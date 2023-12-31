@@ -13,7 +13,7 @@
             "args": [
                 "--file", "G:\\Meine Ablage\\Developement\\Python\\VDataParser\\data\\Unterlagen\\Export_Datenbank\\d03ee067.json",
                 "--path", "src\\output",
-                "--log-level", "WARNING",
+                "--log-level", "INFO",
                 //"--verbose"
             ]
         }

@@ -57,10 +57,10 @@ class LogHelper:
         }
 
         self.__skip_logging = {
-            "INFO"   : True,
-            "WARNING": True,
-            "DEBUG"  : True,
-            "ERROR"  : True
+            "INFO"   : False,
+            "WARNING": False,
+            "DEBUG"  : False,
+            "ERROR"  : False
         }
    
     def __get_one_line_data_list(self, type):
@@ -113,8 +113,8 @@ def __get(type: str):
 def setup(log_level = "INFO", verbose_enabled = False) -> None:
 
     global __verbose__ 
-    level = logging._nameToLevel[log_level]
-    logging.basicConfig(level=level, format='%(levelname)s: %(message)s')
+    #level = logging._nameToLevel[log_level]
+    logging.basicConfig(level=log_level, format='%(levelname)s: %(message)s')
     __verbose__ = verbose_enabled
 
 
