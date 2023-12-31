@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "--file", "data\\Unterlagen\\Export_Datenbank\\d03ee067.json",
+                "--file", "G:\\Meine Ablage\\Developement\\Python\\VDataParser\\data\\Unterlagen\\Export_Datenbank\\d03ee067.json",
                 "--path", "src\\output",
                 "--log-level", "WARNING",
                 //"--verbose"
