@@ -3,6 +3,7 @@ from objects import FleatMarket
 from .price_list_generator import PriceListGenerator
 from .seller_data_generator import SellerDataGenerator
 from .statistic_data_generator import StatisticDataGenerator
+from log import logger
 
 class FileGenerator:
 
@@ -16,6 +17,9 @@ class FileGenerator:
         self.__seller_generator.generate()
         self.__price_list_generator.generate()
         self.__statistic_generator.generate()
+
+        
+        logger.info(">> Daten wurden erfolgreich erstellt: <<\n\n\n")
 
     def verify_output_path(self, path: Path):
         path.mkdir(parents=True, exist_ok=True)

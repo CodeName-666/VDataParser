@@ -33,12 +33,15 @@ class BaseData(JsonLoader, JSONData):
         seller_quantity = len(self.get_seller_list())
         article_list_quatity = len(self.get_main_number_list())
         status = ">> Datenbank OK" if seller_quantity == article_list_quatity else ">> Datenbank Fehler"
-            
-        self.__handle_error("INFO", "Prüfe Datenbank:\n" + 
-                            "========================\n" + 
-                            f"    >> Anzahl Verkäufer: {seller_quantity}\n" +
-                            f"    >> Anzahl Artikel Listen: {article_list_quatity}\n"+
-                            f"    {status}\n"+ 
-                             "========================\n")
-        time.sleep(5)
 
+        self.__handle_error("INFO", "Prüfe Datenbank:")
+        time.sleep(5)
+        self.__handle_error("INFO","========================\n" + 
+                            f"         >> Anzahl Verkäufer: {seller_quantity}\n" +
+                            f"         >> Anzahl Artikel Listen: {article_list_quatity}\n"+
+                            f"         {status}\n"+ 
+                             "      ========================\n")
+        time.sleep(2)
+
+
+      

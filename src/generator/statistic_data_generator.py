@@ -25,7 +25,7 @@ class StatisticDataGenerator(DataGenerator):
         valid_cnt = 0 
         invalid_cnt = 0
         logger.info("Generiere Statistic Daten:\n" +
-                    "========================")
+                    "      ========================")
         
         
         for _, main_number_data in enumerate(self.__fleat_market_data.get_main_number_data_list()):
@@ -38,5 +38,5 @@ class StatisticDataGenerator(DataGenerator):
             invalid_cnt +=1
             
         self.__write()
-        logger.info("   >> Daten erstellt:")
+        logger.info("   >> Daten erstellt <<\n\n")
     

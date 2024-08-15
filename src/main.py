@@ -54,4 +54,4 @@ if __name__ == '__main__':
     fleat_market.set_main_number_data(main_numbers)
     
     file_generator = FileGenerator(fleat_market,output_path,'kundendaten','preise')
-    file_generator.generate()
+    file_generator.generate()   
