@@ -29,13 +29,14 @@ class StatisticDataGenerator(DataGenerator):
         
         
         for _, main_number_data in enumerate(self.__fleat_market_data.get_main_number_data_list()):
-            main_number =  main_number_data.get_main_number()
+            if main_number_data.is_valid():
+                main_number =  main_number_data.get_main_number()
           
-            entry = self.__create_entry(main_number)
-            self.__output_data.append(entry)
-            valid_cnt +=1
-        else: 
-            invalid_cnt +=1
+                entry = self.__create_entry(main_number)
+                self.__output_data.append(entry)
+                valid_cnt +=1
+            else: 
+                invalid_cnt +=1
             
         self.__write()
         logger.info("   >> Daten erstellt <<\n\n")

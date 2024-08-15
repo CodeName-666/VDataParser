@@ -25,8 +25,8 @@ class SellerDataGenerator(DataGenerator):
         valid_cnt = 0 
         invalid_cnt = 0
         
-        logger.info("Schreibe Verkäuferliste:")
-        logger.info("========================")
+        logger.info("Erstelle Verkäuferliste:" +
+                    "      ========================")
         time.sleep(2)
         
         for index, main_number_data in enumerate(self.__fleat_market_data.get_main_number_data_list()):
