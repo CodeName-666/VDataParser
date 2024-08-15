@@ -8,13 +8,13 @@ class StatisticDataGenerator(DataGenerator):
 
     FILE_SUFFIX = 'dat'
 
-    def __init__(self, fleat_market_data: FleatMarket, path: str = '', file_name: str = 'Versand') -> None:
+    def __init__(self, fleat_market_data: FleatMarket, path: str = '', file_name: str = 'versand') -> None:
         DataGenerator.__init__(self, path, file_name)
         self.__fleat_market_data: FleatMarket = fleat_market_data
         self.__output_data: List[str] = []
     
-    def __create_entry(self, main_number:int, article_quantity:int, article_total_count:int) -> str:
-        return f'"{main_number}","B",{article_quantity},{article_total_count}\n'
+    def __create_entry(self, main_number:int) -> str:
+        return f'{main_number},"-"\n'
     
     def __write(self):
         if self.__output_data:
@@ -24,25 +24,19 @@ class StatisticDataGenerator(DataGenerator):
     def generate(self):
         valid_cnt = 0 
         invalid_cnt = 0
-        logger.info("Generate seller data:")
-        logger.info("")
+        logger.info("Generiere Statistic Daten:\n" +
+                    "========================")
         
-        for index, main_number_data in enumerate(self.__fleat_market_data.get_main_number_data_list()):
+        
+        for _, main_number_data in enumerate(self.__fleat_market_data.get_main_number_data_list()):
             main_number =  main_number_data.get_main_number()
-            first_name = self.__fleat_market_data.get_seller_data(index).vorname
-            second_name = self.__fleat_market_data.get_seller_data(index).nachname
-            logger.info(f"{index}: Generate Main Number: {main_number} - {first_name}, {second_name}")
-            if main_number_data.is_valid():
-
-                m_n = main_number_data.get_main_number()
-                a_q = main_number_data.get_article_quantity()
-                a_t = main_number_data.get_article_total()
-                entry = self.__create_entry(m_n,a_q,a_t)
-                self.__output_data.append(entry)
-                valid_cnt +=1
-            else: 
-                invalid_cnt +=1
-                logger.warning("--> Main number invalid")
-        logger.info(f"Seller data generated: {valid_cnt}, Seller data skipped: {invalid_cnt}")
+          
+            entry = self.__create_entry(main_number)
+            self.__output_data.append(entry)
+            valid_cnt +=1
+        else: 
+            invalid_cnt +=1
+            
         self.__write()
+        logger.info("   >> Daten erstellt:")
     
