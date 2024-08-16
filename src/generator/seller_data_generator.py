@@ -25,7 +25,7 @@ class SellerDataGenerator(DataGenerator):
         valid_cnt = 0 
         invalid_cnt = 0
         
-        logger.info("Erstelle Verkäuferliste:" +
+        logger.info("Erstelle Verkäuferliste:\n" +
                     "      ========================")
         time.sleep(2)
         
