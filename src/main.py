@@ -53,5 +53,5 @@ if __name__ == '__main__':
     fleat_market.set_seller_data(seller)
     fleat_market.set_main_number_data(main_numbers)
     
-    file_generator = FileGenerator(fleat_market,output_path,'kundendaten','preise')
+    file_generator = FileGenerator(fleat_market,output_path,'kundendaten','preise', 'Abholung_Template.pdf', 'Abholung.pdf')
     file_generator.generate()   
