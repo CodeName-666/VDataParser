@@ -77,6 +77,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):
                 progress['percentage'] = int((progress['current'] / total_groups) * 100)
 
         # Save the new PDF
+        self.output_pdf = Path(self.path).joinpath(output_pdf)    
         try:
             with open(output_pdf, "wb") as output:
                 writer.write(output)
@@ -137,7 +138,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):
                 # Ensure the final progress is 100%
                 self.print_progress_bar(100)
                 
-                print(f"\n\n>> Abholbestätigungen erstellt! {template_file.resolve(strict=False)} <<\n\n")
+                print(f"\n\n>> Abholbestätigungen erstellt! {Path(self.output_pdf).resolve(strict=False)} <<\n\n")
             else:
                 print(f"\n\n>> Abholbestätigungen fehlgeschlagen! <<\n\n")
         
