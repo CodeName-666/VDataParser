@@ -3,9 +3,9 @@ from data import *
 from objects import FleatMarket
 from generator import FileGenerator
 from log import logger
-
+import time
 __major__ = 0
-__minor__ = 2
+__minor__ = 4
 __patch__ = 0
 
 __version__ = f"{__major__}.{__minor__}.{__patch__}"
@@ -53,5 +53,5 @@ if __name__ == '__main__':
     fleat_market.set_seller_data(seller)
     fleat_market.set_main_number_data(main_numbers)
     
-    file_generator = FileGenerator(fleat_market,output_path,'kundendaten','preise')
-    file_generator.generate()
+    file_generator = FileGenerator(fleat_market,output_path,'kundendaten','preise', 'Abholung_Template.pdf', 'Abholung.pdf')
+    file_generator.generate()   

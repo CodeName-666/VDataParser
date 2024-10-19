@@ -16,7 +16,7 @@ class Article(ArticleDataClass):
             logger.debug(f"Article: {self.description()} is valid",True)
             return True
         else:
-            logger.warning(f"Article: {self.description()} is not valid: ")
+            #logger.warning(f"Article: {self.description()} is not valid: ")
             return False
         
     def number(self):

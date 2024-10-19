@@ -2,7 +2,7 @@ from objects import FleatMarket
 from .data_generator import DataGenerator
 from typing import List, Tuple
 from log import logger
-
+import time
 
 class SellerDataGenerator(DataGenerator):
 
@@ -24,14 +24,16 @@ class SellerDataGenerator(DataGenerator):
     def generate(self):
         valid_cnt = 0 
         invalid_cnt = 0
-        logger.info("Generate seller data:")
-        logger.info("")
+        
+        logger.info("Erstelle Verkäuferliste:\n" +
+                    "      ========================")
+        time.sleep(2)
         
         for index, main_number_data in enumerate(self.__fleat_market_data.get_main_number_data_list()):
             main_number =  main_number_data.get_main_number()
             first_name = self.__fleat_market_data.get_seller_data(index).vorname
             second_name = self.__fleat_market_data.get_seller_data(index).nachname
-            logger.info(f"{index}: Generate Main Number: {main_number} - {first_name}, {second_name}")
+            logger.log_one_line("INFO",True)
             if main_number_data.is_valid():
 
                 m_n = main_number_data.get_main_number()
@@ -40,9 +42,34 @@ class SellerDataGenerator(DataGenerator):
                 entry = self.__create_entry(m_n,a_q,a_t)
                 self.__output_data.append(entry)
                 valid_cnt +=1
+                logger.info(f">> Erstelle Eintrag <<\n" +
+                            f"      {first_name}, {second_name}:\n" + 
+                            f"           >> Stammnummer: {main_number}\n" +
+                            f"           >> Anzahl Artikel: {a_q}\n" + 
+                            f"           >> Gesamt Summe: {a_t}€\n"+
+                            f"           >> Status: OK <<\n\n")
             else: 
                 invalid_cnt +=1
-                logger.warning("--> Main number invalid")
-        logger.info(f"Seller data generated: {valid_cnt}, Seller data skipped: {invalid_cnt}")
+                m_n = main_number_data.get_main_number()
+                a_q = main_number_data.get_article_quantity()
+                a_t = main_number_data.get_article_total()
+
+                a_q_f = " - Fehler" if a_q == 0 else ""
+                a_t_f = " - Fehler" if a_t == 0 else ""
+                logger.info(f">> Erstelle Eintrag <<\n" +
+                            f"      {first_name}, {second_name}:\n" + 
+                            f"           >> Stammnummer: {main_number}\n" +
+                            f"           >> Anzahl Artikel: {a_q}{a_q_f}\n" + 
+                            f"           >> Gesamt Summe: {a_t}€{a_t_f}\n"+
+                            f"           >> Status: FEHLER <<\n\n")
+            logger.log_one_line("INFO",False)
+            time.sleep(0.2)
+        
+        time.sleep(1)
         self.__write()
+        logger.info(f"Verkäufer liste erstellt: \n"+
+                     "      ========================\n" +
+                    f"          --> Anzahl Einträge: {valid_cnt}\n" + 
+                    f"          --> Anzahl ungültiger Einträge: {invalid_cnt}\n\n")
+        time.sleep(2)
     

@@ -1,6 +1,6 @@
 from typing import Optional, Callable, Dict, List
 from data import *
-
+import time
 
 
 class BaseData(JsonLoader, JSONData):
@@ -30,14 +30,18 @@ class BaseData(JsonLoader, JSONData):
         return self.main_numbers_list
     
     def verify_data(self):
-        self.__handle_error("INFO", "Verify Data:")
         seller_quantity = len(self.get_seller_list())
         article_list_quatity = len(self.get_main_number_list())
-        self.__handle_error("INFO", f"Seller quantity: {seller_quantity}")
-        self.__handle_error("INFO", f"Article list quantity: {article_list_quatity}")
-        if seller_quantity != article_list_quatity:
-            self.__handle_error("WARNING", "Seller quantity does not match to article quantity")
-        
-    
+        status = ">> Datenbank OK" if seller_quantity == article_list_quatity else ">> Datenbank Fehler"
+
+        self.__handle_error("INFO", "Prüfe Datenbank:")
+        time.sleep(5)
+        self.__handle_error("INFO","========================\n" + 
+                            f"         >> Anzahl Verkäufer: {seller_quantity}\n" +
+                            f"         >> Anzahl Artikel Listen: {article_list_quatity}\n"+
+                            f"         {status}\n"+ 
+                             "      ========================\n")
+        time.sleep(2)
 
 
+      
