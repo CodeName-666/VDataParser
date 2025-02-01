@@ -1,7 +1,14 @@
 import sys
 import json
-from PySide6.QtCore import QFile
-from PySide6.QtWidgets import QApplication, QMainWindow, QTreeWidgetItem, QTableWidgetItem
+from PySide6.QtCore import QFile, Qt
+from PySide6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QTreeWidgetItem,
+    QTableWidgetItem,
+    QListWidget,
+    QListWidgetItem
+)
 from PySide6.QtUiTools import QUiLoader
 
 class MainWindow(QMainWindow):
@@ -18,16 +25,22 @@ class MainWindow(QMainWindow):
         ui_file.close()
 
         self.setCentralWidget(self.ui.centralwidget)
-        self.setWindowTitle("Test")
+        self.setWindowTitle("self.ui.windowTitle()")
 
-        # Beispielhafte JSON-Daten – hier müssten Sie Ihre MySQL-Daten importieren!
-        # (Üblicherweise laden Sie die Daten aus einer Datei oder direkt aus der DB.)
+        # JSON-Daten einlesen (z. B. aus export.json – dies entspricht Ihrem MySQL‑Export)
         with open("export.json", "r", encoding="utf-8") as f:
             self.data = json.load(f)
 
-        # Erstellen Sie ein Dictionary für die Benutzer.
-        # Gruppierung erfolgt hier z.B. über die E-Mail-Adresse, sodass Duplikate (gleiche E-Mail) zusammengeführt werden.
-        # Zusätzlich speichern wir alle zugehörigen IDs (aus der Spalte "id") für jeden Benutzer.
+        # Erzeugen Sie ein Dictionary zur schnellen Zuordnung der stnr‑Tabellen
+        # Beispiel: "stnr1": [Einträge aus Tabelle stnr1], etc.
+        self.stnr_tables = {}
+        for table in self.data:
+            if table.get("type") == "table" and table.get("name", "").startswith("stnr"):
+                self.stnr_tables[table["name"]] = table.get("data", [])
+
+        # Gruppierung der Benutzer aus der "verkaeufer"-Tabelle (aggregierte Ansicht)
+        # Hier werden Benutzer anhand ihrer E-Mail zusammengefasst.
+        # Dabei werden alle in der Spalte "id" auftretenden Werte (bei Duplikaten) gesammelt.
         self.users = {}  # Schlüssel: E-Mail, Wert: { "info": erste Benutzerdaten, "ids": [alle IDs], "stamms": [] }
         for table in self.data:
             if table.get("type") == "table" and table.get("name") == "verkaeufer":
@@ -36,63 +49,90 @@ class MainWindow(QMainWindow):
                     if key not in self.users:
                         self.users[key] = {"info": user, "ids": [user["id"]], "stamms": []}
                     else:
-                        # Füge weitere IDs hinzu, falls der Benutzer bereits existiert
                         if user["id"] not in self.users[key]["ids"]:
                             self.users[key]["ids"].append(user["id"])
 
-        # Jetzt werden die stnr-Tabellen (stnr1 ... stnr7) den Benutzern zugeordnet.
-        # Es wird davon ausgegangen, dass der Tabellenname "stnrX" über X mit der ID des Benutzers korrespondiert.
+        # Ordnen Sie nun zu jedem Benutzer die zugehörigen stnr‑Tabellen zu,
+        # wenn der Tabellenname (z. B. "stnr2") mit einer der gesammelten IDs übereinstimmt.
         for table in self.data:
             if table.get("type") == "table" and table.get("name", "").startswith("stnr"):
-                # Extrahieren Sie aus dem Tabellennamen die Nummer (z.B. "1" aus "stnr1")
-                stnr_num = table["name"][4:]
-                # Durchlaufen Sie alle Benutzer; wenn die Stammnummer in der ID-Liste enthalten ist, ordnen Sie sie zu.
+                stnr_num = table["name"][4:]  # z. B. "1" aus "stnr1"
                 for user in self.users.values():
                     if stnr_num in user["ids"]:
                         user["stamms"].append({
                             "stnr": table["name"],
                             "entries": table.get("data", [])
                         })
-                        # Falls Sie mehrere stnr-Tabellen pro Benutzer erwarten, löschen Sie hier nicht weiter.
-                        # (Bei eindeutiger Zuordnung könnte man z.B. auch ein "break" setzen.)
-        
-        # Füllen Sie das QTreeWidget mit den Benutzern und deren zugehörigen Stammnummern
+
+        # Zunächst wird die Baumansicht (aggregierte Ansicht) gefüllt.
         self.populate_user_tree()
 
-        # Verbinden Sie Signale
+        # Erstellen Sie nun zusätzlich eine flache Listenansicht (QListWidget) und fügen Sie diese in
+        # das linke Layout (verticalLayoutLeft) hinzu – diese wird anfangs versteckt.
+        self.listUsers = QListWidget()
+        self.ui.verticalLayoutLeft.addWidget(self.listUsers)
+        self.listUsers.hide()
+        self.listUsers.itemClicked.connect(self.user_list_item_clicked)
+
+        # Verbinden Sie den Toggle-Button, um zwischen den beiden Ansichten umzuschalten.
         self.ui.btnToggleView.clicked.connect(self.toggle_view)
+
+        # Verbinden Sie das Klicken in der Baumansicht.
         self.ui.treeUsers.itemClicked.connect(self.user_item_clicked)
 
     def populate_user_tree(self):
-        """Befüllt das QTreeWidget mit den Benutzern und ihren zugehörigen Stammnummern."""
+        """Füllt das QTreeWidget (aggregierte Ansicht) mit den Benutzern und ihren zugehörigen stnr‑Tabellen."""
         self.ui.treeUsers.clear()
         for key, user in self.users.items():
-            # Erzeugen eines Baum-Knotens für den Benutzer
+            # Anzeige-Text z. B.: "Max Mustermann (max@mustermann.de)"
             user_text = f'{user["info"]["vorname"]} {user["info"]["nachname"]} ({user["info"]["email"]})'
             user_item = QTreeWidgetItem([user_text])
-            # Füge als untergeordneten Knoten alle zugehörigen Stammnummern hinzu
+            # Füge untergeordnete Kindelemente hinzu, die die zugehörigen stnr‑Tabellen anzeigen.
             for stamm in user["stamms"]:
                 child = QTreeWidgetItem([stamm["stnr"]])
                 user_item.addChild(child)
             self.ui.treeUsers.addTopLevelItem(user_item)
 
+    def populate_user_list(self):
+        """Füllt das QListWidget (flache Listenansicht) mit allen Benutzereinträgen aus der 'verkaeufer'-Tabelle."""
+        self.listUsers.clear()
+        flat_users = []
+        for table in self.data:
+            if table.get("type") == "table" and table.get("name") == "verkaeufer":
+                flat_users = table.get("data", [])
+                break
+        for index, user in enumerate(flat_users, start=1):
+            # Nummerierung und Anzeige-Text z. B.: "1. Sabrina Willkomm (sabimi@gmail.com)"
+            text = f'{index}. {user["vorname"]} {user["nachname"]} ({user["email"]})'
+            item = QListWidgetItem(text)
+            # Speichern Sie das komplette Benutzer-Dictionary im Item (über UserRole)
+            item.setData(Qt.UserRole, user)
+            self.listUsers.addItem(item)
+
     def toggle_view(self):
-        """Umschalten zwischen Baum- und Listenansicht.
-        In einer Listenansicht könnten Sie beispielsweise alle Benutzereinträge (inkl. Duplikaten) untereinander anzeigen.
-        Hier nur als Beispiel – die konkrete Umsetzung liegt bei Ihnen."""
-        print("Toggle-Button wurde gedrückt. Implementieren Sie hier die Umschaltung der Ansicht.")
-        # Beispiel: Sie könnten hier den QTreeWidget komplett leeren und stattdessen eine QTableWidget-Liste füllen.
+        """Schaltet zwischen der Baumansicht (aggregiert) und der Listenansicht (flach) um."""
+        if self.ui.treeUsers.isVisible():
+            # Wechsel zur Listenansicht
+            self.ui.treeUsers.hide()
+            self.populate_user_list()
+            self.listUsers.show()
+            self.ui.btnToggleView.setText("Baumansicht")
+        else:
+            # Wechsel zurück zur Baumansicht
+            self.listUsers.hide()
+            self.ui.treeUsers.show()
+            self.ui.btnToggleView.setText("Listenansicht")
 
     def user_item_clicked(self, item, column):
         """
-        Wenn ein Benutzer- oder Stammnummer-Knoten geklickt wird,
-        sollen im rechten Bereich die entsprechenden Einträge in der Tabelle angezeigt werden.
+        Beim Klick in der Baumansicht:
+        - Wird, wenn ein Kindelement (stnr) geklickt wird, nur die zugehörige stnr-Tabelle geladen.
+        - Wird der Benutzerknoten geklickt, können alle zugehörigen stnr-Einträge zusammengefasst werden.
         """
-        # Falls der geklickte Knoten ein Kind ist (also eine Stammnummer)
         if item.parent() is not None:
+            # Es wurde ein stnr-Kindelement angeklickt.
             stnr_name = item.text(0)
             entries = None
-            # Suchen Sie den entsprechenden Eintrag in den Benutzerdaten
             for user in self.users.values():
                 for stamm in user["stamms"]:
                     if stamm["stnr"] == stnr_name:
@@ -101,10 +141,8 @@ class MainWindow(QMainWindow):
                 if entries is not None:
                     break
         else:
-            # Es wurde ein Benutzerknoten geklickt.
-            # Sie könnten hier alle Einträge des Benutzers (aller zugehörigen Stammnummern) zusammenfassen.
+            # Es wurde ein Benutzerknoten angeklickt – hier werden alle zugehörigen stnr-Einträge zusammengefasst.
             entries = []
-            # Zum Vergleich erstellen wir den Text, wie er im Baum angezeigt wird.
             user_text = item.text(0)
             for user in self.users.values():
                 info_text = f'{user["info"]["vorname"]} {user["info"]["nachname"]} ({user["info"]["email"]})'
@@ -112,24 +150,30 @@ class MainWindow(QMainWindow):
                     for stamm in user["stamms"]:
                         entries.extend(stamm["entries"])
                     break
+        self.populate_entry_table(entries)
 
-        # Füllen Sie die Tabelle auf der rechten Seite mit den gefundenen Einträgen
+    def user_list_item_clicked(self, item):
+        """
+        Beim Klick in der flachen Listenansicht:
+        Wird der Benutzer aus dem Item ausgelesen und anhand seiner ID die zugehörige stnr-Tabelle geladen.
+        """
+        user = item.data(Qt.UserRole)
+        target_stnr = "stnr" + user["id"]
+        entries = self.stnr_tables.get(target_stnr, [])
         self.populate_entry_table(entries)
 
     def populate_entry_table(self, entries):
-        """Befüllt das QTableWidget mit den Detail-Einträgen."""
+        """Befüllt das QTableWidget im rechten Bereich mit den Detail-Einträgen."""
         self.ui.tableEntries.clearContents()
         if not entries:
             self.ui.tableEntries.setRowCount(0)
             return
-
         self.ui.tableEntries.setRowCount(len(entries))
         for row, entry in enumerate(entries):
             self.ui.tableEntries.setItem(row, 0, QTableWidgetItem(entry.get("artikelnummer", "")))
             self.ui.tableEntries.setItem(row, 1, QTableWidgetItem(entry.get("beschreibung", "")))
             self.ui.tableEntries.setItem(row, 2, QTableWidgetItem(entry.get("groesse", "")))
             self.ui.tableEntries.setItem(row, 3, QTableWidgetItem(entry.get("preis", "")))
-            # Beispiel: Datum (hier verwenden wir created_at)
             self.ui.tableEntries.setItem(row, 4, QTableWidgetItem(entry.get("created_at", "")))
 
 if __name__ == '__main__':
