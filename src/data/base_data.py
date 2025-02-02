@@ -3,10 +3,10 @@ from data import *
 import time
 
 
-class BaseData(JsonLoader, JSONData):
+class BaseData(JsonHandler, JSONData):
 
     def __init__(self, json_file_path: str, error_handler = None) -> None:
-        JsonLoader.__init__(self,json_file_path, error_handler)
+        JsonHandler.__init__(self,json_file_path, error_handler)
         
         try: 
             json_data =  self.get_data()

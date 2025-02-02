@@ -18,7 +18,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QMainWindow, QMenuBar,
     QSizePolicy, QStatusBar, QWidget)
 
-from src.ui import DataViewUi
+from src.ui import DataView
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):

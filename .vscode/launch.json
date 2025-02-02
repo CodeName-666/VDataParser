@@ -16,6 +16,23 @@
                 "--log-level", "INFO",
                 //"--verbose"
             ]
+        },
+
+        {
+            "name": "Database",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--host", "localhost",
+                "--user", "Christof",
+                "--password", "exec1234",
+                "--database", "verkauf",
+                "--output", "test_db.json",
+
+                
+            ]
         }
     ]
 }

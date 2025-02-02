@@ -111,13 +111,13 @@ def main():
     connect_parser.set_defaults(func=connect)
 
     # Subcommand: export
-    export_parser = subparsers.add_parser("export", help="Exportiert die gesamte Datenbank als JSON-Datei")
-    export_parser.add_argument("--host", required=True, help="Hostname oder IP der Datenbank")
-    export_parser.add_argument("--user", required=True, help="Datenbank-Benutzername")
-    export_parser.add_argument("--password", required=True, help="Datenbank-Passwort")
-    export_parser.add_argument("--database", required=True, help="Name der Datenbank")
-    export_parser.add_argument("--output", default="export.json", help="Name der JSON-Ausgabedatei (Standard: export.json)")
-    export_parser.set_defaults(func=export)
+    #export_parser = subparsers.add_parser("export", help="Exportiert die gesamte Datenbank als JSON-Datei")
+    #export_parser.add_argument("--host", required=True, help="Hostname oder IP der Datenbank")
+    #export_parser.add_argument("--user", required=True, help="Datenbank-Benutzername")
+    #export_parser.add_argument("--password", required=True, help="Datenbank-Passwort")
+    #export_parser.add_argument("--database", required=True, help="Name der Datenbank")
+    #export_parser.add_argument("--output", default="export.json", help="Name der JSON-Ausgabedatei (Standard: export.json)")
+    #export_parser.set_defaults(func=export)
 
     args = parser.parse_args()
     args.func(args)
