@@ -19,14 +19,14 @@ from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QPushButt
     QSizePolicy, QSplitter, QTableWidget, QTableWidgetItem,
     QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
-class Ui_Form(object):
-    def setupUi(self, Form):
-        if not Form.objectName():
-            Form.setObjectName(u"Form")
-        Form.resize(888, 690)
-        self.horizontalLayout = QHBoxLayout(Form)
+class Ui_DataView(object):
+    def setupUi(self, DataView):
+        if not DataView.objectName():
+            DataView.setObjectName(u"DataView")
+        DataView.resize(888, 690)
+        self.horizontalLayout = QHBoxLayout(DataView)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.splitter = QSplitter(Form)
+        self.splitter = QSplitter(DataView)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Horizontal)
         self.leftWidget = QWidget(self.splitter)
@@ -66,21 +66,21 @@ class Ui_Form(object):
         self.horizontalLayout.addWidget(self.splitter)
 
 
-        self.retranslateUi(Form)
+        self.retranslateUi(DataView)
 
-        QMetaObject.connectSlotsByName(Form)
+        QMetaObject.connectSlotsByName(DataView)
     # setupUi
 
-    def retranslateUi(self, Form):
-        Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.btnToggleView.setText(QCoreApplication.translate("Form", u"Ansicht umschalten", None))
+    def retranslateUi(self, DataView):
+        DataView.setWindowTitle(QCoreApplication.translate("DataView", u"Form", None))
+        self.btnToggleView.setText(QCoreApplication.translate("DataView", u"Ansicht umschalten", None))
         self.treeUsers.setProperty(u"headerLabels", [
-            QCoreApplication.translate("Form", u"Benutzer", None)])
+            QCoreApplication.translate("DataView", u"Benutzer", None)])
         self.tableEntries.setProperty(u"horizontalHeaderLabels", [
-            QCoreApplication.translate("Form", u"Artikelnummer", None),
-            QCoreApplication.translate("Form", u"Beschreibung", None),
-            QCoreApplication.translate("Form", u"Gr\u00f6\u00dfe", None),
-            QCoreApplication.translate("Form", u"Preis", None),
-            QCoreApplication.translate("Form", u"Datum", None)])
+            QCoreApplication.translate("DataView", u"Artikelnummer", None),
+            QCoreApplication.translate("DataView", u"Beschreibung", None),
+            QCoreApplication.translate("DataView", u"Gr\u00f6\u00dfe", None),
+            QCoreApplication.translate("DataView", u"Preis", None),
+            QCoreApplication.translate("DataView", u"Datum", None)])
     # retranslateUi
 

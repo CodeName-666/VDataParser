@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindowWidget</class>
+ <widget class="QWidget" name="MainWindowWidget">
+  <property name="windowTitle">
+   <string>Benutzerübersicht</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <!-- Linker Bereich: Checkbox + Liste -->
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayoutLeft">
+     <item>
+      <widget class="QCheckBox" name="checkboxUnique">
+       <property name="text">
+        <string>Eindeutige Benutzer anzeigen</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QListWidget" name="listWidgetUsers"/>
+     </item>
+    </layout>
+   </item>
+   <!-- Rechter Bereich: Detailanzeige -->
+   <item>
+    <widget class="QGroupBox" name="groupBoxDetails">
+     <property name="title">
+      <string>Benutzerdetails</string>
+     </property>
+     <layout class="QFormLayout" name="formLayoutDetails">
+      <!-- Vorname -->
+      <item row="0" column="0">
+       <widget class="QLabel" name="labelVorname">
+        <property name="text">
+         <string>Vorname:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="valueVorname">
+        <property name="text">
+         <string></string>
+        </property>
+       </widget>
+      </item>
+      <!-- Nachname -->
+      <item row="1" column="0">
+       <widget class="QLabel" name="labelNachname">
+        <property name="text">
+         <string>Nachname:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="valueNachname">
+        <property name="text">
+         <string></string>
+        </property>
+       </widget>
+      </item>
+      <!-- Telefon -->
+      <item row="2" column="0">
+       <widget class="QLabel" name="labelTelefon">
+        <property name="text">
+         <string>Telefon:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="valueTelefon">
+        <property name="text">
+         <string></string>
+        </property>
+       </widget>
+      </item>
+      <!-- E-Mail -->
+      <item row="3" column="0">
+       <widget class="QLabel" name="labelEmail">
+        <property name="text">
+         <string>E-Mail:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="valueEmail">
+        <property name="text">
+         <string></string>
+        </property>
+       </widget>
+      </item>
+      <!-- Created At -->
+      <item row="4" column="0">
+       <widget class="QLabel" name="labelCreatedAt">
+        <property name="text">
+         <string>Created At:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLabel" name="valueCreatedAt">
+        <property name="text">
+         <string></string>
+        </property>
+       </widget>
+      </item>
+      <!-- Updated At -->
+      <item row="5" column="0">
+       <widget class="QLabel" name="labelUpdatedAt">
+        <property name="text">
+         <string>Updated At:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLabel" name="valueUpdatedAt">
+        <property name="text">
+         <string></string>
+        </property>
+       </widget>
+      </item>
+      <!-- IDs -->
+      <item row="6" column="0">
+       <widget class="QLabel" name="labelIDs">
+        <property name="text">
+         <string>IDs:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QLabel" name="valueIDs">
+        <property name="text">
+         <string></string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

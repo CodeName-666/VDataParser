@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Benutzerübersicht</string>
   </property>
-  <widget class="DataViewUi" name="centralwidget">
+  <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout"/>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -28,14 +28,6 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>DataViewUi</class>
-   <extends>QWidget</extends>
-   <header>src.ui</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
