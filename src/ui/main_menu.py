@@ -13,14 +13,14 @@ class MainMenu(BaseUi):
         super().__init__(parent)
         self.ui = MainMenuUi()
         self.ui.setupUi(self)
-        self._setup_signals()
+        self.propagate_signals()
+        self.setup_signals()
+       
+    def propagate_signals(self):
+        self.on_exit_button_clicked = self.ui.exitButton.clicked
 
-    def _propagate_signals(self):
-        self.onExitButtonClickted = self.ui.exitButton.clicked
-
-    def _setup_signals(self):
-        
-        self.onExitButtonClickted.connect(self.worked)
+    def setup_signals(self):        
+        self.on_exit_button_clicked.connect(self.worked)
 
     def worked(self):
         print("Worked")

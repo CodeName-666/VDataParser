@@ -4,43 +4,28 @@ from .generated import MarketUi
 from .market_settings import MarketSetting
 from .data_view import DataView
 from .user_info import UserInfo
+from typing import Type, TypeVar
 
+T = TypeVar('T')
 
 
 class Market(BaseUi):
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = MarketUi()
-        self.marktSettings: MarketSetting = None
-        self.dataView: DataView = None
-        self.userInfo: UserInfo = None
+   
 
-        self.marktSettingsLayout: QVBoxLayout = None
-        self.dataViewLayout : QVBoxLayout = None
-        self.userInfoLayout : QVBoxLayout = None
-
-    def setupUi(self):
+    def setup_ui(self):
         self.ui.setupUi(self)
+        self.__add_widget_to_tab(self.ui.tab, MarketSetting)
+        self.__add_widget_to_tab(self.ui.tab_2, DataView)
+        self.__add_widget_to_tab(self.ui.tab_3, UserInfo)
 
-        self.marktSettingsLayout = self.ui.tab.layout()
-        if self.marktSettingsLayout is None:
-            self.marktSettingsLayout = QVBoxLayout(self.ui.tab)
-            self.marktSettings = MarketSetting(self.marktSettingsLayout)
-            self.marktSettingsLayout.addWidget(self.marktSettings)
-            self.ui.tab.setLayout(self.marktSettingsLayout )
-    
-        self.dataViewLayout = self.ui.tab_2.layout()
-        if self.dataViewLayout is None:
-            self.dataViewLayout = QVBoxLayout(self.ui.tab_2)
-            self.dataView = DataView(self.dataViewLayout)
-            self.dataViewLayout.addWidget(self.dataView)
-            self.ui.tab_2.setLayout(self.dataViewLayout )
-
-        self.userInfoLayout = self.ui.tab_3.layout()
-        if self.userInfoLayout is None:
-            self.userInfoLayout = QVBoxLayout(self.ui.tab_3)
-            self.userInfo = UserInfo(self.userInfoLayout)
-            self.userInfoLayout.addWidget(self.userInfo)
-            self.ui.tab_3.setLayout(self.userInfoLayout )
-    
+    def __add_widget_to_tab(self, tab: QWidget, widgetClass):
+        layout = tab.layout()
+        if layout is None:
+            layout = QVBoxLayout(tab)
+            widget = widgetClass(layout)
+            layout.addWidget(widget)
+            tab.setLayout(layout)

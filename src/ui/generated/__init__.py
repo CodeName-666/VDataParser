@@ -1,5 +1,5 @@
 from .main_window_ui import Ui_MainWindow  as MainWindowUi
-from .data_view_ui import Ui_Form as DataViewUi
+from .data_view_ui import Ui_DataView as DataViewUi
 from .main_menu_ui import Ui_Form as MainMenuUi
 from .market_ui import Ui_marketDialog as MarketUi
 from .user_info_ui import Ui_MainWindowWidget as UserInfoUi
