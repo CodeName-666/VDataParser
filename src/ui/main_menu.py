@@ -7,22 +7,22 @@ from .base_ui import BaseUi
 class MainMenu(BaseUi):
 
 
-    onExitButtonClickted: Signal = None
-
     def __init__(self, parent = None):
         super().__init__(parent)
         self.ui = MainMenuUi()
+            
+    def setup_ui(self): 
         self.ui.setupUi(self)
         self.propagate_signals()
         self.setup_signals()
-       
+
+
     def propagate_signals(self):
-        self.on_exit_button_clicked = self.ui.exitButton.clicked
-
+        self.on_exit_button_clicked: Signal = self.ui.exitButton.clicked
+        self.on_export_button_clicked: Signal = self.ui.exportButton.clicked
+        
     def setup_signals(self):        
-        self.on_exit_button_clicked.connect(self.worked)
+        pass
 
-    def worked(self):
-        print("Worked")
 
 

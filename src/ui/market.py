@@ -26,6 +26,6 @@ class Market(BaseUi):
         layout = tab.layout()
         if layout is None:
             layout = QVBoxLayout(tab)
-            widget = widgetClass(layout)
+            widget = widgetClass()
             layout.addWidget(widget)
             tab.setLayout(layout)

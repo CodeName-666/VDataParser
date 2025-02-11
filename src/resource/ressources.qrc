@@ -1,0 +1,15 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>database.svg</file>
+    <file>database-export.svg</file>
+    <file>database-import.svg</file>
+    <file>database-off.svg</file>
+    <file>database-search.svg</file>
+    <file>database-x.svg</file>
+    <file>file-database.svg</file>
+    <file>file-type-pdf.svg</file>
+    <file>folder-open.svg</file>
+    <file>info-square-rounded.svg</file>
+    <file>json.svg</file>
+  </qresource>
+</RCC>
