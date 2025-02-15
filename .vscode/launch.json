@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Aktuelle Datei",
+            "name": "Python: MAIN CLI ",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "src/main.py",
             "console": "integratedTerminal",
             "args": [
                 "--file", "G:\\Meine Ablage\\Developement\\Python\\VDataParser\\data\\Unterlagen\\Export_Datenbank\\d03ee067.json",
@@ -16,6 +16,15 @@
                 "--log-level", "INFO",
                 //"--verbose"
             ]
+        },
+
+        {
+            "name": "Python: MAIN UI ",
+            "type": "python",
+            "request": "launch",
+            "program": "src/main.py",
+            "console": "integratedTerminal",
+            "args": []
         },
 
         {
