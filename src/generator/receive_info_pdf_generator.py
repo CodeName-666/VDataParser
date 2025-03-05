@@ -12,6 +12,26 @@ from log import logger
 from pathlib import Path
 
 class ReceiveInfoPdfGenerator(DataGenerator):
+    """
+        A class to generate PDF documents with seller information and main numbers for a flea market.
+        Attributes:
+            COORDINATES (list): Coordinates for placing text on the PDF.
+            template_pdf (str): Path to the input PDF template.
+            output_pdf (str): Path to the output PDF.
+            permission_error (bool): Flag to indicate if there was a permission error.
+        Methods:
+            __init__(fleat_market_data, path, pdf_template_path_input, pdf_template_path_output):
+                Initializes the ReceiveInfoPdfGenerator with flea market data and paths for input and output PDFs.
+            add_text_to_pdf(template_pdf, namen_und_stammnummern, output_pdf, progress):
+                Adds text to the PDF template and saves the output PDF.
+            thread_function(template_pdf, namen_und_stammnummern, output_pdf, progress):
+                Thread function to call add_text_to_pdf.
+            print_progress_bar(percentage, length=50):
+            generate():
+                Generates the PDF documents with seller information and main numbers.
+            write():
+                Placeholder method for writing data.
+    """
     
     COORDINATES =  [
         (100, -105, 310, -105),  # x1, y1 for name, x2, y2 for stammnummer
@@ -22,6 +42,20 @@ class ReceiveInfoPdfGenerator(DataGenerator):
 
 
     def __init__(self, fleat_market_data: FleatMarket, path: str = '', pdf_template_path_input: str = '', pdf_template_path_output: str = '') -> None:
+        """
+        Initializes the ReceiveInfoPDFGenerator with the given flea market data and paths.
+
+        Args:
+            fleat_market_data (FleatMarket): The data of the flea market.
+            path (str, optional): The path where the generated PDF will be saved. Defaults to ''.
+            pdf_template_path_input (str, optional): The path to the input PDF template. Defaults to ''.
+            pdf_template_path_output (str, optional): The path to the output PDF. Defaults to ''.
+
+        Attributes:
+            template_pdf (str): The path to the input PDF template.
+            output_pdf (str): The path to the output PDF.
+            permission_error (bool): Flag indicating if there was a permission error.
+        """
         DataGenerator.__init__(self,path, "")
         self.__fleat_market_data = fleat_market_data
          # Lese das Template PDF
@@ -30,6 +64,18 @@ class ReceiveInfoPdfGenerator(DataGenerator):
         self.permission_error = False
 
     def add_text_to_pdf(self, template_pdf, namen_und_stammnummern, output_pdf, progress):
+        """
+        Adds text to a PDF template and generates a new PDF with the provided names and stammnummern.
+        Args:
+            template_pdf (str): Path to the template PDF file.
+            namen_und_stammnummern (list of tuples): List of tuples containing names and stammnummern.
+            output_pdf (str): Path where the output PDF will be saved.
+            progress (dict): Dictionary to track the progress of the PDF generation. 
+                             It should contain 'lock' (threading.Lock), 'current' (int), 
+                             'percentage' (int), and 'error' (bool) keys.
+        Raises:
+            PermissionError: If the output PDF file cannot be written due to permission issues.
+        """
         # Initialize the PDF writer
         writer = PdfWriter()
         total_entries = len(namen_und_stammnummern)
@@ -88,15 +134,53 @@ class ReceiveInfoPdfGenerator(DataGenerator):
             
 
     def thread_function(self, template_pdf, namen_und_stammnummern, output_pdf, progress):
+        """
+        Processes a PDF template by adding text to it and generates an output PDF.
+
+        Args:
+            template_pdf (str): Path to the template PDF file.
+            namen_und_stammnummern (dict): Dictionary containing names and corresponding IDs.
+            output_pdf (str): Path where the output PDF will be saved.
+            progress (callable): A callback function to report progress.
+
+        Returns:
+            None
+        """
         self.add_text_to_pdf(template_pdf, namen_und_stammnummern, output_pdf, progress)
 
     def print_progress_bar(self,percentage, length=50):
+        """
+        Prints a progress bar to the console.
+
+        Args:
+            percentage (int): The current progress as a percentage (0-100).
+            length (int, optional): The total length of the progress bar. Defaults to 50.
+
+        Example:
+            print_progress_bar(75)
+            >> Progress: |###################################-----------------| 75% Complete
+        """
         filled_length = int(length * percentage // 100)
         bar = '#' * filled_length + '-' * (length - filled_length)
         print(f'\r>> Progress: |{bar}| {percentage}% Complete', end='')
 
 
     def generate(self):
+        """
+        Generates the pickup confirmation PDFs for the flea market.
+        This method performs the following steps:
+        1. Logs the start of the generation process.
+        2. Checks if the template PDF file exists.
+        3. Logs the creation of seller data and main numbers.
+        4. Collects valid seller data and main numbers.
+        5. Initializes a progress dictionary to track the generation progress.
+        6. Starts a separate thread to generate the PDFs.
+        7. Monitors the progress of the PDF generation in the main thread.
+        8. Prints the progress bar in the console.
+        9. Logs the completion or failure of the PDF generation.
+        Raises:
+            FileNotFoundError: If the template PDF file does not exist.
+        """
                
         data = []
         logger.info("Generiere Abholungsbestätigung:\n" +
