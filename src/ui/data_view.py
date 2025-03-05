@@ -2,6 +2,7 @@
 
 import sys
 from PySide6.QtWidgets import QWidget, QApplication
+from data import BaseData
 from .generated import DataViewUi  # Annahme: In __init__.py wurde der UI-Code als DataViewUi bereitgestellt.
 from .base_ui import BaseUi
 
@@ -15,6 +16,9 @@ class DataView(BaseUi):
         self.ui.setupUi(self)
         # Zusätzliche Initialisierungen (Signal-Slot-Verbindungen etc.)
         self._setup_signals()
+
+        self.base_data
+
 
     def _setup_signals(self):
         """Verbindet die UI-Elemente mit der Funktionalität."""
@@ -32,6 +36,17 @@ class DataView(BaseUi):
         else:
             self.ui.treeUsers.show()
             self.ui.tableEntries.hide()
+
+    def set_base_data(self, base_data):
+        """
+        Setzt die Basisdaten für die DataView.
+        Args:
+            base_data: BaseData
+                Die Basisdaten, die in der DataView angezeigt werden sollen.
+        """
+        self.base_data = base_data
+        # Hier können die Basisdaten in der DataView angezeigt werden.
+        # Beispiel: self.ui.labelTitle.setText(base_data.title)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

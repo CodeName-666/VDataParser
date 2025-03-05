@@ -2,3 +2,4 @@ auto-py-to-exe >= 2.42.0
 pypdf >= 5.0.0
 reportlab >= 4.2.2 
 mysql-connector-python >= 9.2.0
+PySide6 >= 6.8.2.1

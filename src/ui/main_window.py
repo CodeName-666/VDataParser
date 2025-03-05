@@ -1,5 +1,10 @@
+
+#PySide6 imports
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QMainWindow,  QStackedWidget
+from PySide6.QtWidgets import QMainWindow,  QMessageBox, QFileDialog
+
+#Local imports
+from data import BaseData
 from .stack_widget import StackWidget
 from .generated import MainWindowUi
 from .main_menu import MainMenu
@@ -56,6 +61,7 @@ class MainWindow(QMainWindow):
         self.main_menu = MainMenu(self.stack) 
         self.data_view = DataView(self.stack)
         self.market_view = Market(self.stack)     
+        
 
 
     def setup_ui(self):
@@ -94,8 +100,8 @@ class MainWindow(QMainWindow):
         """
         self.main_menu.on_exit_button_clicked.connect(self.close)
         self.main_menu.on_export_button_clicked.connect(self.open_data_view)
-        self.ui.action_open_export.triggered.connect(self.open_market_view)
-        self.ui.action_open_file.triggered.connect(self.open_file_dialog)
+        #self.ui.action_open_export.triggered.connect(self.open_market_view)
+        #self.ui.action_open_file.triggered.connect(self.open_file_dialog)
 
     def open_view(self, view_name:str):
         """
@@ -119,8 +125,9 @@ class MainWindow(QMainWindow):
         """
         Switches the currently displayed view in the stack to the data view.
         """
-        
-
+        base_data = self.open_file_dialog()
+        self.data_view.set_base_data(base_data)
+        self.open_view("DataView")
         self.open_view("DataView")
         
     def open_market_view(self):
@@ -163,9 +170,11 @@ class MainWindow(QMainWindow):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open JSON File", "", "JSON Files (*.json)")
         if file_name:
             try:
-                with open(file_name, 'r') as file:
-                    data = json.load(file)
-                    # Process the loaded JSON data
-                    print(data)  # Replace with actual processing logic
+                
+                base_data = BaseData(file_name)
+                base_data.verify_data()
+                return base_data
+                
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to load JSON file: {e}")
+                return None

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main_menu.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.1
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -18,12 +18,12 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QGridLayout, QPushButton, QSizePolicy,
     QSpacerItem, QVBoxLayout, QWidget)
 
-class Ui_Form(object):
-    def setupUi(self, Form):
-        if not Form.objectName():
-            Form.setObjectName(u"Form")
-        Form.resize(293, 359)
-        self.gridLayout = QGridLayout(Form)
+class Ui_MainMenuView(object):
+    def setupUi(self, MainMenuView):
+        if not MainMenuView.objectName():
+            MainMenuView.setObjectName(u"MainMenuView")
+        MainMenuView.resize(293, 359)
+        self.gridLayout = QGridLayout(MainMenuView)
         self.gridLayout.setObjectName(u"gridLayout")
         self.verticalSpacer = QSpacerItem(20, 104, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
@@ -35,22 +35,22 @@ class Ui_Form(object):
 
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.newButton = QPushButton(Form)
+        self.newButton = QPushButton(MainMenuView)
         self.newButton.setObjectName(u"newButton")
 
         self.verticalLayout.addWidget(self.newButton)
 
-        self.loadButton = QPushButton(Form)
+        self.loadButton = QPushButton(MainMenuView)
         self.loadButton.setObjectName(u"loadButton")
 
         self.verticalLayout.addWidget(self.loadButton)
 
-        self.exportButton = QPushButton(Form)
+        self.exportButton = QPushButton(MainMenuView)
         self.exportButton.setObjectName(u"exportButton")
 
         self.verticalLayout.addWidget(self.exportButton)
 
-        self.exitButton = QPushButton(Form)
+        self.exitButton = QPushButton(MainMenuView)
         self.exitButton.setObjectName(u"exitButton")
 
         self.verticalLayout.addWidget(self.exitButton)
@@ -67,16 +67,16 @@ class Ui_Form(object):
         self.gridLayout.addItem(self.verticalSpacer_2, 2, 1, 1, 1)
 
 
-        self.retranslateUi(Form)
+        self.retranslateUi(MainMenuView)
 
-        QMetaObject.connectSlotsByName(Form)
+        QMetaObject.connectSlotsByName(MainMenuView)
     # setupUi
 
-    def retranslateUi(self, Form):
-        Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.newButton.setText(QCoreApplication.translate("Form", u"    Neuer Markt    ", None))
-        self.loadButton.setText(QCoreApplication.translate("Form", u"Markt Laden", None))
-        self.exportButton.setText(QCoreApplication.translate("Form", u"    Export Daten Laden    ", None))
-        self.exitButton.setText(QCoreApplication.translate("Form", u"Beenden", None))
+    def retranslateUi(self, MainMenuView):
+        MainMenuView.setWindowTitle(QCoreApplication.translate("MainMenuView", u"Form", None))
+        self.newButton.setText(QCoreApplication.translate("MainMenuView", u"    Neuer Markt    ", None))
+        self.loadButton.setText(QCoreApplication.translate("MainMenuView", u"Markt Laden", None))
+        self.exportButton.setText(QCoreApplication.translate("MainMenuView", u"    Export Daten Laden    ", None))
+        self.exitButton.setText(QCoreApplication.translate("MainMenuView", u"Beenden", None))
     # retranslateUi
 

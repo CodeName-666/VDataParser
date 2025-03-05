@@ -10,13 +10,14 @@ from PySide6.QtWidgets import (
     QListWidgetItem
 )
 from PySide6.QtUiTools import QUiLoader
+from src.data import BaseData
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
         # Laden der .ui-Datei
-        ui_file = QFile("main_window.ui")
+        ui_file = QFile("src/test_code/main_window.ui")
         if not ui_file.open(QFile.ReadOnly):
             print("Kann die UI-Datei nicht öffnen")
             sys.exit(-1)
@@ -28,41 +29,37 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("self.ui.windowTitle()")
 
         # JSON-Daten einlesen (z. B. aus export.json – dies entspricht Ihrem MySQL‑Export)
-        with open("export.json", "r", encoding="utf-8") as f:
-            self.data = json.load(f)
+        self.data = BaseData("src/test_code/export.json")
 
         # Erzeugen Sie ein Dictionary zur schnellen Zuordnung der stnr‑Tabellen
         # Beispiel: "stnr1": [Einträge aus Tabelle stnr1], etc.
         self.stnr_tables = {}
-        for table in self.data:
-            if table.get("type") == "table" and table.get("name", "").startswith("stnr"):
-                self.stnr_tables[table["name"]] = table.get("data", [])
+        for main_number in self.data.get_main_number_list():
+            table_name = f"stnr{main_number.id}"
+            self.stnr_tables[table_name] = main_number.data
 
         # Gruppierung der Benutzer aus der "verkaeufer"-Tabelle (aggregierte Ansicht)
         # Hier werden Benutzer anhand ihrer E-Mail zusammengefasst.
         # Dabei werden alle in der Spalte "id" auftretenden Werte (bei Duplikaten) gesammelt.
         self.users = {}  # Schlüssel: E-Mail, Wert: { "info": erste Benutzerdaten, "ids": [alle IDs], "stamms": [] }
-        for table in self.data:
-            if table.get("type") == "table" and table.get("name") == "verkaeufer":
-                for user in table.get("data", []):
-                    key = user["email"]
-                    if key not in self.users:
-                        self.users[key] = {"info": user, "ids": [user["id"]], "stamms": []}
-                    else:
-                        if user["id"] not in self.users[key]["ids"]:
-                            self.users[key]["ids"].append(user["id"])
+        for user in self.data.get_seller_list():
+            key = user.email
+            if key not in self.users:
+                self.users[key] = {"info": user, "ids": [user.id], "stamms": []}
+            else:
+                if user.id not in self.users[key]["ids"]:
+                    self.users[key]["ids"].append(user.id)
 
         # Ordnen Sie nun zu jedem Benutzer die zugehörigen stnr‑Tabellen zu,
         # wenn der Tabellenname (z. B. "stnr2") mit einer der gesammelten IDs übereinstimmt.
-        for table in self.data:
-            if table.get("type") == "table" and table.get("name", "").startswith("stnr"):
-                stnr_num = table["name"][4:]  # z. B. "1" aus "stnr1"
-                for user in self.users.values():
-                    if stnr_num in user["ids"]:
-                        user["stamms"].append({
-                            "stnr": table["name"],
-                            "entries": table.get("data", [])
-                        })
+        for main_number in self.data.get_main_number_list():
+            stnr_name = f"stnr{main_number.id}"
+            for user in self.users.values():
+                if str(main_number.id) in user["ids"]:
+                    user["stamms"].append({
+                        "stnr": stnr_name,
+                        "entries": main_number.data
+                    })
 
         # Zunächst wird die Baumansicht (aggregierte Ansicht) gefüllt.
         self.populate_user_tree()
@@ -85,7 +82,7 @@ class MainWindow(QMainWindow):
         self.ui.treeUsers.clear()
         for key, user in self.users.items():
             # Anzeige-Text z. B.: "Max Mustermann (max@mustermann.de)"
-            user_text = f'{user["info"]["vorname"]} {user["info"]["nachname"]} ({user["info"]["email"]})'
+            user_text = f'{user["info"].vorname} {user["info"].nachname} ({user["info"].email})'
             user_item = QTreeWidgetItem([user_text])
             # Füge untergeordnete Kindelemente hinzu, die die zugehörigen stnr‑Tabellen anzeigen.
             for stamm in user["stamms"]:
@@ -96,14 +93,10 @@ class MainWindow(QMainWindow):
     def populate_user_list(self):
         """Füllt das QListWidget (flache Listenansicht) mit allen Benutzereinträgen aus der 'verkaeufer'-Tabelle."""
         self.listUsers.clear()
-        flat_users = []
-        for table in self.data:
-            if table.get("type") == "table" and table.get("name") == "verkaeufer":
-                flat_users = table.get("data", [])
-                break
+        flat_users = self.data.get_seller_list()
         for index, user in enumerate(flat_users, start=1):
             # Nummerierung und Anzeige-Text z. B.: "1. Sabrina Willkomm (sabimi@gmail.com)"
-            text = f'{index}. {user["vorname"]} {user["nachname"]} ({user["email"]})'
+            text = f'{index}. {user.vorname} {user.nachname} ({user.email})'
             item = QListWidgetItem(text)
             # Speichern Sie das komplette Benutzer-Dictionary im Item (über UserRole)
             item.setData(Qt.UserRole, user)
@@ -145,7 +138,7 @@ class MainWindow(QMainWindow):
             entries = []
             user_text = item.text(0)
             for user in self.users.values():
-                info_text = f'{user["info"]["vorname"]} {user["info"]["nachname"]} ({user["info"]["email"]})'
+                info_text = f'{user["info"].vorname} {user["info"].nachname} ({user["info"].email})'
                 if info_text == user_text:
                     for stamm in user["stamms"]:
                         entries.extend(stamm["entries"])
@@ -158,7 +151,7 @@ class MainWindow(QMainWindow):
         Wird der Benutzer aus dem Item ausgelesen und anhand seiner ID die zugehörige stnr-Tabelle geladen.
         """
         user = item.data(Qt.UserRole)
-        target_stnr = "stnr" + user["id"]
+        target_stnr = f"stnr{user.id}"
         entries = self.stnr_tables.get(target_stnr, [])
         self.populate_entry_table(entries)
 

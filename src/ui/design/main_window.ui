@@ -29,7 +29,7 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="action_open_export"/>
+    <addaction name="action"/>
     <addaction name="separator"/>
     <addaction name="action_close"/>
    </widget>
@@ -39,14 +39,7 @@
     </property>
     <addaction name="action_tool"/>
    </widget>
-   <widget class="QMenu" name="menuVies">
-    <property name="title">
-     <string>View</string>
-    </property>
-    <addaction name="actionToolbars"/>
-   </widget>
    <addaction name="menu_file"/>
-   <addaction name="menuVies"/>
    <addaction name="menu_help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -63,7 +56,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_open_export"/>
+   <addaction name="action"/>
    <addaction name="separator"/>
    <addaction name="action_Export_Data"/>
    <addaction name="actionCreate_PDF"/>
@@ -78,7 +71,7 @@
     <string>&amp;Beenden</string>
    </property>
   </action>
-  <action name="action_open_export">
+  <action name="action">
    <property name="icon">
     <iconset resource="../../resource/ressources.qrc">
      <normaloff>:/icons/folder-open.svg</normaloff>:/icons/folder-open.svg</iconset>
@@ -101,7 +94,7 @@
     <string>$Export Data</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
   <action name="actionCreate_PDF">
@@ -113,7 +106,7 @@
     <string>Create PDF</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
  </widget>
