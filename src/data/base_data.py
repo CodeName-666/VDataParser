@@ -1,5 +1,7 @@
 from typing import Optional, Callable, Dict, List
-from data import *
+#from data import *
+from src.data.json_handler import JsonHandler
+from src.data.data_class_definition import *
 import time
 
 

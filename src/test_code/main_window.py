@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 import json
 from PySide6.QtCore import QFile, Qt
 from PySide6.QtWidgets import (
@@ -10,6 +11,10 @@ from PySide6.QtWidgets import (
     QListWidgetItem
 )
 from PySide6.QtUiTools import QUiLoader
+
+sys.path.insert(0, Path(__file__).parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
+
+print(sys.path)
 from src.data import BaseData
 
 class MainWindow(QMainWindow):
@@ -35,7 +40,8 @@ class MainWindow(QMainWindow):
         # Beispiel: "stnr1": [Einträge aus Tabelle stnr1], etc.
         self.stnr_tables = {}
         for main_number in self.data.get_main_number_list():
-            table_name = f"stnr{main_number.id}"
+            #table_name = f"stnr{main_number.id}"
+            table_name = main_number.name
             self.stnr_tables[table_name] = main_number.data
 
         # Gruppierung der Benutzer aus der "verkaeufer"-Tabelle (aggregierte Ansicht)
@@ -53,9 +59,11 @@ class MainWindow(QMainWindow):
         # Ordnen Sie nun zu jedem Benutzer die zugehörigen stnr‑Tabellen zu,
         # wenn der Tabellenname (z. B. "stnr2") mit einer der gesammelten IDs übereinstimmt.
         for main_number in self.data.get_main_number_list():
-            stnr_name = f"stnr{main_number.id}"
+            #stnr_name = f"stnr{main_number.id}"
+            stnr_name = main_number.name
             for user in self.users.values():
-                if str(main_number.id) in user["ids"]:
+                #if str(main_number.id) in user["ids"]:
+                if main_number.name in user["ids"]:
                     user["stamms"].append({
                         "stnr": stnr_name,
                         "entries": main_number.data

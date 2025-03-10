@@ -279,4 +279,6 @@ class JsonHandler():
             error_msg = f"Failed to save JSON data to local file: {str(e)}"
             self.__handle_error("save_to_local", error_msg)
 
+    def get_data(self):
+        return self.json_data
 
