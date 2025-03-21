@@ -5,7 +5,35 @@ from src.data.data_class_definition import *
 import time
 
 
-class BaseData(JsonHandler, JSONData):
+class BaseDataMeta(type):
+    """
+    A metaclass for creating a singleton PlayerInfo class.
+    
+    This ensures that only one instance of PlayerInfo exists throughout the application.
+    """
+    
+    _instances = {}  # Dictionary to store the single instance of PlayerInfo
+
+    def __call__(cls, *args, **kwargs):
+        """
+        Ensures that only one instance of the class exists.
+        
+        If an instance of the class does not exist, it creates one. 
+        Otherwise, it returns the existing instance.
+
+        Returns:
+            PlayerInfo: The singleton instance of the class.
+        """
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        else: 
+            if args:
+                cls._instances[cls].load(*args)
+        return cls._instances[cls]
+
+
+class BaseData(JsonHandler, JSONData, metaclass= BaseDataMeta):
 
     def __init__(self, json_file_path: str, error_handler = None) -> None:
         JsonHandler.__init__(self, json_file_path, error_handler)

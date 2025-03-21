@@ -2,7 +2,6 @@
 
 import sys
 from PySide6.QtWidgets import QWidget, QApplication
-from data import BaseData
 from .generated import DataViewUi  # Annahme: In __init__.py wurde der UI-Code als DataViewUi bereitgestellt.
 from .base_ui import BaseUi
 
