@@ -4,7 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow,  QMessageBox, QFileDialog
 
 #Local imports
-from data import BaseData
+from data import DataManager
 from .stack_widget import StackWidget
 from .generated import MainWindowUi
 from .main_menu import MainMenu
@@ -126,9 +126,9 @@ class MainWindow(QMainWindow):
         Switches the currently displayed view in the stack to the data view.
         """
         base_data = self.open_file_dialog()
-        self.data_view.set_base_data(base_data)
+        self.data_view.set_data(base_data)
         self.open_view("DataView")
-        self.open_view("DataView")
+       
         
     def open_market_view(self):
         """
@@ -171,7 +171,7 @@ class MainWindow(QMainWindow):
         if file_name:
             try:
                 
-                base_data = BaseData(file_name)
+                base_data = DataManager(file_name)
                 base_data.verify_data()
                 return base_data
                 

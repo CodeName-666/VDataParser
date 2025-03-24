@@ -54,6 +54,7 @@ class DataManager(BaseData):
                 for user in self.users.values():
                     if stnr_num in user["ids"]:
                         user["stamms"].append(main)
+        return None
 
     def get_aggregated_users(self) -> Dict[str, Dict]:
         """

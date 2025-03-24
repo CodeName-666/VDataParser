@@ -81,7 +81,8 @@ class BaseData(JsonHandler, JSONData, metaclass= BaseDataMeta):
             error_handler.error(f"Error occured during JSON loading: {str(e)}") if error_handler else None
 
     def __handle_error(self, type: str, msg: str): 
-        fnc = self.error_handler().log(type,msg)
+        if self.error_handler():
+            self.error_handler().log(type,msg)
 
     def get_seller_list(self) -> List[SellerDataClass]:
         return self.sellers.data
