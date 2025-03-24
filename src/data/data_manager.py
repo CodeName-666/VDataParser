@@ -1,11 +1,11 @@
 import sys
 from pathlib import Path
 from typing import Dict, List
-from src.data.base_data import BaseData
+from .base_data import BaseData
 
 
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
-from src.data.data_class_definition import MainNumberDataClass, SellerDataClass
+from .data_class_definition import MainNumberDataClass, SellerDataClass
 
 
 
