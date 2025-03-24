@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>770</width>
+    <height>450</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Benutzerübersicht</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout"/>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>770</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_file">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="action"/>
+    <addaction name="separator"/>
+    <addaction name="action_close"/>
+   </widget>
+   <widget class="QMenu" name="menu_help">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="action_tool"/>
+   </widget>
+   <addaction name="menu_file"/>
+   <addaction name="menu_help"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="tool_export">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="floatable">
+    <bool>true</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action"/>
+   <addaction name="separator"/>
+   <addaction name="action_Export_Data"/>
+   <addaction name="actionCreate_PDF"/>
+  </widget>
+  <action name="action_tool">
+   <property name="text">
+    <string>&amp;About Flohmarktmanager</string>
+   </property>
+  </action>
+  <action name="action_close">
+   <property name="text">
+    <string>&amp;Beenden</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="icon">
+    <iconset resource="../../resource/ressources.qrc">
+     <normaloff>:/icons/folder-open.svg</normaloff>:/icons/folder-open.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Eport Daten öffnen</string>
+   </property>
+  </action>
+  <action name="actionToolbars">
+   <property name="text">
+    <string>Toolbars</string>
+   </property>
+  </action>
+  <action name="action_Export_Data">
+   <property name="icon">
+    <iconset resource="../../resource/ressources.qrc">
+     <normaloff>:/icons/file-database.svg</normaloff>:/icons/file-database.svg</iconset>
+   </property>
+   <property name="text">
+    <string>$Export Data</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionCreate_PDF">
+   <property name="icon">
+    <iconset resource="../../resource/ressources.qrc">
+     <normaloff>:/icons/file-type-pdf.svg</normaloff>:/icons/file-type-pdf.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Create PDF</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../../resource/ressources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

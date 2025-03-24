@@ -9,7 +9,7 @@ class HeaderDataClass:
 
 @dataclass
 class BaseInfoDataClass:
-    type:str 
+    type: str 
     name: str
 
 @dataclass
@@ -29,7 +29,21 @@ class MainNumberDataClass:
     data: List[ArticleDataClass]
 
     def __post_init__(self):
-        self.data = [ArticleDataClass(**article) for article in self.data if type(article) == dict ]
+        converted_articles = []
+        for article in self.data:
+            if isinstance(article, dict):
+                converted_article = ArticleDataClass(
+                    artikelnummer=str(article.get('artikelnummer', '')),
+                    beschreibung=str(article.get('beschreibung', '')),
+                    groesse=str(article.get('groesse', '')),
+                    preis=str(article.get('preis', '')),
+                    created_at=str(article.get('created_at', '')),
+                    updated_at=str(article.get('updated_at', ''))
+                )
+                converted_articles.append(converted_article)
+            else:
+                converted_articles.append(article)
+        self.data = converted_articles
 
 @dataclass
 class SellerDataClass:
@@ -50,13 +64,27 @@ class SellerListDataClass:
     data: List[SellerDataClass]
 
     def __post_init__(self):
-        self.data = [SellerDataClass(**seller_data) for seller_data in self.data if type(seller_data) == dict]
-
-      
+        converted_sellers = []
+        for seller in self.data:
+            if isinstance(seller, dict):
+                converted_seller = SellerDataClass(
+                    id=str(seller.get('id', '')),
+                    vorname=str(seller.get('vorname', '')),
+                    nachname=str(seller.get('nachname', '')),
+                    telefon=str(seller.get('telefon', '')),
+                    email=str(seller.get('email', '')),
+                    passwort=str(seller.get('passwort', '')),
+                    created_at=str(seller.get('created_at', '')),
+                    updated_at=str(seller.get('updated_at', ''))
+                )
+                converted_sellers.append(converted_seller)
+            else:
+                converted_sellers.append(seller)
+        self.data = converted_sellers
 
 @dataclass
 class JSONData:
     export_header: HeaderDataClass
     base_info: BaseInfoDataClass
     main_numbers_list: List[MainNumberDataClass]
-    sellers: SellerListDataClass  
+    sellers: SellerListDataClass
