@@ -3,10 +3,8 @@ from pathlib import Path
 from typing import Dict, List
 from .base_data import BaseData
 
-
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
 from .data_class_definition import MainNumberDataClass, SellerDataClass
-
 
 
 class DataManager(BaseData):
@@ -25,20 +23,36 @@ class DataManager(BaseData):
 
     def aggregate_data(self):
         """
-        Führt die Aggregation der Daten durch:
+        Führt die Aggregation der Daten durch, indem interne
+        Hilfsmethoden aufgerufen werden:
         
-        1. Aggregation der Main-Number-Tables (z. B. "stnr1", "stnr2", etc.) in ein Dictionary.
-        2. Gruppierung der Verkäufer (Seller) anhand ihrer E-Mail.
-        3. Zuordnung der stnr‑Tabellen zu den Verkäufern, wenn die Nummer aus dem Tabellennamen in der Verkäufer-ID enthalten ist.
+        1. Aggregation der Main-Number-Tables (stnr‑Tabellen).
+        2. Aggregation der Verkäufer (Seller) anhand der E-Mail-Adresse.
+        3. Zuordnung der stnr‑Tabellen zu den Verkäufern.
         """
-        # Aggregation der Main-Number-Tables (stnr‑Tabellen)
+        self._aggregate_main_number_tables()
+        self._aggregate_sellers()
+        self._assign_main_numbers_to_sellers()
+
+    def _aggregate_main_number_tables(self):
+        """
+        Aggregiert alle MainNumberDataClass-Instanzen, deren Name mit "stnr" beginnt,
+        in ein Dictionary.
+        """
         self.main_number_tables: Dict[str, MainNumberDataClass] = {}
         for main in self.main_numbers_list:
             if main.name.startswith("stnr"):
                 self.main_number_tables[main.name] = main
 
-        # Aggregation der Verkäufer (Seller) anhand der E-Mail-Adresse
-        self.users: Dict[str, Dict] = {}  # Schlüssel: E-Mail, Wert: {"info": SellerDataClass, "ids": [Seller-ID], "stamms": [MainNumberDataClass,...]}
+    def _aggregate_sellers(self):
+        """
+        Gruppiert die Verkäufer anhand ihrer E-Mail-Adresse.
+        
+        Es entsteht ein Dictionary, in dem der Schlüssel die E-Mail ist und
+        der Wert ein Dictionary mit "info" (SellerDataClass),
+        "ids" (Liste der Verkäufer-IDs) und "stamms" (später zugeordnete stnr‑Tabellen) enthält.
+        """
+        self.users: Dict[str, Dict] = {}
         for seller in self.get_seller_list():
             key = seller.email
             if key not in self.users:
@@ -47,14 +61,17 @@ class DataManager(BaseData):
                 if seller.id not in self.users[key]["ids"]:
                     self.users[key]["ids"].append(seller.id)
 
-        # Zuordnung der stnr‑Tabellen zu den Verkäufern, wenn die Nummer im Namen übereinstimmt.
+    def _assign_main_numbers_to_sellers(self):
+        """
+        Ordnet die stnr‑Tabellen den Verkäufern zu, wenn die Nummer im Tabellennamen 
+        in der Liste der Verkäufer-IDs enthalten ist.
+        """
         for main in self.main_numbers_list:
             if main.name.startswith("stnr"):
-                stnr_num = main.name[4:]  # extrahiert z. B. "1" aus "stnr1"
+                stnr_num = main.name[4:]  # z. B. "1" aus "stnr1"
                 for user in self.users.values():
                     if stnr_num in user["ids"]:
                         user["stamms"].append(main)
-        
 
     def get_aggregated_users(self) -> Dict[str, Dict]:
         """

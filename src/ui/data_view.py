@@ -151,11 +151,16 @@ class DataView(BaseUi):
         Befüllt das Tabellen-Widget mit den Detail-Artikeln.
         Dabei wird auf die Artikelattribute (aus ArticleDataClass) über Attribute zugegriffen.
         """
+        headers = ["artikelnummer", "beschreibung", "groesse", "preis", "created_at"]
         self.ui.tableEntries.clearContents()
+        self.ui.tableEntries.setColumnCount(len(headers))
+        self.ui.tableEntries.setHorizontalHeaderLabels(headers)
+        
         if not entries:
             self.ui.tableEntries.setRowCount(0)
             return
         self.ui.tableEntries.setRowCount(len(entries))
+        
         for row, entry in enumerate(entries):
             self.ui.tableEntries.setItem(row, 0, QTableWidgetItem(getattr(entry, "artikelnummer", "")))
             self.ui.tableEntries.setItem(row, 1, QTableWidgetItem(getattr(entry, "beschreibung", "")))

@@ -8,7 +8,6 @@ from data import DataManager
 from .stack_widget import StackWidget
 from .generated import MainWindowUi
 from .main_menu import MainMenu
-from .data_view import DataView
 from .market import Market
 
 
@@ -59,10 +58,7 @@ class MainWindow(QMainWindow):
         self.ui = MainWindowUi()
         self.stack = StackWidget() 
         self.main_menu = MainMenu(self.stack) 
-        self.data_view = DataView(self.stack)
-        self.market_view = Market(self.stack)     
-        
-
+        self.market_view = Market(self.stack) 
 
     def setup_ui(self):
         """
@@ -74,12 +70,11 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
-        
         self.ui.setupUi(self)   
-             
         self.stack.addWidget(self.main_menu)
-        self.stack.addWidget(self.data_view)
         self.stack.addWidget(self.market_view)
+       
+        
         
         # Das QStackedWidget als zentrales Widget setzen
         self.setCentralWidget(self.stack)
@@ -96,7 +91,7 @@ class MainWindow(QMainWindow):
         - the 'action_open_export' triggered signal from the UI actions to the 'open_market_view' method.
         """
         self.main_menu.on_exit_button_clicked.connect(self.close)
-        self.main_menu.on_export_button_clicked.connect(self.open_data_view)
+        self.main_menu.on_export_button_clicked.connect(self.open_local_export)
         self.main_menu.on_open_market_button_clicked.connect(self.open_market_view)
         #self.ui.action_open_export.triggered.connect(self.open_market_view)
         #self.ui.action_open_file.triggered.connect(self.open_file_dialog)
@@ -112,14 +107,14 @@ class MainWindow(QMainWindow):
         index to the view that matches the given view name. It also hides all toolbars
         and shows the toolbars associated with the specified view.
         """
-        for idx, child in enumerate(self.stack.children()):
+        for child in self.stack.children():
             if child.objectName() == view_name:
+                idx = self.stack.indexOf(child)
                 self.stack.setCurrentIndex(idx)
-                self.hide_all_toolbars()
                 self.show_toolbars(view_name)
                 break
     
-    def open_data_view(self):
+    def open_local_export(self):
         """
         Switches the currently displayed view in the stack to the data view.
         """
@@ -150,14 +145,13 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
+        self.hide_all_toolbars()
         match view_name:
             case "MainMenuView":
                 pass
-            case "DataView":
-                self.ui.tool_export.setVisible(True)
 
-            case "MarketView":
-                pass 
+            case "Market":
+                self.ui.tool_export.setVisible(True)
             case _:
                 pass
 
@@ -170,7 +164,7 @@ class MainWindow(QMainWindow):
             try:
                 
                 base_data = DataManager(file_name)
-                base_data.verify_data()
+                #base_data.verify_data()
                 return base_data
                 
             except Exception as e:

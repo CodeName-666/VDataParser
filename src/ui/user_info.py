@@ -110,6 +110,6 @@ class UserInfo(BaseUi):
         if self.ui.checkboxUnique.isChecked():
             # Aggregierter Modus: Alle IDs, durch "|" getrennt
             ids = user.get("ids", [])
-            self.ui.valueIDs.setText("|".join(ids))
+            self.ui.valueIDs.setText(", ".join(ids))
         else:
             self.ui.valueIDs.setText(user.get("id", ""))
