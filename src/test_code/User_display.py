@@ -1,13 +1,18 @@
 import sys
-import json
-from PySide6.QtWidgets import QApplication, QWidget, QListWidgetItem
+from pathlib import Path
+from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile
 
+# Importiere den DataManager aus deinem Modul
+
+sys.path.insert(0, Path(__file__).parent.parent.parent.__str__())
+from src.data import DataManager
+
 class UserInterface(QWidget):
-    def __init__(self, json_data, ui_file="src/test_code/user_ui.ui", parent=None):
+    def __init__(self, data_manager, ui_file="src/test_code/user_ui.ui", parent=None):
         super().__init__(parent)
-        self.json_data = json_data
+        self.data_manager = data_manager
 
         # Laden der UI aus der .ui-Datei
         loader = QUiLoader()
@@ -18,49 +23,54 @@ class UserInterface(QWidget):
         ui_file_obj.close()
         self.setWindowTitle(self.ui.windowTitle())
         
-        # Extrahiere alle Benutzer aus der JSON-Datenstruktur
-        self.users = self.extract_users(json_data)
-        self.aggregated_users = self.get_aggregated_users(self.users)
-        self.current_user_list = self.users  # Standard: alle Einträge
-
+        # Erhalte die Verkäuferdaten aus dem DataManager
+        # Für den nicht aggregierten Modus: konvertiere jeden SellerDataClass-Eintrag in ein Dictionary.
+        self.users = [self.convert_seller_to_dict(seller) for seller in self.data_manager.get_seller_list()]
+        
+        # Für den aggregierten Modus: hole die aggregierten Daten (als Dictionary) und konvertiere sie in eine Liste.
+        aggregated_dict = self.data_manager.get_aggregated_users()  # {email: {info: SellerDataClass, ids: [...], stamms: [...]}}
+        self.aggregated_users = [self.convert_aggregated_user(email, data) for email, data in aggregated_dict.items()]
+        
+        # Standardmäßig werden alle (nicht aggregierten) Einträge angezeigt.
+        self.current_user_list = self.users
+        
         self.setup_connections()
         self.refresh_user_list()
         if self.ui.listWidgetUsers.count() > 0:
             self.ui.listWidgetUsers.setCurrentRow(0)
 
+    def convert_seller_to_dict(self, seller):
+        """Konvertiert einen SellerDataClass-Eintrag in ein Dictionary mit den benötigten Schlüsseln."""
+        return {
+            "vorname": seller.vorname,
+            "nachname": seller.nachname,
+            "telefon": seller.telefon,
+            "email": seller.email,
+            "created_at": seller.created_at,
+            "updated_at": seller.updated_at,
+            "id": seller.id
+        }
+    
+    def convert_aggregated_user(self, email, data):
+        """
+        Konvertiert einen aggregierten Seller aus dem DataManager in das
+        Format, das von der UI erwartet wird.
+        """
+        seller = data["info"]
+        return {
+            "vorname": seller.vorname,
+            "nachname": seller.nachname,
+            "telefon": seller.telefon,
+            "email": seller.email,
+            "created_at": seller.created_at,
+            "updated_at": seller.updated_at,
+            "ids": data["ids"]
+        }
+
     def setup_connections(self):
         """Verbindet die UI-Signale mit den entsprechenden Methoden."""
         self.ui.checkboxUnique.toggled.connect(self.refresh_user_list)
         self.ui.listWidgetUsers.currentRowChanged.connect(self.display_user_details)
-
-    def extract_users(self, data):
-        """Sucht in der JSON-Datenstruktur nach der 'verkaeufer'-Tabelle und gibt deren Daten zurück."""
-        for item in data:
-            if item.get("type") == "table" and item.get("name") == "verkaeufer":
-                return item.get("data", [])
-        return []
-
-    def get_aggregated_users(self, users):
-        """
-        Gruppiert Benutzer anhand eines Schlüssels (hier: E-Mail) und fasst die IDs zusammen.
-        Jeder aggregierte Benutzer enthält dann zusätzlich ein Feld 'ids' mit allen zugehörigen IDs.
-        """
-        aggregated = {}
-        for user in users:
-            key = user.get("email", "")
-            if key not in aggregated:
-                aggregated[key] = {
-                    "vorname": user.get("vorname", ""),
-                    "nachname": user.get("nachname", ""),
-                    "telefon": user.get("telefon", ""),
-                    "email": user.get("email", ""),
-                    "created_at": user.get("created_at", ""),
-                    "updated_at": user.get("updated_at", ""),
-                    "ids": [user.get("id", "")]
-                }
-            else:
-                aggregated[key]["ids"].append(user.get("id", ""))
-        return list(aggregated.values())
 
     def refresh_user_list(self):
         """Aktualisiert die ListWidget-Anzeige basierend auf dem Status der Checkbox."""
@@ -111,20 +121,11 @@ class UserInterface(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-
-    # Laden Sie die JSON-Daten.
-    # Option 1: Aus einer Datei (z. B. config.json)
-    # with open("config.json", "r", encoding="utf-8") as f:
-    #     data = json.load(f)
-
-    # Option 2: Direkt aus einem (längeren) JSON-String (hier als Beispiel mit Platzhalter)
-
-    # Hinweis: Ersetzen Sie in obigem JSON-String den Platzhalter (/* ... */) durch Ihre kompletten Daten oder laden Sie
-    # die Daten aus einer externen Datei.
-    with open('src/test_code/export.json','r',encoding="utf-8") as file:
-        data = json.load(file)
-
-    window = UserInterface(data)
+    
+    # Erstelle eine DataManager-Instanz, die die JSON-Daten (z. B. aus export.json) lädt und verarbeitet.
+    data_manager = DataManager('src/test_code/export.json')
+    
+    window = UserInterface(data_manager)
     window.resize(800, 400)
     window.show()
     sys.exit(app.exec())

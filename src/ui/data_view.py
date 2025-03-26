@@ -20,7 +20,6 @@ class DataView(BaseUi):
         super().__init__(parent)
         self.ui = DataViewUi()
         # Aufbau der UI (erstellt alle Widgets und Layouts)
-        self.data_manager: DataManager = None
         self.ui.setupUi(self)
         
 

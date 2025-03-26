@@ -67,7 +67,7 @@ def run_ui():
     win = MainWindow()
     win.setup_ui()
     win.show()
-    sys.exit(app.exec_())    
+    sys.exit(app.exec())    
 
 
 def main():

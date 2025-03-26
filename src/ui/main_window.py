@@ -76,10 +76,7 @@ class MainWindow(QMainWindow):
         """
         
         self.ui.setupUi(self)   
-        self.main_menu.setup_ui()
-        self.data_view.setup_ui()
-        self.market_view.setup_ui()
-                
+             
         self.stack.addWidget(self.main_menu)
         self.stack.addWidget(self.data_view)
         self.stack.addWidget(self.market_view)
@@ -100,6 +97,7 @@ class MainWindow(QMainWindow):
         """
         self.main_menu.on_exit_button_clicked.connect(self.close)
         self.main_menu.on_export_button_clicked.connect(self.open_data_view)
+        self.main_menu.on_open_market_button_clicked.connect(self.open_market_view)
         #self.ui.action_open_export.triggered.connect(self.open_market_view)
         #self.ui.action_open_file.triggered.connect(self.open_file_dialog)
 
@@ -126,15 +124,15 @@ class MainWindow(QMainWindow):
         Switches the currently displayed view in the stack to the data view.
         """
         base_data = self.open_file_dialog()
-        self.data_view.set_data(base_data)
-        self.open_view("DataView")
+        self.market_view.set_data(base_data)
+        self.open_view("Market")
        
         
     def open_market_view(self):
         """
         Switches the currently displayed view in the stack to the market view.
         """
-        self.open_view("MarketView")
+        self.open_view("Market")
 
 
     def hide_all_toolbars(self):
