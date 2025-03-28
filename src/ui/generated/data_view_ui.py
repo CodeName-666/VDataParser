@@ -15,8 +15,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QPushButton,
-    QSizePolicy, QSplitter, QTableWidget, QTableWidgetItem,
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QSizePolicy,
+    QSplitter, QTableWidget, QTableWidgetItem, QToolButton,
     QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_DataView(object):
@@ -28,21 +28,18 @@ class Ui_DataView(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.splitter = QSplitter(DataView)
         self.splitter.setObjectName(u"splitter")
-        self.splitter.setOrientation(Qt.Horizontal)
+        self.splitter.setOrientation(Qt.Orientation.Horizontal)
         self.leftWidget = QWidget(self.splitter)
         self.leftWidget.setObjectName(u"leftWidget")
         self.verticalLayoutLeft = QVBoxLayout(self.leftWidget)
         self.verticalLayoutLeft.setObjectName(u"verticalLayoutLeft")
         self.verticalLayoutLeft.setContentsMargins(0, 0, 0, 0)
-        self.btnToggleView = QPushButton(self.leftWidget)
+        self.btnToggleView = QToolButton(self.leftWidget)
         self.btnToggleView.setObjectName(u"btnToggleView")
 
         self.verticalLayoutLeft.addWidget(self.btnToggleView)
 
         self.treeUsers = QTreeWidget(self.leftWidget)
-        __qtreewidgetitem = QTreeWidgetItem()
-        __qtreewidgetitem.setText(0, u"1");
-        self.treeUsers.setHeaderItem(__qtreewidgetitem)
         self.treeUsers.setObjectName(u"treeUsers")
 
         self.verticalLayoutLeft.addWidget(self.treeUsers)

@@ -23,6 +23,7 @@ class Ui_MainWindowWidget(object):
     def setupUi(self, MainWindowWidget):
         if not MainWindowWidget.objectName():
             MainWindowWidget.setObjectName(u"MainWindowWidget")
+        MainWindowWidget.resize(381, 238)
         self.horizontalLayout = QHBoxLayout(MainWindowWidget)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.verticalLayoutLeft = QVBoxLayout()
@@ -35,6 +36,11 @@ class Ui_MainWindowWidget(object):
 
         self.listWidgetUsers = QListWidget(MainWindowWidget)
         self.listWidgetUsers.setObjectName(u"listWidgetUsers")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.listWidgetUsers.sizePolicy().hasHeightForWidth())
+        self.listWidgetUsers.setSizePolicy(sizePolicy)
 
         self.verticalLayoutLeft.addWidget(self.listWidgetUsers)
 
@@ -43,6 +49,11 @@ class Ui_MainWindowWidget(object):
 
         self.groupBoxDetails = QGroupBox(MainWindowWidget)
         self.groupBoxDetails.setObjectName(u"groupBoxDetails")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.groupBoxDetails.sizePolicy().hasHeightForWidth())
+        self.groupBoxDetails.setSizePolicy(sizePolicy1)
         self.formLayoutDetails = QFormLayout(self.groupBoxDetails)
         self.formLayoutDetails.setObjectName(u"formLayoutDetails")
         self.labelVorname = QLabel(self.groupBoxDetails)

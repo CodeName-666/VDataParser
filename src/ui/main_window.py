@@ -1,14 +1,16 @@
-
 #PySide6 imports
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QMainWindow,  QMessageBox, QFileDialog
+from PySide6.QtWidgets import QMainWindow,  QMessageBox, QFileDialog, QDialog
 
 #Local imports
 from data import DataManager
 from .stack_widget import StackWidget
 from .generated import MainWindowUi
+from .generated import AboutUi
+
 from .main_menu import MainMenu
 from .market import Market
+
 
 
 
@@ -93,6 +95,7 @@ class MainWindow(QMainWindow):
         self.main_menu.on_exit_button_clicked.connect(self.close)
         self.main_menu.on_export_button_clicked.connect(self.open_local_export)
         self.main_menu.on_open_market_button_clicked.connect(self.open_market_view)
+        self.ui.action_tool.triggered.connect(self.open_about_ui)
         #self.ui.action_open_export.triggered.connect(self.open_market_view)
         #self.ui.action_open_file.triggered.connect(self.open_file_dialog)
 
@@ -170,3 +173,13 @@ class MainWindow(QMainWindow):
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to load JSON file: {e}")
                 return None
+
+    def open_about_ui(self):
+        """
+        Opens and displays the AboutUi dialog.
+        """
+        self.about_dialog =  QDialog()
+        self.adout = AboutUi()
+        self.adout.setupUi(self.about_dialog )
+        self.about_dialog .exec()
+

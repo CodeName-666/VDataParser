@@ -2,11 +2,18 @@
 <ui version="4.0">
  <class>MainWindowWidget</class>
  <widget class="QWidget" name="MainWindowWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>381</width>
+    <height>238</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Benutzerübersicht</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
-   <!-- Linker Bereich: Checkbox + Liste -->
    <item>
     <layout class="QVBoxLayout" name="verticalLayoutLeft">
      <item>
@@ -20,18 +27,29 @@
       </widget>
      </item>
      <item>
-      <widget class="QListWidget" name="listWidgetUsers"/>
+      <widget class="QListWidget" name="listWidgetUsers">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
-   <!-- Rechter Bereich: Detailanzeige -->
    <item>
     <widget class="QGroupBox" name="groupBoxDetails">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Benutzerdetails</string>
      </property>
      <layout class="QFormLayout" name="formLayoutDetails">
-      <!-- Vorname -->
       <item row="0" column="0">
        <widget class="QLabel" name="labelVorname">
         <property name="text">
@@ -42,11 +60,10 @@
       <item row="0" column="1">
        <widget class="QLabel" name="valueVorname">
         <property name="text">
-         <string></string>
+         <string/>
         </property>
        </widget>
       </item>
-      <!-- Nachname -->
       <item row="1" column="0">
        <widget class="QLabel" name="labelNachname">
         <property name="text">
@@ -57,11 +74,10 @@
       <item row="1" column="1">
        <widget class="QLabel" name="valueNachname">
         <property name="text">
-         <string></string>
+         <string/>
         </property>
        </widget>
       </item>
-      <!-- Telefon -->
       <item row="2" column="0">
        <widget class="QLabel" name="labelTelefon">
         <property name="text">
@@ -72,11 +88,10 @@
       <item row="2" column="1">
        <widget class="QLabel" name="valueTelefon">
         <property name="text">
-         <string></string>
+         <string/>
         </property>
        </widget>
       </item>
-      <!-- E-Mail -->
       <item row="3" column="0">
        <widget class="QLabel" name="labelEmail">
         <property name="text">
@@ -87,11 +102,10 @@
       <item row="3" column="1">
        <widget class="QLabel" name="valueEmail">
         <property name="text">
-         <string></string>
+         <string/>
         </property>
        </widget>
       </item>
-      <!-- Created At -->
       <item row="4" column="0">
        <widget class="QLabel" name="labelCreatedAt">
         <property name="text">
@@ -102,11 +116,10 @@
       <item row="4" column="1">
        <widget class="QLabel" name="valueCreatedAt">
         <property name="text">
-         <string></string>
+         <string/>
         </property>
        </widget>
       </item>
-      <!-- Updated At -->
       <item row="5" column="0">
        <widget class="QLabel" name="labelUpdatedAt">
         <property name="text">
@@ -117,11 +130,10 @@
       <item row="5" column="1">
        <widget class="QLabel" name="valueUpdatedAt">
         <property name="text">
-         <string></string>
+         <string/>
         </property>
        </widget>
       </item>
-      <!-- IDs -->
       <item row="6" column="0">
        <widget class="QLabel" name="labelIDs">
         <property name="text">
@@ -132,7 +144,7 @@
       <item row="6" column="1">
        <widget class="QLabel" name="valueIDs">
         <property name="text">
-         <string></string>
+         <string/>
         </property>
        </widget>
       </item>

@@ -17,12 +17,12 @@
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <widget class="QWidget" name="leftWidget">
       <layout class="QVBoxLayout" name="verticalLayoutLeft">
        <item>
-        <widget class="QPushButton" name="btnToggleView">
+        <widget class="QToolButton" name="btnToggleView">
          <property name="text">
           <string>Ansicht umschalten</string>
          </property>
@@ -35,11 +35,6 @@
            <string>Benutzer</string>
           </stringlist>
          </property>
-         <column>
-          <property name="text">
-           <string notr="true">1</string>
-          </property>
-         </column>
         </widget>
        </item>
       </layout>

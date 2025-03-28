@@ -6,7 +6,7 @@ import subprocess
 DEFAULT_UI_INPUT_DIR = "../src/ui/design"
 DEFAULT_UI_OUTPUT_DIR = "../src/ui/generated"
 RESOURCE_INPUT_DIR = "../src/resources"
-RESOURCE_QRC_FILE = "resources.qrc"
+RESOURCE_QRC_FILE = "../resource/resources.qrc"
 RESOURCE_OUTPUT_FILE = "resources_rc.py"
 
 def arguments():
@@ -77,8 +77,14 @@ def convert_ui(ui_file, input_dir, output_dir):
     output_path = os.path.join(output_dir, output_file)
     
     command = f"pyside6-uic {input_path} -o {output_path}"
-    subprocess.run(command, shell=True)
-    print(f"Converted {input_path} to {output_path}")
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"Fehler: Konnte {input_path} nicht in {output_path} konvertieren.")
+        print("STDOUT:", result.stdout)
+        print("STDERR:", result.stderr)
+    else:
+        print(f"Converted {input_path} to {output_path}")
+        print("STDOUT:", result.stdout)
 
 def convert_all(input_dir, output_dir):
     """

@@ -69,9 +69,17 @@ class DataView(BaseUi):
 
     def populate_user_list(self):
         """
-        Befüllt die flache Listenansicht mit allen Verkäufern aus der
-        SellerListDataClass (databaseseitig gespeichert in data_manager.sellers.data).
+        Populates the list widget with seller information retrieved from the data manager.
+        This method first checks if the data manager is available. If not, it exits without performing
+        any operations. Otherwise, it clears the current items in the user list widget and iterates
+        through the collection of sellers provided by the data manager. For each seller, it formats a
+        display string that includes the seller's index, first name, last name, and email address. A new
+        QListWidgetItem is created with this display text, and the corresponding seller object is attached
+        to the item using the Qt.UserRole, enabling later retrieval of the full seller data.
+        Returns:
+            None
         """
+        
         if not self.data_manager:
             return
         
@@ -84,7 +92,7 @@ class DataView(BaseUi):
             self.listUsers.addItem(item)
 
     def toggle_view(self):
-        """Wechselt zwischen der Baumansicht (aggregiert) und der Listenansicht (flach)."""
+       
         if self.ui.treeUsers.isVisible():
             self.ui.treeUsers.hide()
             self.populate_user_list()
@@ -96,12 +104,7 @@ class DataView(BaseUi):
             self.ui.btnToggleView.setText("Listenansicht")
 
     def user_item_clicked(self, item, column):
-        """
-        Reagiert auf Klicks in der Baumansicht.
-        - Wird ein Kindknoten (stnr‑Tabelle) angeklickt, werden nur dessen Artikel angezeigt.
-        - Wird ein Verkäuferknoten angeklickt, werden alle zugehörigen Artikel (aus allen stnr‑Tabellen)
-          zusammengefasst.
-        """
+  
         if not self.data_manager:
             return
 
@@ -151,7 +154,8 @@ class DataView(BaseUi):
         Befüllt das Tabellen-Widget mit den Detail-Artikeln.
         Dabei wird auf die Artikelattribute (aus ArticleDataClass) über Attribute zugegriffen.
         """
-        headers = ["artikelnummer", "beschreibung", "groesse", "preis", "created_at"]
+        #headers = ["artikelnummer", "beschreibung", "groesse", "preis", "created_at"]
+        headers = ["Beschreibung", "Groesse", "Preis", "Created_At"]
         self.ui.tableEntries.clearContents()
         self.ui.tableEntries.setColumnCount(len(headers))
         self.ui.tableEntries.setHorizontalHeaderLabels(headers)
@@ -162,11 +166,11 @@ class DataView(BaseUi):
         self.ui.tableEntries.setRowCount(len(entries))
         
         for row, entry in enumerate(entries):
-            self.ui.tableEntries.setItem(row, 0, QTableWidgetItem(getattr(entry, "artikelnummer", "")))
-            self.ui.tableEntries.setItem(row, 1, QTableWidgetItem(getattr(entry, "beschreibung", "")))
-            self.ui.tableEntries.setItem(row, 2, QTableWidgetItem(getattr(entry, "groesse", "")))
-            self.ui.tableEntries.setItem(row, 3, QTableWidgetItem(getattr(entry, "preis", "")))
-            self.ui.tableEntries.setItem(row, 4, QTableWidgetItem(getattr(entry, "created_at", "")))
+            #self.ui.tableEntries.setItem(row, 0, QTableWidgetItem(getattr(entry, "artikelnummer", "")))
+            self.ui.tableEntries.setItem(row, 0, QTableWidgetItem(getattr(entry, "beschreibung", "")))
+            self.ui.tableEntries.setItem(row, 1, QTableWidgetItem(getattr(entry, "groesse", "")))
+            self.ui.tableEntries.setItem(row, 2, QTableWidgetItem(getattr(entry, "preis", "")))
+            self.ui.tableEntries.setItem(row, 3, QTableWidgetItem(getattr(entry, "created_at", "")))
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
