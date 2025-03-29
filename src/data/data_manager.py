@@ -19,30 +19,18 @@ class DataManager(BaseData):
     def __init__(self, json_file_path: str, error_handler=None) -> None:
         # BaseData lädt und konvertiert die JSON-Daten in die entsprechenden Dataclasses.
         super().__init__(json_file_path, error_handler)
-        self.aggregate_data()
-
-    def aggregate_data(self):
-        """
-        Führt die Aggregation der Daten durch, indem interne
-        Hilfsmethoden aufgerufen werden:
-        
-        1. Aggregation der Main-Number-Tables (stnr‑Tabellen).
-        2. Aggregation der Verkäufer (Seller) anhand der E-Mail-Adresse.
-        3. Zuordnung der stnr‑Tabellen zu den Verkäufern.
-        """
-        self._aggregate_main_number_tables()
-        self._aggregate_sellers()
-        self._assign_main_numbers_to_sellers()
 
     def _aggregate_main_number_tables(self):
         """
         Aggregiert alle MainNumberDataClass-Instanzen, deren Name mit "stnr" beginnt,
         in ein Dictionary.
         """
-        self.main_number_tables: Dict[str, MainNumberDataClass] = {}
+        main_number_tables: Dict[str, MainNumberDataClass] = {}
         for main in self.main_numbers_list:
             if main.name.startswith("stnr"):
-                self.main_number_tables[main.name] = main
+                main_number_tables[main.name] = main
+
+        return main_number_tables
 
     def _aggregate_sellers(self):
         """
@@ -52,26 +40,30 @@ class DataManager(BaseData):
         der Wert ein Dictionary mit "info" (SellerDataClass),
         "ids" (Liste der Verkäufer-IDs) und "stamms" (später zugeordnete stnr‑Tabellen) enthält.
         """
-        self.users: Dict[str, Dict] = {}
+        users: Dict[str, Dict] = {}
         for seller in self.get_seller_list():
             key = seller.email
-            if key not in self.users:
-                self.users[key] = {"info": seller, "ids": [seller.id], "stamms": []}
+            if key not in users:
+                users[key] = {"info": seller, "ids": [seller.id], "stamms": []}
             else:
-                if seller.id not in self.users[key]["ids"]:
-                    self.users[key]["ids"].append(seller.id)
+                if seller.id not in users[key]["ids"]:
+                    users[key]["ids"].append(seller.id)
+        return users
 
     def _assign_main_numbers_to_sellers(self):
         """
         Ordnet die stnr‑Tabellen den Verkäufern zu, wenn die Nummer im Tabellennamen 
         in der Liste der Verkäufer-IDs enthalten ist.
         """
+        sellers = self._aggregate_sellers()
+
         for main in self.main_numbers_list:
             if main.name.startswith("stnr"):
                 stnr_num = main.name[4:]  # z. B. "1" aus "stnr1"
-                for user in self.users.values():
+                for user in sellers.values():
                     if stnr_num in user["ids"]:
                         user["stamms"].append(main)
+        return sellers
 
     def get_aggregated_users(self) -> Dict[str, Dict]:
         """
@@ -87,7 +79,7 @@ class DataManager(BaseData):
                 ...
             }
         """
-        return self.users
+        return self._assign_main_numbers_to_sellers()
 
     def get_main_number_tables(self) -> Dict[str, MainNumberDataClass]:
         """
@@ -95,4 +87,4 @@ class DataManager(BaseData):
         
         Schlüssel: Name der Tabelle (z. B. "stnr1")
         """
-        return self.main_number_tables
+        return self._aggregate_main_number_tables()
