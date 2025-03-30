@@ -1,15 +1,15 @@
 import sys
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QGraphicsScene, QGraphicsPixmapItem,
-    QFileDialog, QListWidget, QListWidgetItem, QPushButton, QGraphicsView
+    QFileDialog, QListWidget, QListWidgetItem, QPushButton, QGraphicsView,
+    QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem
 )
 from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QCursor
 from PySide6.QtCore import Qt, QRectF, QPointF, QFile
 from PySide6.QtPdf import QPdfDocument
-from PySide6.QtWidgets import QGraphicsItem, QGraphicsRectItem,QGraphicsTextItem
 from PySide6.QtUiTools import QUiLoader
 
-# Bestehende Klasse für ein einzelnes, resizables Rechteck
+# Klasse für ein einzelnes, resizables Rechteck
 class DraggableBox(QGraphicsRectItem):
     def __init__(self, rect: QRectF, label="", parent=None):
         super().__init__(rect, parent)
@@ -18,8 +18,7 @@ class DraggableBox(QGraphicsRectItem):
                       QGraphicsItem.ItemSendsGeometryChanges |
                       QGraphicsItem.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
-        # Standard-Pen wird später überschrieben
-        self.setPen(QPen(Qt.black, 2))
+        self.setPen(QPen(Qt.black, 2))  # Standard-Pen, wird bei Bedarf überschrieben
         self.setBrush(QBrush(Qt.transparent))
         self.label = label
         self.posText = QGraphicsTextItem(self)
@@ -135,7 +134,7 @@ class DraggableBox(QGraphicsRectItem):
             self.updatePosText()
         return super().itemChange(change, value)
 
-# Neue Klasse, die immer zusammengehörige Boxen (ein Paar) erstellt
+# Klasse, die ein zusammengehöriges Paar Boxen erstellt
 class BoxPair:
     _id_counter = 1
 
@@ -174,17 +173,21 @@ class MainWindow(QMainWindow):
         ui_file.close()
         self.setCentralWidget(self.ui)
         
-        # Widgets aus der UI ermitteln
+        # Widgets aus der UI
         self.graphicsView = self.ui.findChild(QGraphicsView, "graphicsView")
         self.btnLoadPDF = self.ui.findChild(QPushButton, "btnLoadPDF")
         self.btnAddBoxPair = self.ui.findChild(QPushButton, "btnAddBoxPair")
         self.btnRemoveBoxPair = self.ui.findChild(QPushButton, "btnRemoveBoxPair")
+        self.btnZoomIn = self.ui.findChild(QPushButton, "btnZoomIn")
+        self.btnZoomOut = self.ui.findChild(QPushButton, "btnZoomOut")
         self.listBoxPairs = self.ui.findChild(QListWidget, "listBoxPairs")
         
         # Signale verbinden
         self.btnLoadPDF.clicked.connect(self.load_pdf)
         self.btnAddBoxPair.clicked.connect(self.add_box_pair)
         self.btnRemoveBoxPair.clicked.connect(self.remove_box_pair)
+        self.btnZoomIn.clicked.connect(self.zoom_in)
+        self.btnZoomOut.clicked.connect(self.zoom_out)
         
         # Scene und PDF-Dokument initialisieren
         self.scene = QGraphicsScene(self)
@@ -217,7 +220,7 @@ class MainWindow(QMainWindow):
         self.pdf_item.setFlag(QGraphicsItem.ItemIsSelectable, False)
         self.scene.addItem(self.pdf_item)
         self.scene.setSceneRect(pixmap.rect())
-        # Vorhandene BoxPairs erneut hinzufügen
+        # Vorhandene BoxPairs wieder einfügen
         for pair in self.boxPairs:
             self.scene.addItem(pair.box1)
             self.scene.addItem(pair.box2)
@@ -238,6 +241,14 @@ class MainWindow(QMainWindow):
                 self.boxPairs.remove(boxPair)
             row = self.listBoxPairs.row(item)
             self.listBoxPairs.takeItem(row)
+
+    def zoom_in(self):
+        # Vergrößere die Ansicht um den Faktor 1.2
+        self.graphicsView.scale(1.2, 1.2)
+
+    def zoom_out(self):
+        # Verkleinere die Ansicht um den Faktor 1/1.2
+        self.graphicsView.scale(1/1.2, 1/1.2)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Delete:
