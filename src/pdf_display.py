@@ -9,7 +9,7 @@ from PySide6.QtCore import Qt, QRectF, QPointF, QFile
 from PySide6.QtPdf import QPdfDocument
 from PySide6.QtUiTools import QUiLoader
 
-# Klasse für ein einzelnes, resizables Rechteck
+# Basis-Klasse für ein resizables Rechteck
 class DraggableBox(QGraphicsRectItem):
     def __init__(self, rect: QRectF, label="", parent=None):
         super().__init__(rect, parent)
@@ -18,7 +18,7 @@ class DraggableBox(QGraphicsRectItem):
                       QGraphicsItem.ItemSendsGeometryChanges |
                       QGraphicsItem.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
-        self.setPen(QPen(Qt.black, 2))  # Standard-Pen, wird bei Bedarf überschrieben
+        self.setPen(QPen(Qt.black, 2))  # Standard-Pen, wird ggf. überschrieben
         self.setBrush(QBrush(Qt.transparent))
         self.label = label
         self.posText = QGraphicsTextItem(self)
@@ -31,6 +31,7 @@ class DraggableBox(QGraphicsRectItem):
         self._initialScenePos = self.pos()
 
     def updatePosText(self):
+        # Zeigt das statische Label an, falls gesetzt, ansonsten Koordinaten
         if self.label:
             self.posText.setPlainText(self.label)
         else:
@@ -134,19 +135,25 @@ class DraggableBox(QGraphicsRectItem):
             self.updatePosText()
         return super().itemChange(change, value)
 
-# Klasse, die ein zusammengehöriges Paar Boxen erstellt
+# BoxPair: Erstellt ein Paar zusammengehöriger Boxen
 class BoxPair:
-    _id_counter = 1
-
+    _next_id = 1
+    _free_ids = []
+    
     def __init__(self, scene, startPos=QPointF(50, 50)):
-        self.id = BoxPair._id_counter
-        BoxPair._id_counter += 1
+        if BoxPair._free_ids:
+            self.id = min(BoxPair._free_ids)
+            BoxPair._free_ids.remove(self.id)
+        else:
+            self.id = BoxPair._next_id
+            BoxPair._next_id += 1
+
         rect = QRectF(0, 0, 100, 50)
-        # Erstes Rechteck: roter Rahmen und Label "USR<id>"
+        # Erstes Rechteck: roter Rahmen, Label "USR<id>"
         self.box1 = DraggableBox(rect, label=f"USR{self.id}")
         self.box1.setPos(startPos)
         self.box1.setPen(QPen(Qt.red, 2))
-        # Zweites Rechteck: blauer Rahmen und Label "NR<id>", leicht versetzt
+        # Zweites Rechteck: blauer Rahmen, Label "NR<id>" – leicht versetzt
         offset = QPointF(120, 0)
         self.box2 = DraggableBox(rect, label=f"NR{self.id}")
         self.box2.setPos(startPos + offset)
@@ -158,11 +165,36 @@ class BoxPair:
     def remove_from_scene(self):
         self.scene.removeItem(self.box1)
         self.scene.removeItem(self.box2)
+        # Den verwendeten Index wieder freigeben
+        if self.id not in BoxPair._free_ids:
+            BoxPair._free_ids.append(self.id)
 
     def __str__(self):
         return f"BoxPair {self.id}"
 
-# MainWindow, der die UI aus der .ui-Datei lädt und die Logik implementiert
+# SingleBox: Erstellt eine einzelne Box mit grünem Rahmen und Label "DATE<id>"
+class SingleBox(DraggableBox):
+    _next_id = 1
+    _free_ids = []
+    
+    def __init__(self, rect: QRectF, parent=None):
+        if SingleBox._free_ids:
+            self.id = min(SingleBox._free_ids)
+            SingleBox._free_ids.remove(self.id)
+        else:
+            self.id = SingleBox._next_id
+            SingleBox._next_id += 1
+        label = f"DATE{self.id}"
+        super().__init__(rect, label, parent)
+        self.setPen(QPen(Qt.green, 2))
+
+    def remove_from_scene(self):
+        if self.scene():
+            self.scene().removeItem(self)
+        if self.id not in SingleBox._free_ids:
+            SingleBox._free_ids.append(self.id)
+
+# MainWindow: Lädt die UI aus der .ui-Datei und implementiert die Logik
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -180,14 +212,16 @@ class MainWindow(QMainWindow):
         self.btnRemoveBoxPair = self.ui.findChild(QPushButton, "btnRemoveBoxPair")
         self.btnZoomIn = self.ui.findChild(QPushButton, "btnZoomIn")
         self.btnZoomOut = self.ui.findChild(QPushButton, "btnZoomOut")
+        self.btnAddSingleBox = self.ui.findChild(QPushButton, "btnAddSingleBox")
         self.listBoxPairs = self.ui.findChild(QListWidget, "listBoxPairs")
         
         # Signale verbinden
         self.btnLoadPDF.clicked.connect(self.load_pdf)
         self.btnAddBoxPair.clicked.connect(self.add_box_pair)
-        self.btnRemoveBoxPair.clicked.connect(self.remove_box_pair)
+        self.btnRemoveBoxPair.clicked.connect(self.remove_selected_item)
         self.btnZoomIn.clicked.connect(self.zoom_in)
         self.btnZoomOut.clicked.connect(self.zoom_out)
+        self.btnAddSingleBox.clicked.connect(self.add_single_box)
         
         # Scene und PDF-Dokument initialisieren
         self.scene = QGraphicsScene(self)
@@ -195,6 +229,7 @@ class MainWindow(QMainWindow):
         self.graphicsView.setRenderHint(QPainter.Antialiasing)
         self.pdfDocument = QPdfDocument(self)
         self.boxPairs = []
+        self.singleBoxes = []
 
     def load_pdf(self):
         fileName, _ = QFileDialog.getOpenFileName(
@@ -220,10 +255,12 @@ class MainWindow(QMainWindow):
         self.pdf_item.setFlag(QGraphicsItem.ItemIsSelectable, False)
         self.scene.addItem(self.pdf_item)
         self.scene.setSceneRect(pixmap.rect())
-        # Vorhandene BoxPairs wieder einfügen
+        # Vorhandene BoxPairs und SingleBoxes wieder hinzufügen
         for pair in self.boxPairs:
             self.scene.addItem(pair.box1)
             self.scene.addItem(pair.box2)
+        for single in self.singleBoxes:
+            self.scene.addItem(single)
 
     def add_box_pair(self):
         newPair = BoxPair(self.scene, QPointF(50, 50))
@@ -232,27 +269,38 @@ class MainWindow(QMainWindow):
         listItem.setData(Qt.UserRole, newPair)
         self.listBoxPairs.addItem(listItem)
 
-    def remove_box_pair(self):
+    def add_single_box(self):
+        rect = QRectF(0, 0, 100, 50)
+        newSingle = SingleBox(rect)
+        newSingle.setPos(QPointF(50, 50))
+        self.scene.addItem(newSingle)
+        self.singleBoxes.append(newSingle)
+        listItem = QListWidgetItem(f"BoxSingle {newSingle.id}")
+        listItem.setData(Qt.UserRole, newSingle)
+        self.listBoxPairs.addItem(listItem)
+
+    def remove_selected_item(self):
         selectedItems = self.listBoxPairs.selectedItems()
         for item in selectedItems:
-            boxPair = item.data(Qt.UserRole)
-            if boxPair in self.boxPairs:
-                boxPair.remove_from_scene()
-                self.boxPairs.remove(boxPair)
+            obj = item.data(Qt.UserRole)
+            if isinstance(obj, BoxPair):
+                obj.remove_from_scene()
+                self.boxPairs.remove(obj)
+            elif isinstance(obj, SingleBox):
+                obj.remove_from_scene()
+                self.singleBoxes.remove(obj)
             row = self.listBoxPairs.row(item)
             self.listBoxPairs.takeItem(row)
 
     def zoom_in(self):
-        # Vergrößere die Ansicht um den Faktor 1.2
         self.graphicsView.scale(1.2, 1.2)
 
     def zoom_out(self):
-        # Verkleinere die Ansicht um den Faktor 1/1.2
         self.graphicsView.scale(1/1.2, 1/1.2)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Delete:
-            self.remove_box_pair()
+            self.remove_selected_item()
         else:
             super().keyPressEvent(event)
 
