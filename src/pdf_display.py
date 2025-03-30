@@ -10,18 +10,18 @@ from PySide6.QtCore import Qt, QRectF, QPointF
 from PySide6.QtPdf import QPdfDocument
 from PySide6.QtWidgets import QGraphicsItem
 
-
-# Bestehende Klasse für ein einzelnes, resizables Rechteck
+# Angepasste DraggableBox mit optionalem statischem Label
 class DraggableBox(QGraphicsRectItem):
-    def __init__(self, rect: QRectF, parent=None):
+    def __init__(self, rect: QRectF, label="", parent=None):
         super().__init__(rect, parent)
         self.setFlags(QGraphicsItem.ItemIsMovable |
                       QGraphicsItem.ItemIsSelectable |
                       QGraphicsItem.ItemSendsGeometryChanges |
                       QGraphicsItem.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
-        self.setPen(QPen(Qt.black, 2))
+        self.setPen(QPen(Qt.black, 2))  # Standardfarbe, wird später überschrieben
         self.setBrush(QBrush(Qt.transparent))
+        self.label = label
         self.posText = QGraphicsTextItem(self)
         self.updatePosText()
         self._resizeMargins = 5
@@ -32,8 +32,11 @@ class DraggableBox(QGraphicsRectItem):
         self._initialScenePos = self.pos()
 
     def updatePosText(self):
-        pos = self.scenePos()
-        self.posText.setPlainText(f"X: {int(pos.x())} | Y: {int(pos.y())}")
+        if self.label:
+            self.posText.setPlainText(self.label)
+        else:
+            pos = self.scenePos()
+            self.posText.setPlainText(f"X: {int(pos.x())} | Y: {int(pos.y())}")
         self.posText.setPos(0, -20)
 
     def hoverMoveEvent(self, event):
@@ -77,7 +80,6 @@ class DraggableBox(QGraphicsRectItem):
             newPos = QPointF(self._initialScenePos)
             minWidth = 20
             minHeight = 20
-
             if self._resizeEdges['left']:
                 newWidth = self._initialRect.width() - delta.x()
                 if newWidth < minWidth:
@@ -88,13 +90,11 @@ class DraggableBox(QGraphicsRectItem):
                 newRect.setLeft(newRect.left() + delta_x)
                 newRect.setWidth(newWidth)
                 newPos.setX(self._initialScenePos.x() + delta_x)
-
             if self._resizeEdges['right']:
                 newWidth = self._initialRect.width() + delta.x()
                 if newWidth < minWidth:
                     newWidth = minWidth
                 newRect.setWidth(newWidth)
-
             if self._resizeEdges['top']:
                 newHeight = self._initialRect.height() - delta.y()
                 if newHeight < minHeight:
@@ -105,13 +105,11 @@ class DraggableBox(QGraphicsRectItem):
                 newRect.setTop(newRect.top() + delta_y)
                 newRect.setHeight(newHeight)
                 newPos.setY(self._initialScenePos.y() + delta_y)
-
             if self._resizeEdges['bottom']:
                 newHeight = self._initialRect.height() + delta.y()
                 if newHeight < minHeight:
                     newHeight = minHeight
                 newRect.setHeight(newHeight)
-
             finalRect = QRectF(0, 0, newRect.width(), newRect.height())
             self.setRect(finalRect)
             self.setPos(newPos)
@@ -132,8 +130,7 @@ class DraggableBox(QGraphicsRectItem):
             self.updatePosText()
         return super().itemChange(change, value)
 
-# Neue Klasse, die immer zusammengehörige Rechtecke (ein Paar) erstellt
-# Neue Klasse, die immer zusammengehörige Rechtecke (ein Paar) erstellt
+# Angepasste BoxPair, die zwei zusammengehörige Boxen mit spezifischen Rahmenfarben und Labels erstellt
 class BoxPair:
     _id_counter = 1
 
@@ -141,16 +138,15 @@ class BoxPair:
         self.id = BoxPair._id_counter
         BoxPair._id_counter += 1
         rect = QRectF(0, 0, 100, 50)
-        # Erstes Rechteck (rot)
-        self.box1 = DraggableBox(rect)
+        # Erstes Rechteck: roter Rahmen und Label "USR<id>"
+        self.box1 = DraggableBox(rect, label=f"USR{self.id}")
         self.box1.setPos(startPos)
-        self.box1.setBrush(QBrush(Qt.red))
-        # Zweites Rechteck (blau), leicht versetzt
+        self.box1.setPen(QPen(Qt.red, 2))
+        # Zweites Rechteck: blauer Rahmen und Label "NR<id>", leicht versetzt
         offset = QPointF(120, 0)
-        self.box2 = DraggableBox(rect)
+        self.box2 = DraggableBox(rect, label=f"NR{self.id}")
         self.box2.setPos(startPos + offset)
-        self.box2.setBrush(QBrush(Qt.blue))
-        # Beide Rechtecke in die Scene einfügen
+        self.box2.setPen(QPen(Qt.blue, 2))
         scene.addItem(self.box1)
         scene.addItem(self.box2)
         self.scene = scene
@@ -162,50 +158,35 @@ class BoxPair:
     def __str__(self):
         return f"BoxPair {self.id}"
 
-
-# Hauptfenster mit erweiterter UI
+# Restlicher Code für das MainWindow und die Anwendung
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("PDF Editor mit resizbaren Box-Overlays")
         self.resize(900, 700)
-
         self.pdfDocument = QPdfDocument(self)
         self.scene = QGraphicsScene(self)
         self.view = QGraphicsView(self.scene, self)
         self.view.setRenderHint(QPainter.Antialiasing)
-
-        # Liste, in der die BoxPairs verwaltet werden
         self.boxPairs = []
-
-        # Seitenmenü mit Steuerungselementen und Liste
         self.sideMenu = QWidget()
         sideLayout = QVBoxLayout()
-
         self.loadPdfButton = QPushButton("PDF laden")
         self.loadPdfButton.clicked.connect(self.load_pdf)
-
         self.addBoxPairButton = QPushButton("+")
         self.addBoxPairButton.clicked.connect(self.add_box_pair)
-
         self.removeBoxPairButton = QPushButton("-")
         self.removeBoxPairButton.clicked.connect(self.remove_box_pair)
-
-        # Liste zur Anzeige der erstellten BoxPairs
         self.boxPairListWidget = QListWidget()
-
         sideLayout.addWidget(self.loadPdfButton)
         sideLayout.addWidget(self.addBoxPairButton)
         sideLayout.addWidget(self.removeBoxPairButton)
         sideLayout.addWidget(self.boxPairListWidget)
         sideLayout.addStretch()
         self.sideMenu.setLayout(sideLayout)
-
-        # Hauptlayout: PDF-View links, Seitenmenü rechts
         mainLayout = QHBoxLayout()
         mainLayout.addWidget(self.view, stretch=3)
         mainLayout.addWidget(self.sideMenu, stretch=1)
-
         centralWidget = QWidget()
         centralWidget.setLayout(mainLayout)
         self.setCentralWidget(centralWidget)
@@ -234,13 +215,11 @@ class MainWindow(QMainWindow):
         self.pdf_item.setFlag(QGraphicsItem.ItemIsSelectable, False)
         self.scene.addItem(self.pdf_item)
         self.scene.setSceneRect(pixmap.rect())
-        # Bestehende BoxPairs erneut hinzufügen
         for pair in self.boxPairs:
             self.scene.addItem(pair.box1)
             self.scene.addItem(pair.box2)
 
     def add_box_pair(self):
-        # Erstelle ein neues BoxPair, füge es der Scene und der Liste hinzu
         newPair = BoxPair(self.scene, QPointF(50, 50))
         self.boxPairs.append(newPair)
         listItem = QListWidgetItem(str(newPair))
@@ -248,7 +227,6 @@ class MainWindow(QMainWindow):
         self.boxPairListWidget.addItem(listItem)
 
     def remove_box_pair(self):
-        # Entferne das ausgewählte BoxPair
         selectedItems = self.boxPairListWidget.selectedItems()
         for item in selectedItems:
             boxPair = item.data(Qt.UserRole)
