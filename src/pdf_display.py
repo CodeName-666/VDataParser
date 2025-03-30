@@ -1,4 +1,6 @@
 import sys
+import os
+import json
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QGraphicsScene, QGraphicsPixmapItem,
     QFileDialog, QListWidget, QListWidgetItem, QPushButton, QGraphicsView,
@@ -31,7 +33,6 @@ class DraggableBox(QGraphicsRectItem):
         self._initialScenePos = self.pos()
 
     def updatePosText(self):
-        # Zeigt das statische Label an, falls gesetzt, ansonsten Koordinaten
         if self.label:
             self.posText.setPlainText(self.label)
         else:
@@ -135,7 +136,7 @@ class DraggableBox(QGraphicsRectItem):
             self.updatePosText()
         return super().itemChange(change, value)
 
-# BoxPair: Erstellt ein Paar zusammengehöriger Boxen
+# BoxPair: Erstellt ein Paar zusammengehöriger Boxen mit wiederverwendbaren IDs
 class BoxPair:
     _next_id = 1
     _free_ids = []
@@ -149,11 +150,9 @@ class BoxPair:
             BoxPair._next_id += 1
 
         rect = QRectF(0, 0, 100, 50)
-        # Erstes Rechteck: roter Rahmen, Label "USR<id>"
         self.box1 = DraggableBox(rect, label=f"USR{self.id}")
         self.box1.setPos(startPos)
         self.box1.setPen(QPen(Qt.red, 2))
-        # Zweites Rechteck: blauer Rahmen, Label "NR<id>" – leicht versetzt
         offset = QPointF(120, 0)
         self.box2 = DraggableBox(rect, label=f"NR{self.id}")
         self.box2.setPos(startPos + offset)
@@ -165,7 +164,6 @@ class BoxPair:
     def remove_from_scene(self):
         self.scene.removeItem(self.box1)
         self.scene.removeItem(self.box2)
-        # Den verwendeten Index wieder freigeben
         if self.id not in BoxPair._free_ids:
             BoxPair._free_ids.append(self.id)
 
@@ -194,7 +192,7 @@ class SingleBox(DraggableBox):
         if self.id not in SingleBox._free_ids:
             SingleBox._free_ids.append(self.id)
 
-# MainWindow: Lädt die UI aus der .ui-Datei und implementiert die Logik
+# MainWindow: Lädt die UI, implementiert die Logik und fügt Speichern/Laden hinzu
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -205,7 +203,7 @@ class MainWindow(QMainWindow):
         ui_file.close()
         self.setCentralWidget(self.ui)
         
-        # Widgets aus der UI
+        # Widgets aus der UI ermitteln
         self.graphicsView = self.ui.findChild(QGraphicsView, "graphicsView")
         self.btnLoadPDF = self.ui.findChild(QPushButton, "btnLoadPDF")
         self.btnAddBoxPair = self.ui.findChild(QPushButton, "btnAddBoxPair")
@@ -213,6 +211,8 @@ class MainWindow(QMainWindow):
         self.btnZoomIn = self.ui.findChild(QPushButton, "btnZoomIn")
         self.btnZoomOut = self.ui.findChild(QPushButton, "btnZoomOut")
         self.btnAddSingleBox = self.ui.findChild(QPushButton, "btnAddSingleBox")
+        self.btnSave = self.ui.findChild(QPushButton, "btnSave")
+        self.btnLoad = self.ui.findChild(QPushButton, "btnLoad")
         self.listBoxPairs = self.ui.findChild(QListWidget, "listBoxPairs")
         
         # Signale verbinden
@@ -222,6 +222,8 @@ class MainWindow(QMainWindow):
         self.btnZoomIn.clicked.connect(self.zoom_in)
         self.btnZoomOut.clicked.connect(self.zoom_out)
         self.btnAddSingleBox.clicked.connect(self.add_single_box)
+        self.btnSave.clicked.connect(self.save_state)
+        self.btnLoad.clicked.connect(self.load_state)
         
         # Scene und PDF-Dokument initialisieren
         self.scene = QGraphicsScene(self)
@@ -230,12 +232,14 @@ class MainWindow(QMainWindow):
         self.pdfDocument = QPdfDocument(self)
         self.boxPairs = []
         self.singleBoxes = []
+        self.pdfPath = ""  # Speichert den zuletzt geladenen PDF-Pfad
 
     def load_pdf(self):
         fileName, _ = QFileDialog.getOpenFileName(
             self, "PDF Datei öffnen", "", "PDF Dateien (*.pdf)"
         )
         if fileName:
+            self.pdfPath = fileName
             status = self.pdfDocument.load(fileName)
             if status == QPdfDocument.Error.None_:
                 self.load_page(0)
@@ -250,17 +254,20 @@ class MainWindow(QMainWindow):
             print("Fehler beim Rendern der Seite.")
             return
         pixmap = QPixmap.fromImage(image)
-        self.scene.clear()
+        # Entferne nur das alte PDF-Item, falls vorhanden
+        if hasattr(self, "pdf_item") and self.pdf_item is not None:
+            self.scene.removeItem(self.pdf_item)
         self.pdf_item = QGraphicsPixmapItem(pixmap)
         self.pdf_item.setFlag(QGraphicsItem.ItemIsSelectable, False)
         self.scene.addItem(self.pdf_item)
         self.scene.setSceneRect(pixmap.rect())
-        # Vorhandene BoxPairs und SingleBoxes wieder hinzufügen
+        # Füge alle vorhandenen Box-Paare und Single-Boxen wieder hinzu
         for pair in self.boxPairs:
             self.scene.addItem(pair.box1)
             self.scene.addItem(pair.box2)
         for single in self.singleBoxes:
             self.scene.addItem(single)
+
 
     def add_box_pair(self):
         newPair = BoxPair(self.scene, QPointF(50, 50))
@@ -297,6 +304,117 @@ class MainWindow(QMainWindow):
 
     def zoom_out(self):
         self.graphicsView.scale(1/1.2, 1/1.2)
+
+    def save_state(self):
+        # Erstelle die Datenstruktur für JSON
+        data = {}
+        data["pdf_path"] = self.pdfPath
+        data["pdf_name"] = os.path.basename(self.pdfPath)
+        data["boxPairs"] = []
+        for pair in self.boxPairs:
+            usr_box = pair.box1
+            nr_box = pair.box2
+            usr_data = {
+                "name": usr_box.label,
+                "x": usr_box.scenePos().x(),
+                "y": usr_box.scenePos().y(),
+                "width": usr_box.rect().width(),
+                "height": usr_box.rect().height()
+            }
+            nr_data = {
+                "name": nr_box.label,
+                "x": nr_box.scenePos().x(),
+                "y": nr_box.scenePos().y(),
+                "width": nr_box.rect().width(),
+                "height": nr_box.rect().height()
+            }
+            pair_data = {"id": pair.id, "USR": usr_data, "NR": nr_data}
+            data["boxPairs"].append(pair_data)
+        data["singleBoxes"] = []
+        for single in self.singleBoxes:
+            single_data = {
+                "id": single.id,
+                "name": single.label,
+                "x": single.scenePos().x(),
+                "y": single.scenePos().y(),
+                "width": single.rect().width(),
+                "height": single.rect().height()
+            }
+            data["singleBoxes"].append(single_data)
+        
+        # Öffne einen FileSaveDialog und schreibe die JSON-Daten
+        fileName, _ = QFileDialog.getSaveFileName(
+            self, "Datei speichern", "", "JSON Dateien (*.json)"
+        )
+        if fileName:
+            with open(fileName, "w") as f:
+                json.dump(data, f, indent=4)
+            print("Daten gespeichert.")
+
+    def load_state(self):
+        fileName, _ = QFileDialog.getOpenFileName(
+            self, "Datei laden", "", "JSON Dateien (*.json)"
+        )
+        if fileName:
+            with open(fileName, "r") as f:
+                data = json.load(f)
+            # Lade die PDF
+            pdf_path = data.get("pdf_path", "")
+            if pdf_path:
+                self.pdfPath = pdf_path
+                status = self.pdfDocument.load(pdf_path)
+                if status != QPdfDocument.Error.None_:
+                    print("Fehler beim Laden der PDF.")
+                    return
+            # Entferne bestehende Boxen
+            for pair in self.boxPairs:
+                pair.remove_from_scene()
+            self.boxPairs.clear()
+            for single in self.singleBoxes:
+                single.remove_from_scene()
+            self.singleBoxes.clear()
+            self.listBoxPairs.clear()
+            # Erzeuge BoxPairs neu
+            max_pair_id = 0
+            for pair_data in data.get("boxPairs", []):
+                newPair = BoxPair(self.scene, QPointF(0, 0))
+                newPair.id = pair_data["id"]
+                usr = pair_data["USR"]
+                nr = pair_data["NR"]
+                newPair.box1.label = usr["name"]
+                newPair.box1.setPos(QPointF(usr["x"], usr["y"]))
+                newPair.box1.setRect(QRectF(0, 0, usr["width"], usr["height"]))
+                newPair.box1.updatePosText()
+                newPair.box2.label = nr["name"]
+                newPair.box2.setPos(QPointF(nr["x"], nr["y"]))
+                newPair.box2.setRect(QRectF(0, 0, nr["width"], nr["height"]))
+                newPair.box2.updatePosText()
+                self.boxPairs.append(newPair)
+                listItem = QListWidgetItem(str(newPair))
+                listItem.setData(Qt.UserRole, newPair)
+                self.listBoxPairs.addItem(listItem)
+                max_pair_id = max(max_pair_id, newPair.id)
+            BoxPair._next_id = max_pair_id + 1
+            BoxPair._free_ids = []
+            # Erzeuge SingleBoxes neu
+            max_single_id = 0
+            for single_data in data.get("singleBoxes", []):
+                rect = QRectF(0, 0, single_data["width"], single_data["height"])
+                newSingle = SingleBox(rect)
+                newSingle.id = single_data["id"]
+                newSingle.label = single_data["name"]
+                newSingle.setPos(QPointF(single_data["x"], single_data["y"]))
+                newSingle.setRect(QRectF(0, 0, single_data["width"], single_data["height"]))
+                newSingle.updatePosText()
+                self.singleBoxes.append(newSingle)
+                listItem = QListWidgetItem(f"BoxSingle {newSingle.id}")
+                listItem.setData(Qt.UserRole, newSingle)
+                self.listBoxPairs.addItem(listItem)
+                max_single_id = max(max_single_id, newSingle.id)
+            SingleBox._next_id = max_single_id + 1
+            SingleBox._free_ids = []
+            self.load_page(0)
+            print("Daten geladen.")
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Delete:
