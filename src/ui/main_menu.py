@@ -7,6 +7,10 @@ from .base_ui import BaseUi
 class MainMenu(BaseUi):
 
 
+    on_exit_button_clicked: Signal = None
+    on_export_button_clicked: Signal = None
+    on_open_market_button_clicked: Signal = None
+
     def __init__(self, parent = None):
         super().__init__(parent)
         self.ui = MainMenuUi()
@@ -14,17 +18,13 @@ class MainMenu(BaseUi):
             
     def setup_ui(self): 
         self.ui.setupUi(self)
-        self.propagate_signals()
         self.setup_signals()
 
 
-    def propagate_signals(self):
+    def setup_signals(self):        
         self.on_exit_button_clicked: Signal = self.ui.exitButton.clicked
         self.on_export_button_clicked: Signal = self.ui.exportButton.clicked
         self.on_open_market_button_clicked: Signal = self.ui.loadButton.clicked
-
-    def setup_signals(self):        
-        pass
 
 
 

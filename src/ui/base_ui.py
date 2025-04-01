@@ -14,9 +14,6 @@ class BaseUi(QWidget):
     def setup_ui(self):
         pass
 
-    def propagate_signals(self):
-        pass
-
     def setup_signals(self):
         pass
 

@@ -1,5 +1,5 @@
 #PySide6 imports
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import QMainWindow,  QMessageBox, QFileDialog, QDialog
 
 #Local imports
@@ -10,6 +10,7 @@ from .generated import AboutUi
 
 from .main_menu import MainMenu
 from .market import Market
+from .pdf_display import PdfDisplay
 
 
 
@@ -60,7 +61,8 @@ class MainWindow(QMainWindow):
         self.ui = MainWindowUi()
         self.stack = StackWidget() 
         self.main_menu = MainMenu(self.stack) 
-        self.market_view = Market(self.stack) 
+        self.market_view = Market(self.stack)
+        self.pdf_display = PdfDisplay(self.stack)
 
     def setup_ui(self):
         """
@@ -75,8 +77,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)   
         self.stack.addWidget(self.main_menu)
         self.stack.addWidget(self.market_view)
-       
-        
+        self.stack.addWidget(self.pdf_display)
         
         # Das QStackedWidget als zentrales Widget setzen
         self.setCentralWidget(self.stack)
@@ -95,7 +96,12 @@ class MainWindow(QMainWindow):
         self.main_menu.on_exit_button_clicked.connect(self.close)
         self.main_menu.on_export_button_clicked.connect(self.open_local_export)
         self.main_menu.on_open_market_button_clicked.connect(self.open_market_view)
+
+        self.pdf_display.on_exit_button_clicked.connect(self.switch_to_last_view)
+        
         self.ui.action_tool.triggered.connect(self.open_about_ui)
+
+        self.ui.actionCreate_PDF.triggered.connect(self.open_pdf_display)
         #self.ui.action_open_export.triggered.connect(self.open_market_view)
         #self.ui.action_open_file.triggered.connect(self.open_file_dialog)
 
@@ -113,10 +119,17 @@ class MainWindow(QMainWindow):
         for child in self.stack.children():
             if child.objectName() == view_name:
                 idx = self.stack.indexOf(child)
+                self.stack.backup_last_index()
                 self.stack.setCurrentIndex(idx)
                 self.show_toolbars(view_name)
                 break
     
+    def open_pdf_display(self):
+        """
+        Switches the currently displayed view in the stack to the PDF display view.
+        """
+        self.open_view("PdfDisplayView")
+
     def open_local_export(self):
         """
         Switches the currently displayed view in the stack to the data view.
@@ -132,7 +145,20 @@ class MainWindow(QMainWindow):
         """
         self.open_view("Market")
 
+    @Slot()
+    def switch_to_last_view(self):
+        """
+        Switches the currently displayed view in the stack to the last view.
+        It retrieves the last view's object name, reactivates the corresponding toolbars,
+        and then restores the last view index.
+        """
+        last_index = self.stack.get_last_index()
+        last_view = self.stack.widget(last_index)
+        view_name = last_view.objectName()
+        self.stack.restore_last_index()
+        self.show_toolbars(view_name)
 
+        
     def hide_all_toolbars(self):
         self.ui.tool_export.setVisible(False)
 
@@ -181,5 +207,5 @@ class MainWindow(QMainWindow):
         self.about_dialog =  QDialog()
         self.adout = AboutUi()
         self.adout.setupUi(self.about_dialog )
-        self.about_dialog .exec()
+        self.about_dialog.exec()
 

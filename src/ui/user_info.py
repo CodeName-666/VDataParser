@@ -11,7 +11,7 @@ class UserInfo(BaseUi):
         super().__init__(parent)
         self.ui = UserInfoUi()
         self.ui.setupUi(self)
-        self.setup_connections()
+        self.setup_signals()
 
 
     def set_data(self, data_manager: DataManager):
@@ -62,7 +62,7 @@ class UserInfo(BaseUi):
             "ids": data["ids"]
         }
 
-    def setup_connections(self):
+    def setup_signals(self):
         """Verbindet die UI-Signale mit den entsprechenden Methoden."""
         self.ui.checkboxUnique.toggled.connect(self.refresh_user_list)
         self.ui.listWidgetUsers.currentRowChanged.connect(self.display_user_details)
