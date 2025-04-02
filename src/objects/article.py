@@ -36,8 +36,9 @@ class Article(ArticleDataClass):
     
     def price_valid(self):
         is_none = (self.price() == None)
+        is_none_str = (self.price() == "None")
         is_empty = (self.price() == "") 
-        valid = (not is_empty and not is_none)
+        valid = (not is_empty and not is_none and not is_none_str)
 
         logger.log_one_line("DEBUG",True)
         logger.debug(f"Price is None: {is_none} | ",True)

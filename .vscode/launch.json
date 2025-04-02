@@ -11,7 +11,7 @@
             "program": "src/main.py",
             "console": "integratedTerminal",
             "args": [
-                "--file", "G:\\Meine Ablage\\Developement\\Python\\VDataParser\\data\\Unterlagen\\Export_Datenbank\\d03ee067.json",
+                "--file", "c:\\Users\\NoName\\Downloads\\F25.json",
                 "--path", "src\\output",
                 "--log-level", "INFO",
                 //"--verbose"

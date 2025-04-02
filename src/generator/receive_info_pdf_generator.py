@@ -1,234 +1,165 @@
+import io
+import threading
+import time
+from pathlib import Path
 from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-import io
-from typing import List
-import threading
-import time
 from .data_generator import DataGenerator
 from objects import FleatMarket, Seller
 from log import logger
-from pathlib import Path
+from progress_bar import ProgressBar  # Vorausgesetzt, diese Klasse existiert bereits
 
 class ReceiveInfoPdfGenerator(DataGenerator):
     """
-        A class to generate PDF documents with seller information and main numbers for a flea market.
-        Attributes:
-            COORDINATES (list): Coordinates for placing text on the PDF.
-            template_pdf (str): Path to the input PDF template.
-            output_pdf (str): Path to the output PDF.
-            permission_error (bool): Flag to indicate if there was a permission error.
-        Methods:
-            __init__(fleat_market_data, path, pdf_template_path_input, pdf_template_path_output):
-                Initializes the ReceiveInfoPdfGenerator with flea market data and paths for input and output PDFs.
-            add_text_to_pdf(template_pdf, namen_und_stammnummern, output_pdf, progress):
-                Adds text to the PDF template and saves the output PDF.
-            thread_function(template_pdf, namen_und_stammnummern, output_pdf, progress):
-                Thread function to call add_text_to_pdf.
-            print_progress_bar(percentage, length=50):
-            generate():
-                Generates the PDF documents with seller information and main numbers.
-            write():
-                Placeholder method for writing data.
+    Generiert PDF-Dokumente mit Verkäuferinformationen und Stammnummern für einen Flohmarkt.
+
+    Die Positionierung der Texte erfolgt anhand von Koordinaten, die direkt als Parameter übergeben werden.
+    Erwartetes Format der Koordinaten:
+        (x1, y1, x2, y2, x3, y3, font_size)
+    Hierbei werden drei x,y-Paare (für drei Textfelder) und ein Fontsize-Wert erwartet.
     """
-    
-    COORDINATES =  [
-        (100, -105, 310, -105),  # x1, y1 for name, x2, y2 for stammnummer
-        (507, -105, 712, -105),
-        (100, -360, 310, -360),
-        (507, -360, 712, -360)
-    ]
 
-
-    def __init__(self, fleat_market_data: FleatMarket, path: str = '', pdf_template_path_input: str = '', pdf_template_path_output: str = '') -> None:
+    def __init__(self, fleat_market_data: FleatMarket, path: str = '',
+                 pdf_template_path_input: str = '', pdf_template_path_output: str = '',
+                 coordinates: list = None) -> None:
         """
-        Initializes the ReceiveInfoPDFGenerator with the given flea market data and paths.
+        Initialisiert den PDF-Generator.
 
         Args:
-            fleat_market_data (FleatMarket): The data of the flea market.
-            path (str, optional): The path where the generated PDF will be saved. Defaults to ''.
-            pdf_template_path_input (str, optional): The path to the input PDF template. Defaults to ''.
-            pdf_template_path_output (str, optional): The path to the output PDF. Defaults to ''.
-
-        Attributes:
-            template_pdf (str): The path to the input PDF template.
-            output_pdf (str): The path to the output PDF.
-            permission_error (bool): Flag indicating if there was a permission error.
+            fleat_market_data (FleatMarket): Flohmarktdaten.
+            path (str, optional): Pfad, in dem die PDF gespeichert wird.
+            pdf_template_path_input (str, optional): Pfad zur Eingabe-PDF-Vorlage.
+            pdf_template_path_output (str, optional): Pfad zur Ausgabe-PDF.
+            coordinates (list, optional): Liste der Koordinaten, wobei jedes Element ein Tupel mit
+                7 Werten ist (3 x,y-Paare und ein Fontsize-Wert). Falls nicht angegeben, werden Standardwerte genutzt.
         """
-        DataGenerator.__init__(self,path, "")
+        super().__init__(path, "")
         self.__fleat_market_data = fleat_market_data
-         # Lese das Template PDF
         self.template_pdf = pdf_template_path_input
         self.output_pdf = pdf_template_path_output
         self.permission_error = False
 
-    def add_text_to_pdf(self, template_pdf, namen_und_stammnummern, output_pdf, progress):
+        # Falls keine Koordinaten übergeben werden, werden Standardwerte genutzt.
+        self.COORDINATES = coordinates if coordinates is not None else [
+            (100, -105, 310, -105, 520, -105, 15),
+            (507, -105, 712, -105, 917, -105, 15),
+            (100, -360, 310, -360, 520, -360, 15),
+            (507, -360, 712, -360, 917, -360, 15)
+        ]
+
+    def _generate_seller_data(self) -> list:
         """
-        Adds text to a PDF template and generates a new PDF with the provided names and stammnummern.
-        Args:
-            template_pdf (str): Path to the template PDF file.
-            namen_und_stammnummern (list of tuples): List of tuples containing names and stammnummern.
-            output_pdf (str): Path where the output PDF will be saved.
-            progress (dict): Dictionary to track the progress of the PDF generation. 
-                             It should contain 'lock' (threading.Lock), 'current' (int), 
-                             'percentage' (int), and 'error' (bool) keys.
-        Raises:
-            PermissionError: If the output PDF file cannot be written due to permission issues.
+        Generiert eine Liste von Tupeln (Name, Stammnummer, Zusatzinfo) basierend auf den Flohmarktdaten.
+        Die Zusatzinfo wird hier als leerer String eingesetzt.
         """
-        # Initialize the PDF writer
+        data = []
+        for index, main_number_data in enumerate(self.__fleat_market_data.get_main_number_data_list()):
+            if main_number_data.is_valid():
+                main_number = main_number_data.get_main_number()
+                seller = self.__fleat_market_data.get_seller_data(index)
+                # Reihenfolge: Nachname, Vorname, Stammnummer, Zusatzinfo
+                data.append((f'{seller.nachname} {seller.vorname}', main_number, ""))
+        return data
+
+    def _create_overlay_page(self, group: list) -> object:
+        """
+        Erstellt eine Overlay-Seite mit den Textinformationen für eine Gruppe von Einträgen.
+        Für jeden Eintrag werden drei Textfelder anhand der übergebenen Koordinaten positioniert.
+        """
+        packet = io.BytesIO()
+        can = canvas.Canvas(packet, pagesize=letter)
+        can.rotate(90)
+        can.setFillColor(colors.black)
+
+        for idx, (field1, field2, field3) in enumerate(group):
+            try:
+                # Erwartet wird ein Tupel mit 7 Werten: x1, y1, x2, y2, x3, y3, font_size
+                x1, y1, x2, y2, x3, y3, font_size = self.COORDINATES[idx]
+            except (ValueError, IndexError):
+                # Fallback-Werte, falls die Koordinaten nicht korrekt übergeben wurden
+                x1, y1, x2, y2, x3, y3, font_size = 0, 0, 0, 0, 0, 0, 15
+            can.setFont("Helvetica-Bold", font_size)
+            can.drawString(x1, y1, f"{field1}")
+            can.drawString(x2, y2, f"{field2}")
+            can.drawString(x3, y3, f"{field3}")
+
+        can.save()
+        packet.seek(0)
+        new_pdf = PdfReader(packet)
+        return new_pdf.pages[0]
+
+    def _write_pdf(self, writer: PdfWriter, output_pdf: str) -> bool:
+        """
+        Schreibt das PDF in die Ausgabedatei.
+        Gibt True zurück, wenn erfolgreich, sonst False.
+        """
+        output_path = Path(self.path).joinpath(output_pdf)
+        try:
+            with open(output_path, "wb") as output:
+                writer.write(output)
+            return True
+        except PermissionError as e:
+            logger.error("\n\n>> PDF konnte nicht erstellt werden. Bitte prüfen, ob die PDF geschlossen ist.\n" +
+                         f">> {str(e)}")
+            return False
+
+    def add_text_to_pdf(self, template_pdf: str, data: list, output_pdf: str, progress: dict):
+        """
+        Erstellt neue PDF-Seiten, indem ein Template geladen, mit Overlay-Informationen versehen
+        und anschließend zusammengeführt wird.
+        """
         writer = PdfWriter()
-        total_entries = len(namen_und_stammnummern)
-        total_groups = (total_entries + 3) // 4  # Number of pages to be created
+        total_entries = len(data)
+        total_groups = (total_entries + 3) // 4  # jeweils 4 Einträge pro Seite
 
         for i in range(0, total_entries, 4):
-            group = namen_und_stammnummern[i:i+4]
-
-            # Read the template page anew for each group
+            group = data[i:i+4]
             reader = PdfReader(template_pdf)
-            page = reader.pages[0]
-
-            # Create a new canvas for the text overlay
-            packet = io.BytesIO()
-            can = canvas.Canvas(packet, pagesize=letter)
-
-            # Rotate the canvas if needed
-            can.rotate(90)
-
-            # Set font, color, etc.
-            can.setFont("Helvetica-Bold", 15)
-            can.setFillColor(colors.black)
-
-            for idx, (name, stammnummer) in enumerate(group):
-                x1, y1, x2, y2 = self.COORDINATES[idx]
-                can.drawString(x1, y1, f"{name}")
-                can.drawString(x2, y2, f"{stammnummer}")
-
-            can.save()
-
-            # Move to the beginning of the BytesIO buffer
-            packet.seek(0)
-            new_pdf = PdfReader(packet)
-            overlay_page = new_pdf.pages[0]
-
-            # Merge the overlay with the page
-            page.merge_page(overlay_page)
-
-            # Add the page to the writer
-            writer.add_page(page)
-
-            # Update progress
+            template_page = reader.pages[0]
+            overlay_page = self._create_overlay_page(group)
+            template_page.merge_page(overlay_page)
+            writer.add_page(template_page)
             with progress['lock']:
                 progress['current'] += 1
                 progress['percentage'] = int((progress['current'] / total_groups) * 100)
 
-        # Save the new PDF
-        self.output_pdf = Path(self.path).joinpath(output_pdf)    
-        try:
-            with open(output_pdf, "wb") as output:
-                writer.write(output)
-        except PermissionError as e: 
-            logger.error("\n\n>> PDF konnte nich erstellt werden. Bitte Prüfen ob PDF geschlossen ist. \n" +
-                         f">> {str(e)}")
+        if not self._write_pdf(writer, output_pdf):
             progress['error'] = True
-            
-
-    def thread_function(self, template_pdf, namen_und_stammnummern, output_pdf, progress):
-        """
-        Processes a PDF template by adding text to it and generates an output PDF.
-
-        Args:
-            template_pdf (str): Path to the template PDF file.
-            namen_und_stammnummern (dict): Dictionary containing names and corresponding IDs.
-            output_pdf (str): Path where the output PDF will be saved.
-            progress (callable): A callback function to report progress.
-
-        Returns:
-            None
-        """
-        self.add_text_to_pdf(template_pdf, namen_und_stammnummern, output_pdf, progress)
-
-    def print_progress_bar(self,percentage, length=50):
-        """
-        Prints a progress bar to the console.
-
-        Args:
-            percentage (int): The current progress as a percentage (0-100).
-            length (int, optional): The total length of the progress bar. Defaults to 50.
-
-        Example:
-            print_progress_bar(75)
-            >> Progress: |###################################-----------------| 75% Complete
-        """
-        filled_length = int(length * percentage // 100)
-        bar = '#' * filled_length + '-' * (length - filled_length)
-        print(f'\r>> Progress: |{bar}| {percentage}% Complete', end='')
-
 
     def generate(self):
         """
-        Generates the pickup confirmation PDFs for the flea market.
-        This method performs the following steps:
-        1. Logs the start of the generation process.
-        2. Checks if the template PDF file exists.
-        3. Logs the creation of seller data and main numbers.
-        4. Collects valid seller data and main numbers.
-        5. Initializes a progress dictionary to track the generation progress.
-        6. Starts a separate thread to generate the PDFs.
-        7. Monitors the progress of the PDF generation in the main thread.
-        8. Prints the progress bar in the console.
-        9. Logs the completion or failure of the PDF generation.
-        Raises:
-            FileNotFoundError: If the template PDF file does not exist.
+        Hauptmethode zum Erzeugen der PDF-Dokumente:
+          - Prüft, ob das Template existiert.
+          - Generiert die Verkäuferdaten.
+          - Nutzt die erweiterte ProgressBar-Klasse, um die PDF-Erzeugung in einem separaten Thread
+            auszuführen und den Fortschritt automatisch anzuzeigen.
         """
-               
-        data = []
-        logger.info("Generiere Abholungsbestätigung:\n" +
-                    "      ========================")
+        logger.info("Generiere Abholungsbestätigung:\n========================")
         template_file = Path(self.template_pdf)
-        if template_file.is_file():
-            logger.info(">> Template gefunden\n\n")
+        if not template_file.is_file():
+            logger.error(f">> Das PDF Template {self.template_pdf} konnte nicht gefunden werden. " +
+                         "Bitte Template hinzufügen und erneut ausführen")
+            return
 
+        logger.info(">> Template gefunden\n")
+        logger.info(">> Erstelle Verkäuferdaten und Stammnummern\n")
+        seller_data = self._generate_seller_data()
 
-            logger.info(">> Erstelle Verkäuferdaten und Stammnummern\n")
-            for index, main_number_data in enumerate(self.__fleat_market_data.get_main_number_data_list()):
-                #slogger.log_one_line("INFO",True)
-                if main_number_data.is_valid():
-                    main_number =  main_number_data.get_main_number()
-                    first_name = self.__fleat_market_data.get_seller_data(index).vorname
-                    second_name = self.__fleat_market_data.get_seller_data(index).nachname
-                    data.append((f'{second_name} {first_name}',main_number))
+        progress_bar = ProgressBar(length=50, update_interval=0.1)
 
-            progress = {
-                'lock': threading.Lock(),
-                'current': 0,
-                'percentage': 0,
-                'error' : False
-            }
-            logger.info(">> Starte generierung der Abholbestätigungen\n\n")
-            # Create and start the thread
-            thread = threading.Thread(target=self.thread_function, args=(self.template_pdf, data, self.output_pdf, progress))
-            thread.start()
+        logger.info(">> Starte Generierung der Abholbestätigungen\n")
+        # Über die ProgressBar wird add_text_to_pdf in einem eigenen Thread ausgeführt
+        error = progress_bar.run_with_progress(
+            target=self.add_text_to_pdf,
+            args=(self.template_pdf, seller_data, self.output_pdf)
+        )
 
-            # Main thread: monitor progress
-            while thread.is_alive():
-                with progress['lock']:
-                    percentage = progress['percentage']
-                # Print ASCII progress bar
-                self.print_progress_bar(percentage)
-                time.sleep(0.1)
-
-            if progress['error'] == False:
-                # Ensure the final progress is 100%
-                self.print_progress_bar(100)
-                
-                print(f"\n\n>> Abholbestätigungen erstellt! {Path(self.output_pdf).resolve(strict=False)} <<\n\n")
-            else:
-                print(f"\n\n>> Abholbestätigungen fehlgeschlagen! <<\n\n")
-        
+        if not error:
+            print(f"\n\n>> Abholbestätigungen erstellt! {Path(self.output_pdf).resolve(strict=False)} <<\n")
         else:
-            logger.error(f">> Das PDF Template {self.template_pdf} konnte nicht gefunden werden." + 
-                          ">> Bitte Template hinzufügen und erneut ausführen")
+            print("\n\n>> Abholbestätigungen fehlgeschlagen! <<\n")
 
     def write(self):
         pass
