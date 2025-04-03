@@ -18,12 +18,10 @@ from .base_ui import BaseUi
 class DraggableBox(QGraphicsRectItem):
     def __init__(self, rect: QRectF, label="", parent=None):
         super().__init__(rect, parent)
-        self.setFlags(
-            QGraphicsItem.ItemIsMovable |
-            QGraphicsItem.ItemIsSelectable |
-            QGraphicsItem.ItemSendsGeometryChanges |
-            QGraphicsItem.ItemIsFocusable
-        )
+        self.setFlags(QGraphicsItem.ItemIsMovable |
+                      QGraphicsItem.ItemIsSelectable |
+                      QGraphicsItem.ItemSendsGeometryChanges |
+                      QGraphicsItem.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
         self.setPen(QPen(Qt.black, 2))  # Standard-Pen (wird ggf. überschrieben)
         self.setBrush(QBrush(Qt.transparent))
@@ -198,6 +196,7 @@ class SingleBox(DraggableBox):
             SingleBox._free_ids.append(self.id)
 
 
+
 class PdfDisplay(BaseUi):
 
     on_exit_button_clicked: Signal = None
@@ -208,7 +207,7 @@ class PdfDisplay(BaseUi):
         self.ui = PdfDisplayUi()
         self.ui.setupUi(self)
         
-        # Zugriff auf Widgets (die Namen entsprechen denen in der .ui-Datei)
+         # Zugriff auf Widgets (Namen gemäß .ui-Datei)
         self.graphicsView = self.ui.graphicsView
         self.btnLoadPDF = self.ui.btnLoadPDF
         self.btnAddBoxPair = self.ui.btnAddBoxPair
@@ -219,10 +218,13 @@ class PdfDisplay(BaseUi):
         self.btnSave = self.ui.btnSave
         self.btnLoad = self.ui.btnLoad
         self.listBoxPairs = self.ui.listBoxPairs
-        
-        self.on_exit_button_clicked = self.ui.btnClosePDF.clicked
+        # Neue LineEdits zur Anzeige der Box Eigenschaften
+        self.lineEditX = self.ui.lineEditX
+        self.lineEditY = self.ui.lineEditY
+        self.lineEditWidth = self.ui.lineEditWidth
+        self.lineEditHeight = self.ui.lineEditHeight
 
-        # Signale verbinden
+        self.on_exit_button_clicked = self.ui.btnClosePDF.clicked
         self.btnLoadPDF.clicked.connect(self.load_pdf)
         self.btnAddBoxPair.clicked.connect(self.add_box_pair)
         self.btnRemoveBoxPair.clicked.connect(self.remove_selected_item)
@@ -231,19 +233,25 @@ class PdfDisplay(BaseUi):
         self.btnAddSingleBox.clicked.connect(self.add_single_box)
         self.btnSave.clicked.connect(self.save_state)
         self.btnLoad.clicked.connect(self.load_state)
-        
+        # Aktualisiere die Eigenschaftenanzeige, wenn sich die Box-Auswahl ändert
+        self.graphicsView.scene().selectionChanged.connect(self.on_scene_selection_changed)
+        # Verbinde die Bearbeitung der Eigenschaftenfelder
+        self.lineEditX.editingFinished.connect(self.on_box_properties_changed)
+        self.lineEditY.editingFinished.connect(self.on_box_properties_changed)
+        self.lineEditWidth.editingFinished.connect(self.on_box_properties_changed)
+        self.lineEditHeight.editingFinished.connect(self.on_box_properties_changed)
+
         self.scene = QGraphicsScene(self)
         self.graphicsView.setScene(self.scene)
         self.graphicsView.setRenderHint(QPainter.Antialiasing)
         self.pdfDocument = QPdfDocument(self)
         self.boxPairs = []
         self.singleBoxes = []
-        self.pdfPath = ""  # Speichert den zuletzt geladenen PDF-Pfad
+        self.pdfPath = ""
+        self.currentBox = None  # Referenz auf die aktuell ausgewählte Box
 
     def load_pdf(self):
-        fileName, _ = QFileDialog.getOpenFileName(
-            self, "PDF Datei öffnen", "", "PDF Dateien (*.pdf)"
-        )
+        fileName, _ = QFileDialog.getOpenFileName(self, "PDF Datei öffnen", "", "PDF Dateien (*.pdf)")
         if fileName:
             self.pdfPath = fileName
             status = self.pdfDocument.load(fileName)
@@ -267,7 +275,6 @@ class PdfDisplay(BaseUi):
         self.pdf_item.setFlag(QGraphicsItem.ItemIsSelectable, False)
         self.scene.addItem(self.pdf_item)
         self.scene.setSceneRect(pixmap.rect())
-        # Füge alle Boxen wieder hinzu
         for pair in self.boxPairs:
             self.scene.addItem(pair.box1)
             self.scene.addItem(pair.box2)
@@ -308,7 +315,7 @@ class PdfDisplay(BaseUi):
         self.graphicsView.scale(1.2, 1.2)
 
     def zoom_out(self):
-        self.graphicsView.scale(1 / 1.2, 1 / 1.2)
+        self.graphicsView.scale(1/1.2, 1/1.2)
 
     def save_state(self):
         data = {}
@@ -345,18 +352,14 @@ class PdfDisplay(BaseUi):
                 "height": single.rect().height()
             }
             data["singleBoxes"].append(single_data)
-        fileName, _ = QFileDialog.getSaveFileName(
-            self, "Datei speichern", "", "JSON Dateien (*.json)"
-        )
+        fileName, _ = QFileDialog.getSaveFileName(self, "Datei speichern", "", "JSON Dateien (*.json)")
         if fileName:
             with open(fileName, "w") as f:
                 json.dump(data, f, indent=4)
             print("Daten gespeichert.")
 
     def load_state(self):
-        fileName, _ = QFileDialog.getOpenFileName(
-            self, "Datei laden", "", "JSON Dateien (*.json)"
-        )
+        fileName, _ = QFileDialog.getOpenFileName(self, "Datei laden", "", "JSON Dateien (*.json)")
         if fileName:
             with open(fileName, "r") as f:
                 data = json.load(f)
@@ -414,11 +417,50 @@ class PdfDisplay(BaseUi):
             self.load_page(0)
             print("Daten geladen.")
 
+    def on_scene_selection_changed(self):
+        selected = self.scene.selectedItems()
+        if selected:
+            item = selected[0]
+            if isinstance(item, DraggableBox):
+                self.currentBox = item
+                pos = item.scenePos()
+                rect = item.rect()
+                self.lineEditX.setText(str(int(pos.x())))
+                self.lineEditY.setText(str(int(pos.y())))
+                self.lineEditWidth.setText(str(int(rect.width())))
+                self.lineEditHeight.setText(str(int(rect.height())))
+            else:
+                self.currentBox = None
+                self.clear_box_properties_ui()
+        else:
+            self.currentBox = None
+            self.clear_box_properties_ui()
+
+    def clear_box_properties_ui(self):
+        self.lineEditX.setText("")
+        self.lineEditY.setText("")
+        self.lineEditWidth.setText("")
+        self.lineEditHeight.setText("")
+
+    def on_box_properties_changed(self):
+        if self.currentBox:
+            try:
+                x = float(self.lineEditX.text())
+                y = float(self.lineEditY.text())
+                w = float(self.lineEditWidth.text())
+                h = float(self.lineEditHeight.text())
+            except ValueError:
+                return
+            self.currentBox.setPos(x, y)
+            self.currentBox.setRect(0, 0, w, h)
+            self.currentBox.updatePosText()
+
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Delete:
             self.remove_selected_item()
         else:
             super().keyPressEvent(event)
+
 
 
 if __name__ == '__main__':

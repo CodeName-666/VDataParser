@@ -15,15 +15,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QGraphicsView, QGroupBox, QHBoxLayout,
-    QListWidget, QListWidgetItem, QPushButton, QSizePolicy,
-    QSpacerItem, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QGraphicsView, QGridLayout, QGroupBox,
+    QHBoxLayout, QLabel, QLineEdit, QListWidget,
+    QListWidgetItem, QPushButton, QSizePolicy, QSpacerItem,
+    QVBoxLayout, QWidget)
 
 class Ui_PdfDisplayView(object):
     def setupUi(self, PdfDisplayView):
         if not PdfDisplayView.objectName():
             PdfDisplayView.setObjectName(u"PdfDisplayView")
-        PdfDisplayView.resize(997, 823)
+        PdfDisplayView.resize(1103, 681)
         self.horizontalLayout_5 = QHBoxLayout(PdfDisplayView)
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.verticalLayout_3 = QVBoxLayout()
@@ -153,6 +154,53 @@ class Ui_PdfDisplayView(object):
 
         self.verticalLayout_2.addWidget(self.groupBox)
 
+        self.groupBoxProperties = QGroupBox(PdfDisplayView)
+        self.groupBoxProperties.setObjectName(u"groupBoxProperties")
+        self.gridLayout = QGridLayout(self.groupBoxProperties)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.labelX = QLabel(self.groupBoxProperties)
+        self.labelX.setObjectName(u"labelX")
+
+        self.gridLayout.addWidget(self.labelX, 0, 0, 1, 1)
+
+        self.lineEditX = QLineEdit(self.groupBoxProperties)
+        self.lineEditX.setObjectName(u"lineEditX")
+
+        self.gridLayout.addWidget(self.lineEditX, 0, 1, 1, 1)
+
+        self.labelY = QLabel(self.groupBoxProperties)
+        self.labelY.setObjectName(u"labelY")
+
+        self.gridLayout.addWidget(self.labelY, 0, 2, 1, 1)
+
+        self.lineEditY = QLineEdit(self.groupBoxProperties)
+        self.lineEditY.setObjectName(u"lineEditY")
+
+        self.gridLayout.addWidget(self.lineEditY, 0, 3, 1, 2)
+
+        self.labelWidth = QLabel(self.groupBoxProperties)
+        self.labelWidth.setObjectName(u"labelWidth")
+
+        self.gridLayout.addWidget(self.labelWidth, 1, 0, 1, 1)
+
+        self.lineEditWidth = QLineEdit(self.groupBoxProperties)
+        self.lineEditWidth.setObjectName(u"lineEditWidth")
+
+        self.gridLayout.addWidget(self.lineEditWidth, 1, 1, 1, 1)
+
+        self.labelHeight = QLabel(self.groupBoxProperties)
+        self.labelHeight.setObjectName(u"labelHeight")
+
+        self.gridLayout.addWidget(self.labelHeight, 1, 2, 1, 2)
+
+        self.lineEditHeight = QLineEdit(self.groupBoxProperties)
+        self.lineEditHeight.setObjectName(u"lineEditHeight")
+
+        self.gridLayout.addWidget(self.lineEditHeight, 1, 4, 1, 1)
+
+
+        self.verticalLayout_2.addWidget(self.groupBoxProperties)
+
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout_2.addItem(self.verticalSpacer)
@@ -187,6 +235,11 @@ class Ui_PdfDisplayView(object):
         self.btnAddBoxPair.setText(QCoreApplication.translate("PdfDisplayView", u"+ 2", None))
         self.btnAddSingleBox.setText(QCoreApplication.translate("PdfDisplayView", u" + 1", None))
         self.btnRemoveBoxPair.setText(QCoreApplication.translate("PdfDisplayView", u"-", None))
+        self.groupBoxProperties.setTitle(QCoreApplication.translate("PdfDisplayView", u"Box Eigenschaften", None))
+        self.labelX.setText(QCoreApplication.translate("PdfDisplayView", u"X:", None))
+        self.labelY.setText(QCoreApplication.translate("PdfDisplayView", u"Y:", None))
+        self.labelWidth.setText(QCoreApplication.translate("PdfDisplayView", u"Width:", None))
+        self.labelHeight.setText(QCoreApplication.translate("PdfDisplayView", u"Height:", None))
         self.btnClosePDF.setText(QCoreApplication.translate("PdfDisplayView", u"Schlie\u00dfen", None))
     # retranslateUi
 
