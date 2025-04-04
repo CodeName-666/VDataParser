@@ -123,6 +123,10 @@ class DraggableBox(QGraphicsRectItem):
             self.setRect(finalRect)
             self.setPos(newPos)
             self.updatePosText()
+            # Wenn die Box über die Maus verschoben oder in der Größe geändert wurde,
+            # und wenn ein main_window-Attribut gesetzt wurde, dann aktualisiere die UI.
+            if hasattr(self, 'main_window'):
+                self.main_window.update_box_properties_from_item(self)
             event.accept()
         else:
             super().mouseMoveEvent(event)
@@ -137,6 +141,8 @@ class DraggableBox(QGraphicsRectItem):
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionHasChanged:
             self.updatePosText()
+            if hasattr(self, 'main_window'):
+                self.main_window.update_box_properties_from_item(self)
         return super().itemChange(change, value)
 
 
@@ -196,7 +202,6 @@ class SingleBox(DraggableBox):
             SingleBox._free_ids.append(self.id)
 
 
-
 class PdfDisplay(BaseUi):
 
     on_exit_button_clicked: Signal = None
@@ -207,7 +212,7 @@ class PdfDisplay(BaseUi):
         self.ui = PdfDisplayUi()
         self.ui.setupUi(self)
         
-         # Zugriff auf Widgets (Namen gemäß .ui-Datei)
+        # Zugriff auf Widgets (Namen gemäß .ui-Datei)
         self.graphicsView = self.ui.graphicsView
         self.btnLoadPDF = self.ui.btnLoadPDF
         self.btnAddBoxPair = self.ui.btnAddBoxPair
@@ -225,6 +230,15 @@ class PdfDisplay(BaseUi):
         self.lineEditHeight = self.ui.lineEditHeight
 
         self.on_exit_button_clicked = self.ui.btnClosePDF.clicked
+
+        # Erstelle die Szene und weise sie der GraphicsView zu
+        self.scene = QGraphicsScene(self)
+        self.graphicsView.setScene(self.scene)
+        self.graphicsView.setRenderHint(QPainter.Antialiasing)
+        # Verbinde das Signal der Szene (sofern sich die Auswahl ändert)
+        self.scene.selectionChanged.connect(self.on_scene_selection_changed)
+
+        # Verbinde die restlichen Signale
         self.btnLoadPDF.clicked.connect(self.load_pdf)
         self.btnAddBoxPair.clicked.connect(self.add_box_pair)
         self.btnRemoveBoxPair.clicked.connect(self.remove_selected_item)
@@ -233,22 +247,16 @@ class PdfDisplay(BaseUi):
         self.btnAddSingleBox.clicked.connect(self.add_single_box)
         self.btnSave.clicked.connect(self.save_state)
         self.btnLoad.clicked.connect(self.load_state)
-        # Aktualisiere die Eigenschaftenanzeige, wenn sich die Box-Auswahl ändert
-        self.graphicsView.scene().selectionChanged.connect(self.on_scene_selection_changed)
-        # Verbinde die Bearbeitung der Eigenschaftenfelder
         self.lineEditX.editingFinished.connect(self.on_box_properties_changed)
         self.lineEditY.editingFinished.connect(self.on_box_properties_changed)
         self.lineEditWidth.editingFinished.connect(self.on_box_properties_changed)
         self.lineEditHeight.editingFinished.connect(self.on_box_properties_changed)
 
-        self.scene = QGraphicsScene(self)
-        self.graphicsView.setScene(self.scene)
-        self.graphicsView.setRenderHint(QPainter.Antialiasing)
         self.pdfDocument = QPdfDocument(self)
         self.boxPairs = []
         self.singleBoxes = []
         self.pdfPath = ""
-        self.currentBox = None  # Referenz auf die aktuell ausgewählte Box
+        self.currentBox = None  # Aktuell ausgewählte Box
 
     def load_pdf(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "PDF Datei öffnen", "", "PDF Dateien (*.pdf)")
@@ -423,18 +431,23 @@ class PdfDisplay(BaseUi):
             item = selected[0]
             if isinstance(item, DraggableBox):
                 self.currentBox = item
-                pos = item.scenePos()
-                rect = item.rect()
-                self.lineEditX.setText(str(int(pos.x())))
-                self.lineEditY.setText(str(int(pos.y())))
-                self.lineEditWidth.setText(str(int(rect.width())))
-                self.lineEditHeight.setText(str(int(rect.height())))
+                # Setze den Rückverweis zum MainWindow, damit das Item bei Mausbewegungen die UI aktualisieren kann
+                item.main_window = self
+                self.update_box_properties_from_item(item)
             else:
                 self.currentBox = None
                 self.clear_box_properties_ui()
         else:
             self.currentBox = None
             self.clear_box_properties_ui()
+
+    def update_box_properties_from_item(self, item):
+        pos = item.scenePos()
+        rect = item.rect()
+        self.lineEditX.setText(str(int(pos.x())))
+        self.lineEditY.setText(str(int(pos.y())))
+        self.lineEditWidth.setText(str(int(rect.width())))
+        self.lineEditHeight.setText(str(int(rect.height())))
 
     def clear_box_properties_ui(self):
         self.lineEditX.setText("")
@@ -460,7 +473,6 @@ class PdfDisplay(BaseUi):
             self.remove_selected_item()
         else:
             super().keyPressEvent(event)
-
 
 
 if __name__ == '__main__':
