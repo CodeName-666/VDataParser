@@ -157,7 +157,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>+ 2</string>
+             <string>Name &amp;&amp; Nummer</string>
             </property>
            </widget>
           </item>
@@ -170,7 +170,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string> + 1</string>
+             <string>Datum</string>
             </property>
            </widget>
           </item>
@@ -183,7 +183,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>-</string>
+             <string>Löschen</string>
             </property>
            </widget>
           </item>
@@ -206,17 +206,21 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLineEdit" name="lineEditX"/>
+         <widget class="QLineEdit" name="lineEditX">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
         <item row="0" column="2">
          <widget class="QLabel" name="labelY">
           <property name="text">
-           <string>Y:</string>
+           <string>Y: </string>
           </property>
          </widget>
-        </item>
-        <item row="0" column="3" colspan="2">
-         <widget class="QLineEdit" name="lineEditY"/>
         </item>
         <item row="1" column="0">
          <widget class="QLabel" name="labelWidth">
@@ -226,7 +230,14 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLineEdit" name="lineEditWidth"/>
+         <widget class="QLineEdit" name="lineEditWidth">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
         <item row="1" column="2" colspan="2">
          <widget class="QLabel" name="labelHeight">
@@ -236,7 +247,24 @@
          </widget>
         </item>
         <item row="1" column="4">
-         <widget class="QLineEdit" name="lineEditHeight"/>
+         <widget class="QLineEdit" name="lineEditHeight">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLineEdit" name="lineEditY">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

@@ -165,6 +165,8 @@ class Ui_PdfDisplayView(object):
 
         self.lineEditX = QLineEdit(self.groupBoxProperties)
         self.lineEditX.setObjectName(u"lineEditX")
+        sizePolicy.setHeightForWidth(self.lineEditX.sizePolicy().hasHeightForWidth())
+        self.lineEditX.setSizePolicy(sizePolicy)
 
         self.gridLayout.addWidget(self.lineEditX, 0, 1, 1, 1)
 
@@ -173,11 +175,6 @@ class Ui_PdfDisplayView(object):
 
         self.gridLayout.addWidget(self.labelY, 0, 2, 1, 1)
 
-        self.lineEditY = QLineEdit(self.groupBoxProperties)
-        self.lineEditY.setObjectName(u"lineEditY")
-
-        self.gridLayout.addWidget(self.lineEditY, 0, 3, 1, 2)
-
         self.labelWidth = QLabel(self.groupBoxProperties)
         self.labelWidth.setObjectName(u"labelWidth")
 
@@ -185,6 +182,8 @@ class Ui_PdfDisplayView(object):
 
         self.lineEditWidth = QLineEdit(self.groupBoxProperties)
         self.lineEditWidth.setObjectName(u"lineEditWidth")
+        sizePolicy.setHeightForWidth(self.lineEditWidth.sizePolicy().hasHeightForWidth())
+        self.lineEditWidth.setSizePolicy(sizePolicy)
 
         self.gridLayout.addWidget(self.lineEditWidth, 1, 1, 1, 1)
 
@@ -195,8 +194,17 @@ class Ui_PdfDisplayView(object):
 
         self.lineEditHeight = QLineEdit(self.groupBoxProperties)
         self.lineEditHeight.setObjectName(u"lineEditHeight")
+        sizePolicy.setHeightForWidth(self.lineEditHeight.sizePolicy().hasHeightForWidth())
+        self.lineEditHeight.setSizePolicy(sizePolicy)
 
         self.gridLayout.addWidget(self.lineEditHeight, 1, 4, 1, 1)
+
+        self.lineEditY = QLineEdit(self.groupBoxProperties)
+        self.lineEditY.setObjectName(u"lineEditY")
+        sizePolicy.setHeightForWidth(self.lineEditY.sizePolicy().hasHeightForWidth())
+        self.lineEditY.setSizePolicy(sizePolicy)
+
+        self.gridLayout.addWidget(self.lineEditY, 0, 4, 1, 1)
 
 
         self.verticalLayout_2.addWidget(self.groupBoxProperties)
@@ -232,12 +240,12 @@ class Ui_PdfDisplayView(object):
         self.btnSave.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern", None))
         self.btnLoad.setText(QCoreApplication.translate("PdfDisplayView", u"Laden", None))
         self.groupBox.setTitle(QCoreApplication.translate("PdfDisplayView", u"Name und Stammnummer:", None))
-        self.btnAddBoxPair.setText(QCoreApplication.translate("PdfDisplayView", u"+ 2", None))
-        self.btnAddSingleBox.setText(QCoreApplication.translate("PdfDisplayView", u" + 1", None))
-        self.btnRemoveBoxPair.setText(QCoreApplication.translate("PdfDisplayView", u"-", None))
+        self.btnAddBoxPair.setText(QCoreApplication.translate("PdfDisplayView", u"Name && Nummer", None))
+        self.btnAddSingleBox.setText(QCoreApplication.translate("PdfDisplayView", u"Datum", None))
+        self.btnRemoveBoxPair.setText(QCoreApplication.translate("PdfDisplayView", u"L\u00f6schen", None))
         self.groupBoxProperties.setTitle(QCoreApplication.translate("PdfDisplayView", u"Box Eigenschaften", None))
         self.labelX.setText(QCoreApplication.translate("PdfDisplayView", u"X:", None))
-        self.labelY.setText(QCoreApplication.translate("PdfDisplayView", u"Y:", None))
+        self.labelY.setText(QCoreApplication.translate("PdfDisplayView", u"Y: ", None))
         self.labelWidth.setText(QCoreApplication.translate("PdfDisplayView", u"Width:", None))
         self.labelHeight.setText(QCoreApplication.translate("PdfDisplayView", u"Height:", None))
         self.btnClosePDF.setText(QCoreApplication.translate("PdfDisplayView", u"Schlie\u00dfen", None))

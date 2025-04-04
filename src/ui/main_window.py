@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
         self.main_menu.on_export_button_clicked.connect(self.open_local_export)
         self.main_menu.on_open_market_button_clicked.connect(self.open_market_view)
 
-        self.pdf_display.on_exit_button_clicked.connect(self.switch_to_last_view)
+        self.pdf_display.exit_requested.connect(self.switch_to_last_view)
         
         self.ui.action_tool.triggered.connect(self.open_about_ui)
 
