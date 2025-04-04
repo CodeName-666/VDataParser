@@ -238,20 +238,17 @@ class DraggableBox(QGraphicsRectItem):
              super().mouseReleaseEvent(event)
 
     def itemChange(self, change, value):
-        """Called by Qt when specific item properties change."""
-        # Called after setPos() or setRect()
         if change == QGraphicsItem.ItemPositionHasChanged and self.scene():
-             # Check if scene exists to avoid issues during deletion
             self.updatePosText()
-            # Emit signal only if move was likely user-initiated (not during resize)
             if not self._resizing:
-                 self.geometryChangedByUser.emit()
-        elif change == QGraphicsItem.ItemRectHasChanged and self.scene():
-             self.updatePosText()
-             # Note: ItemRectHasChanged is not standard, ItemGeometryChange is more common
-             # We rely on emitting the signal in mouseMoveEvent for resize changes
-
+                self.geometryChangedByUser.emit()
+        # Den folgenden Block entfernen oder auskommentieren,
+        # da ItemRectHasChanged in PySide6 nicht verfügbar ist:
+        # elif change == QGraphicsItem.ItemRectHasChanged and self.scene():
+        #     self.updatePosText()
+        
         return super().itemChange(change, value)
+
 
 
 class BoxPair:
@@ -357,16 +354,14 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         self.ui.btnLoad.clicked.connect(self.load_state)
         self.ui.btnClosePDF.clicked.connect(self.exit_requested.emit) # Emit custom signal
         self.ui.btnClosePDF.clicked.connect(self.close) # Also close the window directly
+        
+        self.scene.selectionChanged.connect(self.on_scene_selection_changed)
+        self.ui.listBoxPairs.itemSelectionChanged.connect(self.on_list_selection_changed)
 
-        self.scene.selectionChanged.connect(self.handle_scene_selection_change) # Renamed
-        self.ui.listBoxPairs.itemSelectionChanged.connect(self.handle_list_selection_change) # Renamed
-        self.ui.lineEditX.editingFinished.connect(self.handle_box_properties_change) # Renamed
-        self.ui.lineEditY.editingFinished.connect(self.handle_box_properties_change) # Renamed
-        self.ui.lineEditWidth.editingFinished.connect(self.handle_box_properties_change) # Renamed
-        self.ui.lineEditHeight.editingFinished.connect(self.handle_box_properties_change) # Renamed
-
-
-       
+        self.ui.lineEditX.editingFinished.connect(self.on_box_properties_changed) # Renamed
+        self.ui.lineEditY.editingFinished.connect(self.on_box_properties_changed) # Renamed
+        self.ui.lineEditWidth.editingFinished.connect(self.on_box_properties_changed) # Renamed
+        self.ui.lineEditHeight.editingFinished.connect(self.on_box_properties_changed) # Renamed       
 
     # --- PDF Handling ---
     @Slot()
