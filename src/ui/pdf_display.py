@@ -269,20 +269,43 @@ class PdfDisplay(BaseUi):
                 print("Fehler beim Laden der PDF.")
 
     def load_page(self, page: int):
+        # Erhalte die Seitengröße in Punkten
         pageSizeF = self.pdfDocument.pagePointSize(page)
-        pageSize = pageSizeF.toSize()
-        image = self.pdfDocument.render(page, pageSize)
+        
+        # Ermittle den DPI-Wert des zugehörigen Bildschirms
+        screen = self.graphicsView.screen()
+        if screen:
+            dpi = screen.logicalDotsPerInch()
+        else:
+            dpi = 72  # Fallback-Wert, falls kein Bildschirm verfügbar ist
+        scaleFactor = dpi / 72.0  # Skalierungsfaktor: 1 PDF-Punkt entspricht 1/72 Zoll
+
+        # Berechne die Zielgröße in Pixeln für das Rendering der PDF-Seite
+        targetSizeF = pageSizeF * scaleFactor
+        targetSize = targetSizeF.toSize()
+
+        # Render die Seite in der berechneten Pixelgröße
+        image = self.pdfDocument.render(page, targetSize)
         if image.isNull():
             print("Fehler beim Rendern der Seite.")
             return
+
+        # Konvertiere das gerenderte Bild in ein Pixmap-Objekt
         pixmap = QPixmap.fromImage(image)
-        # Entferne nur das alte PDF-Item, nicht die Boxen
+        # Setze die devicePixelRatio, sodass der Pixmap in der Szene die originale Seitengröße (in Punkten) hat
+        pixmap.setDevicePixelRatio(scaleFactor)
+
+        # Entferne das alte PDF-Item (ohne die Boxen zu entfernen)
         if hasattr(self, "pdf_item") and self.pdf_item is not None:
             self.scene.removeItem(self.pdf_item)
         self.pdf_item = QGraphicsPixmapItem(pixmap)
         self.pdf_item.setFlag(QGraphicsItem.ItemIsSelectable, False)
         self.scene.addItem(self.pdf_item)
-        self.scene.setSceneRect(pixmap.rect())
+
+        # Setze die Szene-Größe auf die logische Größe der PDF-Seite (in Punkten)
+        self.scene.setSceneRect(0, 0, pageSizeF.width(), pageSizeF.height())
+
+        # Füge alle bereits vorhandenen Boxen wieder der Szene hinzu
         for pair in self.boxPairs:
             self.scene.addItem(pair.box1)
             self.scene.addItem(pair.box2)
