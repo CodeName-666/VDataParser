@@ -1,15 +1,13 @@
 import sys
 from pathlib import Path
-from typing import Dict, List
-from .base_data import BaseData
-import uuid
-from dataclasses import asdict, dataclass
-from datetime import datetime
 from typing import Dict, List, Optional
 from copy import deepcopy
 import uuid
+from dataclasses import asdict, dataclass
+from datetime import datetime
 
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
+from .base_data import BaseData
 from .data_class_definition import MainNumberDataClass, SellerDataClass, ArticleDataClass
 
 @dataclass
@@ -20,41 +18,88 @@ class ChangeLogEntry:
     target: str
     description: str
 
-
 class DataManager(BaseData):
     """
-    DataManager erbt von BaseData und erweitert die Funktionalität,
-    indem er zusätzliche Aggregations-Logik implementiert.
+    DataManager inherits from BaseData and extends its functionality by implementing additional aggregation logic.
 
-    - Aggregiert Verkäufer (Seller) anhand ihrer E-Mail.
-    - Ordnet MainNumberDataClass-Instanzen (stnr‑Tabellen) den jeweiligen Verkäufern zu.
+    - Aggregates sellers based on their email addresses.
+    - Assigns MainNumberDataClass instances (stnr tables) to the respective sellers.
     """
 
     def __init__(self, json_file_path: str, error_handler=None) -> None:
-        # BaseData lädt und konvertiert die JSON-Daten in die entsprechenden Dataclasses.
+        """
+        Initializes the DataManager instance.
+
+        Args:
+            json_file_path (str): Path to the JSON data file.
+            error_handler (optional): Optional error handler callback.
+        """
+        # BaseData loads and converts JSON data into the corresponding dataclasses.
         super().__init__(json_file_path, error_handler)
         self._unsaved_changes: bool = False
         self._change_log: List[ChangeLogEntry] = []
 
-    def _aggregate_main_number_tables(self):
+    def convert_seller_to_dict(self, seller: SellerDataClass) -> dict:
         """
-        Aggregiert alle MainNumberDataClass-Instanzen, deren Name mit "stnr" beginnt,
-        in ein Dictionary.
+        Converts a SellerDataClass entry into a dictionary with required keys.
+
+        Args:
+            seller (SellerDataClass): A seller data entry.
+
+        Returns:
+            dict: Dictionary containing seller information.
+        """
+        return {
+            "vorname": seller.vorname,
+            "nachname": seller.nachname,
+            "telefon": seller.telefon,
+            "email": seller.email,
+            "created_at": seller.created_at,
+            "updated_at": seller.updated_at,
+            "id": seller.id
+        }
+
+    def convert_aggregated_user(self, email: str, data: dict) -> dict:
+        """
+        Converts an aggregated seller into the format expected by the UI.
+
+        Args:
+            email (str): The seller's email.
+            data (dict): Aggregated data containing "info" and "ids".
+
+        Returns:
+            dict: UI-friendly seller data.
+        """
+        seller = data["info"]
+        return {
+            "vorname": seller.vorname,
+            "nachname": seller.nachname,
+            "telefon": seller.telefon,
+            "email": seller.email,
+            "created_at": seller.created_at,
+            "updated_at": seller.updated_at,
+            "ids": data["ids"]
+        }
+
+    def _aggregate_main_number_tables(self) -> Dict[str, MainNumberDataClass]:
+        """
+        Aggregates all MainNumberDataClass instances whose names start with "stnr" into a dictionary.
+
+        Returns:
+            Dict[str, MainNumberDataClass]: Dictionary with table name as key and instance as value.
         """
         main_number_tables: Dict[str, MainNumberDataClass] = {}
         for main in self.main_numbers_list:
             if main.name.startswith("stnr"):
                 main_number_tables[main.name] = main
-
         return main_number_tables
 
-    def _aggregate_sellers(self):
+    def _aggregate_sellers(self) -> Dict[str, Dict]:
         """
-        Gruppiert die Verkäufer anhand ihrer E-Mail-Adresse.
+        Groups sellers based on their email address.
         
-        Es entsteht ein Dictionary, in dem der Schlüssel die E-Mail ist und
-        der Wert ein Dictionary mit "info" (SellerDataClass),
-        "ids" (Liste der Verkäufer-IDs) und "stamms" (später zugeordnete stnr‑Tabellen) enthält.
+        Returns:
+            Dict[str, Dict]: Dictionary with email as key and a dict containing "info", "ids", and "stamms" as value.
         """
         users: Dict[str, Dict] = {}
         for seller in self.get_seller_list():
@@ -66,16 +111,17 @@ class DataManager(BaseData):
                     users[key]["ids"].append(seller.id)
         return users
 
-    def _assign_main_numbers_to_sellers(self):
+    def _assign_main_numbers_to_sellers(self) -> Dict[str, Dict]:
         """
-        Ordnet die stnr‑Tabellen den Verkäufern zu, wenn die Nummer im Tabellennamen 
-        in der Liste der Verkäufer-IDs enthalten ist.
+        Assigns stnr tables to sellers if the number in the table name is in the seller's IDs.
+
+        Returns:
+            Dict[str, Dict]: Sellers dictionary with assigned stnr tables in "stamms".
         """
         sellers = self._aggregate_sellers()
-
         for main in self.main_numbers_list:
             if main.name.startswith("stnr"):
-                stnr_num = main.name[4:]  # z. B. "1" aus "stnr1"
+                stnr_num = main.name[4:]  # e.g. "1" from "stnr1"
                 for user in sellers.values():
                     if stnr_num in user["ids"]:
                         user["stamms"].append(main)
@@ -83,30 +129,50 @@ class DataManager(BaseData):
 
     def get_aggregated_users(self) -> Dict[str, Dict]:
         """
-        Gibt die aggregierten Benutzer zurück.
-        
-        Rückgabeformat:
-            {
-                "<email>": {
-                    "info": SellerDataClass,
-                    "ids": [Seller-ID, ...],
-                    "stamms": [MainNumberDataClass, ...]
-                },
-                ...
-            }
+        Returns the aggregated user information.
+
+        Returns:
+            Dict[str, Dict]: Aggregated users grouped by email with "info", "ids", and "stamms".
         """
         return self._assign_main_numbers_to_sellers()
 
     def get_main_number_tables(self) -> Dict[str, MainNumberDataClass]:
         """
-        Gibt die stnr‑Tabellen als Dictionary zurück.
-        
-        Schlüssel: Name der Tabelle (z. B. "stnr1")
+        Returns stnr tables as a dictionary.
+
+        Returns:
+            Dict[str, MainNumberDataClass]: Dictionary with table name (e.g., "stnr1") as key.
         """
         return self._aggregate_main_number_tables()
 
+    def get_users_data(self) -> List[dict]:
+        """
+        Returns seller data as a list of dictionaries (non-aggregated).
+
+        Returns:
+            List[dict]: List of seller dictionaries.
+        """
+        return [self.convert_seller_to_dict(seller) for seller in self.get_seller_list()]
+
+    def get_aggregated_users_data(self) -> List[dict]:
+        """
+        Returns aggregated seller data as a list of dictionaries.
+
+        Returns:
+            List[dict]: List of aggregated seller data dictionaries.
+        """
+        aggregated_dict = self.get_aggregated_users()
+        return [self.convert_aggregated_user(email, data) for email, data in aggregated_dict.items()]
 
     def _log_change(self, action: str, target: str, description: str):
+        """
+        Logs a change action for audit purposes.
+
+        Args:
+            action (str): The type of action performed.
+            target (str): The target of the action.
+            description (str): A description of the change.
+        """
         entry = ChangeLogEntry(
             id=str(uuid.uuid4()),
             timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -118,10 +184,25 @@ class DataManager(BaseData):
         self._unsaved_changes = True
 
     def update_article(self, stnr_id: str, artikelnummer: str, beschreibung: str, groesse: str, preis: str) -> Optional[ArticleDataClass]:
+        """
+        Updates an article within the given stnr table.
+
+        Args:
+            stnr_id (str): ID of the stnr table.
+            artikelnummer (str): Article number.
+            beschreibung (str): New description.
+            groesse (str): New size.
+            preis (str): New price.
+
+        Returns:
+            Optional[ArticleDataClass]: The updated ArticleDataClass instance.
+
+        Raises:
+            ValueError: If the stnr table or article is not found.
+        """
         table = self.get_main_number_tables().get(f"stnr{stnr_id}")
         if not table:
             raise ValueError(f"Keine Artikelliste für stnr{stnr_id} gefunden.")
-
         for article in table.data:
             if article.artikelnummer == artikelnummer:
                 old_values = (article.beschreibung, article.groesse, article.preis)
@@ -138,9 +219,31 @@ class DataManager(BaseData):
         raise ValueError(f"Artikelnummer {artikelnummer} nicht gefunden in stnr{stnr_id}.")
 
     def delete_article(self, stnr_id: str, artikelnummer: str):
+        """
+        Deletes an article by updating its properties to empty/default values.
+
+        Args:
+            stnr_id (str): ID of the stnr table.
+            artikelnummer (str): Article number to delete.
+
+        Returns:
+            Optional[ArticleDataClass]: The article after deletion.
+        """
         return self.update_article(stnr_id, artikelnummer, "", "0", "0.00")
 
     def delete_seller(self, seller_id: str):
+        """
+        Deletes a seller by clearing out their data.
+
+        Args:
+            seller_id (str): The ID of the seller to delete.
+
+        Returns:
+            SellerDataClass: The seller instance with cleared data.
+
+        Raises:
+            ValueError: If no seller with the given ID is found.
+        """
         for seller in self.get_seller_list():
             if seller.id == seller_id:
                 old_data = deepcopy(seller)
@@ -159,16 +262,26 @@ class DataManager(BaseData):
         raise ValueError(f"Verkäufer mit ID {seller_id} nicht gefunden.")
 
     def delete_article_list(self, stnr_id: str):
+        """
+        Deletes all articles in the specified stnr table by resetting their values.
+
+        Args:
+            stnr_id (str): ID of the stnr table.
+
+        Returns:
+            MainNumberDataClass: The stnr table after articles have been cleared.
+
+        Raises:
+            ValueError: If no stnr table with the given ID is found.
+        """
         table = self.get_main_number_tables().get(f"stnr{stnr_id}")
         if not table:
             raise ValueError(f"Keine Artikelliste für stnr{stnr_id} gefunden.")
-
         for article in table.data:
             article.beschreibung = ""
             article.groesse = "0"
             article.preis = "0.00"
             article.updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
         self._log_change(
             action="DELETE",
             target=f"stnr{stnr_id}",
@@ -177,6 +290,12 @@ class DataManager(BaseData):
         return table
 
     def delete_dataset(self, seller_id: str):
+        """
+        Deletes the complete dataset (seller and their article list) based on seller ID.
+
+        Args:
+            seller_id (str): The ID of the seller whose dataset should be deleted.
+        """
         self.delete_seller(seller_id)
         self.delete_article_list(seller_id)
         self._log_change(
@@ -186,17 +305,41 @@ class DataManager(BaseData):
         )
 
     def validate_structure(self) -> bool:
+        """
+        Validates that the structure is consistent by comparing seller IDs with stnr table IDs.
+
+        Returns:
+            bool: True if seller IDs match stnr table IDs, False otherwise.
+        """
         seller_ids = {seller.id for seller in self.get_seller_list()}
         stnr_ids = {table.name[4:] for table in self.get_main_number_list() if table.name.startswith("stnr")}
         return seller_ids == stnr_ids
 
     def has_unsaved_changes(self) -> bool:
+        """
+        Checks if there are unsaved changes.
+
+        Returns:
+            bool: True if there are unsaved changes, False otherwise.
+        """
         return self._unsaved_changes
 
     def get_change_log(self) -> List[Dict]:
+        """
+        Retrieves the change log as a list of dictionaries.
+
+        Returns:
+            List[Dict]: List containing the change log entries.
+        """
         return [asdict(entry) for entry in self._change_log]
 
     def export_to_json(self) -> List[dict]:
+        """
+        Exports the data to a JSON-compatible list of dictionaries.
+
+        Returns:
+            List[dict]: A list of dictionaries representing the header, base info, tables, and sellers.
+        """
         json_data = [
             asdict(self.export_header),
             asdict(self.base_info)
@@ -205,4 +348,3 @@ class DataManager(BaseData):
             json_data.append(asdict(table))
         json_data.append(asdict(self.sellers))
         return json_data
-
