@@ -1,15 +1,15 @@
 import importlib
 
-from common_interface import (
+from .common_interface import (
     DatabaseConnectionError,
     DatabaseQueryError,
     DatabaseOperations
     )
 
 
-from mysql_interface import MYSQL_AVAILABLE
-from sqlite_interface import SQLiteInterface
-from mysql_interface import MySQLInterface
+from .mysql_interface import MYSQL_AVAILABLE
+from .sqlite_interface import SQLiteInterface
+from .mysql_interface import MySQLInterface
 
 
 # --- Import der spezifischen DB-Implementierungen ---
