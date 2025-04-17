@@ -6,8 +6,8 @@ from PySide6.QtWidgets import (
     QFileDialog, QListWidgetItem, QMessageBox, QGraphicsView, # <--- Added here
     QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem # Other items might be here
 )
-from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor, QCursor
-from PySide6.QtCore import Qt, QRectF, QPointF, Signal, Slot, QSize
+from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor
+from PySide6.QtCore import Qt, QRectF, QPointF, Signal, Slot, QSize, QObject
 from PySide6.QtPdf import QPdfDocument
 
 # Importiere die konvertierte UI-Klasse (Annahme: Name und Pfad sind korrekt)
@@ -36,9 +36,10 @@ LIST_ITEM_DATA_ROLE = Qt.UserRole
 
 
 # --- ID Management (Helper Class) ---
-class ItemIdManager:
+class ItemIdManager(QObject):
     """Manages unique IDs for items, allowing reuse."""
     def __init__(self):
+        super().__init__()
         self._next_id = 1
         self._free_ids = set() # Use set for faster removal checks
 
@@ -64,19 +65,22 @@ class ItemIdManager:
 
 
 # --- Graphics Items ---
-class DraggableBox(QGraphicsRectItem):
+class DraggableBox(QGraphicsRectItem, QObject):
     """ A draggable and resizable rectangle item for the graphics scene. """
-    # Signal emitted when the geometry (pos or size) is changed by user interaction
-    geometryChangedByUser = Signal()
-
+    geometryChangedByUser: Signal = Signal()
+   
     def __init__(self, rect: QRectF, label="", parent=None):
-        super().__init__(rect, parent)
+        QGraphicsRectItem.__init__(self, rect, parent)
+        QObject.__init__(self)
+        
         self.setFlags(
             QGraphicsItem.ItemIsMovable |
             QGraphicsItem.ItemIsSelectable |
             QGraphicsItem.ItemSendsGeometryChanges | # Needed for itemChange
             QGraphicsItem.ItemIsFocusable
         )
+         # Signal emitted when the geometry (pos or size) is changed by user interaction
+
         self.setAcceptHoverEvents(True)
         self.setPen(BOX_BORDER_PEN)
         self.setBrush(BOX_BRUSH)
@@ -251,11 +255,12 @@ class DraggableBox(QGraphicsRectItem):
 
 
 
-class BoxPair:
+class BoxPair(QObject):
     """ Represents a pair of linked DraggableBox items. """
     manager = ItemIdManager() # Class-level ID manager
 
     def __init__(self, scene: QGraphicsScene, startPos=QPointF(50, 50)):
+        super().__init__()
         self.id = BoxPair.manager.get_new_id()
         self.scene = scene
 
@@ -434,7 +439,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         # Connect the box's signal to the update slot
         box.geometryChangedByUser.connect(self.handle_box_geometry_change) # Renamed
         # Disconnect when the box is destroyed (important!)
-        # box.destroyed.connect(lambda: self.on_box_destroyed(box)) # Requires QObject inheritance or tracking
+        box.destroyed.connect(lambda: self.on_box_destroyed(box)) # Requires QObject inheritance or tracking
 
     # Slot to handle geometry changes from any connected box
     @Slot()
@@ -917,32 +922,3 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         else:
             # Allow base class or parent to handle other keys
             super().keyPressEvent(event)
-
-
-# --- Entry Point ---
-if __name__ == '__main__':
-    # Set attribute for high DPI scaling
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
-
-    app = QApplication(sys.argv)
-
-    # --- Setup Main Window ---
-    # Decide if PdfDisplay is the main window or a widget within one
-    # Assuming BaseUi is QWidget and we need a QMainWindow container
-    # from PySide6.QtWidgets import QMainWindow
-    # window = QMainWindow()
-    # pdf_display_widget = PdfDisplay()
-    # window.setCentralWidget(pdf_display_widget)
-    # window.setWindowTitle("PDF Editor") # Set title on main window
-    # window.resize(1200, 800) # Set initial size
-    # window.show()
-
-    # --- OR If BaseUi IS the main window (e.g., inherits QMainWindow) ---
-    window = PdfDisplay()
-    window.setWindowTitle("PDF Editor") # Title might be set in load_pdf/load_state
-    window.resize(1200, 800)
-    window.show()
-    # ---
-
-    sys.exit(app.exec())
