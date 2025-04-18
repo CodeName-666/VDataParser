@@ -437,9 +437,9 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
     def _connect_box_signals(self, box: DraggableBox):
         """Connect signals from a DraggableBox to update UI."""
         # Connect the box's signal to the update slot
-        box.geometryChangedByUser.connect(self.handle_box_geometry_change) # Renamed
+        box.geometryChangedByUser.connect(self.on_box_geometry_changed_by_user) # Renamed
         # Disconnect when the box is destroyed (important!)
-        box.destroyed.connect(lambda: self.on_box_destroyed(box)) # Requires QObject inheritance or tracking
+        # box.destroyed.connect(lambda: self.on_box_destroyed(box)) # Requires QObject inheritance or tracking
 
     # Slot to handle geometry changes from any connected box
     @Slot()
