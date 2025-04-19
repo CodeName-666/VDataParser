@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="windowTitle">
+   <string>Flohmarktmanager</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <!-- Tab für die Datenverwaltung -->
+      <widget class="QWidget" name="tabDaten">
+       <attribute name="title">
+        <string>Datenverwaltung</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayoutDaten">
+        <!-- Auswahl der Stammnummer (z. B. stnr1 bis stnr7) -->
+        <item>
+         <widget class="QComboBox" name="comboBoxStammnummer">
+          <item>
+           <property name="text">
+            <string>stnr1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>stnr2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>stnr3</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>stnr4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>stnr5</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>stnr6</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>stnr7</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableView" name="tableViewDaten"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonSaveData">
+          <property name="text">
+           <string>Daten speichern</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <!-- Tab für die Verkäuferverwaltung -->
+      <widget class="QWidget" name="tabVerkaeufer">
+       <attribute name="title">
+        <string>Verkäuferverwaltung</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayoutVerkaeufer">
+        <item>
+         <widget class="QTableView" name="tableViewVerkaeufer"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutVerkaeuferButtons">
+          <item>
+           <widget class="QPushButton" name="pushButtonEditVerkaeufer">
+            <property name="text">
+             <string>Bearbeiten</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonDeleteVerkaeufer">
+            <property name="text">
+             <string>Verkäufer löschen</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <!-- Menüleiste mit einem Menüeintrag zum Daten herunterladen -->
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuDatei">
+    <property name="title">
+     <string>Datei</string>
+    </property>
+    <addaction name="actionDatenHerunterladen"/>
+   </widget>
+   <addaction name="menuDatei"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionDatenHerunterladen">
+   <property name="text">
+    <string>Daten herunterladen</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
