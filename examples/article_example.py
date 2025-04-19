@@ -1,11 +1,13 @@
-from src.objects import Article
-from src.data import ArticleDataClass
-from src.log.logger import CustomLogger
+
 import sys
 from pathlib import Path
 
-sys.path.insert(0, Path(__file__).parent.parent.__str__())
 
+sys.path.insert(0, Path(__file__).parent.parent.__str__())
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+from src.objects import Article
+from src.data import ArticleDataClass
+from src.log.logger import CustomLogger
 
 if __name__ == "__main__":
 

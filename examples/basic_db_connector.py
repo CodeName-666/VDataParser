@@ -1,6 +1,10 @@
 # --- Beispielhafte Nutzung (Angepasst an die neue Struktur) ---
 
 import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, Path(__file__).parent.parent.__str__())
 from src.backend.basic_db_connector import BasicDBConnector
 from src.backend import SQLiteInterface
 from src.backend import MySQLInterface

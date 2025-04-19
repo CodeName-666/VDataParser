@@ -23,12 +23,12 @@ class BaseInfoDataClass:
 
 @dataclass
 class ArticleDataClass:
-    artikelnummer: str
-    beschreibung: str
-    groesse: str
-    preis: str
-    created_at: str
-    updated_at: str
+    artikelnummer: str = ""
+    beschreibung: str = ""
+    groesse: str  = ""
+    preis: str = ""
+    created_at: str = ""
+    updated_at: str = ""
 
 @dataclass
 class MainNumberDataClass:
