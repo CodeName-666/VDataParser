@@ -8,15 +8,13 @@ from datetime import datetime
 
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
 from .base_data import BaseData
-from .data_class_definition import MainNumberDataClass, SellerDataClass, ArticleDataClass
+from .data_class_definition import (
+    MainNumberDataClass,
+    SellerDataClass,
+    ArticleDataClass,
+    ChangeLogEntry)
 
-@dataclass
-class ChangeLogEntry:
-    id: str
-    timestamp: str
-    action: str
-    target: str
-    description: str
+
 
 class DataManager(BaseData):
     """

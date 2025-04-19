@@ -1,6 +1,15 @@
 from dataclasses import dataclass, field
 from typing import List
 
+
+@dataclass
+class ChangeLogEntry:
+    id: str
+    timestamp: str
+    action: str
+    target: str
+    description: str
+
 @dataclass
 class HeaderDataClass:
     type: str

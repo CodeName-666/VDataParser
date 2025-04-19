@@ -6,7 +6,7 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QApplication
 )
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt
 
 sys.path.insert(0, Path(__file__).parent.parent.__str__())
 from src.ui.pdf_display import PdfDisplay
