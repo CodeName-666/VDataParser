@@ -1,66 +1,26 @@
 from .base_ui import BaseUi
 from .generated import UserInfoUi
 
-from data import DataManager
-
-
-
 class UserInfo(BaseUi):
-
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = UserInfoUi()
         self.ui.setupUi(self)
         self.setup_signals()
 
-
-    def set_data(self, data_manager: DataManager):
-        """Setzt den DataManager und führt die Initialisierung durch."""
+    def set_data(self, data_manager):
+        """Setzt den DataManager und initialisiert die Anzeige."""
         self.data_manager = data_manager
-        # Erhalte die Verkäuferdaten aus dem DataManager
-        # Für den nicht aggregierten Modus: konvertiere jeden SellerDataClass-Eintrag in ein Dictionary.
-        self.users = [self.convert_seller_to_dict(seller) for seller in self.data_manager.get_seller_list()]
-        
-        # Für den aggregierten Modus: hole die aggregierten Daten (als Dictionary) und konvertiere sie in eine Liste.
-        aggregated_dict = self.data_manager.get_aggregated_users()  # {email: {info: SellerDataClass, ids: [...], stamms: [...]}}
-        self.aggregated_users = [self.convert_aggregated_user(email, data) for email, data in aggregated_dict.items()]
-        
-        # Standardmäßig werden alle (nicht aggregierten) Einträge angezeigt.
+        self.users = self.data_manager.get_users_data()
+        self.aggregated_users = self.data_manager.get_aggregated_users_data()
+
+        # Standardmäßig werden die nicht aggregierten Einträge angezeigt.
         self.current_user_list = self.users
-        
-        
+
         self.refresh_user_list()
         if self.ui.listWidgetUsers.count() > 0:
             self.ui.listWidgetUsers.setCurrentRow(0)
 
-
-    def convert_seller_to_dict(self, seller):
-        """Konvertiert einen SellerDataClass-Eintrag in ein Dictionary mit den benötigten Schlüsseln."""
-        return {
-            "vorname": seller.vorname,
-            "nachname": seller.nachname,
-            "telefon": seller.telefon,
-            "email": seller.email,
-            "created_at": seller.created_at,
-            "updated_at": seller.updated_at,
-            "id": seller.id
-        }
-    
-    def convert_aggregated_user(self, email, data):
-        """
-        Konvertiert einen aggregierten Seller aus dem DataManager in das
-        Format, das von der UI erwartet wird.
-        """
-        seller = data["info"]
-        return {
-            "vorname": seller.vorname,
-            "nachname": seller.nachname,
-            "telefon": seller.telefon,
-            "email": seller.email,
-            "created_at": seller.created_at,
-            "updated_at": seller.updated_at,
-            "ids": data["ids"]
-        }
 
     def setup_signals(self):
         """Verbindet die UI-Signale mit den entsprechenden Methoden."""
@@ -87,7 +47,7 @@ class UserInfo(BaseUi):
             self.clear_details()
 
     def clear_details(self):
-        """Leert alle Detailfelder."""
+        """Leert alle Detailfelder der UI."""
         self.ui.valueVorname.setText("")
         self.ui.valueNachname.setText("")
         self.ui.valueTelefon.setText("")
@@ -108,7 +68,7 @@ class UserInfo(BaseUi):
         self.ui.valueCreatedAt.setText(user.get("created_at", ""))
         self.ui.valueUpdatedAt.setText(user.get("updated_at", ""))
         if self.ui.checkboxUnique.isChecked():
-            # Aggregierter Modus: Alle IDs, durch "|" getrennt
+            # Aggregierter Modus: Alle IDs, kommasepariert
             ids = user.get("ids", [])
             self.ui.valueIDs.setText(", ".join(ids))
         else:
