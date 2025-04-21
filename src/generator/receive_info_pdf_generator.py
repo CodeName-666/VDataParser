@@ -36,7 +36,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):
 
     Die Positionierung der Texte erfolgt anhand von Koordinaten, die als Liste von
     `CoordinatesConfig`-Objekten übergeben werden. Für jeden Eintrag werden drei Textfelder
-    erstellt (z. B. Name, Stammnummer, Zusatzinfo).
+    erstellt (z.B. Name, Stammnummer, Zusatzinfo).
     """
 
     def __init__(self,
