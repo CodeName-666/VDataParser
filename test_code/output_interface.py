@@ -70,7 +70,7 @@ if QT_AVAILABLE: # Definiere die QtOutput-Klasse nur, wenn PySide6 installiert i
                 raise TypeError("output_widget muss eine Instanz von QTextEdit oder QPlainTextEdit sein.")
             self.output_widget = output_widget
 
-        # @Slot(str) # Kann als Slot deklariert werden, wenn von Qt-Signalen aufgerufen
+        #@Slot(str) # Kann als Slot deklariert werden, wenn von Qt-Signalen aufgerufen
         def write_message(self, message: str):
             """Fügt die Nachricht dem Qt-Widget hinzu."""
             # Wichtig: UI-Updates sollten immer im Main-GUI-Thread erfolgen.

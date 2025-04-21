@@ -1,7 +1,7 @@
-from .output_interface import OutputInterface
+from .output_interface_abstraction import OutputInterfaceAbstraction
 
 
-class ConsoleOutput(OutputInterface):
+class ConsoleOutput(OutputInterfaceAbstraction):
     """
     Implementierung von OutputInterface für die Standard-Konsolenausgabe (print).
     """

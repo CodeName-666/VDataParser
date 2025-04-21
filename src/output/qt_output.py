@@ -1,10 +1,10 @@
-from .output_interface import OutputInterface
+from .output_interface_abstraction import OutputInterfaceAbstraction
 
 from PySide6.QtWidgets import QTextEdit, QPlainTextEdit
 from PySide6.QtCore import Slot # Für saubere Slots, falls nötig
 
 
-class QtOutput(OutputInterface):
+class QtOutput(OutputInterfaceAbstraction):
     """
     Implementierung von OutputInterface für die Ausgabe in ein Qt-Widget
     (z.B. QTextEdit oder QPlainTextEdit).

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 
 
-class OutputInterface(ABC):
+class OutputInterfaceAbstraction(ABC):
     """
     Abstrakte Basisklasse für Ausgabemechanismen.
     Definiert das Interface, das alle konkreten Ausgabeklassen implementieren müssen.
