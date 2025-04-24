@@ -56,21 +56,21 @@ class MainNumberDataClass:
 
 @dataclass
 class SellerDataClass:
-    id: str
-    vorname: str
-    nachname: str
-    telefon: str
-    email: str
-    passwort: str
-    created_at: str
-    updated_at: str
+    id: str = ""
+    vorname: str = ""
+    nachname: str = ""
+    telefon: str = ""
+    email: str = ""
+    passwort: str = ""
+    created_at: str = ""
+    updated_at: str = ""
 
 @dataclass
 class SellerListDataClass:
-    type: str
-    name: str
-    database: str
-    data: List[SellerDataClass]
+    type: str = ""
+    name: str = ""
+    database: str = ""
+    data: List[SellerDataClass] = field(default_factory=list)
 
     def __post_init__(self):
         converted_sellers = []

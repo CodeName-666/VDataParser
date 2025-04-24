@@ -91,6 +91,7 @@ class BaseData(JsonHandler, JSONData, metaclass=BaseDataMeta):
         # The logger passed here will be available as self.logger
         super().__init__(json_path_or_data=json_file_path, logger=logger)
 
+
         # Check if data loading was successful in JsonHandler's __init__
         if self.json_data is None:
             self._log("ERROR", f"BaseData initialization failed: Could not load JSON data from {json_file_path}.")
@@ -98,7 +99,7 @@ class BaseData(JsonHandler, JSONData, metaclass=BaseDataMeta):
             JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
                               main_numbers_list=[], sellers=SellerListDataClass())
             return # Stop further processing if data loading failed
-
+        
         # Proceed with parsing if data loaded successfully
         self._parse_json_data()
 
