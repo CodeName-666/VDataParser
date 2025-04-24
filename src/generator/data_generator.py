@@ -1,30 +1,39 @@
 # --- data_generator.py ---
 from pathlib import Path
 from typing import Optional
-# Annahme: ProgressTracker existiert im selben Verzeichnis oder im PYTHONPATH
+
+# Conditional import of CustomLogger
+try:
+    # Assume logger.py is in the same directory or package
+    from log import CustomLogger
+except ImportError:
+    CustomLogger = None # type: ignore # Allow CustomLogger to be None if import fails
+
+# Conditional import of ProgressTracker
 try:
     from .progress_tracker import ProgressTracker
 except ImportError:
-    # Fallback, falls die Datei einzeln ausgeführt wird (weniger wahrscheinlich)
-    ProgressTracker = None
+    ProgressTracker = None # type: ignore
 
 class DataGenerator:
     """
-    A base class for data generators.
+    A base class for data generators, now with optional logging support.
 
     Attributes:
     -----------
-    __file_name : str
+    file_name : str
         The name of the file to be generated (without suffix).
-    __path : Path
+    path : Path
         The path where the file will be saved.
+    logger : Optional[CustomLogger]
+        An optional logger instance.
     """
 
-    FILE_SUFFIX = '' # Standardmäßig kein Suffix, Unterklassen sollten dies definieren
+    FILE_SUFFIX = '' # Subclasses should define this
 
-    def __init__(self, path: str, file_name: str) -> None:
+    def __init__(self, path: str, file_name: str, logger: Optional[CustomLogger] = None) -> None:
         """
-        Initializes the DataGenerator with a path and file name.
+        Initializes the DataGenerator with path, file name, and optional logger.
 
         Parameters:
         -----------
@@ -32,62 +41,65 @@ class DataGenerator:
             The path where the file will be saved.
         file_name : str
             The name of the file to be generated (without suffix).
+        logger : Optional[CustomLogger], optional
+            A CustomLogger instance for logging, defaults to None (no logging).
         """
         self.__file_name: str = file_name
-        # Konvertiere leeren Pfad zu aktuellem Verzeichnis
         self.__path: Path = Path(path) if path else Path('.')
+        self.logger = logger # Store the logger instance
+
+    def _log(self, level: str, message: str, on_verbose: bool = False) -> None:
+        """ Helper method for conditional logging. """
+        if self.logger:
+            # Get the appropriate logging method (info, warning, error, debug)
+            log_method = getattr(self.logger, level.lower(), None)
+            if log_method and callable(log_method):
+                try:
+                    # Call the logger's method, passing on_verbose if applicable
+                    # Check if the logger method accepts on_verbose
+                    # A simpler approach is to let the CustomLogger handle on_verbose internally
+                    if level.lower() in ["debug", "info", "warning", "error"]:
+                         # Use the specific methods of CustomLogger which handle on_verbose
+                         log_method(message, on_verbose=on_verbose)
+                    else:
+                         # Fallback for potentially custom levels (though unlikely here)
+                         log_method(message) # Assuming basic logging call
+                except Exception as e:
+                     # Fallback: If logging itself fails, print to stderr
+                     import sys
+                     print(f"LOGGING FAILED ({level}): {message} | Error: {e}", file=sys.stderr)
+            # else: # Optional: Log a warning if an invalid level string is passed
+            #    if self.logger: self.logger.warning(f"Invalid log level '{level}' used in _log")
 
     @property
     def file_name(self) -> str:
-        """
-        Gets the file name (without suffix).
-        """
         return self.__file_name
 
     @file_name.setter
     def file_name(self, file_name: str):
-        """
-        Sets the file name (without suffix).
-        """
         self.__file_name = file_name
 
     @property
     def path(self) -> Path:
-        """
-        Gets the output path.
-        """
         return self.__path
 
     @path.setter
     def path(self, path: str):
-        """
-        Sets the output path.
-        """
         self.__path = Path(path) if path else Path('.')
 
     def get_full_path(self) -> Path:
-        """
-        Returns the full path including filename and suffix.
-        """
         if not self.file_name:
              raise ValueError("Dateiname wurde nicht gesetzt.")
         if not self.FILE_SUFFIX:
-             raise ValueError("FILE_SUFFIX wurde in der Unterklasse nicht definiert.")
+             # Attempt to log the error if logger exists
+             self._log("ERROR", f"FILE_SUFFIX nicht definiert für Klasse {self.__class__.__name__}")
+             raise ValueError(f"FILE_SUFFIX wurde in der Unterklasse {self.__class__.__name__} nicht definiert.")
         return self.path / f'{self.file_name}.{self.FILE_SUFFIX}'
 
-
     def generate(self, overall_tracker: Optional[ProgressTracker] = None) -> None:
-         """
-         Generates the data. Should be implemented by subclasses.
-         If an overall_tracker is provided, it should call overall_tracker.increment() upon completion.
-         """
+         self._log("ERROR", "Die Methode 'generate' muss in der Unterklasse implementiert werden.")
          raise NotImplementedError("Die Methode 'generate' muss in der Unterklasse implementiert werden.")
 
-    def write(self) -> None:
-         """
-         Writes the generated data. May not be needed if generate handles writing.
-         Should be implemented by subclasses if needed.
-         """
-         # Kann leer bleiben, wenn generate das Schreiben übernimmt
-         # Oder raise NotImplementedError, wenn explizites Schreiben erwartet wird
+    def write(self, *args, **kwargs) -> None: # Allow args/kwargs for flexibility
+         # Base implementation does nothing, subclasses might override
          pass

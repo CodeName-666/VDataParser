@@ -1,284 +1,392 @@
+# --- START OF FILE json_handler.py ---
+
 import json
 import inspect
 import copy
-from typing import Union, Dict, List
-from urllib.parse import urlparse
-import requests
+import sys # For stderr fallback
+from typing import Union, Dict, List, Optional, Any # Added Optional, Any
+from pathlib import Path
 
+# Conditional import of CustomLogger
+try:
+    # Assume logger.py is in the same directory or package
+    from log import CustomLogger, LogType # Import LogType if used
+except ImportError:
+    CustomLogger = None # type: ignore
+
+# Conditional import for type checking (requests is only used for URL loading)
+try:
+    import requests
+except ImportError:
+    requests = None # type: ignore
+
+from urllib.parse import urlparse
 
 class JsonHandler():
     """
-    JsonHandler is a utility class to load, modify, and save JSON configuration files.
+    JsonHandler is a utility class to load, modify, and save JSON configuration files,
+    with optional logging support via CustomLogger.
 
     Attributes:
-        json_data (Union[str, Dict]): The loaded JSON data as a dictionary or an empty string if an error occurs.
-
-    Methods:
-        __init__(self, sw_factory_cfg: str, error_handler_cbk: Optional[Callable] = None) -> None:
-            Initializes the JsonHandler with the path to the JSON configuration file and an optional error handler.
-
-        load(self, path_or_url: str) -> Union[str, Dict]:
-            Loads a JSON file from a path or URL and returns the loaded JSON data.
-
-        load_from_url(self, json_url: str) -> Union[str, Dict]:
-            Loads a JSON file from a URL and returns the loaded JSON data.
-
-        load_from_local(self, json_file_path: str) -> Union[str, Dict]:
-            Loads a JSON file from a local path and returns the loaded JSON data.
-
-        error_handler(self, error_handler: Callable) -> None:
-            Sets the error handler function to handle errors when they occur.
-
-        __handle_error(self, method_name: str, error_msg: str) -> None:
-            Handles errors using the provided error handler function or prints the error message if no error handler is set.
-
-        get_key_value(self, keys: List[str], data: dict = None):
-            Retrieves a deeply nested value in a nested dictionary using a list of keys representing the path to the desired value.
-            Returns the found value or None if the value is not found.
-
-        set_key_value(self, keys: List[str], value, data: dict = None) -> None:
-            Sets a value for a deeply nested key in a nested dictionary. Creates the key if it does not exist.
-
-        save(self, path_or_url: str) -> None:
-            Saves the current JSON data to the specified local path or URL.
+        json_data (Optional[Union[Dict, List]]): The loaded JSON data. None if loading failed or not yet loaded.
+        logger (Optional[CustomLogger]): Logger instance for logging messages and errors.
     """
 
-    def __init__(self, json_path_or_data: Union[str, Dict] = None, error_handler=None) -> None:
+    def __init__(self, json_path_or_data: Optional[Union[str, Dict, List]] = None, logger: Optional[CustomLogger] = None) -> None:
         """
         Initialize the JsonHandler.
 
-        :param json_path_or_data: The path or data to the JSON configuration file.
-        :type json_path_or_data: str
-        :param error_handler: The optional error handling module or class that will be called when an error occurs.
-        :type error_handler: Callable, optional
+        Args:
+            json_path_or_data (Optional[Union[str, Dict, List]]): Path/URL to the JSON file or pre-loaded JSON data.
+            logger (Optional[CustomLogger]): An optional CustomLogger instance.
         """
-        self.__error_handler = error_handler
-        self.json_data = None
+        self.logger = logger
+        self.json_data: Optional[Union[Dict, List]] = None # Initialize as None
 
-        if isinstance(json_path_or_data,str):
+        if isinstance(json_path_or_data, str):
+            # Load data if path/URL is provided
             self.load(json_path_or_data)
-        elif isinstance(json_path_or_data,Dict):
+        elif isinstance(json_path_or_data, (dict, list)):
+            # Use provided data directly (create a deep copy)
             self.json_data = copy.deepcopy(json_path_or_data)
-        else: 
-            pass
+            self._log("DEBUG", "JsonHandler initialized with provided data object.")
+        elif json_path_or_data is not None:
+             self._log("WARNING", f"JsonHandler initialized with unsupported data type: {type(json_path_or_data)}. Ignored.")
+        # If json_path_or_data is None, json_data remains None
 
-        
-    def load(self, path_or_url: str) -> Union[str, Dict]:
-        """
-        Load JSON data from a path or URL.
 
-        :param path_or_url: The path or URL to the JSON file.
-        :type path_or_url: str
-        :return: The loaded JSON data as a dictionary, or an empty string if an error occurs.
-        :rtype: Union[str, Dict]
+    def _log(self, level: str, message: str, on_verbose: bool = False) -> None:
+        """ Helper method for conditional logging. """
+        if self.logger and CustomLogger: # Check if logger exists and is the correct type
+            log_method = getattr(self.logger, level.lower(), None)
+            if log_method and callable(log_method):
+                 try:
+                     if level.lower() in ["debug", "info", "warning", "error"]:
+                          log_method(message, on_verbose=on_verbose)
+                     else:
+                          log_method(message)
+                 except Exception as e:
+                      print(f"LOGGING FAILED ({level}): {message} | Error: {e}", file=sys.stderr)
+        # No print fallback for general logs, only for errors via _log_error
+
+    def _log_error(self, method_name: str, error_msg: str, exception: Optional[Exception] = None) -> None:
         """
-        parsed = urlparse(path_or_url)
-        if parsed.scheme and parsed.netloc:
-            self.json_data =  self.load_from_url(path_or_url)
+        Handles error logging using the logger or prints to stderr as a fallback.
+
+        Args:
+            method_name (str): The name of the method where the error occurred.
+            error_msg (str): The primary error message.
+            exception (Optional[Exception]): The exception object, if available.
+        """
+        # Try to get line number where the *caller* of _log_error is
+        line_info = ""
+        try:
+            frame = inspect.currentframe()
+            if frame and frame.f_back:
+                 line_info = f"Line {frame.f_back.f_lineno}: "
+        except Exception:
+            pass # Ignore errors getting frame info
+
+        # Format the final message
+        full_error_msg = f"{method_name}: {line_info}{error_msg}"
+        if exception:
+             # Add exception type and message for more context
+             full_error_msg += f" | Exception: {type(exception).__name__}: {exception}"
+
+        if self.logger and CustomLogger:
+             # Log using the ERROR level
+             self.logger.error(full_error_msg)
+             # Optionally log traceback if logger supports exc_info or similar
+             # self.logger.error(full_error_msg, exc_info=True) # If logger supports it
         else:
-            self.json_data =  self.load_from_local(path_or_url)
+             # Fallback if no logger is available
+             print(f"ERROR: {full_error_msg}", file=sys.stderr)
 
-    def load_from_url(self, json_url: str) -> Union[str, Dict]:
+
+    def load(self, path_or_url: str) -> None:
+        """
+        Load JSON data from a path or URL and store it in self.json_data.
+        Resets self.json_data to None if loading fails.
+
+        Args:
+            path_or_url (str): The path or URL to the JSON file.
+        """
+        self._log("INFO", f"Attempting to load JSON from: {path_or_url}")
+        self.json_data = None # Reset before loading
+        try:
+            parsed = urlparse(path_or_url)
+            if parsed.scheme and parsed.netloc:
+                # Handle URL
+                self.json_data = self.load_from_url(path_or_url)
+            else:
+                # Handle local path
+                self.json_data = self.load_from_local(path_or_url)
+
+            if self.json_data is not None:
+                 self._log("INFO", "JSON data loaded successfully.")
+            # else: error already logged in load_from_url/local
+
+        except Exception as e:
+             # Catch potential errors from urlparse or other unexpected issues
+             self._log_error("load", f"Unexpected error during loading preparation for '{path_or_url}'", e)
+             self.json_data = None
+
+
+    def load_from_url(self, json_url: str) -> Optional[Union[Dict, List]]:
         """
         Load JSON data from a URL.
 
-        :param json_url: The URL to the JSON file.
-        :type json_url: str
-        :return: The loaded JSON data as a dictionary, or an empty string if an error occurs.
-        :rtype: Union[str, Dict]
-        """
-        json_data = ''
-        try:
-            response = requests.get(json_url)
-            json_data = json.loads(response.content.decode('utf-8'))
-        except json.decoder.JSONDecodeError as e:
-            error_msg = f"JSON file structure error: {str(e)}"
-            self.__handle_error("load_from_url", error_msg)
-        except requests.exceptions.HTTPError as e:
-            error_msg = f"File not found with error: {str(e)}"
-            self.__handle_error("load_from_url", error_msg)
-        return json_data
+        Args:
+            json_url (str): The URL to the JSON file.
 
-    def load_from_local(self, json_file_path: str) -> Union[str, Dict]:
+        Returns:
+            Optional[Union[Dict, List]]: Loaded JSON data or None if an error occurs.
+        """
+        if requests is None:
+            self._log_error("load_from_url", "Cannot load from URL because 'requests' library is not installed.")
+            return None
+
+        try:
+            response = requests.get(json_url, timeout=10) # Added timeout
+            response.raise_for_status() # Raises HTTPError for bad responses (4xx or 5xx)
+            # Use response.json() for automatic decoding and parsing
+            return response.json()
+        except requests.exceptions.Timeout:
+            self._log_error("load_from_url", f"Request timed out for URL: {json_url}")
+            return None
+        except requests.exceptions.RequestException as e:
+            self._log_error("load_from_url", f"HTTP request failed for URL: {json_url}", e)
+            return None
+        except json.JSONDecodeError as e:
+            self._log_error("load_from_url", f"JSON decoding failed for URL: {json_url}", e)
+            return None
+        except Exception as e: # Catch other unexpected errors
+            self._log_error("load_from_url", f"Unexpected error loading from URL: {json_url}", e)
+            return None
+
+    def load_from_local(self, json_file_path: str) -> Optional[Union[Dict, List]]:
         """
         Load a JSON file from a local path.
 
-        :param json_file_path: The path to the JSON file.
-        :type json_file_path: str
-        :return: The loaded JSON data as a dictionary, or an empty string if an error occurs.
-        :rtype: Union[str, Dict]
+        Args:
+            json_file_path (str): The path to the JSON file.
+
+        Returns:
+            Optional[Union[Dict, List]]: Loaded JSON data or None if an error occurs.
         """
-        json_data: Union[str, Dict] = ''
         try:
-            with open(json_file_path, 'r', encoding='utf-8') as json_file:
-                json_data = json.load(json_file)
-        except json.decoder.JSONDecodeError as e:
-            error_msg = f"JSON file structure error: {str(e)}"
-            self.__handle_error("load_from_local", error_msg)
-            return None
+            # Ensure path is resolved and exists before opening
+            p = Path(json_file_path).resolve()
+            if not p.is_file():
+                 raise FileNotFoundError(f"File not found at resolved path: {p}")
+
+            with open(p, 'r', encoding='utf-8') as json_file: # Specify UTF-8
+                return json.load(json_file)
         except FileNotFoundError as e:
-            error_msg = f"JSON file not found error: {str(e)}"
-            self.__handle_error("load_from_local", error_msg)
+            self._log_error("load_from_local", f"JSON file not found", e)
             return None
-        return json_data
-
-    def error_handler(self, error_handler) -> None:
-        """
-        Set the error handler function.
-
-        :param error_handler: The error handler function.
-        :type error_handler: Callable
-        """
-        self.__error_handler = error_handler
-
-    def error_handler(self):
-        return self.__error_handler
-
-    def __handle_error(self, method_name: str, error_msg: str) -> None:
-        """
-        Handle the error using the error handler function, if provided.
-        If no error handler is set, it prints the error message to the console.
-
-        :param method_name: The name of the method where the error occurred.
-        :type method_name: str
-        :param error_msg: The error message.
-        :type error_msg: str
-        """
-        error_handler_msg = f'"{method_name}", Line {inspect.currentframe().f_back.f_lineno}: {error_msg}'
-        if self.__error_handler:
-            self.__error_handler(method_name, error_msg)
-        else:
-            print(error_handler_msg)
-
-    def get_value(self, data: Dict, key):
-        return_value = None
-        if isinstance(key, str):
-            return_value = data.get(key, None)
-        elif isinstance(key, int):
-            return_value = data[key]
-        else:
-            return_value = None
-        
-        return return_value
-
-
-    def get_key_value(self, keys: List[str], data: dict = None):
-        """
-        Retrieve a deeply nested value in a nested dictionary.
-
-        :param keys: A list of keys representing the path to the desired value.
-        :type keys: List[str]
-        :param data: The dictionary to search in (default is the loaded JSON data).
-        :type data: Optional[dict]
-        :return: The found value or None if the value is not found.
-        :rtype: Union[object, None]
-        """
-        if data is None:
-            internal_data = self.json_data
-        else:
-            internal_data = data
-
-        try:
-            key = keys[0]
-            if len(keys) == 1:
-                return_data = self.get_value(internal_data, key)
-                if return_data is None:
-                    raise KeyError(f"Unknown Key {key} requested")
-                return return_data
-            else:
-                next_level_data = self.get_value(internal_data,key)
-                if next_level_data:
-                    return self.get_key_value(keys[1:], next_level_data)
-                else:
-                    raise KeyError(f"Unknown Key {key} requested")
-        except Exception as e:
-            error_msg = f"Key Error: {str(e)}"
-            self.__handle_error("get_key_value", error_msg)
+        except json.JSONDecodeError as e:
+            self._log_error("load_from_local", f"JSON decoding failed for file: {json_file_path}", e)
+            return None
+        except IOError as e: # Catch other file reading errors
+            self._log_error("load_from_local", f"Could not read file: {json_file_path}", e)
+            return None
+        except Exception as e: # Catch other unexpected errors
+            self._log_error("load_from_local", f"Unexpected error loading local file: {json_file_path}", e)
             return None
 
-    def set_key_value(self, keys: List[str], value, data: dict = None) -> bool:
-        """
-        Set a value for a deeply nested key in a nested dictionary.
-        Creates the key if it does not exist.
+    # get_value method seems unused, can be removed or kept if needed elsewhere
+    # def get_value(self, data: Union[Dict, List], key: Union[str, int]) -> Optional[Any]: ...
 
-        :param keys: A list of keys representing the path to the desired key.
-        :type keys: List[str]
-        :param value: The value to set at the specified key path.
-        :type value: Any
-        :param data: The dictionary to modify (default is the loaded JSON data).
-        :type data: Optional[dict]
+    def get_key_value(self, keys: List[Union[str, int]], data: Optional[Union[Dict, List]] = None) -> Optional[Any]:
         """
-        if data == None:
-            data = self.json_data
+        Retrieve a deeply nested value using a list of keys/indices.
+
+        Args:
+            keys (List[Union[str, int]]): Path to the desired value (strings for dict keys, ints for list indices).
+            data (Optional[Union[Dict, List]]): Dictionary or list to search in (defaults to self.json_data).
+
+        Returns:
+            Optional[Any]: Found value or None if path is invalid or not found.
+        """
+        current_data = data if data is not None else self.json_data
+
+        if current_data is None:
+             self._log("WARNING", "get_key_value called but no JSON data is loaded.")
+             return None
+        if not keys: # Empty keys list
+             return current_data # Return the current level data
 
         key = keys[0]
+        remaining_keys = keys[1:]
 
-        if len(keys) == 1:
-            try:
-                data[key] = value
-                return True
-            except Exception as e: 
-                error_msg = f"Key Error: {str(e)}"
-                self.__handle_error("get_key_value", error_msg)
-                return False
-        else:
-            if isinstance(data,dict):
-                if key not in data:
-                    data[key] = {}
-
-            elif isinstance(data, list):
-                if isinstance(key,int):
-                    if len(data) < key:
-                        raise IndexError("Wrong index was requested")
+        try:
+            if isinstance(current_data, dict):
+                if isinstance(key, str):
+                    next_level_data = current_data.get(key) # Use .get for safety
+                    if next_level_data is None and key in current_data: # Handle explicit None value
+                         return None if not remaining_keys else self.get_key_value(remaining_keys, None)
+                    elif next_level_data is None and key not in current_data:
+                         raise KeyError(f"Key '{key}' not found")
                 else:
-                    raise TypeError(f"Wrong type of paramter are given, Integer expected, got {type(key)} ")
+                    raise TypeError(f"Cannot use key of type {type(key).__name__} to access a dictionary")
+
+            elif isinstance(current_data, list):
+                if isinstance(key, int):
+                    if 0 <= key < len(current_data):
+                        next_level_data = current_data[key]
+                    else:
+                        raise IndexError(f"Index {key} out of range (size {len(current_data)})")
+                else:
+                    raise TypeError(f"Cannot use key of type {type(key).__name__} to access a list")
             else:
-                raise NotImplementedError("This case is not implemented yes")
-            
-            return self.set_key_value(keys[1:], value, data[key])
-        
+                # Cannot traverse further if current level is not dict or list
+                raise TypeError(f"Cannot traverse key '{key}'; current data level is of type {type(current_data).__name__}")
+
+            # Recursive call or return final value
+            if not remaining_keys:
+                return next_level_data
+            else:
+                return self.get_key_value(remaining_keys, next_level_data)
+
+        except (KeyError, IndexError, TypeError) as e:
+            path_str = " -> ".join(map(str, keys[:keys.index(key)+1]))
+            self._log_error("get_key_value", f"Error accessing path '{path_str}'", e)
+            return None
+        except Exception as e: # Catch other unexpected errors
+             path_str = " -> ".join(map(str, keys))
+             self._log_error("get_key_value", f"Unexpected error accessing path '{path_str}'", e)
+             return None
+
+
+    def set_key_value(self, keys: List[Union[str, int]], value: Any, data: Optional[Union[Dict, List]] = None) -> bool:
+        """
+        Set a value for a deeply nested key/index. Creates path if it does not exist.
+
+        Args:
+            keys (List[Union[str, int]]): Path to the desired key/index.
+            value (Any): Value to set.
+            data (Optional[Union[Dict, List]]): Dictionary/list to modify (defaults to self.json_data).
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        current_data = data if data is not None else self.json_data
+
+        if current_data is None:
+             self._log("ERROR", "set_key_value called but no JSON data is loaded or provided.")
+             return False
+        if not keys:
+             self._log("ERROR", "set_key_value requires a non-empty list of keys.")
+             return False
+
+        key = keys[0]
+        remaining_keys = keys[1:]
+
+        try:
+            if not remaining_keys: # Last key in the path
+                if isinstance(current_data, dict) and isinstance(key, str):
+                    current_data[key] = value
+                    return True
+                elif isinstance(current_data, list) and isinstance(key, int):
+                    if 0 <= key < len(current_data):
+                        current_data[key] = value
+                        return True
+                    elif key == len(current_data): # Allow appending
+                        current_data.append(value)
+                        return True
+                    else:
+                        raise IndexError(f"Index {key} out of range for setting value (size {len(current_data)})")
+                else:
+                    raise TypeError(f"Cannot set value at final key '{key}' with current data type {type(current_data).__name__}")
+            else: # Traverse or create next level
+                next_key = remaining_keys[0]
+                if isinstance(current_data, dict) and isinstance(key, str):
+                    if key not in current_data:
+                        # Create next level based on the type of the *next* key
+                        current_data[key] = [] if isinstance(next_key, int) else {}
+                    elif not isinstance(current_data[key], (dict, list)):
+                         # Overwrite if existing value is not traversable, log warning?
+                         self._log("WARNING", f"Overwriting non-traversable value at key '{key}' during set_key_value.")
+                         current_data[key] = [] if isinstance(next_key, int) else {}
+                    return self.set_key_value(remaining_keys, value, current_data[key])
+
+                elif isinstance(current_data, list) and isinstance(key, int):
+                    if key == len(current_data): # Need to append a new level
+                         current_data.append([] if isinstance(next_key, int) else {})
+                    elif not (0 <= key < len(current_data)):
+                        raise IndexError(f"Index {key} out of range for traversal (size {len(current_data)})")
+
+                    if not isinstance(current_data[key], (dict, list)):
+                        # Overwrite if existing value is not traversable
+                        self._log("WARNING", f"Overwriting non-traversable value at index {key} during set_key_value.")
+                        current_data[key] = [] if isinstance(next_key, int) else {}
+                    return self.set_key_value(remaining_keys, value, current_data[key])
+                else:
+                     raise TypeError(f"Cannot traverse key '{key}' (type {type(key).__name__}) on data type {type(current_data).__name__}")
+
+        except (KeyError, IndexError, TypeError) as e:
+            path_str = " -> ".join(map(str, keys[:keys.index(key)+1]))
+            self._log_error("set_key_value", f"Error setting value at path '{path_str}'", e)
+            return False
+        except Exception as e: # Catch other unexpected errors
+            path_str = " -> ".join(map(str, keys))
+            self._log_error("set_key_value", f"Unexpected error setting value at path '{path_str}'", e)
+            return False
 
     def save(self, path_or_url: str) -> None:
-        """
-        Save the current JSON data to the specified local path or URL.
-
-        :param path_or_url: The path or URL to save the JSON data.
-        :type path_or_url: str
-        """
-        parsed = urlparse(path_or_url)
-        if parsed.scheme and parsed.netloc:
-            self.save_to_url(path_or_url)
-        else:
-            self.save_to_local(path_or_url)
+        """ Saves the current JSON data to the specified local path or URL. """
+        if self.json_data is None:
+            self._log("ERROR", "Cannot save, no JSON data loaded.")
+            return
+        self._log("INFO", f"Attempting to save JSON data to: {path_or_url}")
+        try:
+            parsed = urlparse(path_or_url)
+            if parsed.scheme and parsed.netloc:
+                self.save_to_url(path_or_url)
+            else:
+                self.save_to_local(path_or_url)
+        except Exception as e:
+             self._log_error("save", f"Unexpected error during save preparation for '{path_or_url}'", e)
 
     def save_to_url(self, json_url: str) -> None:
-        """
-        Save JSON data to a URL using a PUT request.
+        """ Saves JSON data to a URL using a PUT request. """
+        if requests is None:
+            self._log_error("save_to_url", "Cannot save to URL because 'requests' library is not installed.")
+            return
+        if self.json_data is None: return # Already logged by save()
 
-        :param json_url: The URL to save the JSON data.
-        :type json_url: str
-        """
         try:
-            response = requests.put(json_url, json=self.json_data)
+            # Consider adding headers if required by the endpoint
+            response = requests.put(json_url, json=self.json_data, timeout=10)
             response.raise_for_status()
-        except Exception as e:
-            error_msg = f"Failed to save JSON data to URL: {str(e)}"
-            self.__handle_error("save_to_url", error_msg)
+            self._log("INFO", f"JSON data successfully saved to URL: {json_url}")
+        except requests.exceptions.Timeout:
+            self._log_error("save_to_url", f"Request timed out saving to URL: {json_url}")
+        except requests.exceptions.RequestException as e:
+            self._log_error("save_to_url", f"HTTP request failed saving to URL: {json_url}", e)
+        except Exception as e: # Catch other unexpected errors
+            self._log_error("save_to_url", f"Unexpected error saving to URL: {json_url}", e)
+
 
     def save_to_local(self, json_file_path: str) -> None:
-        """
-        Save JSON data to a local file.
+        """ Saves JSON data to a local file. """
+        if self.json_data is None: return # Already logged by save()
 
-        :param json_file_path: The path to the local JSON file.
-        :type json_file_path: str
-        """
         try:
-            with open(json_file_path, 'w', encoding='utf-8') as json_file:
-                json.dump(self.json_data, json_file, indent=4)
-        except Exception as e:
-            error_msg = f"Failed to save JSON data to local file: {str(e)}"
-            self.__handle_error("save_to_local", error_msg)
+            p = Path(json_file_path)
+            # Ensure the parent directory exists
+            p.parent.mkdir(parents=True, exist_ok=True)
+            with open(p, 'w', encoding='utf-8') as json_file:
+                json.dump(self.json_data, json_file, indent=4, ensure_ascii=False) # ensure_ascii=False for non-latin chars
+            self._log("INFO", f"JSON data successfully saved to local file: {p.resolve()}")
+        except IOError as e:
+            self._log_error("save_to_local", f"Could not write to file: {json_file_path}", e)
+        except Exception as e: # Catch other unexpected errors
+            self._log_error("save_to_local", f"Unexpected error saving local file: {json_file_path}", e)
 
-    def get_data(self):
+    def get_data(self) -> Optional[Union[Dict, List]]:
+        """ Returns the loaded JSON data. """
         return self.json_data
 
+# --- END OF FILE json_handler.py ---

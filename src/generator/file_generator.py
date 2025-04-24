@@ -1,99 +1,75 @@
 # --- file_generator.py ---
 from pathlib import Path
 import time
+from typing import Optional, List
 
-# Annahme: Benötigte Objekte sind in 'objects.py' und Logger in 'log.py'
+# Conditional import of CustomLogger
 try:
-    from objects import FleatMarket # Nur FleatMarket benötigt
-    from log import logger
+    from log import CustomLogger
 except ImportError:
-    print("WARNUNG: Konnte 'objects' oder 'log' nicht importieren. Stellen Sie sicher, dass diese Module existieren.")
-    # Dummy-Implementierungen
-    class FleatMarket: pass # Leere Klasse reicht hier
-    class Logger:
-        def info(self, msg): print(f"INFO: {msg}")
-        def warning(self, msg): print(f"WARN: {msg}")
-        def error(self, msg): print(f"ERROR: {msg}")
-        def debug(self, msg): print(f"DEBUG: {msg}")
-    logger = Logger()
+    CustomLogger = None # type: ignore
 
-# Importiere alle benötigten Generatoren und Hilfsklassen
+# Assume objects are available
+try:
+    from objects import FleatMarket # Adjust name
+except ImportError:
+    class FleatMarket: pass # Dummy
+
+# Import generators and progress classes (handle imports conditionally/gracefully)
 from .price_list_generator import PriceListGenerator
 from .seller_data_generator import SellerDataGenerator
 from .statistic_data_generator import StatisticDataGenerator
 from .receive_info_pdf_generator import ReceiveInfoPdfGenerator
-# Annahme: ProgressTracker und ConsoleProgressBar existieren
 try:
     from .progress_tracker import ProgressTracker
+except ImportError:
+    ProgressTracker = None # type: ignore
+try:
     from .console_progress_bar import ConsoleProgressBar
 except ImportError:
-    logger.error("FEHLER: ProgressTracker oder ConsoleProgressBar nicht gefunden. Gesamtfortschritt nicht verfügbar.")
-    ProgressTracker = None
-    ConsoleProgressBar = None
-
+    ConsoleProgressBar = None # type: ignore
 
 class FileGenerator:
     """
-    Orchestriert die Generierung verschiedener Dateien für einen Flohmarkt
-    (Preisliste, Verkäuferdaten, Statistik, Abholbestätigung-PDF)
-    und zeigt den Gesamtfortschritt an, falls die entsprechenden Klassen verfügbar sind.
+    Orchestrates file generation with optional logging and overall progress.
     """
 
     def __init__(self,
                  fleat_market_data: FleatMarket,
-                 output_path: str = 'output', # Standard-Ausgabeverzeichnis
+                 output_path: str = 'output',
                  seller_file_name: str = "kundendaten",
                  price_list_file_name: str = "preisliste",
                  statistic_file_name: str = "versand",
-                 pdf_template_path_input: str = 'template/template.pdf', # Beispiel-Template-Pfad
-                 pdf_output_file_name: str = 'Abholbestaetigungen.pdf' # Name der PDF-Datei
+                 pdf_template_path_input: str = 'template/template.pdf',
+                 pdf_output_file_name: str = 'Abholbestaetigungen.pdf',
+                 logger: Optional[CustomLogger] = None # Accept optional logger
                  ) -> None:
-        """
-        Initialisiert den FileGenerator und alle untergeordneten Generatoren.
-
-        Args:
-            fleat_market_data (FleatMarket): Das zentrale Datenobjekt für den Flohmarkt.
-            output_path (str): Das Hauptverzeichnis für alle generierten Dateien.
-            seller_file_name (str): Dateiname (ohne Endung) für die Verkäuferdaten.
-            price_list_file_name (str): Dateiname (ohne Endung) für die Preisliste.
-            statistic_file_name (str): Dateiname (ohne Endung) für die Statistikdatei.
-            pdf_template_path_input (str): Vollständiger Pfad zur PDF-Vorlagedatei.
-            pdf_output_file_name (str): Dateiname (mit Endung) für die generierte PDF-Datei.
-        """
+        """ Initializes FileGenerator and its sub-generators. """
+        self.logger = logger # Store the logger
         self.output_path = Path(output_path) if output_path else Path('.')
         self.fleat_market_data = fleat_market_data
-        self.pdf_template_path = pdf_template_path_input
-        self.pdf_output_filename = pdf_output_file_name # Behalte den vollen Namen
 
-        # Stelle sicher, dass das Ausgabeverzeichnis existiert
+        self._log("DEBUG", f"FileGenerator initialized. Output path: {self.output_path.resolve()}")
+
         try:
-            self.verify_output_path(self.output_path)
+            self._verify_output_path(self.output_path)
         except Exception as e:
-             logger.error(f"Konnte Ausgabepfad '{self.output_path}' nicht erstellen. Fehler: {e}")
-             # Entscheiden, ob hier abgebrochen werden soll
+             self._log("ERROR", f"Konnte Ausgabepfad '{self.output_path}' nicht erstellen: {e}")
              raise RuntimeError(f"Ausgabepfad '{self.output_path}' konnte nicht erstellt werden.") from e
 
-        # Generatoren initialisieren - übergebe das output_path als String
+        # Initialize generators, passing the logger instance
         output_path_str = str(self.output_path)
-        self.__seller_generator = SellerDataGenerator(
-            fleat_market_data, output_path_str, seller_file_name
-        )
-        self.__price_list_generator = PriceListGenerator(
-            fleat_market_data, output_path_str, price_list_file_name
-        )
-        self.__statistic_generator = StatisticDataGenerator(
-            fleat_market_data, output_path_str, statistic_file_name
-        )
-        # PDF Generator braucht Pfad zum Template und den Namen der Output-Datei
+        common_args = {'fleat_market_data': fleat_market_data, 'path': output_path_str, 'logger': self.logger}
+
+        self.__seller_generator = SellerDataGenerator(**common_args, file_name=seller_file_name)
+        self.__price_list_generator = PriceListGenerator(**common_args, file_name=price_list_file_name)
+        self.__statistic_generator = StatisticDataGenerator(**common_args, file_name=statistic_file_name)
         self.__receive_info_pdf_generator = ReceiveInfoPdfGenerator(
-            fleat_market_data,
-            output_path_str, # Ausgabeverzeichnis
-            pdf_template_path_input,
-            pdf_output_file_name # Name der Zieldatei
-            # Optional: coordinates hier übergeben, falls nicht Standard
+            **common_args, # Pass common args including logger
+            pdf_template_path_input=pdf_template_path_input,
+            pdf_template_path_output=pdf_output_file_name
         )
 
-        # Liste der Generierungsaufgaben (Name für Logging, Instanz)
         self.generation_tasks = [
             ("Verkäuferdaten (.dat)", self.__seller_generator),
             ("Preisliste (.dat)", self.__price_list_generator),
@@ -102,110 +78,106 @@ class FileGenerator:
         ]
         self.total_steps = len(self.generation_tasks)
 
-        # Tracker und Bar für den Gesamtfortschritt, falls verfügbar
+        # Setup overall progress tracking if available
         self.__overall_tracker = None
         self.__overall_progress_bar = None
         if ProgressTracker and ConsoleProgressBar:
              self.__overall_tracker = ProgressTracker(total=self.total_steps)
              self.__overall_progress_bar = ConsoleProgressBar(length=60, description="Gesamtfortschritt")
+             self._log("DEBUG", "Gesamtfortschrittsanzeige initialisiert.")
         else:
-             logger.warning("Fortschrittsanzeige nicht initialisiert (Tracker oder Bar fehlt).")
+             self._log("WARNING", "Fortschrittsanzeige nicht verfügbar (ProgressTracker oder ConsoleProgressBar fehlt).")
 
+    def _log(self, level: str, message: str, on_verbose: bool = False) -> None:
+        """ Helper method for conditional logging for FileGenerator itself. """
+        if self.logger:
+            log_method = getattr(self.logger, level.lower(), None)
+            if log_method and callable(log_method):
+                 # Assuming CustomLogger methods handle on_verbose correctly
+                if level.lower() in ["debug", "info", "warning", "error"]:
+                     log_method(message, on_verbose=on_verbose)
+                else:
+                     log_method(message) # Fallback
 
-    def verify_output_path(self, path: Path):
-        """ Stellt sicher, dass der Ausgabepfad existiert. Wirft Fehler bei Problemen. """
+    def _verify_output_path(self, path: Path):
+        """ Ensures the output path exists. """
         path.mkdir(parents=True, exist_ok=True)
-        logger.debug(f"Ausgabepfad sichergestellt: {path.resolve()}")
-
+        self._log("DEBUG", f"Ausgabepfad sichergestellt: {path.resolve()}")
 
     def generate(self):
-        """
-        Führt alle konfigurierten Generierungsaufgaben nacheinander aus
-        und zeigt den Gesamtfortschritt an (falls Tracker/Bar verfügbar sind).
-        """
-        logger.info(f"Starte Gesamt-Dateigenerierung nach '{self.output_path.resolve()}'...")
+        """ Runs all configured generation tasks sequentially. """
+        self._log("INFO", f"Starte Gesamt-Dateigenerierung nach '{self.output_path.resolve()}'...")
         if not self.fleat_market_data:
-             logger.error("Keine Flohmarktdaten übergeben. Generierung abgebrochen.")
+             self._log("ERROR", "Keine Flohmarktdaten übergeben. Generierung abgebrochen.")
              return
 
         start_time = time.time()
         global_success = True
 
-        # Tracker zurücksetzen, falls vorhanden
+        # Reset and display initial progress bar state
         if self.__overall_tracker:
             self.__overall_tracker.reset(total=self.total_steps)
-            # Initialen Stand der Bar anzeigen
-            state = self.__overall_tracker.get_state()
             if self.__overall_progress_bar:
+                 state = self.__overall_tracker.get_state()
                  self.__overall_progress_bar.update(state['percentage'], state['current'], state['total'])
 
         for name, generator_instance in self.generation_tasks:
-            logger.info(f"\n--- Starte Schritt: {name} ---")
+            self._log("INFO", f"\n--- Starte Schritt: {name} ---")
             step_start_time = time.time()
             try:
-                # Führe die generate-Methode des Generators aus
-                # Übergebe den Gesamt-Tracker, damit der Generator ihn inkrementieren kann
+                # The generator's generate method uses its own logger (passed during init)
+                # We pass the overall_tracker for progress updates
                 generator_instance.generate(overall_tracker=self.__overall_tracker)
 
                 step_duration = time.time() - step_start_time
-                logger.info(f"--- Schritt '{name}' beendet (Dauer: {step_duration:.2f}s) ---")
+                self._log("INFO", f"--- Schritt '{name}' beendet (Dauer: {step_duration:.2f}s) ---")
 
-                # Fortschrittsanzeige aktualisieren, falls vorhanden
+                # Update overall progress bar
                 if self.__overall_tracker and self.__overall_progress_bar:
                     state = self.__overall_tracker.get_state()
                     self.__overall_progress_bar.update(state['percentage'], state['current'], state['total'])
-
-                    # Prüfe auf Fehler, die im Schritt aufgetreten sein könnten (durch tracker.set_error)
                     if state['error']:
-                         logger.error(f"!! Fehler während Schritt '{name}': {state['error']}. Fortfahren...")
-                         global_success = False # Markiere Gesamtprozess als fehlerhaft
-                         # Hier entscheiden: Abbrechen oder weitermachen?
-                         # Aktuell: Weitermachen mit nächstem Schritt
+                         self._log("ERROR", f"!! Fehler festgestellt während Schritt '{name}': {state['error']}. Fortfahren...")
+                         global_success = False # Mark overall failure
 
             except NotImplementedError:
-                 logger.error(f"Fehler: Die 'generate'-Methode ist für '{name}' nicht implementiert.")
+                 self._log("ERROR", f"Fehler: Die 'generate'-Methode ist für '{name}' nicht implementiert.")
                  global_success = False
                  if self.__overall_tracker:
                       self.__overall_tracker.set_error(NotImplementedError(f"generate für {name} fehlt"))
-                      self.__overall_tracker.increment() # Trotzdem Schritt zählen
-                 if self.__overall_tracker and self.__overall_progress_bar: # Update Bar nach Fehler
+                      if self.__overall_tracker.current < self.total_steps: self.__overall_tracker.increment() # Ensure step counted
+                 # Update bar after error
+                 if self.__overall_tracker and self.__overall_progress_bar:
                       state = self.__overall_tracker.get_state()
                       self.__overall_progress_bar.update(state['percentage'], state['current'], state['total'])
 
             except Exception as e:
                 step_duration = time.time() - step_start_time
-                logger.error(f"!! Unerwarteter FEHLER während Schritt '{name}' nach {step_duration:.2f}s: {e}", exc_info=True) # Log Traceback
+                self._log("ERROR", f"!! Unerwarteter FEHLER während Schritt '{name}' nach {step_duration:.2f}s: {e}") # exc_info=True for traceback if logger supports it
                 global_success = False
                 if self.__overall_tracker:
-                    self.__overall_tracker.set_error(e) # Fehler im Tracker speichern
-                    # Sicherstellen, dass der Schritt gezählt wird, auch wenn die Generator-Methode abstürzt
-                    # Check current progress vs expected progress
-                    current_prog = self.__overall_tracker.current
-                    expected_prog = self.generation_tasks.index((name, generator_instance)) + 1
-                    if current_prog < expected_prog:
-                         self.__overall_tracker.increment()
-                if self.__overall_tracker and self.__overall_progress_bar: # Update Bar nach Fehler
+                    self.__overall_tracker.set_error(e)
+                    if self.__overall_tracker.current < self.total_steps: self.__overall_tracker.increment() # Ensure step counted
+                 # Update bar after error
+                if self.__overall_tracker and self.__overall_progress_bar:
                     state = self.__overall_tracker.get_state()
                     self.__overall_progress_bar.update(state['percentage'], state['current'], state['total'])
-                # Hier entscheiden: Abbrechen oder weitermachen?
-                # break # Beispiel für Abbruch
+                # Decide whether to break or continue on unexpected errors
+                # break
 
-
-        # Gesamtprozess abschließen
+        # Final summary
         end_time = time.time()
         total_duration = end_time - start_time
-
-        logger.info("\n========================================")
+        self._log("INFO", "\n========================================")
         if global_success:
-            logger.info(f"Alle Generierungsschritte abgeschlossen in {total_duration:.2f} Sekunden.")
+            self._log("INFO", f"Alle Generierungsschritte abgeschlossen in {total_duration:.2f} Sekunden.")
             if self.__overall_progress_bar:
                 self.__overall_progress_bar.complete(success=True)
         else:
-            logger.error(f"Dateigenerierung mit FEHLERN abgeschlossen nach {total_duration:.2f} Sekunden.")
-            final_error = self.__overall_tracker.error if self.__overall_tracker else "Unbekannter Fehler"
+            final_error_msg = "Unbekannter Fehler"
+            if self.__overall_tracker and self.__overall_tracker.error:
+                 final_error_msg = str(self.__overall_tracker.error)
+            self._log("ERROR", f"Dateigenerierung mit FEHLERN abgeschlossen nach {total_duration:.2f} Sekunden.")
             if self.__overall_progress_bar:
-                 self.__overall_progress_bar.complete(success=False, final_message=f"Abgeschlossen mit Fehlern (letzter: {str(final_error)[:80]})")
-
-        logger.info("========================================")
-
-    # set_... Methoden sind nicht mehr nötig, da Namen im __init__ übergeben werden
+                 self.__overall_progress_bar.complete(success=False, final_message=f"Abgeschlossen mit Fehlern (letzter: {final_error_msg[:80]})")
+        self._log("INFO", "========================================")

@@ -2,103 +2,86 @@
 from pathlib import Path
 from typing import List, Optional
 
-# Annahme: Benötigte Objekte sind in 'objects.py' und Logger in 'log.py'
+# Conditional import of CustomLogger
 try:
-    from objects import FleatMarket # Nur FleatMarket benötigt
-    from log import logger
+    from log import CustomLogger
 except ImportError:
-    print("WARNUNG: Konnte 'objects' oder 'log' nicht importieren. Stellen Sie sicher, dass diese Module existieren.")
-    # Dummy-Implementierungen
-    class FleatMarket:
-        def get_main_number_data_list(self): return []
-    class Logger:
-        def info(self, msg): print(f"INFO: {msg}")
-        def warning(self, msg): print(f"WARN: {msg}")
-        def error(self, msg): print(f"ERROR: {msg}")
-    logger = Logger()
+    CustomLogger = None # type: ignore
 
-from .data_generator import DataGenerator
-# Annahme: ProgressTracker existiert im selben Verzeichnis oder im PYTHONPATH
+# Assume objects and ProgressTracker are available
+try:
+    from objects import FleatMarket # Adjust name as per your project
+except ImportError:
+    class FleatMarket: get_main_number_data_list = lambda self: []
 try:
     from .progress_tracker import ProgressTracker
 except ImportError:
-    ProgressTracker = None
+    ProgressTracker = None # type: ignore
 
+from .data_generator import DataGenerator
 
 class StatisticDataGenerator(DataGenerator):
-    """
-    Generates a simple statistics file ('versand.dat').
-    Format: main_number,"-"
-    Only includes entries for valid main numbers.
-    """
+    """ Generates statistic data ('versand.dat'), using optional logging. """
 
     FILE_SUFFIX = 'dat'
 
-    def __init__(self, fleat_market_data: FleatMarket, path: str = '', file_name: str = 'versand') -> None:
-        """
-        Initializes the StatisticDataGenerator.
-
-        Args:
-            fleat_market_data: The flea market data object.
-            path: The output directory path.
-            file_name: The name of the output file (without suffix). Default is 'versand'.
-        """
-        super().__init__(path, file_name)
-        self.__fleat_market_data: FleatMarket = fleat_market_data
+    def __init__(self,
+                 fleat_market_data: FleatMarket,
+                 path: str = '',
+                 file_name: str = 'versand',
+                 logger: Optional[CustomLogger] = None) -> None:
+        """ Initializes the StatisticDataGenerator with data, path, name, and logger. """
+        super().__init__(path, file_name, logger) # Pass logger to base class
+        self.__fleat_market_data = fleat_market_data
+        # self.logger inherited
 
     def __create_entry(self, main_number: int) -> str:
         """ Creates a formatted entry: main_number,"-" """
         return f'{main_number},"-"\n'
 
-    def __write(self, output_data: List[str]):
+    def write(self, output_data: List[str]):
         """ Writes the generated statistic data entries to the file. """
         if not output_data:
-            logger.info("Keine Statistikdaten zum Schreiben vorhanden.")
+            self._log("INFO", "Keine Statistikdaten zum Schreiben vorhanden.")
             return
-
         full_path = self.get_full_path()
         try:
             full_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(full_path, 'w', encoding='utf-8') as file: # Specify encoding
+            with open(full_path, 'w', encoding='utf-8') as file:
                 file.writelines(output_data)
-            logger.info(f"Statistikdaten erfolgreich geschrieben: {full_path}")
+            self._log("INFO", f"Statistikdaten erfolgreich geschrieben: {full_path}")
         except IOError as e:
-            logger.error(f"Fehler beim Schreiben der Statistikdaten nach {full_path}: {e}")
+            self._log("ERROR", f"Fehler beim Schreiben der Statistikdaten nach {full_path}: {e}")
         except Exception as e:
-            logger.error(f"Unerwarteter Fehler beim Schreiben der Statistikdaten: {e}")
-
+            self._log("ERROR", f"Unerwarteter Fehler beim Schreiben der Statistikdaten: {e}")
 
     def generate(self, overall_tracker: Optional[ProgressTracker] = None):
-        """
-        Generates statistic data for valid main numbers, writes the file,
-        and updates the overall progress tracker if provided.
-        """
+        """ Generates statistic data, writes, and updates tracker. """
+        self._log("INFO", f"Generiere Statistik Daten ({self.file_name}.{self.FILE_SUFFIX}):\n" +
+                    "      ========================")
         output_data: List[str] = []
         valid_cnt = 0
         invalid_cnt = 0
-        logger.info(f"Generiere Statistik Daten ({self.file_name}.{self.FILE_SUFFIX}):\n" +
-                    "      ========================")
 
         try:
             all_main_numbers_data = self.__fleat_market_data.get_main_number_data_list()
         except AttributeError:
-             logger.error("FleatMarket Objekt hat keine Methode 'get_main_number_data_list'. Breche Statistik-Generierung ab.")
-             if overall_tracker:
+             self._log("ERROR", "FleatMarket Objekt hat keine Methode 'get_main_number_data_list'. Breche ab.")
+             if overall_tracker and isinstance(overall_tracker, ProgressTracker):
                  overall_tracker.set_error(AttributeError("Fehlende Methode in FleatMarket"))
                  overall_tracker.increment()
              return
         except Exception as e:
-             logger.error(f"Fehler beim Abrufen der Hauptnummern-Daten: {e}")
-             if overall_tracker:
+             self._log("ERROR", f"Fehler beim Abrufen der Hauptnummern-Daten: {e}")
+             if overall_tracker and isinstance(overall_tracker, ProgressTracker):
                  overall_tracker.set_error(e)
                  overall_tracker.increment()
              return
 
         for main_number_data in all_main_numbers_data:
-             # Prüfe Datenobjekt
             if not all([hasattr(main_number_data, 'is_valid'),
                         hasattr(main_number_data, 'get_main_number')]):
-                 logger.warning("Unerwartetes Datenobjekt in Hauptnummernliste gefunden. Übersprungen.")
+                 self._log("WARNING", "Unerwartetes Datenobjekt in Hauptnummernliste gefunden. Übersprungen.")
                  invalid_cnt += 1
                  continue
 
@@ -109,19 +92,19 @@ class StatisticDataGenerator(DataGenerator):
                     output_data.append(entry)
                     valid_cnt +=1
                 except (ValueError, TypeError) as e:
-                     logger.error(f"Konnte Hauptnummer nicht als Zahl interpretieren: {main_number_data.get_main_number()}. Fehler: {e}")
+                     self._log("ERROR", f"Hauptnummer nicht als Zahl interpretierbar: {main_number_data.get_main_number()}. Fehler: {e}")
                      invalid_cnt += 1
                 except Exception as e:
-                     logger.error(f"Unerwarteter Fehler bei gültiger Hauptnummer {main_number_data.get_main_number()}: {e}")
+                     self._log("ERROR", f"Unerwarteter Fehler bei gültiger Hauptnummer {main_number_data.get_main_number()}: {e}")
                      invalid_cnt += 1
             else:
                 invalid_cnt +=1
 
-        self.__write(output_data)
-        logger.info(f"   >> Statistikdaten erstellt: {valid_cnt} gültige Einträge, {invalid_cnt} ungültige/übersprungene Hauptnummern <<\n")
+        self.write(output_data)
+        self._log("INFO", f"   >> Statistikdaten erstellt: {valid_cnt} gültige Einträge, {invalid_cnt} ungültige/übersprungene Hauptnummern <<\n")
 
-        # Melde Abschluss dieser Aufgabe an den Gesamt-Tracker
+        # Update tracker
         if overall_tracker and isinstance(overall_tracker, ProgressTracker):
             overall_tracker.increment()
         elif overall_tracker:
-             logger.warning("overall_tracker wurde übergeben, ist aber kein ProgressTracker.")
+             self._log("WARNING", "overall_tracker wurde übergeben, ist aber kein ProgressTracker.")
