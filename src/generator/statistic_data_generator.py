@@ -12,7 +12,7 @@ except ImportError:
 try:
     from objects import FleatMarket # Adjust name as per your project
 except ImportError:
-    class FleatMarket: get_main_number_data_list = lambda self: []
+    class FleatMarket: get_main_number_list = lambda self: []
 try:
     from .progress_tracker import ProgressTracker
 except ImportError:
@@ -64,9 +64,9 @@ class StatisticDataGenerator(DataGenerator):
         invalid_cnt = 0
 
         try:
-            all_main_numbers_data = self.__fleat_market_data.get_main_number_data_list()
+            all_main_numbers_data = self.__fleat_market_data.get_main_number_list()
         except AttributeError:
-             self._log("ERROR", "FleatMarket Objekt hat keine Methode 'get_main_number_data_list'. Breche ab.")
+             self._log("ERROR", "FleatMarket Objekt hat keine Methode 'get_main_number_list'. Breche ab.")
              if overall_tracker and isinstance(overall_tracker, ProgressTracker):
                  overall_tracker.set_error(AttributeError("Fehlende Methode in FleatMarket"))
                  overall_tracker.increment()

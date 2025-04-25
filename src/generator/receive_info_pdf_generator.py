@@ -33,7 +33,7 @@ except ImportError:
 try:
     from objects import FleatMarket, Seller # Adjust names
 except ImportError:
-    class FleatMarket: get_main_number_data_list=lambda self: []; get_seller_data=lambda i: Seller()
+    class FleatMarket: get_main_number_list=lambda self: []; get_seller_data=lambda i: Seller()
     class Seller: vorname="Dummy"; nachname="Dummy"
 try:
     from .progress_tracker import ProgressTracker
@@ -92,9 +92,9 @@ class ReceiveInfoPdfGenerator(DataGenerator):
         data: List[Tuple[str, str, str]] = []
         valid_count, invalid_count = 0, 0
         try:
-            all_main_numbers_data = self.__fleat_market_data.get_main_number_data_list()
+            all_main_numbers_data = self.__fleat_market_data.get_main_number_list()
         except AttributeError:
-             self._log("ERROR", "FleatMarket Objekt hat keine Methode 'get_main_number_data_list'.")
+             self._log("ERROR", "FleatMarket Objekt hat keine Methode 'get_main_number_list'.")
              return []
         except Exception as e:
              self._log("ERROR", f"Fehler beim Abrufen der Hauptnummern-Daten für PDF: {e}")

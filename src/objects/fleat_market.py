@@ -118,7 +118,7 @@ class FleatMarket:
         Returns:
             List[MainNumber]: The internal list of initialized MainNumber instances.
         """
-        # Corrected method name from get_main_number_data_list to match convention
+        # Corrected method name from get_main_number_list to match convention
         if self._logger:
             self._logger.debug(f"Accessing main number list (count: {len(self.__main_number_list)}).")
         return self.__main_number_list

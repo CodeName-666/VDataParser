@@ -13,7 +13,7 @@
             "args": [
                 "--file", "c:\\Users\\NoName\\Downloads\\F25.json",
                 "--path", "src\\output",
-                "--log-level", "INFO",
+                "--log-level", "DEBUG",
                 //"--verbose"
             ]
         },
