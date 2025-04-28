@@ -2,26 +2,30 @@
 from pathlib import Path
 from typing import List, Optional
 
-# Conditional import of CustomLogger
+# Conditional imports... (keep as they are)
 try:
     from log import CustomLogger
 except ImportError:
-    CustomLogger = None # type: ignore
-
-# Assume objects and ProgressTracker are available
+    CustomLogger = None
 try:
-    from objects import FleatMarket # Adjust name as per your project
+    from objects import FleatMarket
 except ImportError:
-    class FleatMarket: get_main_number_list = lambda self: []
+    class FleatMarket:
+        def get_main_number_list(self): return []
 try:
-    from .progress_tracker import ProgressTracker
+    from src.display import ProgressTrackerAbstraction
 except ImportError:
-    ProgressTracker = None # type: ignore
+    ProgressTrackerAbstraction = None
+try:
+    from src.display import OutputInterfaceAbstraction  # Added
+except ImportError:
+    OutputInterfaceAbstraction = None  # Added
 
 from .data_generator import DataGenerator
 
+
 class StatisticDataGenerator(DataGenerator):
-    """ Generates statistic data ('versand.dat'), using optional logging. """
+    """ Generates statistic data ('versand.dat'), using optional logging and output interface. """
 
     FILE_SUFFIX = 'dat'
 
@@ -29,11 +33,12 @@ class StatisticDataGenerator(DataGenerator):
                  fleat_market_data: FleatMarket,
                  path: str = '',
                  file_name: str = 'versand',
-                 logger: Optional[CustomLogger] = None) -> None:
-        """ Initializes the StatisticDataGenerator with data, path, name, and logger. """
-        super().__init__(path, file_name, logger) # Pass logger to base class
+                 logger: Optional[CustomLogger] = None,
+                 output_interface: Optional[OutputInterfaceAbstraction] = None) -> None:  # Added
+        """ Initializes the StatisticDataGenerator with data, path, name, logger, and output interface. """
+        super().__init__(path, file_name, logger, output_interface)  # Pass both
         self.__fleat_market_data = fleat_market_data
-        # self.logger inherited
+        # self.logger, self.output_interface inherited
 
     def __create_entry(self, main_number: int) -> str:
         """ Creates a formatted entry: main_number,"-" """
@@ -42,23 +47,27 @@ class StatisticDataGenerator(DataGenerator):
     def write(self, output_data: List[str]):
         """ Writes the generated statistic data entries to the file. """
         if not output_data:
-            self._log("INFO", "Keine Statistikdaten zum Schreiben vorhanden.")
+            # Inform user and log
+            self._output_and_log("INFO", "Keine Statistikdaten zum Schreiben vorhanden.")
             return
-        full_path = self.get_full_path()
+        full_path = self.get_full_path()  # Handles its own errors
         try:
             full_path.parent.mkdir(parents=True, exist_ok=True)
             with open(full_path, 'w', encoding='utf-8') as file:
                 file.writelines(output_data)
-            self._log("INFO", f"Statistikdaten erfolgreich geschrieben: {full_path}")
+            # Success message for user
+            self._output_and_log("INFO", f"Statistikdaten erfolgreich geschrieben: {full_path}")
         except IOError as e:
-            self._log("ERROR", f"Fehler beim Schreiben der Statistikdaten nach {full_path}: {e}")
+            # Critical errors for user
+            self._output_and_log("ERROR", f"Fehler beim Schreiben der Statistikdaten nach {full_path}: {e}")
         except Exception as e:
-            self._log("ERROR", f"Unerwarteter Fehler beim Schreiben der Statistikdaten: {e}")
+            self._output_and_log("ERROR", f"Unerwarteter Fehler beim Schreiben der Statistikdaten: {e}")
 
-    def generate(self, overall_tracker: Optional[ProgressTracker] = None):
+    def generate(self, overall_tracker: Optional[ProgressTrackerAbstraction] = None):
         """ Generates statistic data, writes, and updates tracker. """
-        self._log("INFO", f"Generiere Statistik Daten ({self.file_name}.{self.FILE_SUFFIX}):\n" +
-                    "      ========================")
+        # Start message for user
+        self._output_and_log("INFO", f"Generiere Statistik Daten ({self.file_name}.{self.FILE_SUFFIX}):\n" +
+                             "      ========================")
         output_data: List[str] = []
         valid_cnt = 0
         invalid_cnt = 0
@@ -66,45 +75,60 @@ class StatisticDataGenerator(DataGenerator):
         try:
             all_main_numbers_data = self.__fleat_market_data.get_main_number_list()
         except AttributeError:
-             self._log("ERROR", "FleatMarket Objekt hat keine Methode 'get_main_number_list'. Breche ab.")
-             if overall_tracker and isinstance(overall_tracker, ProgressTracker):
-                 overall_tracker.set_error(AttributeError("Fehlende Methode in FleatMarket"))
-                 overall_tracker.increment()
-             return
+            # Critical error
+            err_msg = "FleatMarket Objekt hat keine Methode 'get_main_number_list'. Breche ab."
+            self._output_and_log("ERROR", err_msg)
+            if overall_tracker and isinstance(overall_tracker, ProgressTrackerAbstraction):
+                overall_tracker.set_error(AttributeError("Fehlende Methode in FleatMarket"))
+                overall_tracker.increment()
+            return
         except Exception as e:
-             self._log("ERROR", f"Fehler beim Abrufen der Hauptnummern-Daten: {e}")
-             if overall_tracker and isinstance(overall_tracker, ProgressTracker):
-                 overall_tracker.set_error(e)
-                 overall_tracker.increment()
-             return
+            # Critical error
+            err_msg = f"Fehler beim Abrufen der Hauptnummern-Daten: {e}"
+            self._output_and_log("ERROR", err_msg)
+            if overall_tracker and isinstance(overall_tracker, ProgressTrackerAbstraction):
+                overall_tracker.set_error(e)
+                overall_tracker.increment()
+            return
 
         for main_number_data in all_main_numbers_data:
+            # Data structure check - potentially relevant warning
             if not all([hasattr(main_number_data, 'is_valid'),
                         hasattr(main_number_data, 'get_main_number')]):
-                 self._log("WARNING", "Unerwartetes Datenobjekt in Hauptnummernliste gefunden. Übersprungen.")
-                 invalid_cnt += 1
-                 continue
+                self._output_and_log("WARNING", "Unerwartetes Datenobjekt in Hauptnummernliste gefunden. Übersprungen.")
+                invalid_cnt += 1
+                continue
 
             if main_number_data.is_valid():
                 try:
                     main_number = int(main_number_data.get_main_number())
                     entry = self.__create_entry(main_number)
                     output_data.append(entry)
-                    valid_cnt +=1
+                    valid_cnt += 1
                 except (ValueError, TypeError) as e:
-                     self._log("ERROR", f"Hauptnummer nicht als Zahl interpretierbar: {main_number_data.get_main_number()}. Fehler: {e}")
-                     invalid_cnt += 1
+                    # Data conversion error
+                    self._output_and_log(
+                        "ERROR", f"Hauptnummer nicht als Zahl interpretierbar: {main_number_data.get_main_number()}. Fehler: {e}. Übersprungen.")
+                    invalid_cnt += 1
                 except Exception as e:
-                     self._log("ERROR", f"Unerwarteter Fehler bei gültiger Hauptnummer {main_number_data.get_main_number()}: {e}")
-                     invalid_cnt += 1
+                    # Unexpected processing error
+                    self._output_and_log(
+                        "ERROR", f"Unerwarteter Fehler bei gültiger Hauptnummer {main_number_data.get_main_number()}: {e}. Übersprungen.")
+                    invalid_cnt += 1
             else:
-                invalid_cnt +=1
+                # Skipping invalid is expected, just increment count
+                # self._log("DEBUG", f"Überspringe ungültige Hauptnummer für Statistik: {main_number_data.get_main_number()}")
+                invalid_cnt += 1
 
-        self.write(output_data)
-        self._log("INFO", f"   >> Statistikdaten erstellt: {valid_cnt} gültige Einträge, {invalid_cnt} ungültige/übersprungene Hauptnummern <<\n")
+        self.write(output_data)  # write handles its own messages
+        # Final summary for user
+        self._output_and_log(
+            "INFO", f"   >> Statistikdaten erstellt: {valid_cnt} gültige Einträge, {invalid_cnt} ungültige/übersprungene Hauptnummern <<\n")
 
-        # Update tracker
-        if overall_tracker and isinstance(overall_tracker, ProgressTracker):
+        # Update tracker - internal log
+        if overall_tracker and isinstance(overall_tracker, ProgressTrackerAbstraction):
             overall_tracker.increment()
+            self._log("DEBUG", "Overall tracker incremented for StatisticDataGenerator.")
         elif overall_tracker:
-             self._log("WARNING", "overall_tracker wurde übergeben, ist aber kein ProgressTracker.")
+            # Warning about tracker type
+            self._output_and_log("WARNING", "overall_tracker wurde übergeben, ist aber kein ProgressTrackerInterface.")
