@@ -5,7 +5,7 @@ import threading
 
 # Import the INTERFACE, not the implementation
 try:
-    from .progress_tracker_interface import ProgressTrackerInterface
+    from ..tracker.progress_tracker_abstraction import ProgressTrackerAbstraction
 except ImportError:
     ProgressTrackerInterface = None # type: ignore
 
@@ -68,7 +68,7 @@ class ProgressBarAbstraction(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def _monitor_progress(self, tracker: ProgressTrackerInterface):
+    def _monitor_progress(self, tracker: ProgressTrackerAbstraction):
         """
         Interne Methode (normalerweise in einem Thread ausgeführt), die den
         Status vom Tracker abfragt und die `update`-Methode aufruft.
@@ -78,7 +78,7 @@ class ProgressBarAbstraction(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerInterface) -> Optional[Exception]:
+    def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerAbstraction) -> Optional[Exception]:
         """
         Führt die `target`-Funktion aus und zeigt währenddessen den Fortschritt an.
 

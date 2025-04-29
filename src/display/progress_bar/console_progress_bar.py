@@ -6,7 +6,8 @@ from typing import Optional, Callable, Dict, Any, Tuple
 
 # Import the Abstraction
 try:
-    from ..progress_bar_abstraction import ProgressBarAbstraction
+
+    from .progress_bar_abstraction import ProgressBarAbstraction
 except ImportError:
     # Fallback if running standalone or structure differs
     try:
@@ -17,9 +18,9 @@ except ImportError:
 
 # Import the INTERFACE, not the implementation
 try:
-    from .progress_tracker_interface import ProgressTrackerInterface
+    from ..tracker.progress_tracker_abstraction import ProgressTrackerAbstraction
 except ImportError:
-    ProgressTrackerInterface = None # type: ignore
+    ProgressTrackerAbstraction = None # type: ignore
 
 # Conditional import of CustomLogger (remain the same)
 try:
@@ -91,7 +92,7 @@ class ConsoleProgressBar(ProgressBarAbstraction):
 
 
     # Implement the abstract _monitor_progress method
-    def _monitor_progress(self, tracker: ProgressTrackerInterface):
+    def _monitor_progress(self, tracker: ProgressTrackerAbstraction):
         """Thread-Funktion, die den Tracker überwacht und die Anzeige aktualisiert."""
         if tracker is None:
              self._log("ERROR", "Kein Tracker zum Überwachen übergeben.")
@@ -149,7 +150,7 @@ class ConsoleProgressBar(ProgressBarAbstraction):
 
 
     # Implement the abstract run_with_progress method
-    def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerInterface) -> Optional[Exception]:
+    def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerAbstraction) -> Optional[Exception]:
         """
         Führt eine Funktion 'target' aus und zeigt währenddessen den Fortschritt
         mithilfe des 'tracker' in der Konsole an.
@@ -164,7 +165,7 @@ class ConsoleProgressBar(ProgressBarAbstraction):
             Optional[Exception]: Der Fehler, der im Tracker gesetzt wurde oder während
                                  der Ausführung von 'target' aufgetreten ist, oder None bei Erfolg.
         """
-        if not isinstance(tracker, ProgressTrackerInterface): # type: ignore # Check if it's a valid tracker
+        if not isinstance(tracker, ProgressTrackerAbstraction): # type: ignore # Check if it's a valid tracker
             raise ValueError("Ein gültiges ProgressTrackerInterface-Objekt muss übergeben werden.")
         if kwargs is None:
             kwargs = {}
@@ -186,7 +187,7 @@ class ConsoleProgressBar(ProgressBarAbstraction):
             task_exception = e
             # Stelle sicher, dass der Tracker den Fehler kennt, falls die Aufgabe ihn nicht selbst setzt
             # Check if tracker *interface* is available before calling methods
-            if ProgressTrackerInterface is not None and isinstance(tracker, ProgressTrackerInterface):
+            if ProgressTrackerAbstraction is not None and isinstance(tracker, ProgressTrackerAbstraction):
                 current_tracker_state = tracker.get_state()
                 if not current_tracker_state.get('error'):
                     try:

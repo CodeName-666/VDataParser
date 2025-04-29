@@ -41,7 +41,7 @@ except ImportError:
 
 # Import the INTERFACE
 try:
-    from .progress_tracker_interface import ProgressTrackerInterface
+    from ..tracker.progress_tracker_abstraction import ProgressTrackerAbstraction
 except ImportError:
     ProgressTrackerInterface = None # type: ignore
 
@@ -227,7 +227,7 @@ class QtProgressBar(ProgressBarAbstraction):
 
 
     # Implement the abstract _monitor_progress method
-    def _monitor_progress(self, tracker: ProgressTrackerInterface):
+    def _monitor_progress(self, tracker: ProgressTrackerAbstraction):
         """
         Thread-Funktion, die den Tracker überwacht und Signale zur
         Aktualisierung der GUI aussendet. Läuft in einem separaten Thread.
@@ -323,7 +323,7 @@ class QtProgressBar(ProgressBarAbstraction):
         else:
             self._dialog.finished_signal.emit(success) # Already in GUI thread
 
-    def _run_target_task(self, target: Callable[..., Any], args: Tuple, kwargs: Dict[str, Any], tracker: ProgressTrackerInterface):
+    def _run_target_task(self, target: Callable[..., Any], args: Tuple, kwargs: Dict[str, Any], tracker: ProgressTrackerAbstraction):
         """Wrapper function to run the target task in a separate thread."""
         self._task_exception = None # Reset before task starts
         try:
@@ -355,7 +355,7 @@ class QtProgressBar(ProgressBarAbstraction):
 
 
     # Implement the abstract run_with_progress method
-    def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerInterface) -> Optional[Exception]:
+    def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerAbstraction) -> Optional[Exception]:
         """
         Führt die `target`-Funktion in einem separaten Thread aus und zeigt
         den Fortschritt in einem modalen Qt-Dialog an.
