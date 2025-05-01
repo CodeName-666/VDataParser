@@ -5,6 +5,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Optional, Dict, Any
 
+from pypdf import PdfReader, PdfWriter, PageObject
+# --- CORRECTED/ADDED ReportLab IMPORTS ---
+from reportlab.pdfgen import canvas # The main canvas object for drawing
+from reportlab.lib.pagesizes import letter, landscape # Standard page sizes and orientation
+from reportlab.lib.units import mm # Measurement units like millimeters
+from reportlab.lib import colors # Predefined colors
+
 # External dependencies... (keep as they are)
 # Conditional imports... (keep as they are)
 try:

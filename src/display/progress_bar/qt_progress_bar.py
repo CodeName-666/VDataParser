@@ -355,7 +355,7 @@ class QtProgressBar(ProgressBarAbstraction):
 
 
     # Implement the abstract run_with_progress method
-    def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerAbstraction) -> Optional[Exception]:
+    def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerAbstraction = None) -> Optional[Exception]:
         """
         Führt die `target`-Funktion in einem separaten Thread aus und zeigt
         den Fortschritt in einem modalen Qt-Dialog an.

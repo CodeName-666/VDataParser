@@ -7,13 +7,14 @@ import threading
 try:
     from ..tracker.progress_tracker_abstraction import ProgressTrackerAbstraction
 except ImportError:
-    ProgressTrackerInterface = None # type: ignore
+    ProgressTrackerInterface = None  # type: ignore
 
 # Conditional import of CustomLogger
 try:
     from log import CustomLogger
 except ImportError:
     CustomLogger = None
+
 
 class ProgressBarAbstraction(abc.ABC):
     """
@@ -42,16 +43,16 @@ class ProgressBarAbstraction(abc.ABC):
         # Store the latest known state, useful for subclasses
         self._current_state: Dict[str, Any] = {'percentage': 0, 'current': 0, 'total': 100, 'error': None}
 
-
     def _log(self, level: str, message: str):
         """Helper zum Loggen von Nachrichten, falls ein Logger vorhanden ist."""
         if self.logger:
-             log_method = getattr(self.logger, level.lower(), None)
-             if log_method: log_method(f"{self.__class__.__name__}: {message}")
-             elif level.upper() == "ERROR":
-                 print(f"ERROR: {self.__class__.__name__}: {message}", file=sys.stderr) # Fallback for errors
-             # else:
-             #    print(f"{level}: {self.__class__.__name__}: {message}") # Optional: Fallback for other levels
+            log_method = getattr(self.logger, level.lower(), None)
+            if log_method:
+                log_method(f"{self.__class__.__name__}: {message}")
+            elif level.upper() == "ERROR":
+                print(f"ERROR: {self.__class__.__name__}: {message}", file=sys.stderr)  # Fallback for errors
+            # else:
+            #    print(f"{level}: {self.__class__.__name__}: {message}") # Optional: Fallback for other levels
 
     @abc.abstractmethod
     def update(self, percentage: int, current: Optional[int] = None, total: Optional[int] = None, error: Optional[Exception] = None):
@@ -78,7 +79,7 @@ class ProgressBarAbstraction(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerAbstraction) -> Optional[Exception]:
+    def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerAbstraction = None) -> Optional[Exception]:
         """
         Führt die `target`-Funktion aus und zeigt währenddessen den Fortschritt an.
 

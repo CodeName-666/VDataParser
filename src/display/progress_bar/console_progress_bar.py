@@ -150,7 +150,7 @@ class ConsoleProgressBar(ProgressBarAbstraction):
 
 
     # Implement the abstract run_with_progress method
-    def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerAbstraction) -> Optional[Exception]:
+    def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerAbstraction = None) -> Optional[Exception]:
         """
         Führt eine Funktion 'target' aus und zeigt währenddessen den Fortschritt
         mithilfe des 'tracker' in der Konsole an.

@@ -4,7 +4,6 @@ from .output.qt_output import QtOutput
 
 from .tracker.progress_tracker_abstraction import ProgressTrackerAbstraction
 from .tracker.basic_porgress_tracker import BasicProgressTracker
-from .tracker.progress_tracker_abstraction import ProgressTracker
 
 from .progress_bar.progress_bar_abstraction import ProgressBarAbstraction
 from .progress_bar.console_progress_bar import ConsoleProgressBar
