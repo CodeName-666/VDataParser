@@ -21,7 +21,7 @@ except ImportError:
 # Import Abstractions/Interfaces
 try:
     # Import the tracker abstraction
-    from src.tracker.progress_tracker_abstraction import ProgressTrackerAbstraction
+    from src.display import ProgressTrackerAbstraction
 except ImportError:
     ProgressTrackerAbstraction = None # type: ignore
 

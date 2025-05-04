@@ -5,12 +5,14 @@ from typing import Dict, Any, Optional
 # Import the interface
 from .progress_tracker_abstraction import ProgressTrackerAbstraction
 
+
 class BasicProgressTracker(ProgressTrackerAbstraction):
     """
     Eine grundlegende, Thread-sichere Implementierung des ProgressTrackerInterface.
     Verwaltet den Zustand und bietet Methoden zur Aktualisierung und Abfrage.
     Diese Implementierung benachrichtigt nicht aktiv über Änderungen (Polling-basiert).
     """
+
     def __init__(self, total: int = 100):
         """
         Initialisiert den Tracker.
@@ -40,7 +42,8 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
             if total is not None:
                 if total < 0:
                     # Statt print -> Fehler werfen für ungültige Eingaben
-                    raise ValueError(f"Versuch, total auf ungültigen negativen Wert {total} zu setzen.")
+                    raise ValueError(
+                        f"Versuch, total auf ungültigen negativen Wert {total} zu setzen.")
                 self._total = total
             # Neuberechnung des Prozentsatzes nach Reset
             self._calculate_percentage_unsafe()
@@ -48,7 +51,8 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
     def increment(self, value: int = 1) -> None:
         """Erhöht den aktuellen Fortschrittswert."""
         if value < 0:
-            raise ValueError(f"Versuch, Fortschritt um negativen Wert {value} zu erhöhen.")
+            raise ValueError(
+                f"Versuch, Fortschritt um negativen Wert {value} zu erhöhen.")
         with self._lock:
             self._current += value
             # Neuberechnung, da sich current geändert hat
@@ -57,7 +61,8 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
     def set_progress(self, current: int) -> None:
         """Setzt den aktuellen Fortschrittswert direkt."""
         if current < 0:
-            raise ValueError(f"Versuch, Fortschritt auf negativen Wert {current} zu setzen.")
+            raise ValueError(
+                f"Versuch, Fortschritt auf negativen Wert {current} zu setzen.")
         with self._lock:
             self._current = current
             # Neuberechnung, da sich current geändert hat
@@ -66,7 +71,8 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
     def set_percentage(self, percentage: int) -> None:
         """Setzt den Prozentsatz direkt (0-100). Passt 'current' näherungsweise an."""
         if not (0 <= percentage <= 100):
-             raise ValueError(f"Versuch, Prozentsatz auf ungültigen Wert {percentage} zu setzen (muss 0-100 sein).")
+            raise ValueError(
+                f"Versuch, Prozentsatz auf ungültigen Wert {percentage} zu setzen (muss 0-100 sein).")
         with self._lock:
             self._percentage = percentage
             # Passe _current an (kann bei Rundung ungenau sein)
@@ -76,8 +82,9 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
             elif percentage == 100:
                 # Wenn total 0 ist, aber 100% erreicht, setzen wir current auf etwas > 0 (z.B. 1)
                 # um den Zustand "abgeschlossen" darzustellen.
-                self._current = 1 if self._total == 0 else self._total # Wenn total 0, dann 1, sonst total
-            else: # percentage < 100 und total = 0
+                # Wenn total 0, dann 1, sonst total
+                self._current = 1 if self._total == 0 else self._total
+            else:  # percentage < 100 und total = 0
                 self._current = 0
             # Stelle sicher, dass die Berechnung konsistent ist (kann Rundungsfehler korrigieren)
             self._calculate_percentage_unsafe()
@@ -96,7 +103,8 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
         if self._total > 0:
             # Begrenze Prozentsatz auf 0-100
             perc = (self._current / self._total) * 100
-            self._percentage = max(0, min(100, int(round(perc)))) # Runden statt nur int()
+            # Runden statt nur int()
+            self._percentage = max(0, min(100, int(round(perc))))
         else:
             # Wenn total 0 ist: 100% wenn current > 0 (oder == total, was 0 ist), sonst 0%
             # Oder: Immer 100% wenn total 0 ist? Konvention: 100% nur wenn Arbeit getan (current > 0).
@@ -114,7 +122,7 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
         # Total ist nach Initialisierung konstant (außer bei reset), kein Lock nötig?
         # Sicherer mit Lock, falls total doch änderbar gemacht wird.
         with self._lock:
-             return self._total
+            return self._total
 
     @property
     def percentage(self) -> int:
