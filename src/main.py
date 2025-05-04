@@ -1,5 +1,6 @@
 # --- START OF FILE main.py (Revised for Injected Progress) ---
 import sys
+import logging  # Standard logging for fallback
 from typing import List, Optional
 from pathlib import Path  # Import Path for clarity
 from args import Arguments  # Import Arguments class for command line argument parsing
@@ -41,8 +42,8 @@ try:
     # Interface needed? Not directly here.
     from display import ProgressTrackerAbstraction
     # Implementation needed? Not directly here.
+    from display import ProgressBarAbstraction
     from display import BasicProgressTracker
-    # Needed? No, FileGenerator handles it.
     from display import ConsoleProgressBar
     from display import OutputInterfaceAbstraction, ConsoleOutput  # Needed for CLI
 except ImportError as e:
@@ -83,6 +84,8 @@ def run_cli():
     args = Arguments()
     output_path = args.path
 
+    file_handler = logging.FileHandler('cli_logging', mode='w', encoding='utf-8')
+
     # --- Setup Logging ---
     log_level = 'DEBUG' if args.verbose else args.log_level
     verbose_mode = args.verbose
@@ -92,7 +95,8 @@ def run_cli():
         cli_logger = CustomLogger(
             name="FleaMarketCLI",
             log_level=log_level,
-            verbose_enabled=verbose_mode
+            verbose_enabled=verbose_mode,
+            handler=file_handler,  # Pass the file handler
         )
         cli_logger.info(
             f"--- Starting Flea Market Generator v{get_version()} (CLI Mode) ---")
@@ -116,8 +120,8 @@ def run_cli():
     cli_tracker: Optional[ProgressTrackerAbstraction] = None
     cli_progress_bar: Optional[ProgressBarAbstraction] = None
 
-    if ProgressTracker:  # Check if the *concrete* tracker class was imported
-        cli_tracker = ProgressTracker()  # Instantiate the tracker
+    if BasicProgressTracker:  # Check if the *concrete* tracker class was imported
+        cli_tracker = BasicProgressTracker()  # Instantiate the tracker
         # No total needed here, FileGenerator will reset it
         if cli_logger:
             cli_logger.debug("Progress Tracker initialized.")
