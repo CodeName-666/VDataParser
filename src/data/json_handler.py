@@ -46,6 +46,9 @@ class JsonHandler():
         if isinstance(json_path_or_data, str):
             # Load data if path/URL is provided
             self.load(json_path_or_data)
+        elif isinstance(json_path_or_data, Path):
+            # Load data if Path object is provided
+            self.load(json_path_or_data.__str__())
         elif isinstance(json_path_or_data, (dict, list)):
             # Use provided data directly (create a deep copy)
             self.json_data = copy.deepcopy(json_path_or_data)

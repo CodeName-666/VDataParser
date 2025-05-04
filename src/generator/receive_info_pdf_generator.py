@@ -23,7 +23,7 @@ try:
 except ImportError:
     class FleatMarket:
         def get_main_number_list(self): return []
-        def get_seller_data(i): return Seller()
+        def get_seller_list(i): return Seller()
 
         class Seller:
             vorname = "Dummy"
@@ -126,7 +126,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):
                     continue
                 main_number = str(main_number_data.get_main_number())
 
-                seller: Seller = self.__fleat_market_data.get_seller_data(index)
+                seller: Seller = self.__fleat_market_data.get_seller_list(index)
                 if not all(hasattr(seller, attr) for attr in ['nachname', 'vorname']):
                     # Missing seller info warning
                     self._output_and_log("WARNING", f"Seller-Objekt Index {index} unvollständig. Verwende 'Unbekannt'.")

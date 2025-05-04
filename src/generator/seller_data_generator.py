@@ -13,7 +13,7 @@ try:
 except ImportError:
     class FleatMarket:
         def get_main_number_list(self): return []
-        def get_seller_data(i): return Seller()
+        def get_seller_list(i): return Seller()
 
         class Seller:
             vorname = "Dummy"
@@ -116,7 +116,7 @@ class SellerDataGenerator(DataGenerator):
             main_number_val = main_number_data.get_main_number()
             first_name, second_name = "Unbekannt", "Unbekannt"
             try:
-                seller: Seller = self.__fleat_market_data.get_seller_data(index)
+                seller: Seller = self.__fleat_market_data.get_seller_list(index)
                 if hasattr(seller, 'vorname') and hasattr(seller, 'nachname'):
                     first_name = seller.vorname
                     second_name = seller.nachname
@@ -128,11 +128,11 @@ class SellerDataGenerator(DataGenerator):
                 continue
             except AttributeError:
                 # Critical error: Missing method on main data object
-                err_msg = "FleatMarket Objekt hat keine Methode 'get_seller_data'. Breche Schleife ab."
+                err_msg = "FleatMarket Objekt hat keine Methode 'get_seller_list'. Breche Schleife ab."
                 self._output_and_log("ERROR", err_msg)
                 invalid_cnt += total_items - processed_count + 1
                 if overall_tracker:
-                    overall_tracker.set_error(AttributeError("Missing get_seller_data"))
+                    overall_tracker.set_error(AttributeError("Missing get_seller_list"))
                 break
             except Exception as e:
                 # Unexpected error fetching seller

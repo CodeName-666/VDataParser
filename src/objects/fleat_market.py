@@ -55,7 +55,7 @@ class FleatMarket:
         try:
             # Create Seller instances, passing the logger down
             new_seller_list = [
-                Seller(seller_data, logger=self._logger)
+                Seller(seller_data)
                 for seller_data in seller_data_list
             ]
             self.__seller_list = new_seller_list # Assign only after successful creation
@@ -86,7 +86,7 @@ class FleatMarket:
         try:
              # Create MainNumber instances, passing the logger down
             new_main_number_list = [
-                MainNumber(main_number_data, logger=self._logger)
+                MainNumber(main_number_data)
                 for main_number_data in main_number_data_list
             ]
             self.__main_number_list = new_main_number_list # Assign only after successful creation
