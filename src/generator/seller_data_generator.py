@@ -116,7 +116,7 @@ class SellerDataGenerator(DataGenerator):
             main_number_val = main_number_data.get_main_number()
             first_name, second_name = "Unbekannt", "Unbekannt"
             try:
-                seller: Seller = self.__fleat_market_data.get_seller_list(index)
+                seller: Seller = self.__fleat_market_data.get_seller_by_index(index)
                 if hasattr(seller, 'vorname') and hasattr(seller, 'nachname'):
                     first_name = seller.vorname
                     second_name = seller.nachname
