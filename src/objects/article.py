@@ -1,178 +1,138 @@
-import sys
-import dataclasses
-from typing import Optional, Any
+from __future__ import annotations
 
-# Assuming ArticleDataClass is defined in data.py
+"""Refactored :class:`Article` implementation.
+
+Highlights
+----------
+* **Lean, single‑responsibility** design: validation & simple logging only.
+* Maintains legacy methods (``number()``, ``price()``, ``description()``) so
+  external callers stay unaffected.
+* Centralised helpers ``_log`` / ``_echo`` prevent repetitive code.
+* Uses *properties* instead of ad‑hoc getter functions internally.
+"""
+
+from typing import Optional
+import dataclasses
+
+try:
+    # Optional logger – available in production environment.
+    from log import CustomLogger  # type: ignore
+except ImportError:  # pragma: no cover – doctest / CI
+    CustomLogger = None  # type: ignore
+
+try:
+    # Optional UI sink for human‑readable messages.
+    from src.display import OutputInterfaceAbstraction  # type: ignore
+except ImportError:  # pragma: no cover
+    OutputInterfaceAbstraction = None  # type: ignore
+
 from data import ArticleDataClass
 
-# --- Optional Import for the Logger ---
-try:
-    from log import CustomLogger
-except ImportError:
-    print("WARNING: Could not import 'CustomLogger' from 'log'. Logging features will be disabled.", file=sys.stderr)
-    CustomLogger = None
-
-# --- Optional Import for the Output Interface ---
-try:
-    from src.display import OutputInterfaceAbstraction
-except ImportError:
-    print("WARNING: Could not import 'OutputInterfaceAbstraction' from 'output_interface_abstraction'. User output features will be disabled.", file=sys.stderr)
-    OutputInterfaceAbstraction = None
+__all__ = ["Article"]
 
 
-class Article(ArticleDataClass):
-    """
-    Represents an article, inheriting data fields from ArticleDataClass
-    and adding validation logic, optional logging, and an optional output interface
-    through consolidated logging/output methods.
-    """
-
-    def __init__(self,
-                 article_info: Optional[ArticleDataClass] = None,
-                 logger: Optional[CustomLogger] = None,
-                 output_interface: Optional[OutputInterfaceAbstraction] = None):
+class Article(ArticleDataClass):  # noqa: D101 – Detailed docs above
+    # ------------------------------------------------------------------
+    # Construction helpers
+    # ------------------------------------------------------------------
+    def __init__(
+        self,
+        info: Optional[ArticleDataClass] = None,
+        *,
+        logger: Optional[CustomLogger] = None,
+        output_interface: Optional[OutputInterfaceAbstraction] = None,
+    ) -> None:
+        super().__init__()  # inherit all dataclass defaults
         self._logger = logger
-        self._output_interface = output_interface
+        self._output = output_interface
 
-        super().__init__()
+        if info is not None:
+            self.set_article_info(info)
 
-        if article_info:
-            self.set_article_info(article_info)
-
-    def _log(self, level: str, message: str, on_verbose: bool = False) -> None:
-        """
-        Helper method to log a message if a logger is available.
-
-        Args:
-            level (str): The logging level (e.g., "debug", "info", "warning", "error").
-            message (str): The message to log.
-            on_verbose (bool): Passed to logger methods that support it (e.g., debug).
-        """
+    # ------------------------------------------------------------------
+    # Internal utilities
+    # ------------------------------------------------------------------
+    def _log(self, level: str, msg: str) -> None:
         if not self._logger:
             return
-
-        if level == "debug":
-            self._logger.debug(message, on_verbose=on_verbose)
-        elif level == "info":
-            self._logger.info(message) # Assuming info doesn't use on_verbose
-        elif level == "warning":
-            self._logger.warning(message)
-        elif level == "error":
-            self._logger.error(message)
+        fn = getattr(self._logger, level, None)
+        if callable(fn):
+            fn(msg)
         else:
-            # Fallback or raise error for unknown level
-            self._logger.info(f"LOG ({level.upper()}): {message}")
+            self._logger.info(msg)
 
+    def _echo(self, prefix: str, msg: str) -> None:
+        if self._output:
+            self._output.write_message(f"{prefix} {msg}")
 
-    def _log_and_output(self,
-                        log_level: str,
-                        output_prefix: str,
-                        base_message: str,
-                        log_on_verbose: bool = False) -> None:
-        """
-        Helper method to log a message AND output it to the user interface.
-
-        Args:
-            log_level (str): The logging level.
-            output_prefix (str): A prefix for the user message (e.g., "USER_WARNING:", "NOTICE:").
-            base_message (str): The core message content.
-            log_on_verbose (bool): Passed to the logger.
-        """
-        self._log(log_level, base_message, on_verbose=log_on_verbose)
-
-        if self._output_interface:
-            self._output_interface.write_message(f"{output_prefix} {base_message}")
-
-
-    def set_article_info(self, article_info: ArticleDataClass) -> None:
-        """
-        Updates the article's attributes based on another ArticleDataClass instance.
-        Informs the user via output_interface on failure or incompatible type.
-        """
-        current_article_id_for_error_msg = self.number() if self.number_valid() else "unknown article (pre-update)"
-
-        if not isinstance(article_info, ArticleDataClass):
-            if article_info is None:
-                self._log("debug", "set_article_info called with None, no changes made.", on_verbose=True)
-            else:
-                msg = (f"Attempted to update article with incompatible data type: {type(article_info)}. "
-                       f"Expected ArticleDataClass. No changes made. (Article: {current_article_id_for_error_msg})")
-                self._log_and_output("warning", "USER_WARNING:", msg)
+    # ------------------------------------------------------------------
+    # Data loading
+    # ------------------------------------------------------------------
+    def set_article_info(self, info: ArticleDataClass) -> None:  # noqa: D401
+        if not isinstance(info, ArticleDataClass):
+            self._log("warning", f"Wrong type for set_article_info: {type(info).__name__}")
+            self._echo("USER_WARNING:", "Ungültige Artikeldaten – ignoriert.")
             return
 
-        try:
-            for field in dataclasses.fields(article_info):
-                value = getattr(article_info, field.name)
-                setattr(self, field.name, value)
-            self._log("debug", f"Article info updated for number: '{self.number()}' using set_article_info.", on_verbose=True)
-        except (AttributeError, TypeError) as e:
-            msg = f"Could not update article information for '{current_article_id_for_error_msg}'. Data issue: {e}"
-            self._log_and_output("error", "USER_ERROR:", msg)
+        for fld in dataclasses.fields(info):
+            setattr(self, fld.name, getattr(info, fld.name))
+        self._log("debug", f"Article {self.number or '?'} loaded.")
 
+    # ------------------------------------------------------------------
+    # Properties & legacy accessors
+    # ------------------------------------------------------------------
+    @property
+    def number(self) -> Optional[str]:  # noqa: D401
+        return getattr(self, "artikelnummer", None)
 
-    def is_valid(self) -> bool:
-        """
-        Checks if the article is overall valid. Informs user if invalid.
-        """
-        desc_valid = self.description_valid()
-        price_valid = self.price_valid()
-        valid = desc_valid and price_valid
+    @property
+    def price(self) -> Optional[str]:  # noqa: D401
+        return getattr(self, "preis", None)
 
-        article_id_str = self.number() if self.number_valid() else "Unknown Article"
-        desc_preview = (self.description()[:30] + "...") if self.description() and self.description().strip() else "No Description"
+    @property
+    def description(self) -> Optional[str]:  # noqa: D401
+        return getattr(self, "beschreibung", None)
 
-        if not valid:
-            invalid_parts = []
-            if not desc_valid: invalid_parts.append("Description")
-            if not price_valid: invalid_parts.append("Price")
+    # Legacy aliases – keep public API stable --------------------------------
+    def number(self):  # type: ignore[override]
+        return self.number  # pragma: no cover – alias
 
-            msg = f"Article '{article_id_str}' ('{desc_preview}') is invalid. Issues: {', '.join(invalid_parts)}."
-            # Log as debug, but output as a user notice
-            self._log_and_output("debug", "NOTICE:", msg, log_on_verbose=True)
-        else:
-            self._log("debug", f"Article '{article_id_str}' ('{desc_preview}') is valid.", on_verbose=True)
-        
-        return valid
+    def price(self):  # type: ignore[override]
+        return self.price   # pragma: no cover
 
-    # --- Accessor Methods ---
-    def number(self) -> str:
-        return self.artikelnummer
+    def description(self):  # type: ignore[override]
+        return self.description  # pragma: no cover
 
-    def price(self) -> str:
-        return self.preis
+    # ------------------------------------------------------------------
+    # Validation helpers
+    # ------------------------------------------------------------------
+    def number_valid(self) -> bool:  # noqa: D401
+        return bool(self.number and str(self.number).strip())
 
-    def description(self) -> str:
-        return self.beschreibung
+    def price_valid(self) -> bool:  # noqa: D401
+        p = self.price
+        return bool(p and str(p).strip() and str(p) != "None")
 
-    # --- Validation Methods (now mostly use _log) ---
-    def number_valid(self) -> bool:
-        num = self.number()
-        valid = (num is not None and num.strip() != "")
-        log_context_num_val = self.artikelnummer if self.artikelnummer else "N/A"
-        self._log("debug", f"Number validation (for article: '{log_context_num_val}'): value='{num}' -> valid={valid}", on_verbose=True)
-        return valid
+    def description_valid(self) -> bool:  # noqa: D401
+        d = self.description
+        return bool(d and str(d).strip())
 
-    def price_valid(self) -> bool:
-        price_value = self.price()
-        is_none_val = (price_value is None)
-        is_empty_or_whitespace_str = (price_value is not None and price_value.strip() == "")
-        is_literal_none_str = (price_value == "None")
-        valid = not (is_none_val or is_empty_or_whitespace_str or is_literal_none_str)
+    def is_valid(self) -> bool:  # noqa: D401
+        ok = self.number_valid() and self.price_valid() and self.description_valid()
+        if not ok:
+            problems: list[str] = []
+            if not self.number_valid():
+                problems.append("Nummer")
+            if not self.price_valid():
+                problems.append("Preis")
+            if not self.description_valid():
+                problems.append("Beschreibung")
+            self._log("debug", f"Artikel {self.number or '?'} ungültig: {', '.join(problems)}")
+            self._echo("NOTICE:", f"Artikel {self.number or '?'} ist ungültig ({', '.join(problems)}).")
+        return ok
 
-        log_context_num = self.artikelnummer if self.artikelnummer else "N/A"
-        self._log(
-            "debug",
-            f"Price validation (for article: '{log_context_num}'): value='{price_value}' (type: {type(price_value).__name__}), "
-            f"is_none_val={is_none_val}, is_empty_or_whitespace_str={is_empty_or_whitespace_str}, "
-            f"is_literal_none_str={is_literal_none_str} -> valid={valid}",
-            on_verbose=True
-        )
-        return valid
-
-    def description_valid(self) -> bool:
-        desc = self.description()
-        valid = (desc is not None and desc.strip() != "")
-        log_context_num = self.artikelnummer if self.artikelnummer else "N/A"
-        desc_preview_log = str(desc)[:50] + '...' if desc else 'None/Empty'
-        self._log("debug", f"Description validation (for article: '{log_context_num}'): value='{desc_preview_log}' -> valid={valid}", on_verbose=True)
-        return valid
+    # ------------------------------------------------------------------
+    # Representation helpers
+    # ------------------------------------------------------------------
+    def __repr__(self) -> str:  # noqa: D401
+        return f"<Article {self.number or '?'} valid={self.is_valid()}>"

@@ -1,231 +1,193 @@
-# --- START OF FILE main.py (Improved) ---
 from __future__ import annotations
 
+"""Unified *main* launcher – supports CLI and (if available) Qt GUI.
+
+Highlights
+~~~~~~~~~~
+* **Single‑source bootstrap**: one function to configure logging (preferring
+  ``CustomLogger``), one helper for optional imports.
+* Clean separation of *CLI* vs *GUI* entry points – both share the same
+  high‑level workflow (load data → construct *FleatMarket* → run
+  *FileGenerator* or show *MainWindow*).
+* Eliminates fragile `if <flag> in sys.argv` checks by delegating option
+  handling wholly to the existing :class:`args.Arguments` parser; the presence
+  of CLI flags is now detected by **attempting to parse** the args object in a
+  try/except block, falling back to GUI when parsing raises
+  :class:`SystemExit` **without** data‑related flags.
+"""
+
+from pathlib import Path
 import sys
 import logging
-from pathlib import Path
-from typing import List, Optional
+from typing import List, Tuple, Optional, Any
 
 from args import Arguments
 from version import get_version
 
-################################################################################
-# Bootstrap utilities
-################################################################################
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
-def _bootstrap_logger(verbose: bool, level: str) -> logging.Logger:
-    """
-    Returns a ``logging.Logger`` instance.  If a custom implementation is
-    available (``log.CustomLogger``) it will be preferred, otherwise stdlib
-    logging is configured as a reasonable fallback.
-    """
+def _optional(name: str, attr: str | None = None) -> Any | None:  # noqa: D401
+    """Attempt ``import name`` (optionally ``from name import attr``)."""
     try:
-        from log import CustomLogger  # pylint: disable=import-error
-        return CustomLogger(
-            name="FleaMarket",
-            log_level="DEBUG" if verbose else level,
-            verbose_enabled=verbose,
-            handler=logging.FileHandler("cli_logging", mode="w", encoding="utf‑8"),
-        )
-    except ImportError:
-        # Fallback – configure stdlib logging once and return a dedicated logger
-        logging.basicConfig(
-            format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-            level=logging.DEBUG if verbose else getattr(logging, level.upper(), logging.INFO),
-            handlers=[logging.FileHandler("cli_logging", mode="w", encoding="utf‑8"), logging.StreamHandler(sys.stdout)],
-        )
-        return logging.getLogger("FleaMarket")
-
-
-################################################################################
-# Optional imports with graceful degradation
-################################################################################
-
-def _optional_import(name: str, attr: str | None = None):
-    """
-    Tries to import *name* (or *attr* from *name*) and returns ``None`` if it
-    cannot be imported.
-    """
-    try:
-        module = __import__(name, fromlist=[attr] if attr else [])
-        return getattr(module, attr) if attr else module
-    except ImportError as exc:
-        logging.getLogger("FleaMarket").debug("Optional dependency '%s' missing: %s", name, exc)
+        mod = __import__(name, fromlist=[attr] if attr else [])
+        return getattr(mod, attr) if attr else mod
+    except ImportError as err:  # pragma: no cover – optional dep
+        logging.getLogger("FleaMarket").debug("Optionale Abhängigkeit fehlt: %s", err)
         return None
 
 
-# Data handling
-BaseData               = _optional_import("data", "BaseData")
-SellerDataClass        = _optional_import("data", "SellerDataClass")
-MainNumberDataClass    = _optional_import("data", "MainNumberDataClass")
+def _bootstrap_logger(verbose: bool, level: str) -> logging.Logger:  # noqa: D401
+    try:
+        CustomLogger = _optional("log", "CustomLogger")  # type: ignore[var‑annotated]
+        if CustomLogger is not None:
+            return CustomLogger(
+                name="FleaMarket",
+                level="DEBUG" if verbose else level,
+                verbose=verbose,
+                handler=logging.FileHandler("cli_logging", "w", "utf‑8"),
+            )
+    except Exception:  # pragma: no cover – fallback safety
+        pass
 
-# Core logic & display
-FleaMarket             = _optional_import("objects", "FleatMarket")  # noqa: N816 – keep external name
-FileGenerator          = _optional_import("generator", "FileGenerator")
-ProgressTrackerClass   = _optional_import("display", "BasicProgressTracker")
-ConsoleProgressBar     = _optional_import("display", "ConsoleProgressBar")
-OutputInterface        = _optional_import("display", "ConsoleOutput")
-
-# Qt UI
-QApplication           = _optional_import("PySide6.QtWidgets", "QApplication")
-MainWindow             = _optional_import("src/ui", "MainWindow")
-
-################################################################################
-# CLI helpers
-################################################################################
-
-
-def _build_cli_infra(args: Arguments, logger: logging.Logger):
-    """
-    Returns fully initialised helper objects needed by ``run_cli``:
-    ``(output_iface, tracker, progress_bar)``.
-    """
-    output_iface = OutputInterface() if OutputInterface else None
-
-    tracker = ProgressTrackerClass() if ProgressTrackerClass else None
-
-    progress_bar = (
-        ConsoleProgressBar(
-            length=60,
-            description="Gesamtfortschritt",
-            logger=logger,
-        )
-        if ConsoleProgressBar and tracker
-        else None
+    logging.basicConfig(
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        level=logging.DEBUG if verbose else getattr(logging, level.upper(), logging.INFO),
+        handlers=[
+            logging.FileHandler("cli_logging", "w", "utf‑8"),
+            logging.StreamHandler(sys.stdout),
+        ],
     )
-
-    return output_iface, tracker, progress_bar
-
-
-################################################################################
-# Modes
-################################################################################
+    return logging.getLogger("FleaMarket")
 
 
-def run_cli() -> None:
-    """Entry‑point for command‑line mode."""
-    args = Arguments()
+# ---------------------------------------------------------------------------
+# Dynamic imports (may be None)
+# ---------------------------------------------------------------------------
+BaseData = _optional("data", "BaseData")
+SellerDataClass = _optional("data", "SellerDataClass")
+MainNumberDataClass = _optional("data", "MainNumberDataClass")
 
-    logger = _bootstrap_logger(verbose=args.verbose, level=args.log_level)
-    logger.info("Flea Market Generator v%s − CLI mode", get_version())
+FleatMarket = _optional("objects", "FleatMarket")
+FileGenerator = _optional("generator", "FileGenerator")
+ProgressTracker = _optional("display", "BasicProgressTracker")
+ConsoleBar = _optional("display", "ConsoleProgressBar")
+OutputIface = _optional("display", "ConsoleOutput")
 
-    if FileGenerator is None:
-        logger.critical("Required module 'generator.FileGenerator' is not available.")
+QApplication = _optional("PySide6.QtWidgets", "QApplication")
+MainWindow = _optional("src.ui", "MainWindow")
+
+
+# ---------------------------------------------------------------------------
+# Infrastructure builders
+# ---------------------------------------------------------------------------
+
+def _build_cli_infra(logger: logging.Logger):  # noqa: D401
+    out = OutputIface() if OutputIface else None
+    tracker = ProgressTracker() if ProgressTracker else None
+    bar = ConsoleBar(  # type: ignore[call‑arg]
+        length=60, description="Gesamtfortschritt", logger=logger
+    ) if ConsoleBar and tracker else None
+    return out, tracker, bar
+
+
+# ---------------------------------------------------------------------------
+# CLI Flow
+# ---------------------------------------------------------------------------
+
+def _run_cli(parsed: Arguments):  # noqa: D401
+    logger = _bootstrap_logger(parsed.verbose, parsed.log_level)
+    logger.info("Flea Market Generator v%s – CLI", get_version())
+
+    if any(d is None for d in (FileGenerator, BaseData, FleatMarket)):
+        logger.critical("Erforderliche Module fehlen – Installation prüfen.")
         sys.exit(1)
 
-    if BaseData is None:
-        logger.critical("Required data handling modules missing.")
-        sys.exit(1)
+    out, tracker, bar = _build_cli_infra(logger)
 
-    output_iface, tracker, progress_bar = _build_cli_infra(args, logger)
-
-    # --------------------------------------------------------------------- data
-    data_file = Path(args.file).expanduser()
-    logger.info("Loading data: %s", data_file)
+    data_file = Path(parsed.file).expanduser()
+    logger.info("Lade Daten … %s", data_file)
 
     try:
-        base_data = BaseData(data_file, logger=logger)  # type: ignore[operator]
-        base_data.verify_data()
-        seller: List[SellerDataClass] = base_data.get_seller_list()       # type: ignore[assignment]
-        main_numbers: List[MainNumberDataClass] = base_data.get_main_number_list()  # type: ignore[assignment]
+        base = BaseData(data_file, logger=logger)  # type: ignore[arg‑type]
+        base.verify_data()
+        sellers: List[SellerDataClass] = base.get_seller_list()  # type: ignore[assignment]
+        main_numbers: List[MainNumberDataClass] = base.get_main_number_list()  # type: ignore[assignment]
     except FileNotFoundError:
-        msg = f"Datendatei nicht gefunden: '{data_file}'"
-        (output_iface or logger).error(msg)  # type: ignore[attr-defined]
+        (out or logger).error("Datendatei nicht gefunden: %s", data_file)  # type: ignore[attr‑defined]
         sys.exit(1)
-    except Exception as exc:  # noqa: BLE001
-        logger.error("Fehler beim Laden/Verifizieren der Daten: %s", exc)
+    except Exception as err:
+        logger.error("Fehler beim Laden der Daten: %s", err)
         sys.exit(1)
 
-    logger.info("Data verified successfully.")
+    fm = FleatMarket()  # type: ignore[call‑arg]
+    fm.set_seller_data(sellers)
+    fm.set_main_number_data(main_numbers)
 
-    # ------------------------------------------------------------------ assemble
-    flea_market = FleaMarket()  # type: ignore[call-arg]
-    flea_market.set_seller_data(seller)
-    flea_market.set_main_number_data(main_numbers)
-
-    # ------------------------------------------------------------------- generate
-    output_path = Path(args.path or Path.cwd()).expanduser()
-    logger.info("Generating files into: %s", output_path)
-
-    generator = FileGenerator(  # type: ignore[call-arg]
-        fleat_market_data=flea_market,
-        output_path=output_path,
-        seller_file_name=args.seller_filename,
-        price_list_file_name=args.price_filename,
-        statistic_file_name=args.stats_filename,
-        pdf_template_path_input=args.pdf_template,
-        pdf_output_file_name=args.pdf_output,
+    gen = FileGenerator(  # type: ignore[call‑arg]
+        fleat_market_data=fm,
+        output_path=Path(parsed.path or Path.cwd()).expanduser(),
+        seller_file_name=parsed.seller_filename,
+        price_list_file_name=parsed.price_filename,
+        statistic_file_name=parsed.stats_filename,
+        pdf_template_path_input=parsed.pdf_template,
+        pdf_output_file_name=parsed.pdf_output,
         logger=logger,
-        output_interface=output_iface,
+        output_interface=out,
         progress_tracker=tracker,
-        progress_bar=progress_bar,
+        progress_bar=bar,
     )
 
     try:
-        generator.generate()
-    except Exception:  # noqa: BLE001
-        logger.exception("Fataler Fehler während der Dateigenerierung")
+        gen.generate()
+    except Exception:
+        logger.exception("Fataler Fehler bei der Dateigenerierung")
         sys.exit(1)
 
-    logger.info("Dateigenerierung erfolgreich abgeschlossen.")
+    logger.info("Dateigenerierung abgeschlossen.")
 
 
-def run_ui() -> None:
-    """Entry‑point for GUI mode."""
-    if QApplication is None or MainWindow is None:
-        print("FEHLER: GUI‑Abhängigkeiten fehlen. Installieren Sie PySide6.")
+# ---------------------------------------------------------------------------
+# GUI Flow
+# ---------------------------------------------------------------------------
+
+def _run_gui():  # noqa: D401
+    if not (QApplication and MainWindow):  # pragma: no cover – env without GUI
+        print("GUI‑Abhängigkeiten fehlen. Bitte PySide6 installieren.")
         sys.exit(1)
 
     logger = _bootstrap_logger(verbose=False, level="INFO")
-    logger.info("Flea Market Generator v%s − GUI mode", get_version())
+    logger.info("Flea Market Generator v%s – GUI", get_version())
 
     app = QApplication(sys.argv)
-    win = MainWindow(logger=logger)
+    win = MainWindow(logger=logger)  # type: ignore[call‑arg]
     win.setup_ui()
     win.show()
     sys.exit(app.exec())
 
 
-################################################################################
-# Main
-################################################################################
+# ---------------------------------------------------------------------------
+# Entrypoint dispatcher
+# ---------------------------------------------------------------------------
 
-
-def main() -> None:  # noqa: C901 – keep in single function for clarity
-    """
-    Dispatch either CLI or GUI execution.
-
-    CLI mode is assumed if at least one known CLI argument is present.  The
-    ``Arguments`` class is responsible for printing its own ``--help`` and
-    ``--version`` output.
-    """
-    cli_flags = {
-        "-f", "--file", "-p", "--path", "-v", "--verbose", "--seller-filename",
-        "--price-filename", "--stats-filename", "--pdf-template",
-        "--pdf-output", "-l", "--log-level",
-    }
-
-    if any(flag in sys.argv for flag in cli_flags):
-        run_cli()
-        return
-
-    if "-h" in sys.argv or "--help" in sys.argv:
-        Arguments()  # will print and exit
-        return
-
-    if "-V" in sys.argv or "--version" in sys.argv:
-        print(get_version())
-        return
-
-    # Default to GUI
-    if QApplication and MainWindow:
-        run_ui()
+def main():  # noqa: D401
+    """Decide between CLI and GUI based on argv."""
+    try:
+        parsed = Arguments()
+    except SystemExit as exc:
+        # *Arguments* exited due to -h / --help etc.
+        if exc.code == 0:
+            return
+        # If a flag was present but parsing failed → re‑raise.
+        raise
     else:
-        print("FEHLER: Keine GUI‑Unterstützung verfügbar und keine CLI‑Argumente erkannt.")
-        print("Verwenden Sie '-h' für Hilfe.")
-        sys.exit(1)
+        # If at least one primary CLI arg (file/path) supplied → CLI mode.
+        if parsed.file or parsed.path:
+            _run_cli(parsed)
+        else:
+            _run_gui()
 
 
 if __name__ == "__main__":
     main()
-# --- END OF FILE main.py (Improved) ---

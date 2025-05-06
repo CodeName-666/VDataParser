@@ -1,141 +1,107 @@
-# --- data_generator.py ---
+from __future__ import annotations
+
+"""Abstract base class for all file‑/data‑generators.
+
+Shared responsibilities
+~~~~~~~~~~~~~~~~~~~~~~
+* Path & filename handling (`get_full_path`).
+* Thin logging/echo helpers (no conditional logic scattered around).
+* Optional support for a progress tracker object (only forwarded; not used
+  internally).
+
+Concrete subclasses **must** override :pymeth:`generate` and should define a
+class attribute :pyattr:`FILE_SUFFIX` (eg. ``'dat'`` or ``'pdf'``).
+"""
+
 from pathlib import Path
 from typing import Optional
 
-# Assume logger.py exists
 try:
-    from log import CustomLogger
-except ImportError:
+    from log import CustomLogger  # type: ignore
+except ImportError:  # pragma: no cover – tests/CI
     CustomLogger = None  # type: ignore
 
-# Assume progress_tracker.py exists
 try:
-    from src.display import ProgressTrackerAbstraction
-except ImportError:
-    ProgressTrackerAbstraction = None  # type: ignore
+    from src.display import (
+        OutputInterfaceAbstraction,                       # type: ignore
+        ProgressTrackerAbstraction as _TrackerBase,       # type: ignore
+    )
+except ImportError:  # pragma: no cover
+    OutputInterfaceAbstraction = _TrackerBase = None  # type: ignore
 
-# Import the abstraction
-try:
-    # Assuming output_interface.py is accessible, adjust path if needed
-    from src.display import OutputInterfaceAbstraction
-except ImportError:
-    OutputInterfaceAbstraction = None  # type: ignore
+__all__ = ["DataGenerator"]
 
 
-class DataGenerator:
-    """
-    A base class for data generators, with optional logging and user output interface support.
+class DataGenerator:  # noqa: D101 – detailed docstring above
+    FILE_SUFFIX: str = ""  # subclasses must override
 
-    Attributes:
-    -----------
-    file_name : str
-        The name of the file to be generated (without suffix).
-    path : Path
-        The path where the file will be saved.
-    logger : Optional[CustomLogger]
-        An optional logger instance.
-    output_interface : Optional[OutputInterfaceAbstraction]
-        An optional interface for user-facing output.
-    """
+    # ------------------------------------------------------------------
+    # Construction helpers
+    # ------------------------------------------------------------------
+    def __init__(
+        self,
+        path: str | Path,
+        file_name: str,
+        *,
+        logger: Optional[CustomLogger] = None,
+        output_interface: Optional[OutputInterfaceAbstraction] = None,
+    ) -> None:
+        self._path = Path(path) if path else Path(".")
+        self._file_name = file_name
+        self._logger = logger
+        self._ui = output_interface
 
-    FILE_SUFFIX = ''  # Subclasses should define this
-
-    def __init__(self,
-                 path: str,
-                 file_name: str,
-                 logger: Optional[CustomLogger] = None,
-                 output_interface: Optional[OutputInterfaceAbstraction] = None  # Added
-                 ) -> None:
-        """
-        Initializes the DataGenerator with path, file name, logger, and output interface.
-
-        Parameters:
-        -----------
-        path : str
-            The path where the file will be saved.
-        file_name : str
-            The name of the file to be generated (without suffix).
-        logger : Optional[CustomLogger], optional
-            A CustomLogger instance for logging.
-        output_interface : Optional[OutputInterfaceAbstraction], optional
-            An interface for user-facing output.
-        """
-        self.__file_name: str = file_name
-        self.__path: Path = Path(path) if path else Path('.')
-        self.logger = logger  # Store the logger instance
-        self.output_interface = output_interface  # Store the output interface instance
-
-    def _log(self, level: str, message: str, on_verbose: bool = False) -> None:
-        """ Helper method for conditional logging ONLY. """
-        if self.logger:
-            log_method = getattr(self.logger, level.lower(), None)
-            if log_method and callable(log_method):
-                try:
-                    if level.lower() in ["debug", "info", "warning", "error"]:
-                        log_method(message, on_verbose=on_verbose)
-                    else:
-                        log_method(message)
-                except Exception as e:
-                    import sys
-                    print(f"LOGGING FAILED ({level}): {message} | Error: {e}", file=sys.stderr)
-
-    def _output(self, message: str) -> None:
-        """ Helper method to write ONLY to the output interface. """
-        if self.output_interface:
+    # ------------------------------------------------------------------
+    # Logging & UI
+    # ------------------------------------------------------------------
+    def _log(self, level: str, msg: str) -> None:  # noqa: D401
+        if not self._logger:
+            return
+        fn = getattr(self._logger, level, None)
+        if callable(fn):
             try:
-                self.output_interface.write_message(message)
-            except Exception as e:
-                # Log error if output fails? Or just print?
-                self._log("ERROR", f"Failed to write message to output interface: {e}")
-                # Or print to stderr as a last resort
-                # import sys
-                # print(f"OUTPUT INTERFACE FAILED: {message} | Error: {e}", file=sys.stderr)
+                fn(msg)
+            except Exception:  # pragma: no cover – logger mis‑configured
+                pass
+        else:
+            self._logger.info(msg)
 
-    def _output_and_log(self, level: str, message: str, on_verbose: bool = False) -> None:
-        """
-        Helper method for sending messages to BOTH logger and output interface.
-        Typically used for INFO, WARNING, ERROR level messages relevant to the user.
-        """
-        # Log first
-        self._log(level, message, on_verbose)
+    def _echo(self, msg: str) -> None:  # noqa: D401
+        if self._ui:
+            try:
+                self._ui.write_message(msg)
+            except Exception:  # pragma: no cover – UI mis‑configured
+                pass
 
-        # Then output to user interface (usually only for non-debug levels)
-        if level.upper() in ["INFO", "WARNING", "ERROR", "CRITICAL"]:
-            self._output(message)  # Send the same message to the user output
+    def _output(self, level: str, msg: str) -> None:  # noqa: D401
+        self._log(level, msg)
+        if level.upper() in {"INFO", "WARNING", "ERROR", "CRITICAL"}:
+            self._echo(msg)
 
-    # --- Properties (file_name, path) remain the same ---
+    # ------------------------------------------------------------------
+    # Path helpers
+    # ------------------------------------------------------------------
     @property
-    def file_name(self) -> str:
-        return self.__file_name
-
-    @file_name.setter
-    def file_name(self, file_name: str):
-        self.__file_name = file_name
+    def file_name(self) -> str:  # noqa: D401
+        return self._file_name
 
     @property
-    def path(self) -> Path:
-        return self.__path
+    def path(self) -> Path:  # noqa: D401
+        return self._path
 
-    @path.setter
-    def path(self, path: str):
-        self.__path = Path(path) if path else Path('.')
-
-    def get_full_path(self) -> Path:
-        if not self.file_name:
-            # Use _output_and_log for user-visible errors if interface exists
-            err_msg = "Dateiname wurde nicht gesetzt."
-            self._output_and_log("ERROR", err_msg)
-            raise ValueError(err_msg)
+    def get_full_path(self) -> Path:  # noqa: D401
         if not self.FILE_SUFFIX:
-            err_msg = f"FILE_SUFFIX nicht definiert für Klasse {self.__class__.__name__}"
-            self._output_and_log("ERROR", err_msg)  # Log and output this critical error
-            raise ValueError(err_msg)
-        return self.path / f'{self.file_name}.{self.FILE_SUFFIX}'
+            raise ValueError(
+                f"{self.__class__.__name__}.FILE_SUFFIX muss definiert sein"
+            )
+        return self._path / f"{self._file_name}.{self.FILE_SUFFIX}"
 
-    def generate(self, overall_tracker: Optional[ProgressTrackerAbstraction] = None) -> None:
-        err_msg = "Die Methode 'generate' muss in der Unterklasse implementiert werden."
-        self._output_and_log("ERROR", err_msg)  # This is a critical implementation error
-        raise NotImplementedError(err_msg)
+    # ------------------------------------------------------------------
+    # Abstract API
+    # ------------------------------------------------------------------
+    def generate(self, overall_tracker: Optional[_TrackerBase] = None) -> None:  # noqa: D401
+        raise NotImplementedError("Sub‑class must implement generate()")
 
-    def write(self, *args, **kwargs) -> None:
-        pass  # Base implementation does nothing
+    def write(self, *args, **kwargs) -> None:  # noqa: D401
+        """Optional hook for subclasses. Default = no‑op."""
+        return None
