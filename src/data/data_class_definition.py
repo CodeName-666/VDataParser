@@ -32,10 +32,10 @@ class ArticleDataClass:
 
 @dataclass
 class MainNumberDataClass:
-    type: str
-    name: str
-    database: str
-    data: List[ArticleDataClass]
+    type: str = ""
+    name: str = ""
+    database: str = ""
+    data: List[ArticleDataClass] = field(default_factory=list)
 
     def __post_init__(self):
         converted_articles = []

@@ -76,7 +76,7 @@ ConsoleBar = _optional("display", "ConsoleProgressBar")
 OutputIface = _optional("display", "ConsoleOutput")
 
 QApplication = _optional("PySide6.QtWidgets", "QApplication")
-MainWindow = _optional("src.ui", "MainWindow")
+MainWindow = _optional("ui", "MainWindow")
 
 
 # ---------------------------------------------------------------------------
@@ -98,7 +98,7 @@ def _build_cli_infra(logger: logging.Logger):  # noqa: D401
 
 def _run_cli(parsed: Arguments):  # noqa: D401
     logger = _bootstrap_logger(parsed.verbose, parsed.log_level)
-    logger.info("Flea Market Generator v%s – CLI", get_version())
+    logger.info(f"Flea Market Generator v{get_version()} – CLI")
 
     if any(d is None for d in (FileGenerator, BaseData, FleatMarket)):
         logger.critical("Erforderliche Module fehlen – Installation prüfen.")
@@ -107,7 +107,7 @@ def _run_cli(parsed: Arguments):  # noqa: D401
     out, tracker, bar = _build_cli_infra(logger)
 
     data_file = Path(parsed.file).expanduser()
-    logger.info("Lade Daten … %s", data_file)
+    logger.info(f"Lade Daten …{data_file}")
 
     try:
         base = BaseData(data_file, logger=logger)  # type: ignore[arg‑type]
@@ -118,12 +118,12 @@ def _run_cli(parsed: Arguments):  # noqa: D401
         (out or logger).error("Datendatei nicht gefunden: %s", data_file)  # type: ignore[attr‑defined]
         sys.exit(1)
     except Exception as err:
-        logger.error("Fehler beim Laden der Daten: %s", err)
+        logger.error(f"Fehler beim Laden der Daten: {err}")
         sys.exit(1)
 
-    fm = FleatMarket()  # type: ignore[call‑arg]
-    fm.set_seller_data(sellers)
-    fm.set_main_number_data(main_numbers)
+    fm = FleatMarket(logger = logger, output_interface = out)  # type: ignore[call‑arg]
+    fm.load_sellers(sellers)
+    fm.load_main_numbers(main_numbers)
 
     gen = FileGenerator(  # type: ignore[call‑arg]
         fleat_market_data=fm,

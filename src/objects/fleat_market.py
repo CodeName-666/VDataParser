@@ -79,7 +79,7 @@ class FleatMarket:  # noqa: D101 – Docstring below
         self._log("debug", f"Loading {len(data)} seller entries …")
         try:
             self._sellers = [
-                Seller(s, logger=self._logger, output_interface=self._output) for s in data
+                Seller(s) for s in data
             ]
             self._log("info", f"{len(self._sellers)} sellers loaded.")
         except Exception as err:  # pragma: no cover – defensive
