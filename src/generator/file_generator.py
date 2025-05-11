@@ -93,11 +93,7 @@ class FileGenerator:  # noqa: D101 – detailed docs above
             ("Statistik",      StatisticDataGenerator(**common, file_name=statistic_file_name)),
             (
                 "Abholbestätigung",
-                ReceiveInfoPdfGenerator(
-                    **common,
-                    pdf_template_path_input=pdf_template_path_input,
-                    pdf_template_path_output=pdf_output_file_name,
-                ),
+                ReceiveInfoPdfGenerator(**common, pdf_template = pdf_template_path_input),
             ),
         ]
 
