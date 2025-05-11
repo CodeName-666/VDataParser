@@ -1,21 +1,5 @@
 from __future__ import annotations
 
-"""Unified *main* launcher – supports CLI and (if available) Qt GUI.
-
-Highlights
-~~~~~~~~~~
-* **Single‑source bootstrap**: one function to configure logging (preferring
-  ``CustomLogger``), one helper for optional imports.
-* Clean separation of *CLI* vs *GUI* entry points – both share the same
-  high‑level workflow (load data → construct *FleatMarket* → run
-  *FileGenerator* or show *MainWindow*).
-* Eliminates fragile `if <flag> in sys.argv` checks by delegating option
-  handling wholly to the existing :class:`args.Arguments` parser; the presence
-  of CLI flags is now detected by **attempting to parse** the args object in a
-  try/except block, falling back to GUI when parsing raises
-  :class:`SystemExit` **without** data‑related flags.
-"""
-
 from pathlib import Path
 import sys
 import logging

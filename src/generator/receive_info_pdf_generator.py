@@ -1,22 +1,23 @@
 from __future__ import annotations
 
-"""Refactored :class:`ReceiveInfoPdfGenerator`.
+"""
+    Refactored :class:`ReceiveInfoPdfGenerator`.
 
-Goals
------
-* Mirror the tidy, dependency‑light style used across the refactored codebase.
-* Keep the original public contract (constructor + ``generate``) intact so
-  callers do not break.
-* Centralise error handling + user feedback through ``_output_and_log`` inherited
-  from :class:`DataGenerator`.
-* Gracefully degrade when optional libs (``pypdf`` / ``reportlab``) are missing.
+    Goals
+    -----
+    * Mirror the tidy, dependency‑light style used across the refactored codebase.
+    * Keep the original public contract (constructor + ``generate``) intact so
+    callers do not break.
+    * Centralise error handling + user feedback through ``_output_and_log`` inherited
+    from :class:`DataGenerator`.
+    * Gracefully degrade when optional libs (``pypdf`` / ``reportlab``) are missing.
 
-Notes
------
-* This file assumes that :class:`DataGenerator` already exposes helpers
-  ``_log`` (plain logger) and ``_output_and_log`` (logger + user interface).
-* The *progress‑tracking* functionality is preserved but simplified; if the
-  helper classes are unavailable we fall back to a no‑op stub.
+    Notes
+    -----
+    * This file assumes that :class:`DataGenerator` already exposes helpers
+    ``_log`` (plain logger) and ``_output_and_log`` (logger + user interface).
+    * The *progress‑tracking* functionality is preserved but simplified; if the
+    helper classes are unavailable we fall back to a no‑op stub.
 """
 
 from pathlib import Path
@@ -55,27 +56,34 @@ try:
 except ImportError:  # pragma: no cover
     canvas = letter = landscape = mm = colors = None  # type: ignore
 
+from .data_generator import DataGenerator
 # ---------------------------------------------------------------------------
 # FleatMarket interface (duck‑typed) – we only use two methods
 # ---------------------------------------------------------------------------
+
+
 class _HasFleaMarketData(Protocol):
     def get_main_number_list(self) -> Sequence[object]: ...  # noqa: D401
     def get_seller_list(self, index: int): ...  # noqa: D401
 
 
 # Local imports -------------------------------------------------------------
-from .data_generator import DataGenerator
 
 __all__ = ["ReceiveInfoPdfGenerator"]
 
 # ---------------------------------------------------------------------------
 # Helper dataclass – kept fully compatible with legacy signature
 # ---------------------------------------------------------------------------
+
+
 @dataclass
 class CoordinatesConfig:
-    x1: float; y1: float
-    x2: float; y2: float
-    x3: float; y3: float
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    x3: float
+    y3: float
     font_size: int = 12
 
 
@@ -89,6 +97,7 @@ class _NoOpTracker:  # noqa: D101
     # noqa: D401 – tiny helper class
     def reset(self, total: int): ...  # pragma: no cover
     def increment(self): ...  # pragma: no cover
+
     def set_error(self, exc: Exception):
         self.has_error = True
 
@@ -98,10 +107,14 @@ class _NoOpTracker:  # noqa: D101
 # ---------------------------------------------------------------------------
 class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docstring
     DEFAULT_COORDS = [
-        CoordinatesConfig(20 * mm, -30 * mm, 80 * mm, -30 * mm, 140 * mm, -30 * mm),
-        CoordinatesConfig(160 * mm, -30 * mm, 220 * mm, -30 * mm, 280 * mm, -30 * mm),
-        CoordinatesConfig(20 * mm, -130 * mm, 80 * mm, -130 * mm, 140 * mm, -130 * mm),
-        CoordinatesConfig(160 * mm, -130 * mm, 220 * mm, -130 * mm, 280 * mm, -130 * mm),
+        CoordinatesConfig(20 * mm, -30 * mm, 80 * mm, -
+                          30 * mm, 140 * mm, -30 * mm),
+        CoordinatesConfig(160 * mm, -30 * mm, 220 * mm, -
+                          30 * mm, 280 * mm, -30 * mm),
+        CoordinatesConfig(20 * mm, -130 * mm, 80 * mm, -
+                          130 * mm, 140 * mm, -130 * mm),
+        CoordinatesConfig(160 * mm, -130 * mm, 220 * mm, -
+                          130 * mm, 280 * mm, -130 * mm),
     ] if mm else []  # empty if reportlab absent
 
     # ------------------------------------------------------------------
@@ -123,7 +136,8 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self._template_path = Path(pdf_template) if pdf_template else None
         self._coords: List[CoordinatesConfig] = coordinates or self.DEFAULT_COORDS
         if not self._coords:
-            raise ValueError("Es wurden keine Koordinaten definiert und ReportLab ist nicht verfügbar.")
+            raise ValueError(
+                "Es wurden keine Koordinaten definiert und ReportLab ist nicht verfügbar.")
 
         self._entries_per_page = len(self._coords)
         self._output_pdf = (self.path / opath).with_suffix(".pdf")
@@ -158,7 +172,8 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         try:
             return self._template_path.read_bytes()
         except Exception as err:  # pragma: no cover
-            self._output_and_log("ERROR", f"Fehler beim Lesen des Templates: {err}")
+            self._output_and_log(
+                "ERROR", f"Fehler beim Lesen des Templates: {err}")
             return None
 
     def _overlay_page(self, rows: Sequence[Tuple[str, str, str]]):  # noqa: D401
@@ -166,7 +181,8 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             return None  # reportlab missing
         packet = io.BytesIO()
         page_w, page_h = landscape(letter)  # type: ignore[arg-type]
-        can = canvas.Canvas(packet, pagesize=(page_w, page_h))  # type: ignore[arg-type]
+        can = canvas.Canvas(packet, pagesize=(
+            page_w, page_h))  # type: ignore[arg-type]
         can.setFillColor(colors.black)  # type: ignore[arg-type]
         for idx, (f1, f2, f3) in enumerate(rows):
             cfg = self._coords[idx]
@@ -186,10 +202,12 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             self._output_pdf.parent.mkdir(parents=True, exist_ok=True)
             with self._output_pdf.open("wb") as fh:
                 writer.write(fh)
-            self._output_and_log("INFO", f"PDF geschrieben: {self._output_pdf.relative_to(Path.cwd())}")
+            self._output_and_log(
+                "INFO", f"PDF geschrieben: {self._output_pdf.relative_to(Path.cwd())}")
             return True
         except Exception as err:  # pragma: no cover
-            self._output_and_log("ERROR", f"Fehler beim Schreiben der PDF: {err}")
+            self._output_and_log(
+                "ERROR", f"Fehler beim Schreiben der PDF: {err}")
             return False
 
     # ------------------------------------------------------------------
@@ -201,13 +219,15 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             self._output_and_log("ERROR", "PDF‑Libraries fehlen – Abbruch.")
             if overall:
                 overall.increment()  # type: ignore[attr-defined]
-                overall.set_error(ImportError("pypdf/reportlab fehlt"))  # type: ignore[attr-defined]
+                # type: ignore[attr-defined]
+                overall.set_error(ImportError("pypdf/reportlab fehlt"))
             return
 
         self._output_and_log("INFO", "Starte PDF‑Generierung …")
         rows = self._seller_rows()
         if not rows:
-            self._output_and_log("INFO", "Keine gültigen Daten – nichts zu tun.")
+            self._output_and_log(
+                "INFO", "Keine gültigen Daten – nichts zu tun.")
             if overall:
                 overall.increment()  # type: ignore[attr-defined]
             return
@@ -215,21 +235,25 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         template = self._template_bytes()
         if template is None:
             if overall:
-                overall.increment(); overall.set_error(FileNotFoundError())  # type: ignore[attr-defined]
+                overall.increment()
+                # type: ignore[attr-defined]
+                overall.set_error(FileNotFoundError())
             return
 
         # 1. Progress helper -------------------------------------------------
         tracker = _NoOpTracker() if _TrackerBase is None else _TrackerBase()
-        total_pages = (len(rows) + self._entries_per_page - 1) // self._entries_per_page
+        total_pages = (len(rows) + self._entries_per_page -
+                       1) // self._entries_per_page
         if hasattr(tracker, "reset"):
             tracker.reset(total=total_pages)  # type: ignore[misc]
 
-        bar = _ConsoleBar(length=50, description="PDF") if _ConsoleBar else None
+        bar = _ConsoleBar(
+            length=50, description="PDF") if _ConsoleBar else None
 
         def _task():
             writer = PdfWriter()
             for i in range(0, len(rows), self._entries_per_page):
-                grp = rows[i : i + self._entries_per_page]
+                grp = rows[i: i + self._entries_per_page]
                 try:
                     base = PdfReader(io.BytesIO(template)).pages[0]
                     ovl = self._overlay_page(grp)
@@ -246,15 +270,18 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
 
         # 2. Run with optional console bar ----------------------------------
         if bar:
-            bar.run_with_progress(target=_task, args=(), tracker=tracker)  # type: ignore[arg-type]
+            # type: ignore[arg-type]
+            bar.run_with_progress(target=_task, args=(), tracker=tracker)
         else:
             _task()
 
         # 3. Final state -----------------------------------------------------
         if tracker.has_error:
-            self._output_and_log("ERROR", "PDF‑Erstellung fehlgeschlagen – siehe Log.")
+            self._output_and_log(
+                "ERROR", "PDF‑Erstellung fehlgeschlagen – siehe Log.")
             if overall:
-                overall.set_error(RuntimeError("PDF error"))  # type: ignore[attr-defined]
+                # type: ignore[attr-defined]
+                overall.set_error(RuntimeError("PDF error"))
         else:
             self._output_and_log("INFO", "PDF‑Erstellung abgeschlossen.")
 

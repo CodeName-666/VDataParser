@@ -1,15 +1,5 @@
 from __future__ import annotations
 
-"""Refactored :class:`Article` implementation.
-
-Highlights
-----------
-* **Lean, single‑responsibility** design: validation & simple logging only.
-* Maintains legacy methods (``number()``, ``price()``, ``description()``) so
-  external callers stay unaffected.
-* Centralised helpers ``_log`` / ``_echo`` prevent repetitive code.
-* Uses *properties* instead of ad‑hoc getter functions internally.
-"""
 
 from typing import Optional
 import dataclasses
@@ -76,7 +66,8 @@ class Article(ArticleDataClass):  # noqa: D101 – Detailed docs above
 
         for fld in dataclasses.fields(info):
             setattr(self, fld.name, getattr(info, fld.name))
-        self._log("debug", f"Article {self.number or '?'} loaded.")
+        #self._log("debug", f"Article {self.number() or '?'} loaded.")
+        print("Pause")
 
     # ------------------------------------------------------------------
     # Properties & legacy accessors
@@ -92,16 +83,6 @@ class Article(ArticleDataClass):  # noqa: D101 – Detailed docs above
     @property
     def description(self) -> Optional[str]:  # noqa: D401
         return getattr(self, "beschreibung", None)
-
-    # Legacy aliases – keep public API stable --------------------------------
-    def number(self):  # type: ignore[override]
-        return self.number  # pragma: no cover – alias
-
-    def price(self):  # type: ignore[override]
-        return self.price   # pragma: no cover
-
-    def description(self):  # type: ignore[override]
-        return self.description  # pragma: no cover
 
     # ------------------------------------------------------------------
     # Validation helpers

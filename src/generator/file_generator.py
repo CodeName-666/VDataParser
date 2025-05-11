@@ -66,6 +66,7 @@ class FileGenerator:  # noqa: D101 – detailed docs above
         progress_tracker: Optional[_TrackerBase] = None,
         progress_bar: Optional[_BarBase] = None,
     ) -> None:
+        
         # Housekeeping -------------------------------------------------
         self._fm = fleat_market_data
         self._path = Path(output_path)

@@ -1,16 +1,5 @@
 from __future__ import annotations
 
-"""Refactored implementation of :class:`MainNumber`.
-
-Highlights
-----------
-* Clear separation of concerns (data loading, logging, aggregation).
-* Uses modern Python features (f‑strings, type hints, property helpers).
-* Dramatically reduced nested logic and duplicated code.
-* Keeps the public API of the original class intact (``set_main_number_info`` &
-  all aggregation helpers) so that existing callers do not break.
-"""
-
 from typing import List, Optional
 import dataclasses
 

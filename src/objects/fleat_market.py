@@ -94,6 +94,7 @@ class FleatMarket:  # noqa: D101 – Docstring below
                 MainNumber(m, logger=self._logger, output_interface=self._output) for m in data
             ]
             self._log("info", f"{len(self._main_numbers)} main numbers loaded.")
+        
         except Exception as err:  # pragma: no cover
             self._log("error", "Failed to load main numbers", exc=err)
             self._echo("USER_ERROR:", "Fehler beim Laden der Hauptnummern – siehe Log.")
