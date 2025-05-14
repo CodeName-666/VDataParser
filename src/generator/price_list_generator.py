@@ -1,27 +1,13 @@
 from __future__ import annotations
 
-"""Refactored :class:`PriceListGenerator`.
-
-This modernised version shares the clean style of the other generators in the
-project: concise code, clear separation of concerns, optional‑dependency
-handling, and a stable public interface (``__init__`` + ``generate``).
-"""
-
 from pathlib import Path
 from typing import List, Optional, Sequence, Protocol
+from log import CustomLogger  # type: ignore
+from src.display import (
+    ProgressTrackerAbstraction as _TrackerBase,  # type: ignore
+    OutputInterfaceAbstraction,                  # type: ignore
+)
 
-try:
-    from log import CustomLogger  # type: ignore
-except ImportError:  # pragma: no cover
-    CustomLogger = None  # type: ignore
-
-try:
-    from src.display import (
-        ProgressTrackerAbstraction as _TrackerBase,  # type: ignore
-        OutputInterfaceAbstraction,                  # type: ignore
-    )
-except ImportError:  # pragma: no cover
-    _TrackerBase = OutputInterfaceAbstraction = None  # type: ignore
 
 # ---------------------------------------------------------------------------
 # FleatMarket interface (duck‑typed) – we only need three helpers

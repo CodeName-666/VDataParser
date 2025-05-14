@@ -1,34 +1,11 @@
 from __future__ import annotations
-
-"""Refactored implementation of :class:`FleatMarket`.
-
-Key improvements
-----------------
-* Clear, minimal public API (``load_sellers`` / ``load_main_numbers``).
-* Centralised error handling & logging helpers.
-* Properties expose immutable *views* – internal lists stay encapsulated.
-* Optional dependencies (logger, output interface) remain truly optional.
-"""
-
 from typing import List, Optional, Sequence
-
-try:
-    # --- Optional Logger ---------------------------------------------------
-    from log import CustomLogger  # type: ignore
-except ImportError:  # pragma: no cover
-    CustomLogger = None  # type: ignore
-
-try:
-    # --- Optional Output Interface ----------------------------------------
-    from src.display import OutputInterfaceAbstraction  # type: ignore
-except ImportError:  # pragma: no cover
-    OutputInterfaceAbstraction = None  # type: ignore
-
+from log import CustomLogger  # type: ignore
+from src.display import OutputInterfaceAbstraction  # type: ignore
 from data import SellerDataClass, MainNumberDataClass
 from .seller import Seller
 from .main_number import MainNumber
 
-__all__ = ["FleatMarket"]
 
 
 class FleatMarket:  # noqa: D101 – Docstring below
@@ -71,9 +48,7 @@ class FleatMarket:  # noqa: D101 – Docstring below
         if self._output:
             self._output.write_message(f"{prefix} {msg}")
 
-    # ------------------------------------------------------------------
-    # Public API – data loading
-    # ------------------------------------------------------------------
+   
     def load_sellers(self, data: Sequence[SellerDataClass]) -> None:  # noqa: D401
         """Replace internal seller list with *data*."""
         self._log("debug", f"Loading {len(data)} seller entries …")
@@ -99,18 +74,13 @@ class FleatMarket:  # noqa: D101 – Docstring below
             self._log("error", "Failed to load main numbers", exc=err)
             self._echo("USER_ERROR:", "Fehler beim Laden der Hauptnummern – siehe Log.")
 
-    # ------------------------------------------------------------------
-    # Read‑only views
-    # ------------------------------------------------------------------
-    @property
-    def sellers(self) -> tuple[Seller, ...]:
+    def sellers(self) ->  List[Seller]:
         """Immutable view of loaded sellers."""
-        return tuple(self._sellers)
+        return self._sellers
 
-    @property
-    def main_numbers(self) -> tuple[MainNumber, ...]:
+    def main_numbers(self) -> List[MainNumber]:
         """Immutable view of loaded main numbers."""
-        return tuple(self._main_numbers)
+        return self._main_numbers
 
     # Convenience helpers -------------------------------------------------
     def seller_count(self) -> int:  # noqa: D401

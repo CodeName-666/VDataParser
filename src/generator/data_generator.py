@@ -2,24 +2,11 @@
 from pathlib import Path
 from typing import Optional
 
-# Assume logger.py exists
-try:
-    from log import CustomLogger
-except ImportError:
-    CustomLogger = None  # type: ignore
 
-# Assume progress_tracker.py exists
-try:
-    from src.display import ProgressTrackerAbstraction
-except ImportError:
-    ProgressTrackerAbstraction = None  # type: ignore
 
-# Import the abstraction
-try:
-    # Assuming output_interface.py is accessible, adjust path if needed
-    from src.display import OutputInterfaceAbstraction
-except ImportError:
-    OutputInterfaceAbstraction = None  # type: ignore
+from log import CustomLogger
+from src.display import ProgressTrackerAbstraction
+from src.display import OutputInterfaceAbstraction
 
 
 class DataGenerator:

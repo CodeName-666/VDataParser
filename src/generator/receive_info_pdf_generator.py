@@ -1,61 +1,23 @@
 from __future__ import annotations
 
-"""
-    Refactored :class:`ReceiveInfoPdfGenerator`.
-
-    Goals
-    -----
-    * Mirror the tidy, dependency‑light style used across the refactored codebase.
-    * Keep the original public contract (constructor + ``generate``) intact so
-    callers do not break.
-    * Centralise error handling + user feedback through ``_output_and_log`` inherited
-    from :class:`DataGenerator`.
-    * Gracefully degrade when optional libs (``pypdf`` / ``reportlab``) are missing.
-
-    Notes
-    -----
-    * This file assumes that :class:`DataGenerator` already exposes helpers
-    ``_log`` (plain logger) and ``_output_and_log`` (logger + user interface).
-    * The *progress‑tracking* functionality is preserved but simplified; if the
-    helper classes are unavailable we fall back to a no‑op stub.
-"""
-
 from pathlib import Path
 from dataclasses import dataclass
 from typing import List, Optional, Sequence, Tuple, Protocol
 import io
 
-# ---------------------------------------------------------------------------
-# Optional run‑time dependencies (logger, UI, PDF libs) – all degrade nicely
-# ---------------------------------------------------------------------------
-try:
-    from log import CustomLogger  # type: ignore
-except ImportError:  # pragma: no cover
-    CustomLogger = None  # type: ignore
+from log import CustomLogger  # type: ignore
 
-try:
-    from src.display import (
-        ProgressTrackerAbstraction as _TrackerBase,  # type: ignore
-        ConsoleProgressBar as _ConsoleBar,           # type: ignore
-        OutputInterfaceAbstraction,                  # type: ignore
-    )
-except ImportError:  # pragma: no cover – tests / CI
-    _TrackerBase = _ConsoleBar = OutputInterfaceAbstraction = None  # type: ignore
+from src.display import (
+    ProgressTrackerAbstraction as _TrackerBase,  # type: ignore
+    ConsoleProgressBar as _ConsoleBar,           # type: ignore
+    OutputInterfaceAbstraction,                  # type: ignore
+)
 
-# PDF helpers ---------------------------------------------------------------
-try:
-    from pypdf import PdfReader, PdfWriter, PageObject  # type: ignore
-except ImportError:  # pragma: no cover
-    PdfReader = PdfWriter = PageObject = object  # type: ignore
-
-try:
-    from reportlab.pdfgen import canvas  # type: ignore
-    from reportlab.lib.pagesizes import letter, landscape  # type: ignore
-    from reportlab.lib.units import mm  # type: ignore
-    from reportlab.lib import colors  # type: ignore
-except ImportError:  # pragma: no cover
-    canvas = letter = landscape = mm = colors = None  # type: ignore
-
+from pypdf import PdfReader, PdfWriter, PageObject  # type: ignore
+from reportlab.pdfgen import canvas  # type: ignore
+from reportlab.lib.pagesizes import letter, landscape  # type: ignore
+from reportlab.lib.units import mm  # type: ignore
+from reportlab.lib import colors  # type: ignore
 from .data_generator import DataGenerator
 # ---------------------------------------------------------------------------
 # FleatMarket interface (duck‑typed) – we only use two methods

@@ -7,19 +7,9 @@ import sys # For stderr fallback
 from typing import Union, Dict, List, Optional, Any # Added Optional, Any
 from pathlib import Path
 
-# Conditional import of CustomLogger
-try:
-    # Assume logger.py is in the same directory or package
-    from log import CustomLogger, LogType # Import LogType if used
-except ImportError:
-    CustomLogger = None # type: ignore
 
-# Conditional import for type checking (requests is only used for URL loading)
-try:
-    import requests
-except ImportError:
-    requests = None # type: ignore
-
+from log import CustomLogger, LogType # Import LogType if used
+import requests
 from urllib.parse import urlparse
 
 class JsonHandler():

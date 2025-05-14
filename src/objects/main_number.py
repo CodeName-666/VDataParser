@@ -2,19 +2,8 @@ from __future__ import annotations
 
 from typing import List, Optional
 import dataclasses
-
-try:
-    # --- Optional Logger ---------------------------------------------------
-    from log import CustomLogger  # type: ignore
-except ImportError:  # pragma: no cover – Logger is optional at runtime
-    CustomLogger = None  # type: ignore
-
-try:
-    # --- Optional Output Interface ----------------------------------------
-    from src.display import OutputInterfaceAbstraction  # type: ignore
-except ImportError:  # pragma: no cover
-    OutputInterfaceAbstraction = None  # type: ignore
-
+from log import CustomLogger  # type: ignore
+from src.display import OutputInterfaceAbstraction  # type: ignore
 from data import MainNumberDataClass, ArticleDataClass
 from objects import Article
 
@@ -111,7 +100,6 @@ class MainNumber(MainNumberDataClass):
     # ------------------------------------------------------------------
     # Convenience helpers / computed attributes
     # ------------------------------------------------------------------
-    @property
     def number(self) -> Optional[int]:
         """Return the numeric identifier extracted from ``self.name`` (``stnr123`` → ``123``)."""
         if isinstance(self.name, str) and self.name.lower().startswith("stnr"):
@@ -124,20 +112,19 @@ class MainNumber(MainNumberDataClass):
     # ------------------------------------------------------------------
     # Aggregations
     # ------------------------------------------------------------------
-    @property
     def valid_articles(self) -> List[Article]:
         """List of *valid* :class:`Article` instances."""
         return [a for a in self._articles if a.is_valid()]
 
     def article_quantity(self) -> int:
         """Number of valid articles."""
-        qty = len(self.valid_articles)
+        qty = len(self.valid_articles())
         self._log("debug", f"'{self.name}': {qty} gültige Artikel gezählt (gesamt {len(self._articles)}).")
         return qty
 
     def article_total(self) -> float:
         """Total price of valid articles (rounded to 2 decimals)."""
-        total = round(sum(float(a.price()) for a in self.valid_articles), 2)
+        total = round(sum(float(a.price()) for a in self.valid_articles()), 2)
         self._log("debug", f"'{self.name}': Gesamtwert der Artikel = {total:.2f} €.")
         return total
 

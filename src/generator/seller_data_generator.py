@@ -3,30 +3,10 @@ from pathlib import Path
 from typing import List, Optional
 import time
 
-# Conditional imports... (keep as they are)
-try:
-    from log import CustomLogger
-except ImportError:
-    CustomLogger = None
-try:
-    from objects import FleatMarket, Seller
-except ImportError:
-    class FleatMarket:
-        def get_main_number_list(self): return []
-        def get_seller_list(i): return Seller()
-
-        class Seller:
-            vorname = "Dummy"
-            nachname = "Dummy"
-try:
-    from src.display import ProgressTrackerAbstraction
-except ImportError:
-    ProgressTrackerAbstraction = None
-try:
-    from src.display import OutputInterfaceAbstraction  # Added
-except ImportError:
-    OutputInterfaceAbstraction = None  # Added
-
+from log import CustomLogger
+from objects import FleatMarket, Seller
+from src.display import ProgressTrackerAbstraction
+from src.display import OutputInterfaceAbstraction  # Added
 from .data_generator import DataGenerator
 
 
@@ -80,7 +60,7 @@ class SellerDataGenerator(DataGenerator):
         processed_count = 0
 
         try:
-            all_main_numbers_data = self.__fleat_market_data.get_main_number_list()
+            all_main_numbers_data = self.__fleat_market_data.main_numbers()
             total_items = len(all_main_numbers_data)
         except AttributeError:
             # Critical error
