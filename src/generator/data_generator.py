@@ -5,8 +5,8 @@ from typing import Optional
 
 
 from log import CustomLogger
-from src.display import ProgressTrackerAbstraction
-from src.display import OutputInterfaceAbstraction
+from display import ProgressTrackerAbstraction
+from display import OutputInterfaceAbstraction
 
 
 class DataGenerator:

@@ -5,8 +5,8 @@ import time
 
 from log import CustomLogger
 from objects import FleatMarket, Seller
-from src.display import ProgressTrackerAbstraction
-from src.display import OutputInterfaceAbstraction  # Added
+from display import ProgressTrackerAbstraction
+from display import OutputInterfaceAbstraction  # Added
 from .data_generator import DataGenerator
 
 

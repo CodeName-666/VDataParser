@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List, Optional, Sequence
 from log import CustomLogger  # type: ignore
-from src.display import OutputInterfaceAbstraction  # type: ignore
+from display import OutputInterfaceAbstraction  # type: ignore
 from data import SellerDataClass, MainNumberDataClass
 from .seller import Seller
 from .main_number import MainNumber

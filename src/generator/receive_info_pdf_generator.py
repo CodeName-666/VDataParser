@@ -7,7 +7,7 @@ import io
 
 from log import CustomLogger  # type: ignore
 
-from src.display import (
+from display import (
     ProgressTrackerAbstraction as _TrackerBase,  # type: ignore
     ConsoleProgressBar as _ConsoleBar,           # type: ignore
     OutputInterfaceAbstraction,                  # type: ignore

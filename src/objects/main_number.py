@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List, Optional
 import dataclasses
 from log import CustomLogger  # type: ignore
-from src.display import OutputInterfaceAbstraction  # type: ignore
+from display import OutputInterfaceAbstraction  # type: ignore
 from data import MainNumberDataClass, ArticleDataClass
 from objects import Article
 

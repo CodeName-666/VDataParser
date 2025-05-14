@@ -5,8 +5,8 @@ from typing import List, Optional
 
 from log import CustomLogger
 from objects import FleatMarket
-from src.display import ProgressTrackerAbstraction
-from src.display import OutputInterfaceAbstraction  # Added
+from display import ProgressTrackerAbstraction
+from display import OutputInterfaceAbstraction  # Added
 from .data_generator import DataGenerator
 
 

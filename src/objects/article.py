@@ -3,19 +3,8 @@ from __future__ import annotations
 
 from typing import Optional
 import dataclasses
-
-try:
-    # Optional logger – available in production environment.
-    from log import CustomLogger  # type: ignore
-except ImportError:  # pragma: no cover – doctest / CI
-    CustomLogger = None  # type: ignore
-
-try:
-    # Optional UI sink for human‑readable messages.
-    from src.display import OutputInterfaceAbstraction  # type: ignore
-except ImportError:  # pragma: no cover
-    OutputInterfaceAbstraction = None  # type: ignore
-
+from log import CustomLogger  # type: ignore
+from display import OutputInterfaceAbstraction  # type: ignore
 from data import ArticleDataClass
 
 __all__ = ["Article"]

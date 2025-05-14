@@ -8,6 +8,18 @@ from typing import List, Tuple, Optional, Any
 from args import Arguments
 from version import get_version
 
+from data import BaseData
+from data import SellerDataClass
+from data import MainNumberDataClass
+
+from generator import FileGenerator
+from display import BasicProgressTracker as ProgressTracker
+from display import ConsoleProgressBar as ConsoleBar
+from display import ConsoleOutput as OutputIface
+from objects import FleatMarket
+from ui import MainWindow
+from PySide6.QtWidgets import QApplication
+from log import CustomLogger
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -24,14 +36,13 @@ def _optional(name: str, attr: str | None = None) -> Any | None:  # noqa: D401
 
 def _bootstrap_logger(verbose: bool, level: str) -> logging.Logger:  # noqa: D401
     try:
-        CustomLogger = _optional("log", "CustomLogger")  # type: ignore[var‑annotated]
-        if CustomLogger is not None:
-            return CustomLogger(
-                name="FleaMarket",
-                level="DEBUG" if verbose else level,
-                verbose=verbose,
-                handler=logging.FileHandler("cli_logging", "w", "utf‑8"),
-            )
+      
+        return CustomLogger(
+            name="FleaMarket",
+            level="DEBUG" if verbose else level,
+            verbose=verbose,
+            handler=logging.FileHandler("cli_logging", "w", "utf‑8"),
+        )
     except Exception:  # pragma: no cover – fallback safety
         pass
 
@@ -46,21 +57,7 @@ def _bootstrap_logger(verbose: bool, level: str) -> logging.Logger:  # noqa: D40
     return logging.getLogger("FleaMarket")
 
 
-# ---------------------------------------------------------------------------
-# Dynamic imports (may be None)
-# ---------------------------------------------------------------------------
-BaseData = _optional("data", "BaseData")
-SellerDataClass = _optional("data", "SellerDataClass")
-MainNumberDataClass = _optional("data", "MainNumberDataClass")
 
-FleatMarket = _optional("objects", "FleatMarket")
-FileGenerator = _optional("generator", "FileGenerator")
-ProgressTracker = _optional("display", "BasicProgressTracker")
-ConsoleBar = _optional("display", "ConsoleProgressBar")
-OutputIface = _optional("display", "ConsoleOutput")
-
-QApplication = _optional("PySide6.QtWidgets", "QApplication")
-MainWindow = _optional("ui", "MainWindow")
 
 
 # ---------------------------------------------------------------------------
@@ -83,10 +80,6 @@ def _build_cli_infra(logger: logging.Logger):  # noqa: D401
 def _run_cli(parsed: Arguments):  # noqa: D401
     logger = _bootstrap_logger(parsed.verbose, parsed.log_level)
     logger.info(f"Flea Market Generator v{get_version()} – CLI")
-
-    if any(d is None for d in (FileGenerator, BaseData, FleatMarket)):
-        logger.critical("Erforderliche Module fehlen – Installation prüfen.")
-        sys.exit(1)
 
     out, tracker, bar = _build_cli_infra(logger)
 

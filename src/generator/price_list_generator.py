@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List, Optional, Sequence, Protocol
 from log import CustomLogger  # type: ignore
-from src.display import (
+from display import (
     ProgressTrackerAbstraction as _TrackerBase,  # type: ignore
     OutputInterfaceAbstraction,                  # type: ignore
 )
