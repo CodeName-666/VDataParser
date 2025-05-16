@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import List, Optional
 import dataclasses
+from data import Base
 from log import CustomLogger  # type: ignore
 from display import OutputInterfaceAbstraction  # type: ignore
 from data import MainNumberDataClass, ArticleDataClass
@@ -10,7 +11,7 @@ from objects import Article
 __all__ = ["MainNumber"]
 
 
-class MainNumber(MainNumberDataClass):
+class MainNumber(MainNumberDataClass, Base):
     """Business‑logic wrapper around :class:`MainNumberDataClass`.
 
     A *main number* groups multiple :class:`Article` objects.  This subclass adds
@@ -22,19 +23,12 @@ class MainNumber(MainNumberDataClass):
     # ---------------------------------------------------------------------
     # Construction helpers
     # ---------------------------------------------------------------------
-    def __init__(
-        self,
-        main_number_info: Optional[MainNumberDataClass] = None,
-        *,
-        logger: Optional[CustomLogger] = None,
-        output_interface: Optional[OutputInterfaceAbstraction] = None,
-    ) -> None:
-        # 1. Initialise inherited dataclass fields with their defaults.
-        super().__init__()
-
-        # 2. Optional collaborators --------------------------------------------------
-        self._logger = logger
-        self._output = output_interface
+    def __init__(self, main_number_info: Optional[MainNumberDataClass] = None,*,
+                logger: Optional[CustomLogger] = None,
+                output_interface: Optional[OutputInterfaceAbstraction] = None):
+        
+        MainNumberDataClass.__init__()
+        Base.__init__(logger, output_interface)
 
         # 3. Runtime‑only state ------------------------------------------------------
         self._articles: List[Article] = []
@@ -43,38 +37,7 @@ class MainNumber(MainNumberDataClass):
         if main_number_info is not None:
             self.set_main_number_info(main_number_info)
 
-    # ---------------------------------------------------------------------
-    # Logging utilities (internal only)
-    # ---------------------------------------------------------------------
-    def _log(
-        self,
-        level: str,
-        msg: str,
-        *,
-        verbose: bool = False,
-        exc_info: bool | Exception | None = False,
-    ) -> None:
-        """Dispatch *msg* to the external logger (if configured)."""
-        if not self._logger:
-            return  # Logging disabled
-
-        log_fn = getattr(self._logger, level, None)
-        if callable(log_fn):
-            # Most common logger signatures are ``(msg)`` or ``(msg, exc_info=…)``.
-            try:
-                log_fn(msg, exc_info=exc_info)  # type: ignore[arg-type]
-            except TypeError:
-                # Fallback: silently ignore unsupported keyword args.
-                log_fn(msg)  # type: ignore[misc]
-        else:
-            # Unknown *level* → fallback to *info*.
-            self._logger.info(msg)
-
-    def _echo(self, prefix: str, msg: str) -> None:
-        """Write *msg* to the optional *output_interface*."""
-        if self._output:
-            self._output.write_message(f"{prefix} {msg}")
-
+    
     # ---------------------------------------------------------------------
     # Public API
     # ---------------------------------------------------------------------
@@ -141,12 +104,4 @@ class MainNumber(MainNumberDataClass):
             self._echo("NOTICE:", "Keine gültigen Artikel gefunden – bitte prüfen.")
         return flag
 
-    # ------------------------------------------------------------------
-    # Human‑readable helpers
-    # ------------------------------------------------------------------
-    def __repr__(self) -> str:  # noqa: D401
-        return (
-            f"<MainNumber name='{self.name}' #articles={len(self._articles)} "
-            f"valid={self.article_quantity()} total={self.article_total():.2f}>"
-        )
-
+    

@@ -3,59 +3,33 @@ from typing import List, Optional, Sequence
 from log import CustomLogger  # type: ignore
 from display import OutputInterfaceAbstraction  # type: ignore
 from data import SellerDataClass, MainNumberDataClass
+from data import Base
 from .seller import Seller
 from .main_number import MainNumber
 
 
 
-class FleatMarket:  # noqa: D101 – Docstring below
+class FleatMarket(Base):  # noqa: D101 – Docstring below
     """Container object managing :class:`Seller` and :class:`MainNumber` sets."""
 
     # ------------------------------------------------------------------
     # Construction helpers
     # ------------------------------------------------------------------
-    def __init__(
-        self,
-        *,
-        logger: Optional[CustomLogger] = None,
-        output_interface: Optional[OutputInterfaceAbstraction] = None,
-    ) -> None:
-        self._logger = logger
-        self._output = output_interface
+    def __init__(self, *,logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None,):
+        
+        Base.__init__(logger, output_interface)
 
         self._sellers: List[Seller] = []
         self._main_numbers: List[MainNumber] = []
 
         self._log("info", "FleatMarket initialised.")
-
-    # ------------------------------------------------------------------
-    # Internal helpers
-    # ------------------------------------------------------------------
-    def _log(self, level: str, msg: str, *, exc: Exception | None = None) -> None:
-        if not self._logger:
-            return
-
-        fn = getattr(self._logger, level, None)
-        if callable(fn):
-            try:
-                fn(msg, exc_info=exc)  # type: ignore[arg-type]
-            except TypeError:
-                fn(msg)  # type: ignore[misc]
-        else:
-            self._logger.info(msg)
-
-    def _echo(self, prefix: str, msg: str) -> None:
-        if self._output:
-            self._output.write_message(f"{prefix} {msg}")
-
    
     def load_sellers(self, data: Sequence[SellerDataClass]) -> None:  # noqa: D401
         """Replace internal seller list with *data*."""
         self._log("debug", f"Loading {len(data)} seller entries …")
         try:
-            self._sellers = [
-                Seller(s) for s in data
-            ]
+            self._sellers = [ Seller(s) for s in data ]
+
             self._log("info", f"{len(self._sellers)} sellers loaded.")
         except Exception as err:  # pragma: no cover – defensive
             self._log("error", "Failed to load sellers", exc=err)
@@ -65,11 +39,8 @@ class FleatMarket:  # noqa: D101 – Docstring below
         """Replace internal main‑number list with *data*."""
         self._log("debug", f"Loading {len(data)} main‑number entries …")
         try:
-            self._main_numbers = [
-                MainNumber(m, logger=self._logger, output_interface=self._output) for m in data
-            ]
+            self._main_numbers = [ MainNumber(m, logger=self._logger, output_interface=self._output) for m in data]
             self._log("info", f"{len(self._main_numbers)} main numbers loaded.")
-        
         except Exception as err:  # pragma: no cover
             self._log("error", "Failed to load main numbers", exc=err)
             self._echo("USER_ERROR:", "Fehler beim Laden der Hauptnummern – siehe Log.")
@@ -94,17 +65,5 @@ class FleatMarket:  # noqa: D101 – Docstring below
         try:
             return self._sellers[index]
         except IndexError:
-            self._log(
-                "warning",
-                f"Seller index {index} out of range (max {len(self._sellers) - 1}).",
-            )
+            self._log("warning",f"Seller index {index} out of range (max {len(self._sellers) - 1}).")
             return None
-
-    # ------------------------------------------------------------------
-    # Dunder helpers
-    # ------------------------------------------------------------------
-    def __repr__(self) -> str:  # noqa: D401
-        return (
-            f"<FleatMarket sellers={self.seller_count()} "
-            f"main_numbers={self.main_number_count()}>"
-        )

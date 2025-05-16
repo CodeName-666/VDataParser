@@ -8,6 +8,7 @@ from typing import List, Tuple, Optional, Any
 from args import Arguments
 from version import get_version
 
+from data import Base
 from data import BaseData
 from data import SellerDataClass
 from data import MainNumberDataClass
@@ -87,10 +88,11 @@ def _run_cli(parsed: Arguments):  # noqa: D401
     logger.info(f"Lade Daten …{data_file}")
 
     try:
-        base = BaseData(data_file, logger=logger)  # type: ignore[arg‑type]
-        base.verify_data()
-        sellers: List[SellerDataClass] = base.get_seller_list()  # type: ignore[assignment]
-        main_numbers: List[MainNumberDataClass] = base.get_main_number_list()  # type: ignore[assignment]
+        b = Base(logger=logger, output_interface=out)  # type: ignore[call‑arg]
+        base_data = BaseData(data_file, logger=logger)  # type: ignore[arg‑type]
+        base_data.verify_data()
+        sellers: List[SellerDataClass] = base_data.get_seller_list()  # type: ignore[assignment]
+        main_numbers: List[MainNumberDataClass] = base_data.get_main_number_list()  # type: ignore[assignment]
     except FileNotFoundError:
         (out or logger).error("Datendatei nicht gefunden: %s", data_file)  # type: ignore[attr‑defined]
         sys.exit(1)
@@ -98,7 +100,7 @@ def _run_cli(parsed: Arguments):  # noqa: D401
         logger.error(f"Fehler beim Laden der Daten: {err}")
         sys.exit(1)
 
-    fm = FleatMarket(logger = logger, output_interface = out)  # type: ignore[call‑arg]
+    fm = FleatMarket()  # type: ignore[call‑arg]
     fm.load_sellers(sellers)
     fm.load_main_numbers(main_numbers)
 
@@ -110,8 +112,6 @@ def _run_cli(parsed: Arguments):  # noqa: D401
         statistic_file_name=parsed.stats_filename,
         pdf_template_path_input=parsed.pdf_template,
         pdf_output_file_name=parsed.pdf_output,
-        logger=logger,
-        output_interface=out,
         progress_tracker=tracker,
         progress_bar=bar,
     )

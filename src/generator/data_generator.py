@@ -1,15 +1,12 @@
-# --- data_generator.py ---
 from pathlib import Path
 from typing import Optional
-
-
-
 from log import CustomLogger
 from display import ProgressTrackerAbstraction
 from display import OutputInterfaceAbstraction
+from data import Base
 
 
-class DataGenerator:
+class DataGenerator(Base):
     """
     A base class for data generators, with optional logging and user output interface support.
 
@@ -51,44 +48,6 @@ class DataGenerator:
         self.__path: Path = Path(path) if path else Path('.')
         self.logger = logger  # Store the logger instance
         self.output_interface = output_interface  # Store the output interface instance
-
-    def _log(self, level: str, message: str, on_verbose: bool = False) -> None:
-        """ Helper method for conditional logging ONLY. """
-        if self.logger:
-            log_method = getattr(self.logger, level.lower(), None)
-            if log_method and callable(log_method):
-                try:
-                    if level.lower() in ["debug", "info", "warning", "error"]:
-                        log_method(message, on_verbose=on_verbose)
-                    else:
-                        log_method(message)
-                except Exception as e:
-                    import sys
-                    print(f"LOGGING FAILED ({level}): {message} | Error: {e}", file=sys.stderr)
-
-    def _output(self, message: str) -> None:
-        """ Helper method to write ONLY to the output interface. """
-        if self.output_interface:
-            try:
-                self.output_interface.write_message(message)
-            except Exception as e:
-                # Log error if output fails? Or just print?
-                self._log("ERROR", f"Failed to write message to output interface: {e}")
-                # Or print to stderr as a last resort
-                # import sys
-                # print(f"OUTPUT INTERFACE FAILED: {message} | Error: {e}", file=sys.stderr)
-
-    def _output_and_log(self, level: str, message: str, on_verbose: bool = False) -> None:
-        """
-        Helper method for sending messages to BOTH logger and output interface.
-        Typically used for INFO, WARNING, ERROR level messages relevant to the user.
-        """
-        # Log first
-        self._log(level, message, on_verbose)
-
-        # Then output to user interface (usually only for non-debug levels)
-        if level.upper() in ["INFO", "WARNING", "ERROR", "CRITICAL"]:
-            self._output(message)  # Send the same message to the user output
 
     # --- Properties (file_name, path) remain the same ---
     @property

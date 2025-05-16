@@ -5,37 +5,20 @@ from dataclasses import dataclass
 from typing import List, Optional, Sequence, Tuple, Protocol
 import io
 
-from log import CustomLogger  # type: ignore
+from log import CustomLogger  
 
 from display import (
-    ProgressTrackerAbstraction as _TrackerBase,  # type: ignore
-    ConsoleProgressBar as _ConsoleBar,           # type: ignore
-    OutputInterfaceAbstraction,                  # type: ignore
+    ProgressTrackerAbstraction as _TrackerBase,  
+    ConsoleProgressBar as _ConsoleBar,          
+    OutputInterfaceAbstraction,                 
 )
 
-from pypdf import PdfReader, PdfWriter, PageObject  # type: ignore
-from reportlab.pdfgen import canvas  # type: ignore
-from reportlab.lib.pagesizes import letter, landscape  # type: ignore
-from reportlab.lib.units import mm  # type: ignore
-from reportlab.lib import colors  # type: ignore
+from pypdf import PdfReader, PdfWriter, PageObject  
+from reportlab.pdfgen import canvas 
+from reportlab.lib.pagesizes import letter, landscape 
+from reportlab.lib.units import mm  
+from reportlab.lib import colors  
 from .data_generator import DataGenerator
-# ---------------------------------------------------------------------------
-# FleatMarket interface (duck‑typed) – we only use two methods
-# ---------------------------------------------------------------------------
-
-
-class _HasFleaMarketData(Protocol):
-    def get_main_number_list(self) -> Sequence[object]: ...  # noqa: D401
-    def get_seller_list(self, index: int): ...  # noqa: D401
-
-
-# Local imports -------------------------------------------------------------
-
-__all__ = ["ReceiveInfoPdfGenerator"]
-
-# ---------------------------------------------------------------------------
-# Helper dataclass – kept fully compatible with legacy signature
-# ---------------------------------------------------------------------------
 
 
 @dataclass
@@ -82,7 +65,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     # ------------------------------------------------------------------
     def __init__(
         self,
-        fleat_market_data: _HasFleaMarketData,
+        fleat_market_data,
         *,
         path: str | Path = "",
         pdf_template: str | Path = "",

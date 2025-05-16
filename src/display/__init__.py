@@ -1,3 +1,4 @@
+
 from .output.output_interface_abstraction import OutputInterfaceAbstraction
 from .output.cosole_output import ConsoleOutput
 from .output.qt_output import QtOutput

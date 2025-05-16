@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import Optional
 import dataclasses
+from data import Base
 from log import CustomLogger  # type: ignore
 from display import OutputInterfaceAbstraction  # type: ignore
 from data import ArticleDataClass
@@ -10,39 +11,21 @@ from data import ArticleDataClass
 __all__ = ["Article"]
 
 
-class Article(ArticleDataClass):  # noqa: D101 – Detailed docs above
+class Article(ArticleDataClass, Base):  # noqa: D101 – Detailed docs above
     # ------------------------------------------------------------------
     # Construction helpers
     # ------------------------------------------------------------------
-    def __init__(
-        self,
-        info: Optional[ArticleDataClass] = None,
-        *,
+    def __init__(self, info: Optional[ArticleDataClass] = None,*,
         logger: Optional[CustomLogger] = None,
-        output_interface: Optional[OutputInterfaceAbstraction] = None,
-    ) -> None:
-        super().__init__()  # inherit all dataclass defaults
+        output_interface: Optional[OutputInterfaceAbstraction] = None,):
+        
+        ArticleDataClass.__init__()  # inherit all dataclass defaults
+        Base.__init__(logger, output_interface)  # inherit all base defaults
         self._logger = logger
         self._output = output_interface
 
         if info is not None:
             self.set_article_info(info)
-
-    # ------------------------------------------------------------------
-    # Internal utilities
-    # ------------------------------------------------------------------
-    def _log(self, level: str, msg: str) -> None:
-        if not self._logger:
-            return
-        fn = getattr(self._logger, level, None)
-        if callable(fn):
-            fn(msg)
-        else:
-            self._logger.info(msg)
-
-    def _echo(self, prefix: str, msg: str) -> None:
-        if self._output:
-            self._output.write_message(f"{prefix} {msg}")
 
     # ------------------------------------------------------------------
     # Data loading
@@ -55,21 +38,17 @@ class Article(ArticleDataClass):  # noqa: D101 – Detailed docs above
 
         for fld in dataclasses.fields(info):
             setattr(self, fld.name, getattr(info, fld.name))
-        #self._log("debug", f"Article {self.number() or '?'} loaded.")
-        print("Pause")
+        self._log("debug", f"Article {self.number() or '?'} loaded.")
+        
 
-    # ------------------------------------------------------------------
-    # Properties & legacy accessors
-    # ------------------------------------------------------------------
-    @property
     def number(self) -> Optional[str]:  # noqa: D401
         return getattr(self, "artikelnummer", None)
 
-    @property
+  
     def price(self) -> Optional[str]:  # noqa: D401
         return getattr(self, "preis", None)
 
-    @property
+  
     def description(self) -> Optional[str]:  # noqa: D401
         return getattr(self, "beschreibung", None)
 

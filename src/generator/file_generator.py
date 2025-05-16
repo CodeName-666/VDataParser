@@ -1,44 +1,21 @@
 from __future__ import annotations
 
-"""Refactored :class:`FileGenerator`.
 
-Core ideas
-~~~~~~~~~~
-* **Slim orchestration** – the heavy lifting is done by the concrete generator
-  classes; *FileGenerator* merely wires them together.
-* **Optional‑dependency friendly** – works even if logger / UI / tracker / bar
-  are absent.
-* **Unified helpers** (``_log``/``_echo``) mirror the rest of the refactored
-  codebase.
-"""
 
 from pathlib import Path
 import time
 from typing import List, Optional, Sequence, Tuple, Protocol
-
-try:
-    from log import CustomLogger  # type: ignore
-except ImportError:  # pragma: no cover
-    CustomLogger = None  # type: ignore
-
-try:
-    from src.display import (
-        OutputInterfaceAbstraction,                      # type: ignore
-        ProgressTrackerAbstraction as _TrackerBase,      # type: ignore
-    )
-    from src.display.progress_bar.progress_bar_abstraction import (
-        ProgressBarAbstraction as _BarBase,              # type: ignore
-    )
-except ImportError:  # pragma: no cover
-    OutputInterfaceAbstraction = _TrackerBase = _BarBase = None  # type: ignore
-
-# ---------------------------------------------------------------------------
-# Flea‑market data placeholder (duck‑typed) – only stored & forwarded.
-# ---------------------------------------------------------------------------
-class _HasFM:  # noqa: D101 – minimal Protocol substitute
-    pass
+from log import CustomLogger  # type: ignore
+from display import (
+    OutputInterfaceAbstraction,                      # type: ignore
+    ProgressTrackerAbstraction as _TrackerBase,      # type: ignore
+)
+from display.progress_bar.progress_bar_abstraction import (
+    ProgressBarAbstraction as _BarBase,              # type: ignore
+)
 
 # Sub‑generators -----------------------------------------------------------
+from data import Base
 from .price_list_generator import PriceListGenerator
 from .seller_data_generator import SellerDataGenerator
 from .statistic_data_generator import StatisticDataGenerator
@@ -47,13 +24,13 @@ from .receive_info_pdf_generator import ReceiveInfoPdfGenerator
 __all__ = ["FileGenerator"]
 
 
-class FileGenerator:  # noqa: D101 – detailed docs above
+class FileGenerator(Base):  # noqa: D101 – detailed docs above
     # ------------------------------------------------------------------
     # Construction helpers
     # ------------------------------------------------------------------
     def __init__(
         self,
-        fleat_market_data: _HasFM,
+        fleat_market_data ,  # type: ignore[valid-type]
         *,
         output_path: str | Path = "output",
         seller_file_name: str = "kundendaten",
@@ -68,6 +45,8 @@ class FileGenerator:  # noqa: D101 – detailed docs above
     ) -> None:
         
         # Housekeeping -------------------------------------------------
+        
+        Base.__init__(logger, output_interface)
         self._fm = fleat_market_data
         self._path = Path(output_path)
         self._path.mkdir(parents=True, exist_ok=True)
@@ -104,25 +83,6 @@ class FileGenerator:  # noqa: D101 – detailed docs above
     # Internal helpers
     # ------------------------------------------------------------------
     # Logging + UI ------------------------------------------------------
-    def _log(self, level: str, msg: str) -> None:  # noqa: D401
-        if self._logger:
-            fn = getattr(self._logger, level, None)
-            if callable(fn):
-                fn(msg)
-            else:
-                self._logger.info(msg)
-
-    def _echo(self, msg: str) -> None:  # noqa: D401
-        if self._ui:
-            try:
-                self._ui.write_message(msg)
-            except Exception:  # pragma: no cover
-                pass
-
-    def _output(self, level: str, msg: str) -> None:  # noqa: D401
-        self._log(level, msg)
-        if level.upper() in {"INFO", "WARNING", "ERROR", "CRITICAL"}:
-            self._echo(msg)
 
     # Progress bar helper ----------------------------------------------
     def _update_bar(self):  # noqa: D401

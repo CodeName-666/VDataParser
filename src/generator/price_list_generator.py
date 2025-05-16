@@ -8,18 +8,8 @@ from display import (
     OutputInterfaceAbstraction,                  # type: ignore
 )
 
-
-# ---------------------------------------------------------------------------
-# FleatMarket interface (duck‑typed) – we only need three helpers
-# ---------------------------------------------------------------------------
-class _HasMarket(Protocol):
-    def get_main_number_list(self) -> Sequence[object]: ...  # noqa: D401
-
-
-# Local import --------------------------------------------------------------
 from .data_generator import DataGenerator
 
-__all__ = ["PriceListGenerator"]
 
 
 class PriceListGenerator(DataGenerator):  # noqa: D101 – detailed docs above
@@ -28,7 +18,7 @@ class PriceListGenerator(DataGenerator):  # noqa: D101 – detailed docs above
     # ------------------------------------------------------------------
     def __init__(
         self,
-        fleat_market_data: _HasMarket,
+        fleat_market_data,
         *,
         path: str | Path = "",
         file_name: str = "preisliste",
@@ -58,7 +48,7 @@ class PriceListGenerator(DataGenerator):  # noqa: D101 – detailed docs above
             if not (getattr(mn, "is_valid", lambda: False)() and hasattr(mn, "article_list")):
                 skipped += 1
                 continue
-            main_no = str(mn.get_main_number())
+            main_no = str(mn.number())
             for art in getattr(mn, "article_list", []):
                 if not getattr(art, "is_valid", lambda: False)():
                     skipped += 1

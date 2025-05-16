@@ -64,7 +64,7 @@ class SellerDataGenerator(DataGenerator):
             total_items = len(all_main_numbers_data)
         except AttributeError:
             # Critical error
-            err_msg = "FleatMarket Objekt hat keine Methode 'get_main_number_list'. Breche ab."
+            err_msg = "FleatMarket Objekt hat keine Methode 'number_list'. Breche ab."
             self._output_and_log("ERROR", err_msg)
             if overall_tracker and isinstance(overall_tracker, ProgressTrackerAbstraction):
                 overall_tracker.set_error(AttributeError("Fehlende Methode in FleatMarket"))
@@ -86,17 +86,17 @@ class SellerDataGenerator(DataGenerator):
 
             # Data structure checks - use _output_and_log for warnings about unexpected structure
             if not all([hasattr(main_number_data, 'is_valid'),
-                        hasattr(main_number_data, 'get_main_number'),
-                        hasattr(main_number_data, 'get_article_quantity'),
-                        hasattr(main_number_data, 'get_article_total')]):  # Corrected check
+                        hasattr(main_number_data, 'number'),
+                        hasattr(main_number_data, 'article_quantity'),
+                        hasattr(main_number_data, 'article_total')]):  # Corrected check
                 self._output_and_log("WARNING", f"Unerwartetes Datenobjekt bei Index {index}. Übersprungen.")
                 invalid_cnt += 1
                 continue
 
-            main_number_val = main_number_data.get_main_number()
+            main_number_val = main_number_data.number()
             first_name, second_name = "Unbekannt", "Unbekannt"
             try:
-                seller: Seller = self.__fleat_market_data.get_seller_by_index(index)
+                seller: Seller = self.__fleat_market_data.seller_at(index)
                 if hasattr(seller, 'vorname') and hasattr(seller, 'nachname'):
                     first_name = seller.vorname
                     second_name = seller.nachname
@@ -127,8 +127,8 @@ class SellerDataGenerator(DataGenerator):
             if main_number_data.is_valid():
                 try:
                     m_n = int(main_number_val)
-                    a_q = int(main_number_data.get_article_quantity())
-                    a_t_val = main_number_data.get_article_total()
+                    a_q = int(main_number_data.article_quantity())
+                    a_t_val = main_number_data.article_total()
                     a_t = float(a_t_val) if a_t_val is not None else 0.0
 
                     entry = self.__create_entry(m_n, a_q, a_t)
@@ -148,8 +148,8 @@ class SellerDataGenerator(DataGenerator):
             else:
                 invalid_cnt += 1
                 m_n_str = str(main_number_val)
-                a_q_val = main_number_data.get_article_quantity()
-                a_t_val = main_number_data.get_article_total()
+                a_q_val = main_number_data.article_quantity()
+                a_t_val = main_number_data.article_total()
                 a_q_str = str(a_q_val) if a_q_val is not None else "N/A"
                 a_t_str = f"{float(a_t_val):.2f} EUR" if a_t_val is not None and isinstance(
                     a_t_val, (int, float)) else "N/A"  # Added type check
