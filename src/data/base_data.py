@@ -5,31 +5,10 @@ import sys
 import time
 from pathlib import Path # Import Path from pathlib
 
-# Conditional import of CustomLogger
-try:
-    from log import CustomLogger, LogType
-except ImportError:
-    CustomLogger = None # type: ignore
 
-# Assume JsonHandler is updated and available
+from log import CustomLogger, LogType
 from .json_handler import JsonHandler
-# Assume data class definitions are correct and available
-try:
-    from .data_class_definition import * # Import necessary data classes
-except ImportError:
-    # Define dummy classes if missing, to allow script parsing
-    class HeaderDataClass: pass
-    class BaseInfoDataClass: pass
-    class MainNumberDataClass: pass
-    class SellerListDataClass: data = []
-    class SellerDataClass: pass
-    class JSONData: # Dummy base class for JSONData
-        def __init__(self, *args, **kwargs):
-            self.export_header = HeaderDataClass()
-            self.base_info = BaseInfoDataClass()
-            self.main_numbers_list: List[MainNumberDataClass] = []
-            self.sellers = SellerListDataClass()
-    print("WARNUNG: data_class_definition.py nicht gefunden, BaseData verwendet Dummy-Klassen.")
+from .data_class_definition import * 
 
 
 class BaseDataMeta(type):
@@ -112,7 +91,7 @@ class BaseData(JsonHandler, JSONData, metaclass=BaseDataMeta):
             if log_method and callable(log_method):
                  try:
                      if level.lower() in ["debug", "info", "warning", "error"]:
-                          log_method(message, on_verbose=on_verbose)
+                          log_method(message, verbose=on_verbose)
                      else:
                           log_method(message)
                  except Exception as e:

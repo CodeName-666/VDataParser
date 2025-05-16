@@ -39,7 +39,7 @@ class FleatMarket(Base):  # noqa: D101 – Docstring below
         """Replace internal main‑number list with *data*."""
         self._log("debug", f"Loading {len(data)} main‑number entries …")
         try:
-            self._main_numbers = [ MainNumber(m, logger=self._logger, output_interface=self._output) for m in data]
+            self._main_numbers = [ MainNumber(m) for m in data]
             self._log("info", f"{len(self._main_numbers)} main numbers loaded.")
         except Exception as err:  # pragma: no cover
             self._log("error", "Failed to load main numbers", exc=err)

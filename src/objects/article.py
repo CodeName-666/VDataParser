@@ -19,10 +19,9 @@ class Article(ArticleDataClass, Base):  # noqa: D101 – Detailed docs above
         logger: Optional[CustomLogger] = None,
         output_interface: Optional[OutputInterfaceAbstraction] = None,):
         
-        ArticleDataClass.__init__()  # inherit all dataclass defaults
+        ArticleDataClass.__init__(self)  # inherit all dataclass defaults
         Base.__init__(logger, output_interface)  # inherit all base defaults
-        self._logger = logger
-        self._output = output_interface
+       
 
         if info is not None:
             self.set_article_info(info)
@@ -38,7 +37,7 @@ class Article(ArticleDataClass, Base):  # noqa: D101 – Detailed docs above
 
         for fld in dataclasses.fields(info):
             setattr(self, fld.name, getattr(info, fld.name))
-        self._log("debug", f"Article {self.number() or '?'} loaded.")
+        #self._log("debug", f"Article {self.number() or '?'} loaded.")
         
 
     def number(self) -> Optional[str]:  # noqa: D401

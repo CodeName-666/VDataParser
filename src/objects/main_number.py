@@ -27,7 +27,7 @@ class MainNumber(MainNumberDataClass, Base):
                 logger: Optional[CustomLogger] = None,
                 output_interface: Optional[OutputInterfaceAbstraction] = None):
         
-        MainNumberDataClass.__init__()
+        MainNumberDataClass.__init__(self)
         Base.__init__(logger, output_interface)
 
         # 3. Runtime‑only state ------------------------------------------------------
@@ -55,7 +55,7 @@ class MainNumber(MainNumberDataClass, Base):
         # Convert raw *ArticleDataClass* entries into rich *Article* objects.
         raw_articles = getattr(info, "data", []) or []
         self._articles = [
-            Article(a, logger=self._logger, output_interface=self._output)
+            Article(a)
             for a in raw_articles
         ]
         self._log("debug", f"Loaded {len(self._articles)} article(s) for '{self.name}'.")
@@ -72,9 +72,6 @@ class MainNumber(MainNumberDataClass, Base):
                 pass  # fallthrough → None
         return None
 
-    # ------------------------------------------------------------------
-    # Aggregations
-    # ------------------------------------------------------------------
     def valid_articles(self) -> List[Article]:
         """List of *valid* :class:`Article` instances."""
         return [a for a in self._articles if a.is_valid()]
@@ -91,9 +88,6 @@ class MainNumber(MainNumberDataClass, Base):
         self._log("debug", f"'{self.name}': Gesamtwert der Artikel = {total:.2f} €.")
         return total
 
-    # ------------------------------------------------------------------
-    # Validation
-    # ------------------------------------------------------------------
     def is_valid(self) -> bool:  # noqa: D401
         """A *main number* is considered *valid* if it has at least one valid article."""
         flag = bool(self.article_quantity())

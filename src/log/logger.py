@@ -92,16 +92,10 @@ class CustomLogger:  # noqa: D101 – see module docstring
     }
 
     # ------------------------------------------------------------------
-    def __init__(
-        self,
-        name: str = __name__,
-        *,
-        level: str = "INFO",
-        verbose: bool = False,
-        fmt: str = "%(asctime)s %(levelname)s %(message)s",
-        datefmt: str = "%Y-%m-%d %H:%M:%S",
-        handler: Optional[logging.Handler] = None,
-    ) -> None:
+    def __init__(self, name: str = __name__,*, level: str = "INFO", verbose: bool = False,
+                fmt: str = "%(asctime)s %(levelname)s %(message)s",
+                datefmt: str = "%Y-%m-%d %H:%M:%S", handler: Optional[logging.Handler] = None):
+       
         self._verbose = verbose
         self._ol = _OneLineManager()
 

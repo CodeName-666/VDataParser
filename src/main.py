@@ -88,7 +88,7 @@ def _run_cli(parsed: Arguments):  # noqa: D401
     logger.info(f"Lade Daten …{data_file}")
 
     try:
-        b = Base(logger=logger, output_interface=out)  # type: ignore[call‑arg]
+        Base(logger=logger, output_interface=out)  # type: ignore[call‑arg]
         base_data = BaseData(data_file, logger=logger)  # type: ignore[arg‑type]
         base_data.verify_data()
         sellers: List[SellerDataClass] = base_data.get_seller_list()  # type: ignore[assignment]
@@ -119,7 +119,7 @@ def _run_cli(parsed: Arguments):  # noqa: D401
     try:
         gen.generate()
     except Exception:
-        logger.exception("Fataler Fehler bei der Dateigenerierung")
+        logger.critical("Fataler Fehler bei der Dateigenerierung")
         sys.exit(1)
 
     logger.info("Dateigenerierung abgeschlossen.")

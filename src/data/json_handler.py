@@ -55,7 +55,7 @@ class JsonHandler():
             if log_method and callable(log_method):
                  try:
                      if level.lower() in ["debug", "info", "warning", "error"]:
-                          log_method(message, on_verbose=on_verbose)
+                          log_method(message, verbose=on_verbose)
                      else:
                           log_method(message)
                  except Exception as e:

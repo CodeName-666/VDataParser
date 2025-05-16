@@ -32,6 +32,19 @@ class Base:
                     import sys
                     print(f"LOGGING FAILED ({level}): {message} | Error: {e}", file=sys.stderr)
 
+    def _log(self, level: str, msg: str, *, exc: Exception | None = None) -> None:
+        if not self.logger:
+            return
+
+        fn = getattr(self.logger, level, None)
+        if callable(fn):
+            try:
+                fn(msg, exc_info=exc)  # type: ignore[arg-type]
+            except TypeError:
+                fn(msg)  # type: ignore[misc]
+        else:
+            self.logger.info(msg)
+
     def _output(self, message: str) -> None:
         """ Helper method to write ONLY to the output interface. """
         if self.output_interface:
@@ -63,3 +76,11 @@ class Base:
                 self.output_interface.write_message(msg)
             except Exception:  # pragma: no cover
                 pass
+
+    def _echo(self, prefix: str, msg: str) -> None:
+        if self.output_interface:
+            self.output_interface.write_message(f"{prefix} {msg}")
+    
+    
+
+    

@@ -51,8 +51,6 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         self._path = Path(output_path)
         self._path.mkdir(parents=True, exist_ok=True)
 
-        self._logger = logger
-        self._ui = output_interface
         self._tracker = progress_tracker
         self._bar = progress_bar
 
@@ -60,20 +58,13 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         self._log("debug", f"Output path: {self._path.resolve()}")
 
         # Instantiate sub‑generators ----------------------------------
-        common = dict(
-            fleat_market_data=fleat_market_data,
-            path=str(self._path),
-            logger=logger,
-            output_interface=output_interface,
-        )
+        common = dict(fleat_market_data=fleat_market_data,path=str(self._path))
+
         self._tasks: List[Tuple[str, object]] = [
             ("Verkäuferdaten", SellerDataGenerator(**common, file_name=seller_file_name)),
             ("Preisliste",     PriceListGenerator(**common, file_name=price_list_file_name)),
             ("Statistik",      StatisticDataGenerator(**common, file_name=statistic_file_name)),
-            (
-                "Abholbestätigung",
-                ReceiveInfoPdfGenerator(**common, pdf_template = pdf_template_path_input),
-            ),
+            ("Abholbestätigung", ReceiveInfoPdfGenerator(**common, pdf_template = pdf_template_path_input)),
         ]
 
         if self._tracker and hasattr(self._tracker, "reset"):
