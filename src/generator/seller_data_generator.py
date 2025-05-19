@@ -135,8 +135,8 @@ class SellerDataGenerator(DataGenerator):
                     output_data.append(entry)
                     valid_cnt += 1
                     # Log successful processing at DEBUG level
-                    self._log(
-                        "DEBUG", f">> Verkäufer-Eintrag (OK): {first_name} {second_name}, MNr: {m_n}, Artikel: {a_q}, Wert: {a_t:.2f} EUR")
+                    self._output_and_log(
+                        "INFO", f">> Verkäufer-Eintrag (OK): {first_name} {second_name}, MNr: {m_n}, Artikel: {a_q}, Wert: {a_t:.2f} EUR")
                 except (ValueError, TypeError) as e:
                     # Data conversion errors are important warnings/errors
                     self._output_and_log("ERROR", f"Datenkonvertierungsfehler für Hauptnummer {main_number_val}: {e}")

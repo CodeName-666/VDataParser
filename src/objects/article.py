@@ -82,5 +82,5 @@ class Article(ArticleDataClass, Base):  # noqa: D101 – Detailed docs above
     # ------------------------------------------------------------------
     # Representation helpers
     # ------------------------------------------------------------------
-    def __repr__(self) -> str:  # noqa: D401
-        return f"<Article {self.number or '?'} valid={self.is_valid()}>"
+    #def __repr__(self) -> str:  # noqa: D401
+    #    return f"<Article {self.number or '?'} valid={self.is_valid()}>"
