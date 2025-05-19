@@ -56,6 +56,11 @@ class Base:
                 # Or print to stderr as a last resort
                 # import sys
                 # print(f"OUTPUT INTERFACE FAILED: {message} | Error: {e}", file=sys.stderr)
+    @overload
+    def _output(self, level: str, msg: str) -> None:  # noqa: D401
+        self._log(level, msg)
+        if level.upper() in {"INFO", "WARNING", "ERROR", "CRITICAL"}:
+            self._echo(level,msg)
 
     def _output_and_log(self, level: str, message: str, on_verbose: bool = False) -> None:
         """
