@@ -55,18 +55,19 @@ class Article(ArticleDataClass, Base):  # noqa: D101 – Detailed docs above
     # Validation helpers
     # ------------------------------------------------------------------
     def number_valid(self) -> bool:  # noqa: D401
-        return bool(self.number and str(self.number).strip())
+        return bool(self.number() and str(self.number()).strip())
 
     def price_valid(self) -> bool:  # noqa: D401
-        p = self.price
+        p = self.price()
         return bool(p and str(p).strip() and str(p) != "None")
 
     def description_valid(self) -> bool:  # noqa: D401
-        d = self.description
+        d = self.description()
         return bool(d and str(d).strip())
 
     def is_valid(self) -> bool:  # noqa: D401
         ok = self.number_valid() and self.price_valid() and self.description_valid()
+
         if not ok:
             problems: list[str] = []
             if not self.number_valid():
@@ -75,8 +76,8 @@ class Article(ArticleDataClass, Base):  # noqa: D101 – Detailed docs above
                 problems.append("Preis")
             if not self.description_valid():
                 problems.append("Beschreibung")
-            self._log("debug", f"Artikel {self.number or '?'} ungültig: {', '.join(problems)}")
-            self._echo("NOTICE:", f"Artikel {self.number or '?'} ist ungültig ({', '.join(problems)}).")
+            self._log("debug", f"Artikel {self.number() or '?'} ungültig: {', '.join(problems)}")
+            self._echo("NOTICE:", f"Artikel {self.number() or '?'} ist ungültig ({', '.join(problems)}).")
         return ok
 
     # ------------------------------------------------------------------

@@ -9,6 +9,8 @@ from display import (
 )
 
 from .data_generator import DataGenerator
+from objects import FleatMarket  # type: ignore
+from objects import MainNumber  # type: ignore
 
 
 
@@ -18,7 +20,7 @@ class PriceListGenerator(DataGenerator):  # noqa: D101 – detailed docs above
     # ------------------------------------------------------------------
     def __init__(
         self,
-        fleat_market_data,
+        fleat_market_data: FleatMarket,
         *,
         path: str | Path = "",
         file_name: str = "preisliste",
@@ -44,12 +46,12 @@ class PriceListGenerator(DataGenerator):  # noqa: D101 – detailed docs above
     def _collect_lines(self) -> List[str]:  # noqa: D401
         lines: list[str] = []
         skipped = 0
-        for mn in self._fm.get_main_number_list():
-            if not (getattr(mn, "is_valid", lambda: False)() and hasattr(mn, "article_list")):
+        for mn in self._fm.main_numbers():
+            if not (getattr(mn, "is_valid", lambda: False)() and hasattr(mn, "valid_articles")):
                 skipped += 1
                 continue
             main_no = str(mn.number())
-            for art in getattr(mn, "article_list", []):
+            for art in getattr(mn, "valid_articles", []):
                 if not getattr(art, "is_valid", lambda: False)():
                     skipped += 1
                     continue
@@ -78,9 +80,9 @@ class PriceListGenerator(DataGenerator):  # noqa: D101 – detailed docs above
     # ------------------------------------------------------------------
     # Public entry point
     # ------------------------------------------------------------------
-    def generate(self, tracker: Optional[_TrackerBase] = None) -> None:  # noqa: D401
+    def generate(self, overall_tracker: Optional[_TrackerBase] = None) -> None:  # noqa: D401
         self._output_and_log("INFO", "Starte Preislisten‑Generierung …")
         lines = self._collect_lines()
         self._write(lines)
-        if tracker:
-            tracker.increment()  # type: ignore[attr-defined]
+        if overall_tracker:
+            overall_tracker.increment()  # type: ignore[attr-defined]

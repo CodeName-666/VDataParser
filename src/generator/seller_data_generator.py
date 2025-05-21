@@ -53,7 +53,7 @@ class SellerDataGenerator(DataGenerator):
         """ Generates seller data, logs, writes, and updates tracker. """
         # Start message for user
         self._output_and_log("INFO", f"Starte Erstellung der Verkäuferliste ({self.file_name}.{self.FILE_SUFFIX}):\n" +
-                             "      ========================")
+                                      "=================================================")
         output_data: List[str] = []
         valid_cnt = 0
         invalid_cnt = 0

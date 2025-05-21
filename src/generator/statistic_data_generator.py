@@ -59,7 +59,7 @@ class StatisticDataGenerator(DataGenerator):
         invalid_cnt = 0
 
         try:
-            all_main_numbers_data = self.__fleat_market_data.get_main_number_list()
+            all_main_numbers_data = self.__fleat_market_data.main_numbers()
         except AttributeError:
             # Critical error
             err_msg = "FleatMarket Objekt hat keine Methode 'get_main_number_list'. Breche ab."
@@ -80,26 +80,26 @@ class StatisticDataGenerator(DataGenerator):
         for main_number_data in all_main_numbers_data:
             # Data structure check - potentially relevant warning
             if not all([hasattr(main_number_data, 'is_valid'),
-                        hasattr(main_number_data, 'get_main_number')]):
+                        hasattr(main_number_data, 'number')]):
                 self._output_and_log("WARNING", "Unerwartetes Datenobjekt in Hauptnummernliste gefunden. Übersprungen.")
                 invalid_cnt += 1
                 continue
 
             if main_number_data.is_valid():
                 try:
-                    main_number = int(main_number_data.get_main_number())
+                    main_number = int(main_number_data.number())
                     entry = self.__create_entry(main_number)
                     output_data.append(entry)
                     valid_cnt += 1
                 except (ValueError, TypeError) as e:
                     # Data conversion error
                     self._output_and_log(
-                        "ERROR", f"Hauptnummer nicht als Zahl interpretierbar: {main_number_data.get_main_number()}. Fehler: {e}. Übersprungen.")
+                        "ERROR", f"Hauptnummer nicht als Zahl interpretierbar: {main_number_data.number()}. Fehler: {e}. Übersprungen.")
                     invalid_cnt += 1
                 except Exception as e:
                     # Unexpected processing error
                     self._output_and_log(
-                        "ERROR", f"Unerwarteter Fehler bei gültiger Hauptnummer {main_number_data.get_main_number()}: {e}. Übersprungen.")
+                        "ERROR", f"Unerwarteter Fehler bei gültiger Hauptnummer {main_number_data.number()}: {e}. Übersprungen.")
                     invalid_cnt += 1
             else:
                 # Skipping invalid is expected, just increment count
