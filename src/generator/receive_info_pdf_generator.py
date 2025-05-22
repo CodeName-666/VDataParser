@@ -19,7 +19,7 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.units import mm  
 from reportlab.lib import colors  
 from .data_generator import DataGenerator
-
+from display import BasicProgressTracker as ProgressTracker
 
 @dataclass
 class CoordinatesConfig:
@@ -52,14 +52,10 @@ class _NoOpTracker:  # noqa: D101
 # ---------------------------------------------------------------------------
 class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docstring
     DEFAULT_COORDS = [
-        CoordinatesConfig(20 * mm, -30 * mm, 80 * mm, -
-                          30 * mm, 140 * mm, -30 * mm),
-        CoordinatesConfig(160 * mm, -30 * mm, 220 * mm, -
-                          30 * mm, 280 * mm, -30 * mm),
-        CoordinatesConfig(20 * mm, -130 * mm, 80 * mm, -
-                          130 * mm, 140 * mm, -130 * mm),
-        CoordinatesConfig(160 * mm, -130 * mm, 220 * mm, -
-                          130 * mm, 280 * mm, -130 * mm),
+        CoordinatesConfig(20 * mm, -30 * mm, 80 * mm, -30 * mm, 140 * mm, -30 * mm),
+        CoordinatesConfig(160 * mm, -30 * mm, 220 * mm, -30 * mm, 280 * mm, -30 * mm),
+        CoordinatesConfig(20 * mm, -130 * mm, 80 * mm, -130 * mm, 140 * mm, -130 * mm),
+        CoordinatesConfig(160 * mm, -130 * mm, 220 * mm, -130 * mm, 280 * mm, -130 * mm),
     ] if mm else []  # empty if reportlab absent
 
     # ------------------------------------------------------------------
@@ -186,7 +182,8 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             return
 
         # 1. Progress helper -------------------------------------------------
-        tracker = _NoOpTracker() if _TrackerBase is None else _TrackerBase()
+        #tracker = _NoOpTracker() if _TrackerBase is None else _TrackerBase()
+        tracker = ProgressTracker()
         total_pages = (len(rows) + self._entries_per_page -
                        1) // self._entries_per_page
         if hasattr(tracker, "reset"):
