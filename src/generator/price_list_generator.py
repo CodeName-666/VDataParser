@@ -18,45 +18,40 @@ class PriceListGenerator(DataGenerator):  # noqa: D101 – detailed docs above
     FILE_SUFFIX = "dat"
 
     # ------------------------------------------------------------------
-    def __init__(
-        self,
-        fleat_market_data: FleatMarket,
-        *,
-        path: str | Path = "",
-        file_name: str = "preisliste",
-        logger: Optional[CustomLogger] = None,
-        output_interface: Optional[OutputInterfaceAbstraction] = None,
-    ) -> None:
+    def __init__(self, fleat_market_data: FleatMarket, *,path: str | Path = "", file_name: str = "preisliste",
+                 logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None) -> None:
+
         super().__init__(path, file_name, logger, output_interface)
-        self._fm = fleat_market_data
+        self._fleat_market = fleat_market_data
 
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
     @staticmethod
-    def _format_entry(main_no: str, art_no: str, price: str) -> str:  # noqa: D401
+    def _format_entry(main_number: str, article_number: str, price: str) -> str:  # noqa: D401
         try:
-            num = int(art_no)
-            art_no_fmt = f"{num:02d}" if 0 <= num < 100 else "XX"
+            num = int(article_number)
+            article_format = f"{num:02d}" if 0 <= num < 100 else "XX"
         except ValueError:
-            art_no_fmt = "XX"
+            article_format = "XX"
         price_fmt = price.strip().replace(",", ".")
-        return f"{main_no.strip()}{art_no_fmt},{price_fmt}\n"
+        return f"{main_number.strip()}{article_format},{price_fmt}\n"
 
     def _collect_lines(self) -> List[str]:  # noqa: D401
         lines: list[str] = []
         skipped = 0
-        for mn in self._fm.main_numbers():
-            if not (getattr(mn, "is_valid", lambda: False)() and hasattr(mn, "valid_articles")):
+        for main_number in self._fleat_market.main_numbers():
+            if not (getattr(main_number, "is_valid", lambda: False)() and hasattr(main_number, "valid_articles")):
                 skipped += 1
                 continue
-            main_no = str(mn.number())
-            for art in getattr(mn, "valid_articles", []):
-                if not getattr(art, "is_valid", lambda: False)():
+            main_number_int = str(main_number.number())
+            #for art in getattr(mn, "valid_articles", []):
+            for article in main_number.valid_articles():
+                if not getattr(article, "is_valid", lambda: False)():
                     skipped += 1
                     continue
                 try:
-                    line = self._format_entry(main_no, str(art.number()), str(art.price()))
+                    line = self._format_entry(main_number_int, str(article.number()), str(article.price()))
                     lines.append(line)
                 except Exception:  # pragma: no cover – lenient parsing
                     skipped += 1

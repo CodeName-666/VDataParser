@@ -92,15 +92,15 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     # ------------------------------------------------------------------
     def _seller_rows(self) -> List[Tuple[str, str, str]]:  # noqa: D401
         rows: list[Tuple[str, str, str]] = []
-        for idx, mn in enumerate(self._fm.get_main_number_list()):
+        for idx, mn in enumerate(self._fm.main_numbers()):
             if not getattr(mn, "is_valid", lambda: False)():
                 continue
             try:
-                num = str(int(mn.get_main_number()))
+                num = str(int(mn.number()))
             except Exception:
                 continue  # silently skip invalid numbers
             try:
-                seller = self._fm.get_seller_list(idx)
+                seller = self._fm.seller_at(idx)
                 name = f"{getattr(seller, 'nachname', 'Unbekannt')}, {getattr(seller, 'vorname', 'Unbekannt')}"
             except Exception:
                 name = "Unbekannt, Unbekannt"
@@ -158,14 +158,14 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     # ------------------------------------------------------------------
     # Public orchestration
     # ------------------------------------------------------------------
-    def generate(self, overall: Optional[_TrackerBase] = None) -> None:  # noqa: D401
+    def generate(self, overall_tracker: Optional[_TrackerBase] = None) -> None:  # noqa: D401
         # 0. Dependency check ------------------------------------------------
         if PdfReader is object or canvas is None:
             self._output_and_log("ERROR", "PDF‑Libraries fehlen – Abbruch.")
-            if overall:
-                overall.increment()  # type: ignore[attr-defined]
+            if overall_tracker:
+                overall_tracker.increment()  # type: ignore[attr-defined]
                 # type: ignore[attr-defined]
-                overall.set_error(ImportError("pypdf/reportlab fehlt"))
+                overall_tracker.set_error(ImportError("pypdf/reportlab fehlt"))
             return
 
         self._output_and_log("INFO", "Starte PDF‑Generierung …")
@@ -173,16 +173,16 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         if not rows:
             self._output_and_log(
                 "INFO", "Keine gültigen Daten – nichts zu tun.")
-            if overall:
-                overall.increment()  # type: ignore[attr-defined]
+            if overall_tracker:
+                overall_tracker.increment()  # type: ignore[attr-defined]
             return
 
         template = self._template_bytes()
         if template is None:
-            if overall:
-                overall.increment()
+            if overall_tracker:
+                overall_tracker.increment()
                 # type: ignore[attr-defined]
-                overall.set_error(FileNotFoundError())
+                overall_tracker.set_error(FileNotFoundError())
             return
 
         # 1. Progress helper -------------------------------------------------
@@ -224,11 +224,11 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         if tracker.has_error:
             self._output_and_log(
                 "ERROR", "PDF‑Erstellung fehlgeschlagen – siehe Log.")
-            if overall:
+            if overall_tracker:
                 # type: ignore[attr-defined]
-                overall.set_error(RuntimeError("PDF error"))
+                overall_tracker.set_error(RuntimeError("PDF error"))
         else:
             self._output_and_log("INFO", "PDF‑Erstellung abgeschlossen.")
 
-        if overall:
-            overall.increment()  # type: ignore[attr-defined]
+        if overall_tracker:
+            overall_tracker.increment()  # type: ignore[attr-defined]

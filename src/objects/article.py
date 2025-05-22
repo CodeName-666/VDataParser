@@ -67,7 +67,6 @@ class Article(ArticleDataClass, Base):  # noqa: D101 – Detailed docs above
 
     def is_valid(self) -> bool:  # noqa: D401
         ok = self.number_valid() and self.price_valid() and self.description_valid()
-
         if not ok:
             problems: list[str] = []
             if not self.number_valid():
@@ -77,7 +76,7 @@ class Article(ArticleDataClass, Base):  # noqa: D101 – Detailed docs above
             if not self.description_valid():
                 problems.append("Beschreibung")
             self._log("debug", f"Artikel {self.number() or '?'} ungültig: {', '.join(problems)}")
-            self._echo("NOTICE:", f"Artikel {self.number() or '?'} ist ungültig ({', '.join(problems)}).")
+            #self._echo("NOTICE:", f"Artikel {self.number() or '?'} ist ungültig ({', '.join(problems)}).")
         return ok
 
     # ------------------------------------------------------------------

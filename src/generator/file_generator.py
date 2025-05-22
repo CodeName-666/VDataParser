@@ -68,7 +68,8 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         ]
 
         if self._tracker and hasattr(self._tracker, "reset"):
-            self._tracker.reset(total=len(self._tasks))  # type: ignore[misc]
+            #self._tracker.reset(total=len(self._tasks))  # type: ignore[misc]
+            self._tracker.reset(total=6)  # type: ignore[misc]
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -95,11 +96,11 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         start = time.time()
         success = True
 
-        for name, gen in self._tasks:
+        for name, task in self._tasks:
             self._output("INFO", f"→ {name} …")
             step_ok = True
             try:
-                gen.generate(overall_tracker=self._tracker)
+                task.generate(overall_tracker=self._tracker)
             except Exception as err:  # pragma: no cover
                 self._output("ERROR", f"Fehler in Schritt '{name}': {err}")
                 step_ok = success = False
@@ -109,18 +110,15 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
                 if self._tracker and hasattr(self._tracker, "increment"):
                     self._tracker.increment()  # type: ignore[misc]
                 self._update_bar()
-            self._output(
-                "INFO" if step_ok else "ERROR",
-                f"← {name} {'ok' if step_ok else 'fehlgeschlagen'}"
-            )
+            self._output("INFO" if step_ok else "ERROR", f"← {name} {'ok' if step_ok else 'fehlgeschlagen'}")
 
         # Final wrap‑up --------------------------------------------------
-        dur = time.time() - start
+        duration = time.time() - start
         if success:
-            self._output("INFO", f"Alle Aufgaben abgeschlossen in {dur:.2f}s.")
+            self._output("INFO", f"Alle Aufgaben abgeschlossen in {duration:.2f}s.")
             if self._bar:
                 self._bar.complete(success=True)  # type: ignore[misc]
         else:
-            self._output("ERROR", f"Generierung mit Fehlern beendet ({dur:.2f}s).")
+            self._output("ERROR", f"Generierung mit Fehlern beendet ({duration:.2f}s).")
             if self._bar:
                 self._bar.complete(success=False)  # type: ignore[misc]

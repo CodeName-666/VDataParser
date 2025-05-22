@@ -44,7 +44,7 @@ class MainNumber(MainNumberDataClass, Base):
     def set_main_number_info(self, info: MainNumberDataClass) -> None:  # noqa: D401
         """Load *info* and (re‑)initialise :pyattr:`_articles`."""
         if not isinstance(info, MainNumberDataClass):
-            self._log("error", f"Expected MainNumberDataClass, got {type(info).__name__}")
+            self._log("ERROR", f"Expected MainNumberDataClass, got {type(info).__name__}")
             self._echo("USER_ERROR:", "Ungültige Datenstruktur übergeben.")
             return
 
@@ -58,7 +58,7 @@ class MainNumber(MainNumberDataClass, Base):
             Article(a)
             for a in raw_articles
         ]
-        self._log("debug", f"Loaded {len(self._articles)} article(s) for '{self.name}'.")
+        self._log("DEBUG", f"Loaded {len(self._articles)} article(s) for '{self.name}'.")
 
     # ------------------------------------------------------------------
     # Convenience helpers / computed attributes
@@ -74,18 +74,29 @@ class MainNumber(MainNumberDataClass, Base):
 
     def valid_articles(self) -> List[Article]:
         """List of *valid* :class:`Article` instances."""
-        return [a for a in self._articles if a.is_valid()]
+        err_cnt = 0
+        lst = []
+        for a in self._articles:
+            if a.is_valid():
+                lst.append(a)
+            else:
+                err_cnt += 1
+        if err_cnt > 0:
+            self._log("DEBUG", f" {err_cnt} ungültige Artikel gefunden.")
+            #self._echo("DEBUG", f" {err_cnt} ungültige Artikel gefunden.")
+        
+        return lst
 
     def article_quantity(self) -> int:
         """Number of valid articles."""
         qty = len(self.valid_articles())
-        self._log("debug", f"'{self.name}': {qty} gültige Artikel gezählt (gesamt {len(self._articles)}).")
+        self._log("DEBUG", f"'{self.name}': {qty} gültige Artikel gezählt (gesamt {len(self._articles)}).")
         return qty
 
     def article_total(self) -> float:
         """Total price of valid articles (rounded to 2 decimals)."""
         total = round(sum(float(a.price()) for a in self.valid_articles()), 2)
-        self._log("debug", f"'{self.name}': Gesamtwert der Artikel = {total:.2f} €.")
+        self._log("DEBUG", f"'{self.name}': Gesamtwert der Artikel = {total:.2f} €.")
         return total
 
     def is_valid(self) -> bool:  # noqa: D401
@@ -95,7 +106,7 @@ class MainNumber(MainNumberDataClass, Base):
             self._log("info", f"MainNumber '{self.name}' ist *gültig*.")
         else:
             self._log("warning", f"MainNumber '{self.name}' ist *ungültig* (keine gültigen Artikel).")
-            self._echo("NOTICE:", "Keine gültigen Artikel gefunden – bitte prüfen.")
+            self._echo("NOTICE:", f"Stammnummer:'{self.number()}: {self.name} - Keine gültigen Artikel gefunden – bitte prüfen.")
         return flag
 
     

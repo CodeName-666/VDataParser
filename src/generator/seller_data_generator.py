@@ -15,12 +15,9 @@ class SellerDataGenerator(DataGenerator):
 
     FILE_SUFFIX = 'dat'
 
-    def __init__(self,
-                 fleat_market_data: FleatMarket,
-                 path: str = '',
-                 file_name: str = 'kundendaten',
-                 logger: Optional[CustomLogger] = None,
-                 output_interface: Optional[OutputInterfaceAbstraction] = None) -> None:  # Added
+    def __init__(self, fleat_market_data: FleatMarket, path: str = '', file_name: str = 'kundendaten',
+                 logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None):
+        
         """ Initializes the SellerDataGenerator with data, path, name, logger, and output interface. """
         super().__init__(path, file_name, logger, output_interface)  # Pass both
         self.__fleat_market_data = fleat_market_data

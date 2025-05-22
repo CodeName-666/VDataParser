@@ -15,16 +15,13 @@ class StatisticDataGenerator(DataGenerator):
 
     FILE_SUFFIX = 'dat'
 
-    def __init__(self,
-                 fleat_market_data: FleatMarket,
-                 path: str = '',
-                 file_name: str = 'versand',
-                 logger: Optional[CustomLogger] = None,
-                 output_interface: Optional[OutputInterfaceAbstraction] = None) -> None:  # Added
+    def __init__(self, fleat_market_data: FleatMarket, path: str = '', file_name: str = 'versand',
+                 logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None):
+        
         """ Initializes the StatisticDataGenerator with data, path, name, logger, and output interface. """
         super().__init__(path, file_name, logger, output_interface)  # Pass both
         self.__fleat_market_data = fleat_market_data
-        # self.logger, self.output_interface inherited
+       
 
     def __create_entry(self, main_number: int) -> str:
         """ Creates a formatted entry: main_number,"-" """
