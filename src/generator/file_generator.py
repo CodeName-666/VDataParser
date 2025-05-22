@@ -68,8 +68,8 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         ]
 
         if self._tracker and hasattr(self._tracker, "reset"):
-            #self._tracker.reset(total=len(self._tasks))  # type: ignore[misc]
-            self._tracker.reset(total=6)  # type: ignore[misc]
+            self._tracker.reset(total=len(self._tasks)*2)  # type: ignore[misc]
+            #self._tracker.reset(total=6)  # type: ignore[misc]
 
     # ------------------------------------------------------------------
     # Internal helpers

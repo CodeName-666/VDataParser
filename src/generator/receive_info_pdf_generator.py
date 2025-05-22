@@ -51,11 +51,19 @@ class _NoOpTracker:  # noqa: D101
 # Main class
 # ---------------------------------------------------------------------------
 class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docstring
+   #DEFAULT_COORDS = [
+   #    CoordinatesConfig(20 * mm, -30 * mm, 80 * mm, -30 * mm, 140 * mm, -30 * mm),
+   #    CoordinatesConfig(160 * mm, -30 * mm, 220 * mm, -30 * mm, 280 * mm, -30 * mm),
+   #    CoordinatesConfig(20 * mm, -130 * mm, 80 * mm, -130 * mm, 140 * mm, -130 * mm),
+   #    CoordinatesConfig(160 * mm, -130 * mm, 220 * mm, -130 * mm, 280 * mm, -130 * mm),
+   #] if mm else []  # empty if reportlab absent
+
+
     DEFAULT_COORDS = [
-        CoordinatesConfig(20 * mm, -30 * mm, 80 * mm, -30 * mm, 140 * mm, -30 * mm),
-        CoordinatesConfig(160 * mm, -30 * mm, 220 * mm, -30 * mm, 280 * mm, -30 * mm),
-        CoordinatesConfig(20 * mm, -130 * mm, 80 * mm, -130 * mm, 140 * mm, -130 * mm),
-        CoordinatesConfig(160 * mm, -130 * mm, 220 * mm, -130 * mm, 280 * mm, -130 * mm),
+        CoordinatesConfig(100, -105, 310, -105, 0, 0),
+        CoordinatesConfig(507, -105, 712, -105, 0 ,0),
+        CoordinatesConfig(100, -360, 310, -360 ,0 ,0),
+        CoordinatesConfig(507, -360, 712, -360 ,0 ,0),
     ] if mm else []  # empty if reportlab absent
 
     # ------------------------------------------------------------------
@@ -121,9 +129,10 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         if canvas is None:
             return None  # reportlab missing
         packet = io.BytesIO()
-        page_w, page_h = landscape(letter)  # type: ignore[arg-type]
-        can = canvas.Canvas(packet, pagesize=(
-            page_w, page_h))  # type: ignore[arg-type]
+        page_w, page_h = landscape(letter)
+        can = canvas.Canvas(packet, pagesize=(page_w, page_h)) 
+
+        can.rotate(90)
         can.setFillColor(colors.black)  # type: ignore[arg-type]
         for idx, (f1, f2, f3) in enumerate(rows):
             cfg = self._coords[idx]
