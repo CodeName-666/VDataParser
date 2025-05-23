@@ -106,7 +106,7 @@ class MainNumber(MainNumberDataClass, Base):
             self._log("info", f"MainNumber '{self.name}' ist *gültig*.")
         else:
             self._log("warning", f"MainNumber '{self.name}' ist *ungültig* (keine gültigen Artikel).")
-            self._echo("NOTICE:", f"Stammnummer:'{self.number()}: {self.name} - Keine gültigen Artikel gefunden – bitte prüfen.")
+            self._echo("NOTICE:", f"Stammnummer:'{self.number()}: Keine gültigen Artikel gefunden – bitte prüfen.")
         return flag
 
     

@@ -51,37 +51,34 @@ class _NoOpTracker:  # noqa: D101
 # Main class
 # ---------------------------------------------------------------------------
 class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docstring
-   #DEFAULT_COORDS = [
-   #    CoordinatesConfig(20 * mm, -30 * mm, 80 * mm, -30 * mm, 140 * mm, -30 * mm),
-   #    CoordinatesConfig(160 * mm, -30 * mm, 220 * mm, -30 * mm, 280 * mm, -30 * mm),
-   #    CoordinatesConfig(20 * mm, -130 * mm, 80 * mm, -130 * mm, 140 * mm, -130 * mm),
-   #    CoordinatesConfig(160 * mm, -130 * mm, 220 * mm, -130 * mm, 280 * mm, -130 * mm),
+   # DEFAULT_COORDS = [
+   #    CoordinatesConfig(20 * mm , 130 * mm, 80 * mm , 130 * mm, 140 * mm, 130 * mm),
+   #    CoordinatesConfig(160 * mm, 130 * mm, 220 * mm, 130 * mm, 280 * mm, 130 * mm),      
+   #    CoordinatesConfig(20 * mm , 30 * mm , 80 * mm , 30 * mm , 140 * mm, 30 * mm),
+   #    CoordinatesConfig(160 * mm, 30 * mm , 220 * mm, 30 * mm , 280 * mm, 30 * mm),
+   #    
+   #    
    #] if mm else []  # empty if reportlab absent
 
-
     DEFAULT_COORDS = [
-        CoordinatesConfig(100, -105, 310, -105, 0, 0),
-        CoordinatesConfig(507, -105, 712, -105, 0 ,0),
-        CoordinatesConfig(100, -360, 310, -360 ,0 ,0),
-        CoordinatesConfig(507, -360, 712, -360 ,0 ,0),
-    ] if mm else []  # empty if reportlab absent
+       CoordinatesConfig(35 * mm , 173 * mm, 130 * mm , 173 * mm, 140 * mm, 130 * mm),
+       CoordinatesConfig(160 * mm, 173 * mm, 220 * mm , 173 * mm, 280 * mm, 130 * mm),      
+       CoordinatesConfig(35 * mm , 30 * mm , 130 * mm , 30 * mm , 140 * mm, 30 * mm),
+       CoordinatesConfig(160 * mm, 30 * mm , 220 * mm , 30 * mm , 280 * mm, 30 * mm),
+       
+       
+   ] if mm else []  # empty if reportlab absent
 
     # ------------------------------------------------------------------
     def __init__(
-        self,
-        fleat_market_data,
-        *,
-        path: str | Path = "",
-        pdf_template: str | Path = "",
-        output_name: str | Path = "abholbestaetigung.pdf",
-        coordinates: Optional[List[CoordinatesConfig]] = None,
-        logger: Optional[CustomLogger] = None,
-        output_interface: Optional[OutputInterfaceAbstraction] = None,
-    ) -> None:
+        self,fleat_market_data, *, path: str | Path = "", pdf_template: str | Path = "",
+        output_name: str | Path = "abholbestaetigung.pdf", coordinates: Optional[List[CoordinatesConfig]] = None,
+        logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None):
+        
         opath = Path(output_name)
         super().__init__(path, opath.stem, logger, output_interface)
 
-        self._fm = fleat_market_data
+        self._fleat_market_data = fleat_market_data
         self._template_path = Path(pdf_template) if pdf_template else None
         self._coords: List[CoordinatesConfig] = coordinates or self.DEFAULT_COORDS
         if not self._coords:
@@ -96,19 +93,19 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     # ------------------------------------------------------------------
     def _seller_rows(self) -> List[Tuple[str, str, str]]:  # noqa: D401
         rows: list[Tuple[str, str, str]] = []
-        for idx, mn in enumerate(self._fm.main_numbers()):
-            if not getattr(mn, "is_valid", lambda: False)():
+        for idx, main_number in enumerate(self._fleat_market_data.main_numbers()):
+            if not getattr(main_number, "is_valid", lambda: False)():
                 continue
             try:
-                num = str(int(mn.number()))
+                number = str(int(main_number.number()))
             except Exception:
                 continue  # silently skip invalid numbers
             try:
-                seller = self._fm.seller_at(idx)
+                seller = self._fleat_market_data.seller_at(idx)
                 name = f"{getattr(seller, 'nachname', 'Unbekannt')}, {getattr(seller, 'vorname', 'Unbekannt')}"
             except Exception:
                 name = "Unbekannt, Unbekannt"
-            rows.append((name, num, ""))
+            rows.append((name, number, ""))
         return rows
 
     # ------------------------------------------------------------------
@@ -132,7 +129,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         page_w, page_h = landscape(letter)
         can = canvas.Canvas(packet, pagesize=(page_w, page_h)) 
 
-        can.rotate(90)
+        #can.rotate(90)
         can.setFillColor(colors.black)  # type: ignore[arg-type]
         for idx, (f1, f2, f3) in enumerate(rows):
             cfg = self._coords[idx]
@@ -140,6 +137,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             can.drawString(cfg.x1, cfg.y1, f1)
             can.drawString(cfg.x2, cfg.y2, f2)
             can.drawString(cfg.x3, cfg.y3, f3)
+            
         can.save()
         packet.seek(0)
         return PdfReader(packet).pages[0]  # type: ignore[return-value]
