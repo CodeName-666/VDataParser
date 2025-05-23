@@ -135,10 +135,11 @@ def _run_gui():  # noqa: D401
         sys.exit(1)
 
     logger = _bootstrap_logger(verbose=False, level="INFO")
-    logger.info("Flea Market Generator v%s – GUI", get_version())
+    #logger.info("Flea Market Generator v%s – GUI", get_version())
 
     app = QApplication(sys.argv)
-    win = MainWindow(logger=logger)  # type: ignore[call‑arg]
+    #win = MainWindow(logger=logger)  # type: ignore[call‑arg]
+    win = MainWindow()  # 
     win.setup_ui()
     win.show()
     sys.exit(app.exec())

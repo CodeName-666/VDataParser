@@ -64,7 +64,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
             ("Verkäuferdaten", SellerDataGenerator(**common, file_name=seller_file_name)),
             ("Preisliste",     PriceListGenerator(**common, file_name=price_list_file_name)),
             ("Statistik",      StatisticDataGenerator(**common, file_name=statistic_file_name)),
-            ("Abholbestätigung", ReceiveInfoPdfGenerator(**common, pdf_template = pdf_template_path_input)),
+            ("Abholbestätigung", ReceiveInfoPdfGenerator(**common, pdf_template = pdf_template_path_input, output_name= pdf_output_file_name)),
         ]
 
         if self._tracker and hasattr(self._tracker, "reset"):

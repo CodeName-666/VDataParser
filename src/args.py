@@ -44,9 +44,9 @@ EXAMPLES:
     # Argumente mit detaillierteren help-Strings hinzufügen
     parser.add_argument(
         "-f", "--file",
-        required=True,
+        required=False,
         metavar='<path/to/file.json>', # Zeigt an, wie der Wert aussehen soll
-        help="REQUIRED: Specifies the full path to the input JSON file.\n"
+        help="REQUIRED WITH CLI: Specifies the full path to the input JSON file.\n"
              "This file must contain all seller and article data according\n"
              "to the expected format for the program to function."
     )
