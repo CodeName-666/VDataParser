@@ -61,10 +61,10 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
    #] if mm else []  # empty if reportlab absent
 
     DEFAULT_COORDS = [
-       CoordinatesConfig(35 * mm , 173 * mm, 130 * mm , 173 * mm, 140 * mm, 130 * mm),
-       CoordinatesConfig(160 * mm, 173 * mm, 220 * mm , 173 * mm, 280 * mm, 130 * mm),      
-       CoordinatesConfig(35 * mm , 30 * mm , 130 * mm , 30 * mm , 140 * mm, 30 * mm),
-       CoordinatesConfig(160 * mm, 30 * mm , 220 * mm , 30 * mm , 280 * mm, 30 * mm),
+       CoordinatesConfig(35 * mm , 173 * mm, 115 * mm , 173 * mm, 30 * mm, 150 * mm),
+       CoordinatesConfig(178 * mm, 173 * mm, 258 * mm , 173 * mm, 173 * mm, 150 * mm),      
+       CoordinatesConfig(35 * mm , 83 * mm , 115 * mm , 83 * mm , 30 * mm, 60 * mm),
+       CoordinatesConfig(178 * mm, 83 * mm , 258 * mm , 83 * mm , 173 * mm, 60 * mm),
        
        
    ] if mm else []  # empty if reportlab absent
@@ -105,7 +105,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
                 name = f"{getattr(seller, 'nachname', 'Unbekannt')}, {getattr(seller, 'vorname', 'Unbekannt')}"
             except Exception:
                 name = "Unbekannt, Unbekannt"
-            rows.append((name, number, ""))
+            rows.append((name, number, "TEST DATUM"))
         return rows
 
     # ------------------------------------------------------------------
