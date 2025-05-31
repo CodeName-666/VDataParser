@@ -1,12 +1,12 @@
 import copy
+import os
 from pathlib import Path
 from typing import Any, Dict, TYPE_CHECKING, Union
 
 from .json_handler import JsonHandler
 from .base_data import BaseDataMeta
-
-if TYPE_CHECKING:  # pragma: no cover
-    from log import CustomLogger  # noqa: F401
+from .data_manager import DataManager
+from log import CustomLogger  # noqa: F401
 
 
 
@@ -53,11 +53,7 @@ class ProjectManager(JsonHandler, metaclass=BaseDataMeta):
     }
 
     # ------------------------ construction ------------------------- #
-    def __init__(
-        self,
-        json_path_or_data: Union[str, Path, Dict[str, Any]] = "",
-        logger: "CustomLogger" | None = None,
-    ) -> None:
+    def __init__(self, json_path_or_data: Union[str, Path, Dict[str, Any]] = "", logger: "CustomLogger" | None = None) -> None:
         """Create or retrieve the *singleton* instance.
 
         * ``json_path_or_data`` may be a path/URL *or* a Python ``dict``.
@@ -68,6 +64,8 @@ class ProjectManager(JsonHandler, metaclass=BaseDataMeta):
         super().__init__(json_path_or_data or copy.deepcopy(
             self._DEFAULT_STRUCTURE), logger=logger)
         self._merge_defaults()
+       
+        self.data_manger = DataManager(self.get_full_market_path())
 
     # BaseDataMeta hook ----------------------------------------------------
     def reload_data(self, json_path_or_data: Union[str, Path]) -> None:  # noqa: D401
@@ -105,6 +103,17 @@ class ProjectManager(JsonHandler, metaclass=BaseDataMeta):
     def get_market(self) -> Dict[str, str]:
         """Return the *market* section as a shallow dict."""
         return self.get_key_value(["market"]) or {}
+    
+    def get_market_path(self):
+        return self.get_market()["market_path"]
+
+    def get_market_name(self):
+        return self.get_market()["market_name"]
+
+    def get_full_market_path(self):
+        path = self.get_market_path()
+        return self.ensure_trailing_sep(path) + self.get_market()
+
 
     def set_market(self, market_path: str, market_name: str) -> None:
         """Set the *market* subsection."""
@@ -152,4 +161,33 @@ class ProjectManager(JsonHandler, metaclass=BaseDataMeta):
     def save_to(self, destination: Union[str, Path]) -> None:
         """Persist current config to *destination*."""
         self.save(str(destination))
+    
+    @staticmethod
+    def ensure_trailing_sep(path: str) -> str:  # noqa: D401
+        """Ensure *path* ends with the host‑OS separator (``os.sep``).
+
+        * If the string is empty → returned unchanged.
+        * If it already ends with *any* separator, the trailing component is
+          normalised to ``os.sep`` so that callers always get a consistent
+          result, independent of the separator style they passed in.
+
+        Examples
+        --------
+        >>> ProjectManager.ensure_trailing_sep("/var/data")
+        '/var/data/'  # on POSIX
+        >>> ProjectManager.ensure_trailing_sep(r"C:\\logs")
+        'C:\\logs\\'  # on Windows
+        """
+        if not path:
+            return path
+
+        # already ends with a separator – replace if necessary
+        if path.endswith(("/", "\\")):
+            if path.endswith(os.sep):
+                return path
+            return path[:-1] + os.sep  # swap the last char
+
+        # append the host‑separator
+        return path + os.sep
+
 
