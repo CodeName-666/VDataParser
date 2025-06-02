@@ -1,0 +1,95 @@
+{   
+    "database": {
+        "url": "",
+        "port": ""
+    },
+
+    "market": 
+    {
+        "market_path": "",
+        "market_name":""
+    },
+
+
+
+  "default_pdf_generation_data": {
+    "template_info": {
+      "pdf_path": "Abholung_Template.pdf",
+      "pdf_name": "Abholung_Template.pdf"
+    },
+
+    "coordinates": {
+      "boxPairs": [
+        {
+          "id": 1,
+          "box1": {
+            "label": "USR1",
+            "x": 204.5,
+            "y": 177.5,
+            "width": 274.0,
+            "height": 50.0
+          },
+          "box2": {
+            "label": "NR1",
+            "x": 631.5,
+            "y": 175.5,
+            "width": 100.0,
+            "height": 50.0
+          }
+        },
+        {
+          "id": 2,
+          "box1": {
+            "label": "USR2",
+            "x": 1053.5,
+            "y": 178.5,
+            "width": 269.0,
+            "height": 50.0
+          },
+          "box2": {
+            "label": "NR2",
+            "x": 1478.5,
+            "y": 182.5,
+            "width": 100.0,
+            "height": 44.0
+          }
+        },
+        {
+          "id": 3,
+          "box1": {
+            "label": "USR3",
+            "x": 205.5,
+            "y": 709.5,
+            "width": 272.0,
+            "height": 50.0
+          },
+          "box2": {
+            "label": "NR3",
+            "x": 630.5,
+            "y": 707.5,
+            "width": 100.0,
+            "height": 50.0
+          }
+        }
+      ],
+      "singleBoxes": [
+        {
+          "label": "DATE1",
+          "x": 172.5,
+          "y": 319.5,
+          "width": 527.0,
+          "height": 50.0,
+          "id": 1
+        },
+        {
+          "label": "DATE2",
+          "x": 175.5,
+          "y": 860.5,
+          "width": 518.0,
+          "height": 37.0,
+          "id": 2
+        }
+      ]
+    }
+  }
+}
