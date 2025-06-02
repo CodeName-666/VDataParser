@@ -53,7 +53,7 @@ class ProjectManager(JsonHandler, metaclass=BaseDataMeta):
     }
 
     # ------------------------ construction ------------------------- #
-    def __init__(self, json_path_or_data: Union[str, Path, Dict[str, Any]] = "", logger: "CustomLogger" | None = None) -> None:
+    def __init__(self, json_path_or_data: Union[str, Path, Dict[str, Any]] = "", logger: "CustomLogger" or None = None) -> None:
         """Create or retrieve the *singleton* instance.
 
         * ``json_path_or_data`` may be a path/URL *or* a Python ``dict``.
