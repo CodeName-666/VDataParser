@@ -12,7 +12,7 @@ from .base_ui import BaseUi
 from .generated import MarketLoaderUi
 
 
-class MarketLoaderDialog(QDialog):
+class MarketLoaderDialog(BaseUi):
     """Dialog, der zwei Lade‑Varianten bietet:
 
     * **JSON‑Projektdatei** (Pfad auswählen)
