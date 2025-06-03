@@ -321,6 +321,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
 
     def __init__(self, parent=None):
         super().__init__(parent)
+
         self.ui = PdfDisplayUi()
         self.ui.setupUi(self)
 

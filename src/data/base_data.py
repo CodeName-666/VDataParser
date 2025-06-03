@@ -8,7 +8,7 @@ from pathlib import Path # Import Path from pathlib
 
 from log import CustomLogger, LogType
 from .json_handler import JsonHandler
-from .data_class_definition import * 
+from objects.data_class_definition import * 
 
 
 class BaseDataMeta(type):

@@ -4,29 +4,11 @@ import time
 import threading
 from typing import Optional, Callable, Dict, Any, Tuple
 
-# Import the Abstraction
-try:
 
-    from .progress_bar_abstraction import ProgressBarAbstraction
-except ImportError:
-    # Fallback if running standalone or structure differs
-    try:
-        from progress_bar_abstraction import ProgressBarAbstraction
-    except ImportError:
-        print("Error: Cannot find ProgressBarAbstraction.", file=sys.stderr)
-        ProgressBarAbstraction = object # type: ignore # Basic fallback
+from display import ProgressBarAbstraction
+from display import ProgressTrackerAbstraction
+from log import CustomLogger 
 
-# Import the INTERFACE, not the implementation
-try:
-    from ..tracker.progress_tracker_abstraction import ProgressTrackerAbstraction
-except ImportError:
-    ProgressTrackerAbstraction = None # type: ignore
-
-# Conditional import of CustomLogger (remain the same)
-try:
-    from log import CustomLogger
-except ImportError:
-    CustomLogger = None
 
 # Inherit from the Abstraction
 class ConsoleProgressBar(ProgressBarAbstraction):

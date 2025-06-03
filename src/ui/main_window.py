@@ -7,11 +7,12 @@ from data import DataManager
 from .stack_widget import StackWidget
 from .generated import MainWindowUi
 from .generated import AboutUi
+from .generated import MarketLoaderUi
 
 from .main_menu import MainMenu
 from .market import Market
 from .pdf_display import PdfDisplay
-
+from .market_loader_dialog import MarketLoaderDialog
 
 
 
@@ -94,7 +95,7 @@ class MainWindow(QMainWindow):
         - the 'action_open_export' triggered signal from the UI actions to the 'open_market_view' method.
         """
         self.main_menu.on_exit_button_clicked.connect(self.close)
-        self.main_menu.on_export_button_clicked.connect(self.open_local_export)
+        self.main_menu.on_open_export_button_clicked.connect(self.open_local_export)
         self.main_menu.on_open_market_button_clicked.connect(self.open_market_view)
 
         self.pdf_display.exit_requested.connect(self.switch_to_last_view)
@@ -143,7 +144,13 @@ class MainWindow(QMainWindow):
         """
         Switches the currently displayed view in the stack to the market view.
         """
-        self.open_view("Market")
+        dialog = MarketLoaderDialog(self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            market_data = dialog.get_result()
+            #self.market_view.set_data(market_data)
+            #self.open_view("Market")
+        else:
+            QMessageBox.warning(self, "Warning", "No market data loaded. Please try again.")
 
     @Slot()
     def switch_to_last_view(self):
@@ -191,7 +198,6 @@ class MainWindow(QMainWindow):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open JSON File", "", "JSON Files (*.json)")
         if file_name:
             try:
-                
                 base_data = DataManager(file_name)
                 #base_data.verify_data()
                 return base_data

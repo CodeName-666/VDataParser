@@ -6,7 +6,7 @@ import dataclasses
 from data import Base
 from log import CustomLogger  # type: ignore
 from display import OutputInterfaceAbstraction  # type: ignore
-from data import ArticleDataClass
+from .data_class_definition import ArticleDataClass
 
 __all__ = ["Article"]
 
