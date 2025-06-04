@@ -10,6 +10,9 @@ class MarketFacade:
     """
 
     def __init__(self, market):
+        self.project_manager = ProjectManager()
+        self.data_manager = DataManager()
+        self.file_generator = FileGenerator()   
         """
         Initialize the MarketFacade with a market instance.
 
@@ -25,3 +28,12 @@ class MarketFacade:
         :return: Market data for the specified symbol.
         """
         return self.market.get_data(symbol)
+    
+
+    def load_project(self, json_path: str) -> None:
+        """
+        Load a project from a JSON file.
+
+        :param json_path: Path to the JSON file containing project data.
+        """
+        self.project_manager.load_project(json_path)

@@ -53,7 +53,7 @@ class ProjectManager(JsonHandler, metaclass=BaseDataMeta):
     }
 
     # ------------------------ construction ------------------------- #
-    def __init__(self, json_path_or_data: Union[str, Path, Dict[str, Any]] = "", logger: "CustomLogger" or None = None) -> None:
+    def __init__(self, json_path_or_data: Union[str, Path, Dict[str, Any]] = "", logger: CustomLogger or None = None) -> None:
         """Create or retrieve the *singleton* instance.
 
         * ``json_path_or_data`` may be a path/URL *or* a Python ``dict``.
@@ -65,7 +65,6 @@ class ProjectManager(JsonHandler, metaclass=BaseDataMeta):
             self._DEFAULT_STRUCTURE), logger=logger)
         self._merge_defaults()
        
-        self.data_manger = DataManager(self.get_full_market_path())
 
     # BaseDataMeta hook ----------------------------------------------------
     def reload_data(self, json_path_or_data: Union[str, Path]) -> None:  # noqa: D401
@@ -189,5 +188,9 @@ class ProjectManager(JsonHandler, metaclass=BaseDataMeta):
 
         # append the host‑separator
         return path + os.sep
+    
+    def load_project(self, json_path: Union[str, Path]) -> None:
+        """Load project configuration from a JSON file."""
+        self.reload_data(json_path)
 
 

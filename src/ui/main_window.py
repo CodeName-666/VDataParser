@@ -14,7 +14,7 @@ from .market import Market
 from .pdf_display import PdfDisplay
 from .market_loader_dialog import MarketLoaderDialog
 from .output_window import OutputWindow
-
+from data import MarketFacade
 
 
 
@@ -66,6 +66,7 @@ class MainWindow(QMainWindow):
         self.market_view = Market(self.stack)
         self.pdf_display = PdfDisplay(self.stack)
         self.output_window = OutputWindow()
+        self.market_facade = MarketFacade()
 
     def setup_ui(self):
         """
