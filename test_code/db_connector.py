@@ -9,7 +9,7 @@ from datetime import datetime
 # Importiere hier Deine Dataklassen. Es wird angenommen, dass diese aus der Datei 
 # data/data_class_definition.py stammen und folgende Klassen enthalten:
 # HeaderDataClass, BaseInfoDataClass, MainNumberDataClass, SellerListDataClass, JSONData
-from data.data_class_definition import *
+from objects.data_class_definition import *
 
 class DatabaseManager:
     def __init__(self, db_type: str, **kwargs):

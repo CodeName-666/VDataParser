@@ -6,7 +6,7 @@ from typing import List
 from datetime import datetime
 
 
-from data.data_class_definition import *
+from objects.data_class_definition import *
 
 def connect(args):
     """Testet die Verbindung zur MySQL-Datenbank."""

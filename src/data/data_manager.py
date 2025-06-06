@@ -8,7 +8,7 @@ from datetime import datetime
 
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
 from .base_data import BaseData
-from .data_class_definition import (
+from ..objects.data_class_definition import (
     MainNumberDataClass,
     SellerDataClass,
     ArticleDataClass,
