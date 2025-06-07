@@ -10,11 +10,7 @@ class Base:
     # ----------------------------------------------------------
     # Initialisierung
     # ----------------------------------------------------------
-    def __init__(
-        self,
-        logger: Optional[CustomLogger] = None,
-        output_interface: Optional[OutputInterfaceAbstraction] = None,
-    ) -> None:
+    def __init__(self,logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None,)-> None:
         if logger is not None:
             Base.logger = logger
         if output_interface is not None:

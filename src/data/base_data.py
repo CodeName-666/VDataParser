@@ -9,50 +9,10 @@ from pathlib import Path # Import Path from pathlib
 from log import CustomLogger, LogType
 from .json_handler import JsonHandler
 from objects.data_class_definition import * 
+from .singelton_meta import SingletonMeta
 
 
-class BaseDataMeta(type):
-    """ Metaclass for creating the BaseData singleton. """
-    _instances: Dict[type, Any] = {}
-
-    def __call__(cls, *args, **kwargs):
-        """
-        Handles singleton instance creation and potential re-initialization/update.
-        """
-        if cls not in cls._instances:
-            # First time creation: Pass all args/kwargs, including logger
-            instance = super().__call__(*args, **kwargs)
-            cls._instances[cls] = instance
-            # Optional: Log initial creation if logger available in instance
-            if hasattr(instance, '_log'): instance._log("DEBUG", f"Singleton instance of {cls.__name__} created.")
-        else:
-            # Instance already exists
-            instance = cls._instances[cls]
-            # Original logic implies reloading if args are passed
-            if args:
-                json_file_path = args[0] if args else None
-                new_logger = kwargs.get('logger') # Get logger from kwargs if provided
-
-                # Update logger on existing instance if a new one is passed
-                if new_logger and CustomLogger and isinstance(new_logger, CustomLogger):
-                     if instance.logger != new_logger:
-                         instance.logger = new_logger # Update logger attribute directly
-                         instance._log("DEBUG", f"Logger updated for existing {cls.__name__} singleton.")
-                     # else: logger is the same, no update needed
-
-                # Reload data if json_file_path is provided
-                if json_file_path and isinstance(json_file_path, str):
-                    instance._log("INFO", f"Reloading data for existing {cls.__name__} singleton from: {json_file_path}")
-                    # Call a method to explicitly reload, don't call __init__ again
-                    instance.reload_data(json_file_path) # Needs reload_data method
-                # else: No path provided, don't reload data
-
-            # If only kwargs (like logger) are passed without args (path),
-            # the logger update above handles it.
-        return cls._instances[cls]
-
-
-class BaseData(JsonHandler, JSONData, metaclass=BaseDataMeta):
+class BaseData(JsonHandler, JSONData, metaclass=SingletonMeta):
     """
     Handles loading, parsing, and verifying the base JSON data structure.
     Acts as a singleton. Inherits JSON loading/logging from JsonHandler.

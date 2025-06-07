@@ -1,7 +1,6 @@
 
 from PySide6.QtWidgets import QStackedWidget, QWidget, QVBoxLayout
-
-from data import DataManager
+from data import MarketFacade
 
 
 class BaseUi(QWidget): 
@@ -9,7 +8,7 @@ class BaseUi(QWidget):
 
     def __init__(self, parent = None):
         super().__init__(parent)
-       
+        self.market_facade: MarketFacade = MarketFacade()
        
     def setup_ui(self):
         pass

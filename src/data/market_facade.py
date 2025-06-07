@@ -1,24 +1,31 @@
 
 from .data_manager import DataManager
-from .project_manager import ProjectManager
+from .project_manager import ProjectLoader
+from .singelton_meta import SingletonMeta
 from generator import FileGenerator
 
 
-class MarketFacade:
+
+class Project:
+
+    def __init__(self,market):
+        self.market = market
+        self.project_manager = ProjectLoader()
+        self.data_manager = DataManager()
+        self.file_generator = FileGenerator()  
+        
+
+
+
+class MarketFacade(metaclass=SingletonMeta):
     """
     A facade for market operations, providing a simplified interface to interact with market data.
     """
 
     def __init__(self, market):
-        self.project_manager = ProjectManager()
-        self.data_manager = DataManager()
-        self.file_generator = FileGenerator()   
-        """
-        Initialize the MarketFacade with a market instance.
-
-        :param market: An instance of a market class that provides access to market data.
-        """
-        self.market = market
+        super().__init__()
+        self._project_list: Project = []
+        
 
     def get_market_data(self, symbol):
         """

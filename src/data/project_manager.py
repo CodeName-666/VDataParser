@@ -4,39 +4,11 @@ from pathlib import Path
 from typing import Any, Dict, TYPE_CHECKING, Union
 
 from .json_handler import JsonHandler
-from .base_data import BaseDataMeta
 from .data_manager import DataManager
 from log import CustomLogger  # noqa: F401
 
 
-
-
-
-#   A *singleton*‑style wrapper around a project‑configuration JSON.  The class
-#   inherits JSON file/URL convenience from :class:`JsonHandler` and the
-#   singleton behaviour from :class:`BaseDataMeta`.  It exposes **explicit** getter
-#   & setter *methods* (\*no properties\*) for all top‑level sections that are
-#   relevant for everyday use#
-#   Usage example
-#   -------------
-#   ```python
-#   from project_manager import ProjectManage#
-#   pm = ProjectManager(json_path_or_data=my_json_dict#
-#   # database section
-#   print(pm.get_database())               # {"url": "", "port": ""}
-#   pm.set_database(url="https://db", port="5432"#
-#   # market section
-#   print(pm.get_market())                 # {"market_path": "", "market_name": ""}
-#   pm.set_market("/path", "EU_Market"#
-#   # PDF defaults
-#    print(pm.get_pdf_template_info())      # {"pdf_path": "...", "pdf_name": "..."}
-#    print(pm.get_pdf_coordinates())
-#
-#    pm.save_to("config.json")
-#
-
-
-class ProjectManager(JsonHandler, metaclass=BaseDataMeta):
+class ProjectLoader(JsonHandler):
     """Manage one project‑configuration JSON and expose convenience helpers."""
 
     # --------------------------- defaults --------------------------- #

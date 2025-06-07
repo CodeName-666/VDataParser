@@ -20,43 +20,6 @@ from data import MarketFacade
 
 
 class MainWindow(QMainWindow): 
-    """ MainWindow is a subclass of QMainWindow that serves as the application's primary window.
-    It initializes and manages the user interface components, including a stack widget that
-    handles multiple views (such as the main menu, data view, and market view), and the 
-    associated toolbars.
-    Attributes:
-        ui (MainWindowUi): An instance that sets up the UI elements for the main window.
-        stack (StackWidget): A widget that manages multiple view widgets allowing easy switching.
-        main_menu (MainMenu): The primary menu view of the application.
-        data_view (DataView): The view for displaying and interacting with data.
-        market_view (Market): The view representing market information.
-    Methods:
-        __init__(parent=None, flags=Qt.WindowFlags()):
-            Initializes the MainWindow, creating UI elements and setting up child views.
-        setup_ui():
-            Configures the main window's UI by setting up the layout, adding view widgets to the 
-            stack, and initializing toolbar visibility and signal connections.
-        setup_signals():
-            Connects user interface signals (such as button clicks or menu actions) to their
-            corresponding slots or methods (e.g., switching views, closing the window).
-        open_view(view_name: str):
-            Switches the current view within the stack to the one matching the provided view name.
-            It iterates over the children in the stack, sets the proper index if the view name matches,
-            hides all toolbars, and then shows the toolbars appropriate for that view.
-        open_market_view():
-            Switches the currently displayed view in the stack to the market view and makes the 
-            export toolbar visible.
-        open_new_market():
-            A placeholder for functionality that would initiate creating a new market.
-        open_load_market():
-            A placeholder for functionality that would initiate loading a market.
-        hide_all_toolbars():
-            Hides all toolbars present in the UI, used typically before showing the toolbars relevant 
-            to the current view.
-        show_toolbars(view_name: str):
-            Adjusts the visibility of toolbars based on the provided view name. For example, if 
-            view_name is "DataView", the export toolbar is made visible.
-    """
     
     def __init__(self, parent=None, flags=Qt.WindowFlags()):  
         super().__init__(parent, flags)
