@@ -18,7 +18,7 @@ class BaseData(JsonHandler, JSONData, metaclass=SingletonMeta):
     Acts as a singleton. Inherits JSON loading/logging from JsonHandler.
     """
 
-    def __init__(self, json_file_path: str, logger: Optional[CustomLogger] = None) -> None:
+    def __init__(self, json_file_path: str = None, logger: Optional[CustomLogger] = None) -> None:
         """
         Initializes BaseData by loading JSON and parsing it into data classes.
 

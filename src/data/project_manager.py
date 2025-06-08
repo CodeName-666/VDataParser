@@ -17,7 +17,7 @@ class ProjectLoader(JsonHandler):
         "market": {"market_path": "", "market_name": ""},
         "default_pdf_generation_data": {
             "template_info": {
-                "pdf_path": "Abholung_Template.pdf",
+                "pdf_path": "",
                 "pdf_name": "Abholung_Template.pdf",
             },
             "coordinates": {"boxPairs": [], "singleBoxes": []},

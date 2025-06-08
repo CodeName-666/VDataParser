@@ -8,7 +8,7 @@ from datetime import datetime
 
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
 from .base_data import BaseData
-from ..objects.data_class_definition import (
+from  objects import (
     MainNumberDataClass,
     SellerDataClass,
     ArticleDataClass,
@@ -24,7 +24,7 @@ class DataManager(BaseData):
     - Assigns MainNumberDataClass instances (stnr tables) to the respective sellers.
     """
 
-    def __init__(self, json_file_path: str, error_handler=None) -> None:
+    def __init__(self, json_file_path: str = None, error_handler=None) -> None:
         """
         Initializes the DataManager instance.
 
