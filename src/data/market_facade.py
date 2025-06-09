@@ -1,21 +1,29 @@
 
 from .data_manager import DataManager
-from .market_loader import MarketLoader
+from .market_loader import MarketHandler
 from .singelton_meta import SingletonMeta
 from generator import FileGenerator
 
 
 
-class MarketData:
+class MarketObserver:
 
     def __init__(self,market):
         self.market = market
-        self.project_manager = MarketLoader()
+        self.market_handler = MarketHandler()
         self.data_manager = DataManager()
         self.file_generator = None
         
     
-    def load_
+    def load_local(self, json_path: str) -> None:
+        """
+        Load local JSON data.
+
+        :param json_path: Path to the local JSON file.
+        """
+        self.data_manager.load(json_path)
+        self.market_handler.set_
+        self.file_generator = FileGenerator(self.data_manager)
     
 
 
@@ -27,7 +35,7 @@ class MarketFacade(metaclass=SingletonMeta):
 
     def __init__(self, market):
         super().__init__()
-        self._market_list: MarketData = []
+        self._market_list: MarketObserver = []
         
 
     def get_market_data(self, symbol):
@@ -46,7 +54,7 @@ class MarketFacade(metaclass=SingletonMeta):
         :param market_name: Name of the new market.
         """
         self.market = self._market_list.append(market)
-        self._market_list.append(MarketData(self.market))
+        self._market_list.append(MarketObserver(self.market))
 
     def load_online_market(self, json_path: str) -> None:
         """
