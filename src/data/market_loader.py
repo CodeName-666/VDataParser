@@ -8,7 +8,7 @@ from .data_manager import DataManager
 from log import CustomLogger  # noqa: F401
 
 
-class ProjectLoader(JsonHandler):
+class MarketLoader(JsonHandler):
     """Manage one project‑configuration JSON and expose convenience helpers."""
 
     # --------------------------- defaults --------------------------- #
