@@ -8,7 +8,6 @@ class BaseUi(QWidget):
 
     def __init__(self, parent = None):
         super().__init__(parent)
-        self.market_facade: MarketFacade = MarketFacade()
        
     def setup_ui(self):
         pass
@@ -21,7 +20,7 @@ class BaseUi(QWidget):
         layout = parent_widget.layout()
         if layout is None:
             layout = QVBoxLayout(parent_widget)
-            widget_to_add = widgetClass()
+            widget_to_add = widgetClass(self)
             layout.addWidget(widget_to_add)
             parent_widget.setLayout(layout)
         

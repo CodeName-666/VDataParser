@@ -91,6 +91,26 @@ class MarketHandler(JsonHandler):
         self.set_key_value(["market", "market_path"], market_path)
         self.set_key_value(["market", "market_name"], market_name)
 
+    def set_market_path(self, market_path: str) -> None:
+        """Set only the market_path key in the market section."""
+        self.set_key_value(["market", "market_path"], market_path)
+    
+    def set_market_name(self, market_name: str) -> None:
+        """Set only the market_name key in the market section."""
+        self.set_key_value(["market", "market_name"], market_name)
+    
+    def set_full_market_path(self, full_path: str) -> None:
+        """
+        Set the market section by parsing the provided full market path.
+
+        The method splits the full path into a directory part (market_path)
+        and a market name (market_name) using the host's OS conventions.
+        """
+        market_path = os.path.dirname(full_path)
+        market_path = self.ensure_trailing_sep(market_path)
+        market_name = os.path.basename(full_path)
+        self.set_market(market_path, market_name)
+
     # --------------- PDF‑generation default getters -------------- #
     def get_pdf_template_info(self) -> Dict[str, str]:
         """Return ``default_pdf_generation_data.template_info``."""

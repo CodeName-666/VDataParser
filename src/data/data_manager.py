@@ -6,6 +6,8 @@ import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime
 
+from PySide6.QtCore import QObject, Signal
+
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
 from .base_data import BaseData
 from  objects import (
@@ -33,7 +35,9 @@ class DataManager(BaseData):
             error_handler (optional): Optional error handler callback.
         """
         # BaseData loads and converts JSON data into the corresponding dataclasses.
-        super().__init__(json_file_path, error_handler)
+     
+        BaseData.__init__(self, json_file_path, error_handler)
+
         self._unsaved_changes: bool = False
         self._change_log: List[ChangeLogEntry] = []
 

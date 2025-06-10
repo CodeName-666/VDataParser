@@ -6,10 +6,11 @@ import time
 from pathlib import Path # Import Path from pathlib
 
 
-from log import CustomLogger, LogType
-from .json_handler import JsonHandler
-from objects.data_class_definition import * 
 from .singelton_meta import SingletonMeta
+from .json_handler import JsonHandler
+from log import CustomLogger, LogType
+from objects.data_class_definition import * 
+
 
 
 class BaseData(JsonHandler, JSONData, metaclass=SingletonMeta):

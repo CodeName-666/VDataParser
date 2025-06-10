@@ -8,11 +8,10 @@ class UserInfo(BaseUi):
         self.ui.setupUi(self)
         self.setup_signals()
 
-    def set_data(self, data_manager):
+    def setup_views(self):
         """Setzt den DataManager und initialisiert die Anzeige."""
-        self.data_manager = data_manager
-        self.users = self.data_manager.get_users_data()
-        self.aggregated_users = self.data_manager.get_aggregated_users_data()
+        self.users = self.parent.get_user_data()
+        self.aggregated_users = self.parent.get_aggregated_user()
 
         # Standardmäßig werden die nicht aggregierten Einträge angezeigt.
         self.current_user_list = self.users

@@ -101,8 +101,8 @@ class MainWindow(QMainWindow):
         """
         Switches the currently displayed view in the stack to the data view.
         """
-        base_data = self.open_file_dialog()
-        self.market_view.set_data(base_data)
+        local_json = self.open_file_dialog()
+        self.market_facade.load_local_market(self.market_view, local_json)
         self.open_view("Market")
        
         
@@ -163,14 +163,10 @@ class MainWindow(QMainWindow):
         """
         file_name, _ = QFileDialog.getOpenFileName(self, "Open JSON File", "", "JSON Files (*.json)")
         if file_name:
-            try:
-                base_data = DataManager(file_name)
-                #base_data.verify_data()
-                return base_data
-                
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to load JSON file: {e}")
-                return None
+            return file_name                
+        else:            
+            QMessageBox.critical(self, "Error", f"Failed to load JSON file: {e}")
+            return None
 
     def open_about_ui(self):
         """

@@ -23,19 +23,10 @@ class DataView(BaseUi):
         self.ui.setupUi(self)
         
 
-        if self.data_manager:
-            # Zusätzliche Initialisierungen (Signal-Slot-Verbindungen etc.)
-            self.setup_views()
-            self.setup_connections()
         
-    def set_data(self, data_manager: DataManager):
-        """Setzt den DataManager und führt die Initialisierung durch."""
-        self.data_manager = data_manager
-        self.setup_views()
-        self.setup_connections()
-
     def setup_views(self):
         """Initialisiert die Ansichten (Baum- und Listenansicht)."""
+        self.setup_connections()
         self.populate_user_tree()
         self.listUsers = QListWidget()
         self.ui.verticalLayoutLeft.addWidget(self.listUsers)
@@ -53,11 +44,11 @@ class DataView(BaseUi):
         MainNumber-Tabellen (stnr‑Tabellen). Jeder Verkäufer wird über seine E‑Mail
         aggregiert und als Knoten dargestellt.
         """
-        if not self.data_manager:
+        if not self.parent.get_aggregated_user():
             return
         
         self.ui.treeUsers.clear()
-        users_list = self.data_manager.get_aggregated_users()
+        users_list = self.parent.get_aggregated_user()
         for email, user in users_list.items():
             user_text = f'{user["info"].vorname} {user["info"].nachname} ({user["info"].email})'
             user_item = QTreeWidgetItem([user_text])
@@ -84,7 +75,7 @@ class DataView(BaseUi):
             return
         
         self.listUsers.clear()
-        flat_users = self.data_manager.sellers.data
+        flat_users = self.parent.get_seller().data
         for index, seller in enumerate(flat_users, start=1):
             text = f'{index}. {seller.vorname} {seller.nachname} ({seller.email})'
             item = QListWidgetItem(text)
@@ -105,14 +96,14 @@ class DataView(BaseUi):
 
     def user_item_clicked(self, item, column):
   
-        if not self.data_manager:
+        if not self.parent.get_aggregated_users():
             return
 
         if item.parent() is not None:
             # Kindelement (stnr‑Tabelle) wurde angeklickt.
             stnr_name = item.text(0)
             entries = None
-            users_list = self.data_manager.get_aggregated_users()
+            users_list = self.parent.get_aggregated_users()
             for user in users_list.values():
                 for main_number in user["stamms"]:
                     if main_number.name == stnr_name:
@@ -139,12 +130,12 @@ class DataView(BaseUi):
         Anhand der Verkäufer-ID wird die zugehörige stnr‑Tabelle ermittelt und
         deren Artikel angezeigt.
         """
-        if not self.data_manager:
+        if not self.parent.get_main_number():
             return
         
         seller = item.data(Qt.UserRole)
         target_stnr = "stnr" + seller.id
-        strnr_tables = self.data_manager.get_main_number_tables()
+        strnr_tables = self.get_main_number()
         main_number = strnr_tables.get(target_stnr)
         entries = main_number.data if main_number else []
         self.populate_entry_table(entries)

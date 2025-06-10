@@ -10,14 +10,17 @@ from version import get_version
 
 from data import Base
 from data import BaseData
-from data import SellerDataClass
-from data import MainNumberDataClass
+from data import MarketFacade
+from objects import SellerDataClass
+from objects import MainNumberDataClass
+from objects import FleatMarket
+
 
 from generator import FileGenerator
 from display import BasicProgressTracker as ProgressTracker
 from display import ConsoleProgressBar as ConsoleBar
 from display import ConsoleOutput as OutputIface
-from objects import FleatMarket
+
 from ui import MainWindow
 from PySide6.QtWidgets import QApplication
 from log import CustomLogger
@@ -137,6 +140,7 @@ def _run_gui():  # noqa: D401
     logger = _bootstrap_logger(verbose=False, level="INFO")
     #logger.info("Flea Market Generator v%s – GUI", get_version())
 
+    market_facade = MarketFacade()  # type: ignore[call‑arg]
     app = QApplication(sys.argv)
     #win = MainWindow(logger=logger)  # type: ignore[call‑arg]
     win = MainWindow()  # 
