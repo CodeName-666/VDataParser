@@ -33,7 +33,7 @@ class UserInfo(BaseUi):
         """Aktualisiert die ListWidget-Anzeige basierend auf dem Status der Checkbox."""
         self.ui.listWidgetUsers.clear()
         if self.ui.checkboxUnique.isChecked():
-            self.current_user_list = self.aggregated_users
+            self.current_user_list = self.users
             for user in self.current_user_list:
                 count_ids = len(user.get("ids", []))
                 text = f"{user.get('vorname', '')} {user.get('nachname', '')} ({count_ids})"
