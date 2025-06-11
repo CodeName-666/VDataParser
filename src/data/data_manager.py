@@ -6,6 +6,7 @@ import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime
 
+from .singelton_meta import SingletonMeta
 from PySide6.QtCore import QObject, Signal
 
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
@@ -18,13 +19,15 @@ from  objects import (
 
 
 
-class DataManager(BaseData):
+class DataManager(QObject, BaseData, metaclass=SingletonMeta):
     """
     DataManager inherits from BaseData and extends its functionality by implementing additional aggregation logic.
 
     - Aggregates sellers based on their email addresses.
     - Assigns MainNumberDataClass instances (stnr tables) to the respective sellers.
     """
+
+    data_loaded = Signal(object)  # Signal to notify when data is loaded
 
     def __init__(self, json_file_path: str = None, error_handler=None) -> None:
         """
@@ -35,7 +38,7 @@ class DataManager(BaseData):
             error_handler (optional): Optional error handler callback.
         """
         # BaseData loads and converts JSON data into the corresponding dataclasses.
-     
+        QObject.__init__(self)  # Initialize QObject first
         BaseData.__init__(self, json_file_path, error_handler)
 
         self._unsaved_changes: bool = False
@@ -350,3 +353,13 @@ class DataManager(BaseData):
             json_data.append(asdict(table))
         json_data.append(asdict(self.sellers))
         return json_data
+
+    def load(self, path_or_url: str) -> None:
+        """
+        Load JSON data from a file or URL and parse it into data classes.
+
+        Args:
+            path_or_url (str): Path to the JSON file or URL.
+        """
+        super().load(path_or_url)
+        self.data_loaded.emit(self)

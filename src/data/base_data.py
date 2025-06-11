@@ -5,15 +5,13 @@ import sys
 import time
 from pathlib import Path # Import Path from pathlib
 
-
-from .singelton_meta import SingletonMeta
 from .json_handler import JsonHandler
 from log import CustomLogger, LogType
 from objects.data_class_definition import * 
 
 
 
-class BaseData(JsonHandler, JSONData, metaclass=SingletonMeta):
+class BaseData(JsonHandler, JSONData):
     """
     Handles loading, parsing, and verifying the base JSON data structure.
     Acts as a singleton. Inherits JSON loading/logging from JsonHandler.
@@ -37,7 +35,7 @@ class BaseData(JsonHandler, JSONData, metaclass=SingletonMeta):
             self._log("ERROR", f"BaseData initialization failed: Could not load JSON data from {json_file_path}.")
             # Initialize JSONData with defaults even if loading failed, to prevent AttributeErrors later
             JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
-                              main_numbers_list=[], sellers=SellerListDataClass())
+                              settings=SettingDataClass(), main_numbers_list=[], sellers=SellerListDataClass())
             return # Stop further processing if data loading failed
         
         # Proceed with parsing if data loaded successfully
@@ -69,7 +67,7 @@ class BaseData(JsonHandler, JSONData, metaclass=SingletonMeta):
              self._log("ERROR", f"JSON data structure error: Expected a List, got {type(json_data).__name__}. Cannot parse.")
              # Initialize JSONData with defaults
              JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
-                              main_numbers_list=[], sellers=SellerListDataClass())
+                              settings=SettingDataClass(), main_numbers_list=[], sellers=SellerListDataClass())
              return
 
         try:
@@ -79,15 +77,18 @@ class BaseData(JsonHandler, JSONData, metaclass=SingletonMeta):
 
             base_info_dict = json_data[1] if len(json_data) >= 2 and isinstance(json_data[1], dict) else {}
             _base_info = BaseInfoDataClass(**base_info_dict)
+            
+            settings_dict = json_data[2] if len(json_data) >= 3 and isinstance(json_data[2], dict) else {}
+            _settings= SettingDataClass(**settings_dict)
 
             _main_numbers = []
             _sellers_dict = {}
-            if len(json_data) >= 3:
+            if len(json_data) >= 4:
                 # Assume main numbers are all dicts between index 2 and the last element
-                main_number_dicts = [item for item in json_data[2:-1] if isinstance(item, dict)]
+                main_number_dicts = [item for item in json_data[3:-1] if isinstance(item, dict)]
                 _main_numbers = [MainNumberDataClass(**table) for table in main_number_dicts]
                 # Log if non-dict items were skipped
-                skipped_mn = len(json_data[2:-1]) - len(main_number_dicts)
+                skipped_mn = len(json_data[3:-1]) - len(main_number_dicts)
                 if skipped_mn > 0:
                      self._log("WARNING", f"Skipped {skipped_mn} non-dictionary items in main numbers section.")
 
@@ -98,7 +99,7 @@ class BaseData(JsonHandler, JSONData, metaclass=SingletonMeta):
             _sellers = SellerListDataClass(**_sellers_dict)
 
             # Initialize the JSONData part of the class
-            JSONData.__init__(self, export_header=_export_header, base_info=_base_info,
+            JSONData.__init__(self, export_header=_export_header, base_info=_base_info, settings = _settings,
                               main_numbers_list=_main_numbers, sellers=_sellers)
             self._log("INFO", "JSON data parsed successfully.")
 
@@ -106,12 +107,12 @@ class BaseData(JsonHandler, JSONData, metaclass=SingletonMeta):
              # Catch errors often related to unexpected data types in **kwargs
              self._log("ERROR", f"Data structure error during parsing (likely unexpected data type): {e}")
              JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
-                              main_numbers_list=[], sellers=SellerListDataClass()) # Reset to defaults
+                              settings=SettingDataClass(), main_numbers_list=[], sellers=SellerListDataClass()) # Reset to defaults
         except Exception as e:
              self._log("ERROR", f"Unexpected error during JSON parsing: {e}")
              # Reset to default state in case of partial parsing failure
              JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
-                              main_numbers_list=[], sellers=SellerListDataClass())
+                              settings=SettingDataClass(), main_numbers_list=[], sellers=SellerListDataClass())
 
 
     def reload_data(self, json_file_path: str) -> None:
@@ -165,6 +166,17 @@ class BaseData(JsonHandler, JSONData, metaclass=SingletonMeta):
              self._log("ERROR", f"Unerwarteter Fehler bei Datenüberprüfung: {e}")
 
         # time.sleep(1) # Reduced sleep time
+
+    def load(self, path_or_url: str) -> None:
+        """
+        Load JSON data from a file or URL and parse it into data classes.
+
+        Args:
+            path_or_url (str): Path to the JSON file or URL.
+        """
+        self._log("INFO", f"Loading JSON data from {path_or_url}...")
+        super().load(path_or_url)
+        self._parse_json_data()
 
 
 # --- END OF FILE base_data.py ---

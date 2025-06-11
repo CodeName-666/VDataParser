@@ -10,8 +10,8 @@ class UserInfo(BaseUi):
 
     def setup_views(self):
         """Setzt den DataManager und initialisiert die Anzeige."""
-        self.users = self.parent.get_user_data()
-        self.aggregated_users = self.parent.get_aggregated_user()
+        self.users = self.market_widget().get_user_data()
+        self.aggregated_users = self.market_widget().get_aggregated_user()
 
         # Standardmäßig werden die nicht aggregierten Einträge angezeigt.
         self.current_user_list = self.users
@@ -20,6 +20,9 @@ class UserInfo(BaseUi):
         if self.ui.listWidgetUsers.count() > 0:
             self.ui.listWidgetUsers.setCurrentRow(0)
 
+
+    def market_widget(self):
+        return self.parent().parent().parent().parent()
 
     def setup_signals(self):
         """Verbindet die UI-Signale mit den entsprechenden Methoden."""

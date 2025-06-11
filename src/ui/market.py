@@ -22,8 +22,8 @@ class Market(BaseUi):
     def set_data(self, data_manager: DataManager):
         self.data_manager_ref = data_manager
         #self.market_setting.set_data(data_manager)
-        self.data_view.set_data()
-        self.user_info.set_data()
+        self.data_view.setup_views()
+        self.user_info.setup_views()
 
     def setup_ui(self):
         self.ui.setupUi(self)

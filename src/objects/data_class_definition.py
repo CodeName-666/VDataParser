@@ -12,14 +12,39 @@ class ChangeLogEntry:
 
 @dataclass
 class HeaderDataClass:
-    type: str
-    version: str
-    comment: str
+    type: str = ""
+    version: str = ""
+    comment: str = ""
 
 @dataclass
 class BaseInfoDataClass:
-    type: str 
-    name: str
+    type: str = ""
+    name: str = ""
+
+@dataclass
+class SettingsContentDataClass:
+    max_stammnummern: str = ""
+    max_artikel: str = 0
+    datum_counter: str = ""
+    flohmarkt_nr: str = ""
+    psw_laenge: str = ""
+    tabellen_prefix: str = ""
+    verkaufer_liste: str = ""
+    max_user_ids: str = ""
+    datum_flohmarkt: str = ""
+
+@dataclass
+class SettingDataClass:
+    type: str = ""
+    name: str = ""
+    database: str = ""
+    data: List[SettingsContentDataClass] = field(default_factory=SettingsContentDataClass)
+
+   #def __post_init__(self):
+   #    if isinstance(self.data, dict):
+   #        self.data = SettingsContentDataClass(**self.data)
+   #    elif not isinstance(self.data, SettingsContentDataClass):
+   #        raise TypeError("data must be a SettingsDataClassList or a dict")
 
 @dataclass
 class ArticleDataClass:
@@ -95,5 +120,6 @@ class SellerListDataClass:
 class JSONData:
     export_header: HeaderDataClass
     base_info: BaseInfoDataClass
+    settings: SettingDataClass
     main_numbers_list: List[MainNumberDataClass]
     sellers: SellerListDataClass

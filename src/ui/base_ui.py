@@ -1,6 +1,6 @@
 
 from PySide6.QtWidgets import QStackedWidget, QWidget, QVBoxLayout
-from data import MarketFacade
+
 
 
 class BaseUi(QWidget): 

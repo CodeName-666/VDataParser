@@ -9,8 +9,7 @@ from typing import List, Dict, Any, Union
 
 class MarketObserver:
 
-    def __init__(self,market):
-        self.market = market
+    def __init__(self):
         self.market_handler = MarketHandler()
         self.data_manager = DataManager()
         self.file_generator = None
@@ -25,11 +24,13 @@ class MarketObserver:
         self.data_manager.load(json_path)
         self.market_handler.set_full_market_path(json_path)
         self.file_generator = FileGenerator(self.data_manager)
+        
 
     def get_data(self):
         return self.data_manager
     
-
+    def connect_to_market(self, market) -> None:	
+        self.data_manager.data_loaded.connect(market.set_data)
 
 
 class MarketFacade(metaclass=SingletonMeta):
@@ -66,6 +67,10 @@ class MarketFacade(metaclass=SingletonMeta):
 
         :param json_path: Path to the local JSON file.
         """
+        new_observer = self.create_observer(market)
+        new_observer.connect_to_market(market)
+        new_observer.load_local(json_path)
+        
         
     def market_already_exists(self, market) -> bool:
         market = next(((mk, obs)[0] for mk, obs in self._market_list if mk == market), None)
@@ -92,7 +97,7 @@ class MarketFacade(metaclass=SingletonMeta):
         :param market: The market instance to observe.
         :return: An observer instance for the market.
         """
-        observer = MarketObserver(market)
+        observer = MarketObserver()
         if not self.market_already_exists(market):
             self._market_list.append((market, observer))
         return observer
