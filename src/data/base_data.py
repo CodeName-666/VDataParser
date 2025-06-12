@@ -129,12 +129,12 @@ class BaseData(JsonHandler, JSONData):
                                main_numbers_list=[], sellers=SellerListDataClass())
 
 
-    def get_seller_list(self) -> List[SellerDataClass]:
+    def get_seller_as_list(self) -> List[SellerDataClass]:
         """ Returns the list of seller data objects. """
         # Ensure sellers attribute exists from JSONData initialization
         return getattr(self, 'sellers', SellerListDataClass()).data
 
-    def get_main_number_list(self) -> List[MainNumberDataClass]:
+    def get_main_number_as_list(self) -> List[MainNumberDataClass]:
         """ Returns the list of main number data objects. """
         # Ensure main_numbers_list attribute exists
         return getattr(self, 'main_numbers_list', [])
@@ -146,8 +146,8 @@ class BaseData(JsonHandler, JSONData):
 
         # Handle potential AttributeError if initialization failed badly
         try:
-             seller_quantity = len(self.get_seller_list())
-             article_list_quantity = len(self.get_main_number_list())
+             seller_quantity = len(self.get_seller_as_list())
+             article_list_quantity = len(self.get_main_number_as_list())
              status = ">> Datenbank OK" if seller_quantity == article_list_quantity else ">> Datenbank FEHLER: Anzahl Verkäufer und Artikellisten stimmt nicht überein!"
              mismatch = "" if seller_quantity == article_list_quantity else f" (Differenz: {abs(seller_quantity - article_list_quantity)})"
 

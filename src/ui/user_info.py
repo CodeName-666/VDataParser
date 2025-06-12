@@ -10,11 +10,11 @@ class UserInfo(BaseUi):
 
     def setup_views(self):
         """Setzt den DataManager und initialisiert die Anzeige."""
-        self.users = self.market_widget().get_user_data()
-        self.aggregated_users = self.market_widget().get_aggregated_user()
+        self.users_data = self.market_widget().get_user_data()
+        self.aggregated_users_data = self.market_widget().get_aggregated_user_data()
 
         # Standardmäßig werden die nicht aggregierten Einträge angezeigt.
-        self.current_user_list = self.users
+        self.current_user_list = self.users_data
 
         self.refresh_user_list()
         if self.ui.listWidgetUsers.count() > 0:
@@ -33,13 +33,14 @@ class UserInfo(BaseUi):
         """Aktualisiert die ListWidget-Anzeige basierend auf dem Status der Checkbox."""
         self.ui.listWidgetUsers.clear()
         if self.ui.checkboxUnique.isChecked():
-            self.current_user_list = self.users
+            self.current_user_list = self.aggregated_users_data
             for user in self.current_user_list:
                 count_ids = len(user.get("ids", []))
+
                 text = f"{user.get('vorname', '')} {user.get('nachname', '')} ({count_ids})"
                 self.ui.listWidgetUsers.addItem(text)
         else:
-            self.current_user_list = self.users
+            self.current_user_list = self.users_data
             for user in self.current_user_list:
                 text = f"{user.get('vorname', '')} {user.get('nachname', '')}"
                 self.ui.listWidgetUsers.addItem(text)

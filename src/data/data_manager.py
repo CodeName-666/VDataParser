@@ -107,7 +107,7 @@ class DataManager(QObject, BaseData, metaclass=SingletonMeta):
             Dict[str, Dict]: Dictionary with email as key and a dict containing "info", "ids", and "stamms" as value.
         """
         users: Dict[str, Dict] = {}
-        for seller in self.get_seller_list():
+        for seller in self.get_seller_as_list():
             key = seller.email
             if key not in users:
                 users[key] = {"info": seller, "ids": [seller.id], "stamms": []}
@@ -157,7 +157,7 @@ class DataManager(QObject, BaseData, metaclass=SingletonMeta):
         Returns:
             List[dict]: List of seller dictionaries.
         """
-        return [self.convert_seller_to_dict(seller) for seller in self.get_seller_list()]
+        return [self.convert_seller_to_dict(seller) for seller in self.get_seller_as_list()]
 
     def get_aggregated_users_data(self) -> List[dict]:
         """
@@ -249,7 +249,7 @@ class DataManager(QObject, BaseData, metaclass=SingletonMeta):
         Raises:
             ValueError: If no seller with the given ID is found.
         """
-        for seller in self.get_seller_list():
+        for seller in self.get_seller_as_list():
             if seller.id == seller_id:
                 old_data = deepcopy(seller)
                 seller.vorname = ""
@@ -316,8 +316,8 @@ class DataManager(QObject, BaseData, metaclass=SingletonMeta):
         Returns:
             bool: True if seller IDs match stnr table IDs, False otherwise.
         """
-        seller_ids = {seller.id for seller in self.get_seller_list()}
-        stnr_ids = {table.name[4:] for table in self.get_main_number_list() if table.name.startswith("stnr")}
+        seller_ids = {seller.id for seller in self.get_seller_as_list()}
+        stnr_ids = {table.name[4:] for table in self.get_main_number_as_list() if table.name.startswith("stnr")}
         return seller_ids == stnr_ids
 
     def has_unsaved_changes(self) -> bool:

@@ -77,7 +77,7 @@ class DataView(BaseUi):
             return
         
         self.listUsers.clear()
-        flat_users = self.market_widget().get_seller().data
+        flat_users = self.market_widget().get_seller()
         for index, seller in enumerate(flat_users, start=1):
             text = f'{index}. {seller.vorname} {seller.nachname} ({seller.email})'
             item = QListWidgetItem(text)
@@ -117,7 +117,7 @@ class DataView(BaseUi):
             # Verkäuferknoten wurde angeklickt: Alle zugehörigen Artikel zusammenfassen.
             entries = []
             user_text = item.text(0)
-            users_list = self.market_widget^().get_aggregated_users()
+            users_list = self.market_widget().get_aggregated_users()
             for user in users_list.values():
                 info_text = f'{user["info"].vorname} {user["info"].nachname} ({user["info"].email})'
                 if info_text == user_text:

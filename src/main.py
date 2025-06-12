@@ -94,8 +94,8 @@ def _run_cli(parsed: Arguments):  # noqa: D401
         Base(logger=logger, output_interface=out)  # type: ignore[call‑arg]
         base_data = BaseData(data_file, logger=logger)  # type: ignore[arg‑type]
         base_data.verify_data()
-        sellers: List[SellerDataClass] = base_data.get_seller_list()  # type: ignore[assignment]
-        main_numbers: List[MainNumberDataClass] = base_data.get_main_number_list()  # type: ignore[assignment]
+        sellers: List[SellerDataClass] = base_data.get_seller_as_list()  # type: ignore[assignment]
+        main_numbers: List[MainNumberDataClass] = base_data.get_main_number_as_list()  # type: ignore[assignment]
     except FileNotFoundError:
         (out or logger).error("Datendatei nicht gefunden: %s", data_file)  # type: ignore[attr‑defined]
         sys.exit(1)

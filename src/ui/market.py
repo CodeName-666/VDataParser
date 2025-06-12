@@ -41,6 +41,16 @@ class Market(BaseUi):
             return {}
         return self.data_manager_ref.get_users_data()
     
+    def get_aggregated_user_data(self):
+        """
+        Retrieves aggregated user data from the DataManager.
+        Returns:
+            dict: A dictionary containing aggregated user data.
+        """
+        if not self.data_manager_ref:
+            return {}
+        return self.data_manager_ref.get_aggregated_users_data()
+
     def get_aggregated_user(self):
         """
         Retrieves aggregated user data from the DataManager.
@@ -58,8 +68,8 @@ class Market(BaseUi):
             dict: A dictionary containing seller data.
         """
         if not self.data_manager_ref:
-            return {}
-        return self.data_manager_ref.get_seller_list()
+            return []
+        return self.data_manager_ref.get_seller_as_list()
     
     def get_main_numers(self):
         """

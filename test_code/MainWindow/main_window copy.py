@@ -75,14 +75,14 @@ class MainWindow(QMainWindow):
         self.data = BaseData("src/test_code/export.json")
         # Erstellen eines Dictionaries, in dem der Schlüssel die Stammnummer (main_number.name) und der Wert die Einträge ist.
         self.stnr_tables = {}
-        for main_number in self.data.get_main_number_list():
+        for main_number in self.data.get_main_number_as_list():
             key = main_number.name  # Es existiert kein main_number.id!
             self.stnr_tables[key] = main_number.data
 
         # Aggregierung der Verkäufer anhand ihrer E-Mail.
         # Dabei werden alle in der Spalte "id" auftretenden Werte gesammelt.
         self.users = {}
-        for seller in self.data.get_seller_list():
+        for seller in self.data.get_seller_as_list():
             key = seller.email
             if key not in self.users:
                 # Konvertiere seller.id zu String, um Vergleiche konsistent durchzuführen.
@@ -92,7 +92,7 @@ class MainWindow(QMainWindow):
                     self.users[key]["ids"].append(str(seller.id))
 
         # Ordne jedem Benutzer die zugehörigen Stammnummern zu.
-        for main_number in self.data.get_main_number_list():
+        for main_number in self.data.get_main_number_as_list():
             stnr = main_number.name  # Hier wird main_number.name genutzt
             for user in self.users.values():
                 # Vergleiche den Stammnummernamen (als String) mit den IDs des Verkäufers.
