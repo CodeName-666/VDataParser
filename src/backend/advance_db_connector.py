@@ -4,6 +4,7 @@ import json
 
 # Erweiterte Klasse zum Exportieren, Aktualisieren und Modifizieren von JSON-Daten
 class AdvancedDBManager(BasicDBConnector):
+    
     def export_to_custom_json(self, output_file: str):
         """
         Exportiert die komplette Datenbank in ein JSON-Format, das dem in deinem Export-Beispiel entspricht.

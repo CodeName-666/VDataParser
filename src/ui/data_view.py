@@ -119,7 +119,8 @@ class DataView(BaseUi):
             user_text = item.text(0)
             users_list = self.market_widget().get_aggregated_users()
             for user in users_list.values():
-                info_text = f'{user["info"].vorname} {user["info"].nachname} ({user["info"].email})'
+                #info_text = f'{user["info"].vorname} {user["info"].nachname} ({user["info"].email})'
+                info_text = f'{user["info"].vorname} {user["info"].nachname}'
                 if info_text == user_text:
                     for main_number in user["stamms"]:
                         entries.extend(main_number.data)

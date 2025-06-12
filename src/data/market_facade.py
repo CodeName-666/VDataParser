@@ -15,7 +15,18 @@ class MarketObserver:
         self.file_generator = None
         
     
-    def load_local(self, json_path: str) -> None:
+    def load_local_market_project(self, json_path: str) -> None:
+        """
+        Load a local market project from a JSON file.
+
+        :param json_path: Path to the local JSON file.
+        """
+        self.market_handler.load(json_path)
+        market_json_path = self.market_handler.get_full_market_path()
+        self.data_manager.load(market_json_path)
+
+
+    def load_local_market_export(self, json_path: str) -> None:
         """
         Load local JSON data.
 
@@ -29,7 +40,7 @@ class MarketObserver:
     def get_data(self):
         return self.data_manager
     
-    def connect_to_market(self, market) -> None:	
+    def connect_signals(self, market) -> None:	
         self.data_manager.data_loaded.connect(market.set_data)
 
 
@@ -60,16 +71,27 @@ class MarketFacade(metaclass=SingletonMeta):
         """
         
         pass
+    
+    def load_local_market_porject(self, market, json_path: str) -> None:
+        """
+        Load a local market project from a JSON file.
 
-    def load_local_market(self,market, json_path: str) -> None:
+        :param json_path: Path to the local JSON file.
+        """
+
+        new_observer = self.create_observer(market)
+        new_observer.connect_signals(market)
+        new_observer.load_local_market_export(json_path)
+
+    def load_local_market_export(self,market, json_path: str) -> None:
         """
         Load local JSON data.
 
         :param json_path: Path to the local JSON file.
         """
         new_observer = self.create_observer(market)
-        new_observer.connect_to_market(market)
-        new_observer.load_local(json_path)
+        new_observer.connect_signals(market)
+        new_observer.load_local_market_export(json_path)
         
         
     def market_already_exists(self, market) -> bool:

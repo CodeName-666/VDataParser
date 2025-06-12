@@ -61,7 +61,7 @@ class MainWindow(QMainWindow):
         - the 'action_open_export' triggered signal from the UI actions to the 'open_market_view' method.
         """
         self.main_menu.on_exit_button_clicked.connect(self.close)
-        self.main_menu.on_open_export_button_clicked.connect(self.open_local_export)
+        self.main_menu.on_open_export_button_clicked.connect(self.open_local_market_export)
         self.main_menu.on_open_market_button_clicked.connect(self.open_market_view)
 
         self.pdf_display.exit_requested.connect(self.switch_to_last_view)
@@ -96,23 +96,31 @@ class MainWindow(QMainWindow):
         Switches the currently displayed view in the stack to the PDF display view.
         """
         self.open_view("PdfDisplayView")
-
-    def open_local_export(self):
+    @Slot()
+    def open_local_market_export(self):
         """
         Switches the currently displayed view in the stack to the data view.
         """
         local_json = self.open_file_dialog()
-        self.market_facade.load_local_market(self.market_view, local_json)
+        self.market_facade.load_local_market_export(self.market_view, local_json)
         self.open_view("Market")
-       
-        
+
+            
+    @Slot()  
     def open_market_view(self):
         """
         Switches the currently displayed view in the stack to the market view.
         """
         dialog = MarketLoaderDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            market_data = dialog.get_result()
+            market_loader_info = dialog.get_result()
+            if market_loader_info["mode"] == "json":
+                self.market_facade.load_
+            elif market_loader_info["mode"] == "mysql":
+                pass
+            else:
+                #QMessageBox.critical(self, "Error", "Invalid market loader mode selected.")
+                return
             #self.market_view.set_data(market_data)
             #self.open_view("Market")
         else:
