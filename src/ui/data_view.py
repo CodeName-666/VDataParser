@@ -98,14 +98,14 @@ class DataView(BaseUi):
 
     def user_item_clicked(self, item, column):
   
-        if not self.market_widget().get_aggregated_users():
+        if not self.market_widget().get_aggregated_user():
             return
 
         if item.parent() is not None:
             # Kindelement (stnr‑Tabelle) wurde angeklickt.
             stnr_name = item.text(0)
             entries = None
-            users_list = self.market_widget().get_aggregated_users()
+            users_list = self.market_widget().get_aggregated_user()
             for user in users_list.values():
                 for main_number in user["stamms"]:
                     if main_number.name == stnr_name:
@@ -117,7 +117,7 @@ class DataView(BaseUi):
             # Verkäuferknoten wurde angeklickt: Alle zugehörigen Artikel zusammenfassen.
             entries = []
             user_text = item.text(0)
-            users_list = self.market_widget().get_aggregated_users()
+            users_list = self.market_widget().get_aggregated_user()
             for user in users_list.values():
                 #info_text = f'{user["info"].vorname} {user["info"].nachname} ({user["info"].email})'
                 info_text = f'{user["info"].vorname} {user["info"].nachname}'

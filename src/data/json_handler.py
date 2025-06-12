@@ -96,7 +96,7 @@ class JsonHandler():
              print(f"ERROR: {full_error_msg}", file=sys.stderr)
 
 
-    def load(self, path_or_url: str) -> None:
+    def load(self, path_or_url: str) -> bool:
         """
         Load JSON data from a path or URL and store it in self.json_data.
         Resets self.json_data to None if loading fails.
@@ -104,6 +104,7 @@ class JsonHandler():
         Args:
             path_or_url (str): The path or URL to the JSON file.
         """
+        ret: bool = False # 
         self._log("INFO", f"Attempting to load JSON from: {path_or_url}")
         self.json_data = None # Reset before loading
         try:
@@ -117,13 +118,16 @@ class JsonHandler():
 
             if self.json_data is not None:
                  self._log("INFO", "JSON data loaded successfully.")
+                 ret = True
             # else: error already logged in load_from_url/local
 
         except Exception as e:
              # Catch potential errors from urlparse or other unexpected issues
              self._log_error("load", f"Unexpected error during loading preparation for '{path_or_url}'", e)
              self.json_data = None
-
+             ret = False
+             
+        return ret
 
     def load_from_url(self, json_url: str) -> Optional[Union[Dict, List]]:
         """

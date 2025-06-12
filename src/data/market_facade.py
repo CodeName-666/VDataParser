@@ -9,13 +9,13 @@ from typing import List, Dict, Any, Union
 
 class MarketObserver:
 
-    def __init__(self):
-        self.market_handler = MarketHandler()
+    def __init__(self, json_path: str = ""):
+        self.market_handler = MarketHandler(json_path)
         self.data_manager = DataManager()
         self.file_generator = None
         
     
-    def load_local_market_project(self, json_path: str) -> None:
+    def load_local_market_project(self, json_path: str) -> bool:
         """
         Load a local market project from a JSON file.
 
@@ -23,7 +23,7 @@ class MarketObserver:
         """
         self.market_handler.load(json_path)
         market_json_path = self.market_handler.get_full_market_path()
-        self.data_manager.load(market_json_path)
+        return self.data_manager.load(market_json_path)
 
 
     def load_local_market_export(self, json_path: str) -> None:
@@ -72,7 +72,7 @@ class MarketFacade(metaclass=SingletonMeta):
         
         pass
     
-    def load_local_market_porject(self, market, json_path: str) -> None:
+    def load_local_market_porject(self, market, json_path: str) -> bool:
         """
         Load a local market project from a JSON file.
 
@@ -81,7 +81,8 @@ class MarketFacade(metaclass=SingletonMeta):
 
         new_observer = self.create_observer(market)
         new_observer.connect_signals(market)
-        new_observer.load_local_market_export(json_path)
+        return new_observer.load_local_market_project(json_path)
+        
 
     def load_local_market_export(self,market, json_path: str) -> None:
         """
@@ -112,14 +113,17 @@ class MarketFacade(metaclass=SingletonMeta):
                 return observer
         return None
 
-    def create_observer(self, market):
+    def create_observer(self, market, json_path = "") -> MarketObserver:
         """
         Create an observer for the specified market.
 
         :param market: The market instance to observe.
         :return: An observer instance for the market.
         """
-        observer = MarketObserver()
+        
         if not self.market_already_exists(market):
+            observer = MarketObserver(json_path)
             self._market_list.append((market, observer))
+        else:
+            observer = self.get_observer(market)
         return observer

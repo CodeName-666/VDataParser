@@ -354,12 +354,14 @@ class DataManager(QObject, BaseData, metaclass=SingletonMeta):
         json_data.append(asdict(self.sellers))
         return json_data
 
-    def load(self, path_or_url: str) -> None:
+    def load(self, path_or_url: str) -> bool:
         """
         Load JSON data from a file or URL and parse it into data classes.
 
         Args:
             path_or_url (str): Path to the JSON file or URL.
         """
-        super().load(path_or_url)
-        self.data_loaded.emit(self)
+        ret = super().load(path_or_url)
+        if ret:
+            self.data_loaded.emit(self)
+        return ret

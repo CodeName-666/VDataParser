@@ -83,7 +83,7 @@ class MarketHandler(JsonHandler):
 
     def get_full_market_path(self):
         path = self.get_market_path()
-        return self.ensure_trailing_sep(path) + self.get_market()
+        return self.ensure_trailing_sep(path) + self.get_market_name()
 
 
     def set_market(self, market_path: str, market_name: str) -> None:

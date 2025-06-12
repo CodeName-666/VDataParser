@@ -96,6 +96,8 @@ class MainWindow(QMainWindow):
         Switches the currently displayed view in the stack to the PDF display view.
         """
         self.open_view("PdfDisplayView")
+
+
     @Slot()
     def open_local_market_export(self):
         """
@@ -115,14 +117,15 @@ class MainWindow(QMainWindow):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             market_loader_info = dialog.get_result()
             if market_loader_info["mode"] == "json":
-                self.market_facade.load_
+                ret = self.market_facade.load_local_market_porject(self.market_view,market_loader_info["path"])
             elif market_loader_info["mode"] == "mysql":
                 pass
             else:
                 #QMessageBox.critical(self, "Error", "Invalid market loader mode selected.")
                 return
             #self.market_view.set_data(market_data)
-            #self.open_view("Market")
+            if ret:
+                self.open_view("Market")
         else:
             QMessageBox.warning(self, "Warning", "No market data loaded. Please try again.")
 

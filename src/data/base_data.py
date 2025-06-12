@@ -57,8 +57,10 @@ class BaseData(JsonHandler, JSONData):
                       print(f"BASE_DATA LOGGING FAILED ({level}): {message} | Error: {e}", file=sys.stderr)
 
 
-    def _parse_json_data(self):
+    def _parse_json_data(self) -> bool:
         """ Parses the loaded self.json_data into the data class structure. """
+        
+        ret: bool = False
         self._log("INFO", "Parsing loaded JSON data into data classes...")
         json_data = self.get_data() # Already loaded by JsonHandler.__init__
 
@@ -68,7 +70,7 @@ class BaseData(JsonHandler, JSONData):
              # Initialize JSONData with defaults
              JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
                               settings=SettingDataClass(), main_numbers_list=[], sellers=SellerListDataClass())
-             return
+             return ret
 
         try:
             # Use .get() with default values for safe access
@@ -102,32 +104,35 @@ class BaseData(JsonHandler, JSONData):
             JSONData.__init__(self, export_header=_export_header, base_info=_base_info, settings = _settings,
                               main_numbers_list=_main_numbers, sellers=_sellers)
             self._log("INFO", "JSON data parsed successfully.")
-
+            ret = True
         except TypeError as e:
-             # Catch errors often related to unexpected data types in **kwargs
-             self._log("ERROR", f"Data structure error during parsing (likely unexpected data type): {e}")
-             JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
+            # Catch errors often related to unexpected data types in **kwargs
+            self._log("ERROR", f"Data structure error during parsing (likely unexpected data type): {e}")
+            JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
                               settings=SettingDataClass(), main_numbers_list=[], sellers=SellerListDataClass()) # Reset to defaults
+            ret = False
         except Exception as e:
-             self._log("ERROR", f"Unexpected error during JSON parsing: {e}")
-             # Reset to default state in case of partial parsing failure
-             JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
+            self._log("ERROR", f"Unexpected error during JSON parsing: {e}")
+            # Reset to default state in case of partial parsing failure
+            JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
                               settings=SettingDataClass(), main_numbers_list=[], sellers=SellerListDataClass())
+            ret = False
 
+        return ret
 
-    def reload_data(self, json_file_path: str) -> None:
+    def reload_data(self, json_file_path: str) -> bool:
         """ Explicitly reloads JSON data from the given path and reparses it. """
         self._log("INFO", f"Reloading data from {json_file_path}...")
         # Use the load method from JsonHandler (which also updates self.json_data)
         self.load(json_file_path)
         if self.json_data is not None:
-             self._parse_json_data() # Reparse the newly loaded data
+            return self._parse_json_data() # Reparse the newly loaded data
         else:
-             self._log("ERROR", "Reload failed: Could not load new JSON data.")
-             # Keep the old parsed data or reset? Resetting might be safer.
-             JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
+            self._log("ERROR", "Reload failed: Could not load new JSON data.")
+            # Keep the old parsed data or reset? Resetting might be safer.
+            JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
                                main_numbers_list=[], sellers=SellerListDataClass())
-
+            return False
 
     def get_seller_as_list(self) -> List[SellerDataClass]:
         """ Returns the list of seller data objects. """
@@ -167,16 +172,19 @@ class BaseData(JsonHandler, JSONData):
 
         # time.sleep(1) # Reduced sleep time
 
-    def load(self, path_or_url: str) -> None:
+    def load(self, path_or_url: str) -> bool:
         """
         Load JSON data from a file or URL and parse it into data classes.
 
         Args:
             path_or_url (str): Path to the JSON file or URL.
         """
+        ret: bool = False
         self._log("INFO", f"Loading JSON data from {path_or_url}...")
-        super().load(path_or_url)
-        self._parse_json_data()
+        ret = super().load(path_or_url)
+        if ret:
+           ret = self._parse_json_data()
+        return ret
 
 
 # --- END OF FILE base_data.py ---

@@ -71,7 +71,7 @@ class Market(BaseUi):
             return []
         return self.data_manager_ref.get_seller_as_list()
     
-    def get_main_numers(self):
+    def get_main_numbers(self):
         """
         Retrieves main numbers from the DataManager.
         Returns:
