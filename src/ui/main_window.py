@@ -27,7 +27,7 @@ class MainWindow(QMainWindow):
         self.stack = StackWidget() 
         self.main_menu = MainMenu(self.stack) 
         self.market_view = Market(self.stack)
-        self.pdf_display = PdfDisplay(self.stack)
+        #self.pdf_display = PdfDisplay(self.stack)
         self.output_window = OutputWindow()
         self.market_facade = MarketFacade()
 
@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)   
         self.stack.addWidget(self.main_menu)
         self.stack.addWidget(self.market_view)
-        self.stack.addWidget(self.pdf_display)
+        #self.stack.addWidget(self.pdf_display)
         
         # Das QStackedWidget als zentrales Widget setzen
         self.setCentralWidget(self.stack)
@@ -64,11 +64,12 @@ class MainWindow(QMainWindow):
         self.main_menu.on_open_export_button_clicked.connect(self.open_local_market_export)
         self.main_menu.on_open_market_button_clicked.connect(self.open_market_view)
 
-        self.pdf_display.exit_requested.connect(self.switch_to_last_view)
+        #self.pdf_display.exit_requested.connect(self.switch_to_last_view)
         
         self.ui.action_tool.triggered.connect(self.open_about_ui)
 
-        self.ui.actionCreate_PDF.triggered.connect(self.open_pdf_display)
+        #self.ui.actionCreate_PDF.triggered.connect(self.open_pdf_display)
+        self.ui.action_Export_Data.triggered.connect(self.open_local_market_export)
         #self.ui.action_open_export.triggered.connect(self.open_market_view)
         #self.ui.action_open_file.triggered.connect(self.open_file_dialog)
 

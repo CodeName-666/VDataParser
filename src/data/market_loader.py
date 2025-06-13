@@ -84,7 +84,10 @@ class MarketHandler(JsonHandler):
     def get_full_market_path(self):
         path = self.get_market_path()
         return self.ensure_trailing_sep(path) + self.get_market_name()
-
+    
+    def get_pdf_generation_data(self) -> Dict[str, Any]:
+        """Return the *default_pdf_generation_data* section as a shallow dict."""
+        return self.get_key_value(["default_pdf_generation_data"]) or {}
 
     def set_market(self, market_path: str, market_name: str) -> None:
         """Set the *market* subsection."""

@@ -319,8 +319,9 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
     # Define a signal for the exit button if needed externally
     exit_requested = Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, *, state: dict | None = None, json_path: str | None = None):
         super().__init__(parent)
+     
 
         self.ui = PdfDisplayUi()
         self.ui.setupUi(self)
@@ -346,6 +347,16 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
 
         # --- Connect Signals ---
         self.setup_connections()
+
+        self.setup_connections()
+
+        # Zustand sofort herstellen, falls übergeben
+        if state is not None:
+            self.import_state(state)
+        elif json_path:
+            with open(json_path, "r", encoding="utf-8") as f:
+                self.import_state(json.load(f))
+            
 
 
     def setup_connections(self):
@@ -598,43 +609,16 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
     @Slot()
     def save_state(self):
         """Saves the current state (PDF path, boxes) to a JSON file."""
+        
         if not self.pdfPath:
             QMessageBox.warning(self, "Speichern nicht möglich", "Keine PDF geladen.")
             return
-
-        data = {}
-        # Save relative path if possible, otherwise absolute
-        try:
-             # Check if PDF path is relative to current working directory
-             relative_path = os.path.relpath(self.pdfPath)
-             data["pdf_path"] = relative_path
-             print(f"Saving relative PDF path: {relative_path}")
-        except ValueError:
-             # Happens if paths are on different drives (Windows)
-             data["pdf_path"] = self.pdfPath # Fallback to absolute path
-             print(f"Saving absolute PDF path: {self.pdfPath}")
-
-        data["pdf_name"] = os.path.basename(self.pdfPath) # For reference
-
-        data["boxPairs"] = []
-        for pair in self.boxPairs:
-            box1_data = self._box_to_dict(pair.box1)
-            box2_data = self._box_to_dict(pair.box2)
-            pair_data = {"id": pair.id, "box1": box1_data, "box2": box2_data}
-            data["boxPairs"].append(pair_data)
-
-        data["singleBoxes"] = []
-        for single in self.singleBoxes:
-            single_data = self._box_to_dict(single)
-            # Add ID separately as it's managed by SingleBox directly
-            single_data["id"] = single.id
-            data["singleBoxes"].append(single_data)
-
-        # Get save file name
-        fileName, _ = QFileDialog.getSaveFileName(self, "Konfiguration speichern", "", "JSON Dateien (*.json)")
+        
+        fileName, _ = QFileDialog.getSaveFileName(self, "Konfiguration speichern", "", "JSON (*.json)")
         if fileName:
             try:
                 with open(fileName, "w") as f:
+                    data = self.export_state()
                     json.dump(data, f, indent=4)
                 print("Daten gespeichert.")
                 QMessageBox.information(self, "Erfolg", f"Konfiguration erfolgreich gespeichert:\n{fileName}")
@@ -662,110 +646,8 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
                 QMessageBox.critical(self, "Fehler", f"Ein unerwarteter Fehler ist aufgetreten:\n{e}")
                 return
 
-            # --- Load PDF ---
-            pdf_path_saved = data.get("pdf_path", "")
-            if not pdf_path_saved:
-                 QMessageBox.warning(self, "Warnung", "Kein PDF-Pfad in der Konfigurationsdatei gefunden.")
-                 # Optionally proceed without loading PDF or stop here
-                 # return
-
-            # Try to load PDF from saved path (could be relative or absolute)
-            pdf_path_to_load = pdf_path_saved
-            if not os.path.isabs(pdf_path_to_load):
-                 # If relative, assume it's relative to the JSON file's directory
-                 json_dir = os.path.dirname(fileName)
-                 pdf_path_to_load = os.path.join(json_dir, pdf_path_to_load)
-                 pdf_path_to_load = os.path.normpath(pdf_path_to_load) # Clean up path
-
-            if not os.path.exists(pdf_path_to_load):
-                 QMessageBox.warning(self, "Warnung", f"Die PDF-Datei konnte nicht gefunden werden:\n{pdf_path_to_load}\nBitte manuell laden.")
-                 self.pdfPath = ""
-                 self.setWindowTitle("PDF Editor")
-                 # Clear scene if needed, or leave old PDF
-                 if self.pdf_item: self.scene.removeItem(self.pdf_item)
-                 self.pdf_item = None
-                 self.scene.setSceneRect(QRectF()) # Reset scene rect
-            else:
-                status = self.pdfDocument.load(pdf_path_to_load)
-                if status != QPdfDocument.Error.None_:
-                    QMessageBox.critical(self, "Fehler", f"Fehler beim Laden der PDF aus Konfiguration:\n{pdf_path_to_load}\n{self.pdfDocument.errorString()}")
-                    self.pdfPath = ""
-                    self.setWindowTitle("PDF Editor")
-                else:
-                    self.pdfPath = pdf_path_to_load
-                    self.setWindowTitle(f"PDF Editor - {os.path.basename(self.pdfPath)}")
-                    self.load_page(0) # Display loaded PDF
-
-            # --- Clear existing boxes ---
-            self._clear_all_boxes()
-
-            # --- Load Boxes ---
-            max_pair_id = 0
-            try:
-                for pair_data in data.get("boxPairs", []):
-                    pair_id = pair_data.get("id", -1)
-                    box1_data = pair_data.get("box1")
-                    box2_data = pair_data.get("box2")
-                    if pair_id == -1 or not box1_data or not box2_data:
-                         print(f"Skipping invalid box pair data: {pair_data}")
-                         continue
-
-                    # Create pair - ID will be managed internally
-                    newPair = BoxPair(self.scene, QPointF(0,0)) # Temp pos
-                    # Restore state
-                    newPair.id = pair_id # Force ID from save file
-                    box1 = newPair.box1
-                    box2 = newPair.box2
-
-                    box1.setLabel(box1_data["label"])
-                    box1.setPos(QPointF(box1_data["x"], box1_data["y"]))
-                    box1.setRect(QRectF(0, 0, box1_data["width"], box1_data["height"]))
-
-                    box2.setLabel(box2_data["label"])
-                    box2.setPos(QPointF(box2_data["x"], box2_data["y"]))
-                    box2.setRect(QRectF(0, 0, box2_data["width"], box2_data["height"]))
-
-                    self.boxPairs.append(newPair)
-                    self._add_list_item(str(newPair), newPair)
-                    self._connect_box_signals(box1)
-                    self._connect_box_signals(box2)
-                    max_pair_id = max(max_pair_id, newPair.id)
-
-                max_single_id = 0
-                for single_data in data.get("singleBoxes", []):
-                    single_id = single_data.get("id", -1)
-                    if single_id == -1:
-                         print(f"Skipping invalid single box data: {single_data}")
-                         continue
-
-                    rect = QRectF(0, 0, single_data["width"], single_data["height"])
-                    # Create single box - ID will be managed internally
-                    newSingle = SingleBox(rect) # Temp rect
-                    # Restore state
-                    newSingle.id = single_id # Force ID
-                    newSingle.setLabel(single_data["label"])
-                    newSingle.setPos(QPointF(single_data["x"], single_data["y"]))
-                    newSingle.setRect(QRectF(0, 0, single_data["width"], single_data["height"]))
-
-                    self.scene.addItem(newSingle) # Add to scene
-                    self.singleBoxes.append(newSingle)
-                    self._add_list_item(str(newSingle), newSingle)
-                    self._connect_box_signals(newSingle)
-                    max_single_id = max(max_single_id, newSingle.id)
-
-                # Reset ID managers based on loaded data
-                BoxPair.manager.reset(max_pair_id)
-                SingleBox.manager.reset(max_single_id)
-                print("Daten geladen.")
-                QMessageBox.information(self, "Erfolg", f"Konfiguration erfolgreich geladen:\n{fileName}")
-
-            except KeyError as e:
-                 QMessageBox.critical(self, "Fehler", f"Fehler beim Lesen der Box-Daten (fehlender Schlüssel): {e}")
-                 self._clear_all_boxes() # Clear partially loaded state
-            except Exception as e: # Catch other potential errors during box creation/loading
-                 QMessageBox.critical(self, "Fehler", f"Fehler beim Verarbeiten der Box-Daten: {e}")
-                 self._clear_all_boxes()
-
+            self.import_state(data)
+   
 
     # --- UI Update Slots ---
     @Slot()
@@ -923,3 +805,102 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         else:
             # Allow base class or parent to handle other keys
             super().keyPressEvent(event)
+
+    # ---------------------------------------------------------------------
+    def export_state(self) -> dict:
+        """Öffentliche, side-effect-freie Methode (z.B. für Tests)."""
+        return self._state_to_dict()
+
+    def import_state(self, data: dict):
+        """Öffentliche Methode, die den GUI-Zustand setzt."""
+        self._apply_state_dict(data)
+
+
+    # --- State helpers ----------------------------------------------------
+    def _state_to_dict(self) -> dict:
+        """Sammelt den kompletten GUI-Zustand als verschachteltes dict."""
+        if not self.pdfPath:
+            raise RuntimeError("Es ist noch keine PDF geladen")
+
+        data = {
+            "pdf_path": self._make_pdf_path_relative(self.pdfPath),
+            "pdf_name": os.path.basename(self.pdfPath),
+            "boxPairs": [],
+            "singleBoxes": [],
+        }
+
+        # Box-Paare
+        for pair in self.boxPairs:
+            data["boxPairs"].append({
+                "id": pair.id,
+                "box1": self._box_to_dict(pair.box1),
+                "box2": self._box_to_dict(pair.box2),
+            })
+
+        # Einzelboxen
+        for single in self.singleBoxes:
+            d = self._box_to_dict(single)
+            d["id"] = single.id
+            data["singleBoxes"].append(d)
+        return data
+
+    def _apply_state_dict(self, data: dict, *, clear_existing: bool = True):
+        """Stellt den Zustand aus einem zuvor erzeugten dict wieder her."""
+        if clear_existing:
+            self._clear_all_boxes()
+
+        pdf_data = data.get("template_info",{})
+        # ---------- PDF ----------
+        if "pdf_path" in pdf_data:
+            self._load_pdf_from_path(pdf_data["pdf_path"])
+
+        box_data = data.get("coordinates", {})
+        # ---------- Box-Paare ----------
+        max_pair_id = 0
+        for p in box_data.get("boxPairs", []):
+            pair = BoxPair(self.scene, QPointF(0, 0))
+            pair.id = p["id"]
+            self._restore_box(pair.box1, p["box1"])
+            self._restore_box(pair.box2, p["box2"])
+            self.boxPairs.append(pair)
+            self._add_list_item(str(pair), pair)
+            max_pair_id = max(max_pair_id, pair.id)
+
+        # ---------- Einzelboxen ----------
+        max_single_id = 0
+        for s in data.get("singleBoxes", []):
+            rect = QRectF(0, 0, s["width"], s["height"])
+            single = SingleBox(rect)
+            single.id = s["id"]
+            self._restore_box(single, s)
+            self.scene.addItem(single)
+            self.singleBoxes.append(single)
+            self._add_list_item(str(single), single)
+            max_single_id = max(max_single_id, single.id)
+
+        # ID-Manager nachziehen
+        BoxPair.manager.reset(max_pair_id)
+        SingleBox.manager.reset(max_single_id)
+
+    def _make_pdf_path_relative(self, path: str) -> str:
+        try:
+            return os.path.relpath(path)
+        except ValueError:
+            return os.path.abspath(path)  # Fallback
+
+    def _restore_box(self, box: DraggableBox, d: dict):
+        box.setLabel(d["label"])
+        box.setPos(QPointF(d["x"], d["y"]))
+        box.setRect(QRectF(0, 0, d["width"], d["height"]))
+        self._connect_box_signals(box)
+
+    def _load_pdf_from_path(self, path: str):
+        if not os.path.isabs(path):
+            # relative zum Arbeitsverzeichnis der JSON (wird vom Aufrufer gesetzt)
+            path = os.path.normpath(path)
+        if self.pdfDocument.load(path) == QPdfDocument.Error.None_:
+            self.pdfPath = path
+            self.setWindowTitle(f"PDF Editor - {os.path.basename(path)}")
+            self.load_page(0)
+        else:
+            raise IOError(self.pdfDocument.errorString())

@@ -41,8 +41,8 @@ class UserInfo(BaseUi):
                 self.ui.listWidgetUsers.addItem(text)
         else:
             self.current_user_list = self.users_data
-            for user in self.current_user_list:
-                text = f"{user.get('vorname', '')} {user.get('nachname', '')}"
+            for idx, user in enumerate(self.current_user_list):
+                text = f"{idx+1}: {user.get('vorname', '')} {user.get('nachname', '')}"
                 self.ui.listWidgetUsers.addItem(text)
         if self.ui.listWidgetUsers.count() > 0:
             self.ui.listWidgetUsers.setCurrentRow(0)

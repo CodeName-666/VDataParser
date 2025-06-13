@@ -23,6 +23,7 @@ class MarketObserver:
         """
         self.market_handler.load(json_path)
         market_json_path = self.market_handler.get_full_market_path()
+
         return self.data_manager.load(market_json_path)
 
 
@@ -40,6 +41,14 @@ class MarketObserver:
     def get_data(self):
         return self.data_manager
     
+    def get_pdf_data(self) -> Dict[str, Any]:
+        """
+        Retrieve data for PDF generation.
+
+        :return: A dictionary containing data for PDF generation.
+        """
+        return self.market_handler.get_pdf_generation_data()
+
     def connect_signals(self, market) -> None:	
         self.data_manager.data_loaded.connect(market.set_data)
 
@@ -81,7 +90,11 @@ class MarketFacade(metaclass=SingletonMeta):
 
         new_observer = self.create_observer(market)
         new_observer.connect_signals(market)
-        return new_observer.load_local_market_project(json_path)
+        ret = new_observer.load_local_market_project(json_path)
+        if ret:
+            market.set_pdf_display_config(new_observer.get_pdf_data())
+           
+        return ret
         
 
     def load_local_market_export(self,market, json_path: str) -> None:

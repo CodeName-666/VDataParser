@@ -36,6 +36,9 @@ class Ui_Market(object):
         self.tab_2 = QWidget()
         self.tab_2.setObjectName(u"tab_2")
         self.tabWidget.addTab(self.tab_2, "")
+        self.tab_4 = QWidget()
+        self.tab_4.setObjectName(u"tab_4")
+        self.tabWidget.addTab(self.tab_4, "")
 
         self.verticalLayout.addWidget(self.tabWidget)
 
@@ -53,5 +56,6 @@ class Ui_Market(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("Market", u"Markt Einstellungen", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("Market", u"Benutzerinformationen", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("Market", u"Verkaufslisten", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QCoreApplication.translate("Market", u"Abholbestätigung", None))
     # retranslateUi
 

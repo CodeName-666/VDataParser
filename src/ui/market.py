@@ -1,10 +1,11 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel 
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, Signal
 from .base_ui import BaseUi
 from .generated import MarketUi
 from .market_settings import MarketSetting
 from .data_view import DataView
 from .user_info import UserInfo
+from .pdf_display import PdfDisplay
 from typing import Type, TypeVar
 from data import DataManager
 
@@ -25,11 +26,13 @@ class Market(BaseUi):
         self.data_view.setup_views()
         self.user_info.setup_views()
 
+
     def setup_ui(self):
         self.ui.setupUi(self)
         self.market_setting = self.add_widget(self.ui.tab, MarketSetting)
         self.data_view = self.add_widget(self.ui.tab_2, DataView)
         self.user_info = self.add_widget(self.ui.tab_3, UserInfo)
+        self.pdf_display = self.add_widget(self.ui.tab_4, PdfDisplay)
 
     def get_user_data(self):
         """
@@ -80,3 +83,12 @@ class Market(BaseUi):
         if not self.data_manager_ref:
             return {}
         return self.data_manager_ref.get_main_number_tables()
+    
+    def set_pdf_display_config(self, pdf_config: dict) -> None:
+        """
+        Sets the PDF display configuration in the PdfDisplay widget.
+        This method retrieves the PDF generation data from the DataManager
+        and updates the PdfDisplay widget accordingly.
+        """
+        self.pdf_display.import_state(pdf_config)
+            
