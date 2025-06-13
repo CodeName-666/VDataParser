@@ -114,42 +114,53 @@ class MarketHandler(JsonHandler):
         market_name = os.path.basename(full_path)
         self.set_market(market_path, market_name)
 
-    # --------------- PDF‑generation default getters -------------- #
-    def get_pdf_template_info(self) -> Dict[str, str]:
-        """Return ``default_pdf_generation_data.template_info``."""
-        return self.get_key_value(["default_pdf_generation_data", "template_info"]) or {}
+    # -------------------- pdf display configuration accessors ---------------------- #
+    def get_pdf_coordinates_config(self) -> Dict[str, str]:
+        """Return the *pfd_coordiantes_config* section as a shallow dict."""
+        return self.get_key_value(["pfd_coordiantes_config"]) or {}
 
-    def get_pdf_coordinates(self) -> Dict[str, Any]:
-        """Return ``default_pdf_generation_data.coordinates``."""
-        return self.get_key_value(["default_pdf_generation_data", "coordinates"]) or {}
+    def get_pdf_coordinates_config_path(self) -> str:
+        """Return the coordinates_config_path from the pfd_coordiantes_config section."""
+        return self.get_pdf_coordinates_config().get("coordinates_config_path", "")
 
-    # -------------------------- boxes ----------------------------- #
-    def add_box_pair(
-        self,
-        *,
-        box_id: int,
-        usr_label: str,
-        nr_label: str,
-        usr_box: Dict[str, Union[int, float]],
-        nr_box: Dict[str, Union[int, float]],
-    ) -> None:
-        """Append a *boxPairs* entry to the configuration."""
-        pair = {
-            "id": box_id,
-            "box1": {"label": usr_label, **usr_box},
-            "box2": {"label": nr_label, **nr_box},
-        }
-        pairs: list = self.get_key_value([
-            "default_pdf_generation_data",
-            "coordinates",
-            "boxPairs",
-        ]) or []
-        pairs.append(pair)
-        self.set_key_value([
-            "default_pdf_generation_data",
-            "coordinates",
-            "boxPairs",
-        ], pairs)
+    def get_pdf_coordinates_config_name(self) -> str:
+        """Return the coordinates_config_name from the pfd_coordiantes_config section."""
+        return self.get_pdf_coordinates_config().get("coordinates_config_name", "")
+
+    def get_full_pdf_coordinates_config_path(self) -> str:
+        """
+        Compute the full pdf coordinates configuration path by joining
+        the coordinates_config_path and coordinates_config_name.
+        """
+        path = self.get_pdf_coordinates_config_path()
+        name = self.get_pdf_coordinates_config_name()
+        return self.ensure_trailing_sep(path) + name
+
+    def set_pdf_coordinates_config(self, coordinates_config_path: str, coordinates_config_name: str) -> None:
+        """Set the entire pfd_coordiantes_config section."""
+        self.set_key_value(["pfd_coordiantes_config", "coordinates_config_path"], coordinates_config_path)
+        self.set_key_value(["pfd_coordiantes_config", "coordinates_config_name"], coordinates_config_name)
+
+    def set_pdf_coordinates_config_path(self, coordinates_config_path: str) -> None:
+        """Set only the coordinates_config_path key in the pfd_coordiantes_config section."""
+        self.set_key_value(["pfd_coordiantes_config", "coordinates_config_path"], coordinates_config_path)
+
+    def set_pdf_coordinates_config_name(self, coordinates_config_name: str) -> None:
+        """Set only the coordinates_config_name key in the pfd_coordiantes_config section."""
+        self.set_key_value(["pfd_coordiantes_config", "coordinates_config_name"], coordinates_config_name)
+
+    def set_full_pdf_coordinates_config_path(self, full_path: str) -> None:
+        """
+        Set the pfd_coordiantes_config section by parsing the provided full
+        configuration path. Splits the full path into a directory part
+        (coordinates_config_path) and a file name (coordinates_config_name)
+        using the host's OS conventions.
+        """
+        import os
+        config_path = os.path.dirname(full_path)
+        config_path = self.ensure_trailing_sep(config_path)
+        config_name = os.path.basename(full_path)
+        self.set_pdf_coordinates_config(config_path, config_name)
 
     # ------------------------- persistence ------------------------ #
     def save_to(self, destination: Union[str, Path]) -> None:

@@ -19,7 +19,7 @@ from  objects import (
 
 
 
-class DataManager(QObject, BaseData, metaclass=SingletonMeta):
+class DataManager(QObject, BaseData):
     """
     DataManager inherits from BaseData and extends its functionality by implementing additional aggregation logic.
 

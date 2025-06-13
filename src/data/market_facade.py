@@ -2,6 +2,7 @@
 from .data_manager import DataManager
 from .market_loader import MarketHandler
 from .singelton_meta import SingletonMeta
+from .pdf_display_config_loader import PdfDisplayConfigLoader
 from generator import FileGenerator
 from typing import List, Dict, Any, Union
 
@@ -11,7 +12,13 @@ class MarketObserver:
 
     def __init__(self, json_path: str = ""):
         self.market_handler = MarketHandler(json_path)
-        self.data_manager = DataManager()
+
+        market_path = self.market_handler.get_full_market_path()
+        self.data_manager = DataManager(market_path)
+
+        pdf_display_config = self.market_handler.get_full_pdf_coordinates_config_path()
+        self.pdf_display_config_loader = PdfDisplayConfigLoader(pdf_display_config)
+        
         self.file_generator = None
         
     
@@ -72,7 +79,7 @@ class MarketFacade(metaclass=SingletonMeta):
         self.market = self._market_list.append(market)
         self._market_list.append(MarketObserver(self.market))
 
-    def load_online_market(self,market, json_path: str) -> None:
+    def load_online_market(self, market, json_path: str) -> None:
         """
         Load a project from a JSON file.
 
