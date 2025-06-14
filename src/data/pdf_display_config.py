@@ -15,14 +15,14 @@ Dictionary‑Manipulation mehr.
 from __future__ import annotations
 
 import copy
-from PySide6.QtCore import QObject
+from PySide6.QtCore import QObject, Signal
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
         
 from json_handler import JsonHandler  # Basisklasse mit get_key_value / set_key_value
 
-__all__ = ["Box", "BoxPair", "PdfDisplayConfigLoader"]
+__all__ = ["Box", "BoxPair", "PdfDisplayConfig"]
 
 
 # -----------------------------------------------------------------------------
@@ -66,9 +66,12 @@ class BoxPair:
 # -----------------------------------------------------------------------------
 # Spezial‑Handler
 # -----------------------------------------------------------------------------
-class PdfDisplayConfigLoader(QObject, JsonHandler):
+class PdfDisplayConfig(QObject, JsonHandler):
     """Komfortabler Zugriff auf *pdf_display_config.json* via JsonHandler‑API."""
 
+
+    data_loaded = Signal(object)  # Signal to notify when data is loaded
+    
     _TEMPLATE: Dict[str, Any] = {
         "pdf_path": "",
         "pdf_name": "",
