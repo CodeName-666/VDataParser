@@ -11,7 +11,7 @@ from typing import List, Dict, Any, Union
 
 class MarketObserver:
 
-    def __init__(self, json_path: str = ""):
+    def __init__(self, market = None, json_path: str = ""):
         """
 
         Initialize the MarketObserver with a JSON path.
@@ -22,8 +22,7 @@ class MarketObserver:
         self.pdf_display_config_loader: PdfDisplayConfig = None
         self.file_generator: FileGenerator = None
         self.fm: FleatMarket = None
-        self.setup_observer(json_path)
-
+  
     def setup_observer(self, json_path: str) -> None:
         """
         Setup the data manager with the given JSON path.
@@ -80,7 +79,7 @@ class MarketObserver:
 
     def connect_signals(self, market) -> None:
         self.data_manager.data_loaded.connect(market.set_data)
-
+        self.pdf_display_config_loader.data_loaded.connect(market.set_pdf_display_config)
 
 class MarketFacade(metaclass=SingletonMeta):
     """
@@ -153,7 +152,7 @@ class MarketFacade(metaclass=SingletonMeta):
         """
 
         if not self.market_already_exists(market):
-            observer = MarketObserver(json_path)
+            observer = MarketObserver()
             self._market_list.append((market, observer))
         else:
             observer = self.get_observer(market)

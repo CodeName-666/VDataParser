@@ -8,6 +8,7 @@ from .user_info import UserInfo
 from .pdf_display import PdfDisplay
 from typing import Type, TypeVar
 from data import DataManager
+from data import PdfDisplayConfig
 
 
 
@@ -20,11 +21,21 @@ class Market(BaseUi):
         self.setup_ui()
 
     @Slot(DataManager)
-    def set_data(self, data_manager: DataManager):
+    def set_market_data(self, data_manager: DataManager):
         self.data_manager_ref = data_manager
         #self.market_setting.set_data(data_manager)
         self.data_view.setup_views()
         self.user_info.setup_views()
+
+
+    @Slot(PdfDisplayConfig)
+    def set_pdf_config(self, pdf_config: PdfDisplayConfig):
+        """
+        Sets the PDF display configuration in the PdfDisplay widget.
+        This method retrieves the PDF generation data from the DataManager
+        and updates the PdfDisplay widget accordingly.
+        """
+        self.pdf_display.import_state(pdf_config)
 
 
     def setup_ui(self):
@@ -83,12 +94,5 @@ class Market(BaseUi):
         if not self.data_manager_ref:
             return {}
         return self.data_manager_ref.get_main_number_tables()
-    
-    def set_pdf_display_config(self, pdf_config: dict) -> None:
-        """
-        Sets the PDF display configuration in the PdfDisplay widget.
-        This method retrieves the PDF generation data from the DataManager
-        and updates the PdfDisplay widget accordingly.
-        """
-        self.pdf_display.import_state(pdf_config)
+
             

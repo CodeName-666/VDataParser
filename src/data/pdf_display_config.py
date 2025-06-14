@@ -1,26 +1,12 @@
 from __future__ import annotations
 
-"""PdfDisplayConfigHandler – Refactor
-
-Diese Version verwendet **ausschließlich** die von ``JsonHandler`` bereit‑
-­gestellten Hilfsfunktionen
-
-* ``get_key_value(key_path: list[str])``
-* ``set_key_value(key_path: list[str], value)``
-
-für **sämtliche** Lese‑ und Schreibzugriffe – keinerlei direkte
-Dictionary‑Manipulation mehr.
-"""
-
-from __future__ import annotations
-
 import copy
 from PySide6.QtCore import QObject, Signal
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
         
-from json_handler import JsonHandler  # Basisklasse mit get_key_value / set_key_value
+from .json_handler import JsonHandler  # Basisklasse mit get_key_value / set_key_value
 
 __all__ = ["Box", "BoxPair", "PdfDisplayConfig"]
 
