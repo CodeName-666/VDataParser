@@ -157,3 +157,15 @@ class PdfDisplayConfigLoader(QObject, JsonHandler):
     @classmethod
     def _clone_template(cls) -> Dict[str, Any]:
         return copy.deepcopy(cls._TEMPLATE)
+
+    def load(self, path_or_url: str) -> bool:
+        """
+        Load JSON data from a file or URL and parse it into data classes.
+
+        Args:
+            path_or_url (str): Path to the JSON file or URL.
+        """
+        ret = super().load(path_or_url)
+        if ret:
+            self.data_loaded.emit(self)
+        return ret

@@ -1,10 +1,13 @@
 
+from PySide6.QtCore import QObject, Slot
 from .data_manager import DataManager
 from .market_loader import MarketHandler
 from .singelton_meta import SingletonMeta
 from .pdf_display_config_loader import PdfDisplayConfigLoader
 from generator import FileGenerator
+from objects import FleatMarket
 from typing import List, Dict, Any, Union
+
 
 
 
@@ -19,9 +22,14 @@ class MarketObserver:
         pdf_display_config = self.market_handler.get_full_pdf_coordinates_config_path()
         self.pdf_display_config_loader = PdfDisplayConfigLoader(pdf_display_config)
         
+        self.fm: FleatMarket = FleatMarket()
+        self.fm.load_sellers(self.data_manager.get_seller_as_list())
+        self.fm.load_main_numbers(self.data_manager.get_main_number_as_list())
         self.file_generator = None
         
-    
+
+
+
     def load_local_market_project(self, json_path: str) -> bool:
         """
         Load a local market project from a JSON file.
