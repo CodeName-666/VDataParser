@@ -82,9 +82,9 @@ class MarketObserver:
         return self.market_handler.get_pdf_generation_data()
 
     def connect_signals(self, market) -> None:
-        self.data_manager.data_loaded.connect(market.set_data)
-        self.pdf_display_config_loader.pdf_data_loaded.connect(
-            market.set_pdf_display_config)
+        self.data_manager.data_loaded.connect(market.set_market_data)
+        self.pdf_display_config_loader.data_loaded.connect(
+            market.set_pdf_config)
 
 
 class MarketFacade(metaclass=SingletonMeta):
@@ -112,7 +112,7 @@ class MarketFacade(metaclass=SingletonMeta):
         :param json_path: Path to the local JSON file.
         """
 
-        new_observer = self.create_observer(market)
+        new_observer = self.create_observer(market, json_path)
         ret = new_observer.load_local_market_project(json_path)
     
         return ret
