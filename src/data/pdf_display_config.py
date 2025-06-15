@@ -5,6 +5,7 @@ from PySide6.QtCore import QObject, Signal
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
+from objects import CoordinatesConfig  # Typ für Koordinaten
         
 from .json_handler import JsonHandler  # Basisklasse mit get_key_value / set_key_value
 
@@ -158,3 +159,45 @@ class PdfDisplayConfig(QObject, JsonHandler):
         if ret:
             self.data_loaded.emit(self)
         return ret
+    
+    def convert_json_to_coordinates(self, box_id: int) -> CoordinatesConfig:
+        """
+        Wandelt JSON-Koordinaten in ein CoordinatesConfig-Objekt um basierend auf der übergebenen box_id.
+
+        Es wird erwartet, dass json_data zwei Schlüssel besitzt:
+        - "pairboxes": Eine Liste von Boxen mit Struktur
+              { "id": int, "first": {"x": Wert, "y": Wert}, "second": {"x": Wert, "y": Wert} }
+          Der Eintrag mit id == box_id wird genutzt, um x1/y1 (erster Punkt) und x2/y2 (zweiter Punkt) zu belegen.
+        - "singleboxes": Eine Liste von Boxen mit Struktur
+              { "id": int, "x": Wert, "y": Wert }
+          Der Eintrag mit id == box_id wird genutzt, um x3/y3 zu belegen.
+        
+        Falls einzelne Werte fehlen, werden standardmäßig 0.0 bzw. font_size = 12 gesetzt.
+        """
+
+        # Verarbeitung der PairBox mit der übergebenen box_id
+        pairboxes = self.get_box_pairs()
+        pairbox = next((box for box in pairboxes if box.get("id") == box_id), {})
+        first_point = pairbox.get("first", {})
+        second_point = pairbox.get("second", {})
+        x1 = float(first_point.get("x", 0.0))
+        y1 = float(first_point.get("y", 0.0))
+        x2 = float(second_point.get("x", 0.0))
+        y2 = float(second_point.get("y", 0.0))
+        
+        # Verarbeitung der SingleBox mit der übergebenen box_id
+        singleboxes = self.get_single_boxes()
+        singlebox = next((box for box in singleboxes if box.get("id") == box_id), {})
+        x3 = float(singlebox.get("x", 0.0))
+        y3 = float(singlebox.get("y", 0.0))
+        
+        # Rückgabe des konfigurierten CoordinatesConfig-Objekts
+        return CoordinatesConfig(
+            x1=x1,
+            y1=y1,
+            x2=x2,
+            y2=y2,
+            x3=x3,
+            y3=y3,
+            font_size=12
+        )
