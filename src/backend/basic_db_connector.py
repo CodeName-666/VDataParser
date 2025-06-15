@@ -1,9 +1,8 @@
-from interface import (
+from .interface import (
     DatabaseConnectionError,
     DatabaseQueryError,
     DatabaseOperations
-    )
-import os
+)
 
 
 # (Code from the previous response: Imports, Exceptions, DatabaseOperations,
