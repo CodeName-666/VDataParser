@@ -10,13 +10,9 @@ from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor
 from PySide6.QtCore import Qt, QRectF, QPointF, Signal, Slot, QSize, QObject
 from PySide6.QtPdf import QPdfDocument
 
-# Importiere die konvertierte UI-Klasse (Annahme: Name und Pfad sind korrekt)
-# Falls PdfDisplayUi in derselben Datei wie PdfDisplay ist:
-# from <current_module> import PdfDisplayUi
-# Falls in einem Unterordner 'generated':
 from .generated import PdfDisplayUi
-# Importiere die Basisklasse (Annahme: Pfad ist korrekt)
 from .base_ui import BaseUi
+from data import PdfDisplayConfig
 
 # --- Konstanten ---
 BOX_BORDER_PEN = QPen(QColor("black"), 2)
@@ -811,9 +807,9 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         """Öffentliche, side-effect-freie Methode (z.B. für Tests)."""
         return self._state_to_dict()
 
-    def import_state(self, data: dict):
+    def import_state(self, config: PdfDisplayConfig):
         """Öffentliche Methode, die den GUI-Zustand setzt."""
-        self._apply_state_dict(data)
+        self._apply_state_dict(config)
 
 
     # --- State helpers ----------------------------------------------------
@@ -844,20 +840,20 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
             data["singleBoxes"].append(d)
         return data
 
-    def _apply_state_dict(self, data: dict, *, clear_existing: bool = True):
+    def _apply_state_dict(self, config: PdfDisplayConfig, clear_existing: bool = True):
         """Stellt den Zustand aus einem zuvor erzeugten dict wieder her."""
         if clear_existing:
             self._clear_all_boxes()
 
-        pdf_data = data.get("template_info",{})
+        
         # ---------- PDF ----------
-        if "pdf_path" in pdf_data:
-            self._load_pdf_from_path(pdf_data["pdf_path"])
+        if "pdf_path" in config:
+            self._load_pdf_from_path(config["pdf_path"])
 
-        box_data = data.get("coordinates", {})
+
         # ---------- Box-Paare ----------
         max_pair_id = 0
-        for p in box_data.get("boxPairs", []):
+        for p in config.get("boxPairs", []):
             pair = BoxPair(self.scene, QPointF(0, 0))
             pair.id = p["id"]
             self._restore_box(pair.box1, p["box1"])
@@ -868,7 +864,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
 
         # ---------- Einzelboxen ----------
         max_single_id = 0
-        for s in data.get("singleBoxes", []):
+        for s in config.get("singleBoxes", []):
             rect = QRectF(0, 0, s["width"], s["height"])
             single = SingleBox(rect)
             single.id = s["id"]

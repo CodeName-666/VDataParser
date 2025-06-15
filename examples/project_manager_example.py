@@ -1,5 +1,5 @@
 
-from src.data import MarketHandler
+from src.data import MarketConfigHandler
 
 
 # -------------------- minimal ad‑hoc test ------------------------ #
@@ -12,7 +12,7 @@ if __name__ == "__main__":
         "market": {"market_path": "/var/market", "market_name": "Test"},
     }
 
-    pm = MarketHandler(user_json)
+    pm = MarketConfigHandler(user_json)
     print("Database before:", pm.get_database())
     pm.set_database("https://newdb", "6000")
     print("Database after: ", pm.get_database())
