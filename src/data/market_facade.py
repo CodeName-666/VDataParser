@@ -11,33 +11,37 @@ from typing import List, Dict, Any, Union
 
 class MarketObserver:
 
-    def __init__(self, market = None, json_path: str = ""):
+    def __init__(self,market = None, json_path: str = ""):
         """
 
         Initialize the MarketObserver with a JSON path.
         :param json_path: Path to the JSON file.
         """
-        self.market_handler: MarketHandler = None
-        self.data_manager: DataManager = None
-        self.pdf_display_config_loader: PdfDisplayConfig = None
+        self.market_handler: MarketHandler = MarketHandler()
+        self.data_manager: DataManager = DataManager()
+        self.pdf_display_config_loader: PdfDisplayConfig = PdfDisplayConfig()
         self.file_generator: FileGenerator = None
         self.fm: FleatMarket = None
-  
-    def setup_observer(self, json_path: str) -> None:
+
+        if market is not None and json_path:
+            # If a market is provided, set up the observer with the market and JSON path
+            self.setup_observer(market, json_path)
+        
+
+    def setup_observer(self,market, json_path: str) -> None:
         """
         Setup the data manager with the given JSON path.
 
         :param json_path: Path to the JSON file.
         """
         if json_path:
-            self.market_handler = MarketHandler(json_path)
-
+            self.connect_signals(market)
             market_path = self.market_handler.get_full_market_path()
-            self.data_manager = DataManager(market_path)
+            self.data_manager.load(market_path)
 
             pdf_display_config = self.market_handler.get_full_pdf_coordinates_config_path()
-            self.pdf_display_config_loader = PdfDisplayConfig(
-                pdf_display_config)
+            self.pdf_display_config_loader.load(pdf_display_config)
+
 
             self.fm: FleatMarket = FleatMarket()
             self.fm.load_sellers(self.data_manager.get_seller_as_list())
@@ -79,7 +83,9 @@ class MarketObserver:
 
     def connect_signals(self, market) -> None:
         self.data_manager.data_loaded.connect(market.set_data)
-        self.pdf_display_config_loader.data_loaded.connect(market.set_pdf_display_config)
+        self.pdf_display_config_loader.pdf_data_loaded.connect(
+            market.set_pdf_display_config)
+
 
 class MarketFacade(metaclass=SingletonMeta):
     """
@@ -107,11 +113,8 @@ class MarketFacade(metaclass=SingletonMeta):
         """
 
         new_observer = self.create_observer(market)
-        new_observer.connect_signals(market)
         ret = new_observer.load_local_market_project(json_path)
-        if ret:
-            market.set_pdf_display_config(new_observer.get_pdf_data())
-
+    
         return ret
 
     def load_local_market_export(self, market, json_path: str) -> None:
@@ -121,7 +124,6 @@ class MarketFacade(metaclass=SingletonMeta):
         :param json_path: Path to the local JSON file.
         """
         new_observer = self.create_observer(market)
-        new_observer.connect_signals(market)
         new_observer.load_local_market_export(json_path)
 
     def market_already_exists(self, market) -> bool:
@@ -143,7 +145,7 @@ class MarketFacade(metaclass=SingletonMeta):
                 return observer
         return None
 
-    def create_observer(self, market, json_path="") -> MarketObserver:
+    def create_observer(self, market, json_path ="") -> MarketObserver:
         """
         Create an observer for the specified market.
 
@@ -153,6 +155,7 @@ class MarketFacade(metaclass=SingletonMeta):
 
         if not self.market_already_exists(market):
             observer = MarketObserver()
+            observer.setup_observer(market, json_path)
             self._market_list.append((market, observer))
         else:
             observer = self.get_observer(market)

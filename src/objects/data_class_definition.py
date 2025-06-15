@@ -3,6 +3,16 @@ from typing import List
 
 
 @dataclass
+class CoordinatesConfig:
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    x3: float
+    y3: float
+    font_size: int = 12
+
+@dataclass
 class ChangeLogEntry:
     id: str
     timestamp: str

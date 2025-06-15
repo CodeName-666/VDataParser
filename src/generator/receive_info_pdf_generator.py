@@ -5,31 +5,22 @@ from dataclasses import dataclass
 from typing import List, Optional, Sequence, Tuple, Protocol
 import io
 
-from log import CustomLogger  
+from log import CustomLogger
 
 from display import (
-    ProgressTrackerAbstraction as _TrackerBase,  
-    ConsoleProgressBar as _ConsoleBar,          
-    OutputInterfaceAbstraction,                 
+    ProgressTrackerAbstraction as _TrackerBase,
+    ConsoleProgressBar as _ConsoleBar,
+    OutputInterfaceAbstraction,
 )
 
-from pypdf import PdfReader, PdfWriter, PageObject  
-from reportlab.pdfgen import canvas 
-from reportlab.lib.pagesizes import letter, landscape 
-from reportlab.lib.units import mm  
-from reportlab.lib import colors  
+from pypdf import PdfReader, PdfWriter, PageObject
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.units import mm
+from reportlab.lib import colors
 from .data_generator import DataGenerator
+from objects import CoordinatesConfig
 from display import BasicProgressTracker as ProgressTracker
-
-@dataclass
-class CoordinatesConfig:
-    x1: float
-    y1: float
-    x2: float
-    y2: float
-    x3: float
-    y3: float
-    font_size: int = 12
 
 
 # ---------------------------------------------------------------------------
@@ -53,28 +44,32 @@ class _NoOpTracker:  # noqa: D101
 class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docstring
    # DEFAULT_COORDS = [
    #    CoordinatesConfig(20 * mm , 130 * mm, 80 * mm , 130 * mm, 140 * mm, 130 * mm),
-   #    CoordinatesConfig(160 * mm, 130 * mm, 220 * mm, 130 * mm, 280 * mm, 130 * mm),      
+   #    CoordinatesConfig(160 * mm, 130 * mm, 220 * mm, 130 * mm, 280 * mm, 130 * mm),
    #    CoordinatesConfig(20 * mm , 30 * mm , 80 * mm , 30 * mm , 140 * mm, 30 * mm),
    #    CoordinatesConfig(160 * mm, 30 * mm , 220 * mm, 30 * mm , 280 * mm, 30 * mm),
-   #    
-   #    
-   #] if mm else []  # empty if reportlab absent
+   #
+   #
+   # ] if mm else []  # empty if reportlab absent
 
     DEFAULT_COORDS = [
-       CoordinatesConfig(35 * mm , 173 * mm, 115 * mm , 173 * mm, 30 * mm, 150 * mm),
-       CoordinatesConfig(178 * mm, 173 * mm, 258 * mm , 173 * mm, 173 * mm, 150 * mm),      
-       CoordinatesConfig(35 * mm , 83 * mm , 115 * mm , 83 * mm , 30 * mm, 60 * mm),
-       CoordinatesConfig(178 * mm, 83 * mm , 258 * mm , 83 * mm , 173 * mm, 60 * mm),
-       
-       
-   ] if mm else []  # empty if reportlab absent
+        CoordinatesConfig(35 * mm, 173 * mm, 115 * mm,
+                          173 * mm, 30 * mm, 150 * mm),
+        CoordinatesConfig(178 * mm, 173 * mm, 258 * mm,
+                          173 * mm, 173 * mm, 150 * mm),
+        CoordinatesConfig(35 * mm, 83 * mm, 115 * mm,
+                          83 * mm, 30 * mm, 60 * mm),
+        CoordinatesConfig(178 * mm, 83 * mm, 258 * mm,
+                          83 * mm, 173 * mm, 60 * mm),
+
+
+    ] if mm else []  # empty if reportlab absent
 
     # ------------------------------------------------------------------
     def __init__(
-        self,fleat_market_data, *, path: str | Path = "", pdf_template: str | Path = "",
-        output_name: str | Path = "abholbestaetigung.pdf", coordinates: Optional[List[CoordinatesConfig]] = None,
-        logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None):
-        
+            self, fleat_market_data, *, path: str | Path = "", pdf_template: str | Path = "",
+            output_name: str | Path = "abholbestaetigung.pdf", coordinates: Optional[List[CoordinatesConfig]] = None,
+            logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None):
+
         opath = Path(output_name)
         super().__init__(path, opath.stem, logger, output_interface)
 
@@ -127,9 +122,9 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             return None  # reportlab missing
         packet = io.BytesIO()
         page_w, page_h = landscape(letter)
-        can = canvas.Canvas(packet, pagesize=(page_w, page_h)) 
+        can = canvas.Canvas(packet, pagesize=(page_w, page_h))
 
-        #can.rotate(90)
+        # can.rotate(90)
         can.setFillColor(colors.black)  # type: ignore[arg-type]
         for idx, (f1, f2, f3) in enumerate(rows):
             cfg = self._coords[idx]
@@ -137,7 +132,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             can.drawString(cfg.x1, cfg.y1, f1)
             can.drawString(cfg.x2, cfg.y2, f2)
             can.drawString(cfg.x3, cfg.y3, f3)
-            
+
         can.save()
         packet.seek(0)
         return PdfReader(packet).pages[0]  # type: ignore[return-value]
@@ -189,7 +184,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             return
 
         # 1. Progress helper -------------------------------------------------
-        #tracker = _NoOpTracker() if _TrackerBase is None else _TrackerBase()
+        # tracker = _NoOpTracker() if _TrackerBase is None else _TrackerBase()
         tracker = ProgressTracker()
         total_pages = (len(rows) + self._entries_per_page -
                        1) // self._entries_per_page
