@@ -803,7 +803,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
             super().keyPressEvent(event)
 
     # ---------------------------------------------------------------------
-    def export_state(self) -> dict:
+    def export_state(self) -> PdfDisplayConfig:
         """Öffentliche, side-effect-freie Methode (z.B. für Tests)."""
         return self._state_to_dict()
 
@@ -813,7 +813,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
 
 
     # --- State helpers ----------------------------------------------------
-    def _state_to_dict(self) -> dict:
+    def _state_to_dict(self) -> PdfDisplayConfig:
         """Sammelt den kompletten GUI-Zustand als verschachteltes dict."""
         if not self.pdfPath:
             raise RuntimeError("Es ist noch keine PDF geladen")
@@ -841,40 +841,40 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         return data
 
     def _apply_state_dict(self, config: PdfDisplayConfig, clear_existing: bool = True):
-        """Stellt den Zustand aus einem zuvor erzeugten dict wieder her."""
+        """Stellt den Zustand aus einem zuvor erzeugten PdfDisplayConfig wieder her,
+        unter Nutzung der Methoden von PdfDisplayConfig."""
         if clear_existing:
             self._clear_all_boxes()
 
-        
         # ---------- PDF ----------
-        if "pdf_path" in config:
-            self._load_pdf_from_path(config["pdf_path"])
-
+        if config.get_full_pdf_path():
+            self._load_pdf_from_path(config.get_full_pdf_path())
 
         # ---------- Box-Paare ----------
         max_pair_id = 0
-        for p in config.get("boxPairs", []):
+        for p in config.get_box_pairs():
             pair = BoxPair(self.scene, QPointF(0, 0))
-            pair.id = p["id"]
-            self._restore_box(pair.box1, p["box1"])
-            self._restore_box(pair.box2, p["box2"])
+            pair.id = p.id
+            # Wiederherstellung der beiden Boxes aus den Dataclass-Dictionaries
+            self._restore_box(pair.box1, p.box1.to_dict())
+            self._restore_box(pair.box2, p.box2.to_dict())
             self.boxPairs.append(pair)
             self._add_list_item(str(pair), pair)
             max_pair_id = max(max_pair_id, pair.id)
 
         # ---------- Einzelboxen ----------
         max_single_id = 0
-        for s in config.get("singleBoxes", []):
-            rect = QRectF(0, 0, s["width"], s["height"])
+        for s in config.get_single_boxes():
+            rect = QRectF(0, 0, s.width, s.height)
             single = SingleBox(rect)
-            single.id = s["id"]
-            self._restore_box(single, s)
+            single.id = s.id
+            self._restore_box(single, s.to_dict())
             self.scene.addItem(single)
             self.singleBoxes.append(single)
             self._add_list_item(str(single), single)
             max_single_id = max(max_single_id, single.id)
 
-        # ID-Manager nachziehen
+        # Update der ID-Manager
         BoxPair.manager.reset(max_pair_id)
         SingleBox.manager.reset(max_single_id)
 

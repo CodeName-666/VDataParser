@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import os
 from PySide6.QtCore import QObject, Signal
 from dataclasses import dataclass, asdict
 from pathlib import Path
@@ -80,23 +81,55 @@ class PdfDisplayConfig(QObject, JsonHandler):
     # ------------------------------------------------------------------
     # Metadaten (pdf_path / pdf_name)
     # ------------------------------------------------------------------
-    @property
-    def pdf_path(self) -> str:
+    def get_pdf_path(self) -> str:
         return str(self.get_key_value(["pdf_path"]) or "")
 
-    @pdf_path.setter
-    def pdf_path(self, value: str) -> None:
+    
+    def set_pdf_path(self, value: str) -> None:
         self.set_key_value(["pdf_path"], str(value))
         if value and not self.get_key_value(["pdf_name"]):
             self.set_key_value(["pdf_name"], Path(value).name)
 
-    @property
-    def pdf_name(self) -> str:
+    
+    def get_pdf_name(self) -> str:
         return str(self.get_key_value(["pdf_name"]) or "")
 
-    @pdf_name.setter
-    def pdf_name(self, value: str) -> None:
+    
+    def set_pdf_name(self, value: str) -> None:
         self.set_key_value(["pdf_name"], str(value))
+
+    def get_full_pdf_path(self) -> str:
+        """Gibt den vollständigen Pfad zur PDF zurück, bestehend aus dem PDF-Pfad und -Namen."""
+        path = self.get_pdf_path()
+        return self.ensure_trailing_sep(path) + self.get_pdf_name()
+
+    @staticmethod
+    def ensure_trailing_sep(path: str) -> str:  # noqa: D401
+        """Ensure *path* ends with the host‑OS separator (``os.sep``).
+
+        * If the string is empty → returned unchanged.
+        * If it already ends with *any* separator, the trailing component is
+          normalised to ``os.sep`` so that callers always get a consistent
+          result, independent of the separator style they passed in.
+
+        Examples
+        --------
+        >>> ProjectManager.ensure_trailing_sep("/var/data")
+        '/var/data/'  # on POSIX
+        >>> ProjectManager.ensure_trailing_sep(r"C:\\logs")
+        'C:\\logs\\'  # on Windows
+        """
+        if not path:
+            return path
+
+        # already ends with a separator – replace if necessary
+        if path.endswith(("/", "\\")):
+            if path.endswith(os.sep):
+                return path
+            return path[:-1] + os.sep  # swap the last char
+
+        # append the host‑separator
+        return path + os.sep
 
     # ------------------------------------------------------------------
     # BoxPairs ---------------------------------------------------------
