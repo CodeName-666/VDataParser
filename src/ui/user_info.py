@@ -5,11 +5,13 @@ class UserInfo(BaseUi):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = UserInfoUi()
+        self.market = None  # Zugriff auf das MarketWidget
         self.ui.setupUi(self)
         self.setup_signals()
 
-    def setup_views(self):
+    def setup_views(self, market_widget):
         """Setzt den DataManager und initialisiert die Anzeige."""
+        self.market = market_widget
         self.users_data = self.market_widget().get_user_data()
         self.aggregated_users_data = self.market_widget().get_aggregated_user_data()
 
@@ -22,7 +24,7 @@ class UserInfo(BaseUi):
 
 
     def market_widget(self):
-        return self.parent().parent().parent().parent()
+        return self.market
 
     def setup_signals(self):
         """Verbindet die UI-Signale mit den entsprechenden Methoden."""

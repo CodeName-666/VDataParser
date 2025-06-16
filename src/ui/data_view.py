@@ -20,11 +20,14 @@ class DataView(BaseUi):
         super().__init__(parent)
         self.ui = DataViewUi()
         # Aufbau der UI (erstellt alle Widgets und Layouts)
+        self.market = None  # Zugriff auf das MarketWidget
         self.ui.setupUi(self)
         
+        
       
-    def setup_views(self):
+    def setup_views(self, market_widget):
         """Initialisiert die Ansichten (Baum- und Listenansicht)."""
+        self.market = market_widget
         self.listUsers = QListWidget()
         self.setup_connections()
         self.populate_user_tree()
@@ -58,7 +61,7 @@ class DataView(BaseUi):
             self.ui.treeUsers.addTopLevelItem(user_item)
 
     def market_widget(self):
-        return self.parent().parent().parent().parent()
+        return self.market
 
     def populate_user_list(self):
         """

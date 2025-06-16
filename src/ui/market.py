@@ -23,9 +23,9 @@ class Market(BaseUi):
     @Slot(DataManager)
     def set_market_data(self, data_manager: DataManager):
         self.data_manager_ref = data_manager
-        #self.market_setting.set_data(data_manager)
-        self.data_view.setup_views()
-        self.user_info.setup_views()
+        self.market_setting.setup_views(self)
+        self.data_view.setup_views(self)
+        self.user_info.setup_views(self)
 
 
     @Slot(PdfDisplayConfig)

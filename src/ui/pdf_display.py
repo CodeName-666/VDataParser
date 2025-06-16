@@ -344,8 +344,6 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         # --- Connect Signals ---
         self.setup_connections()
 
-        self.setup_connections()
-
         # Zustand sofort herstellen, falls übergeben
         if state is not None:
             self.import_state(state)
@@ -613,9 +611,10 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         fileName, _ = QFileDialog.getSaveFileName(self, "Konfiguration speichern", "", "JSON (*.json)")
         if fileName:
             try:
-                with open(fileName, "w") as f:
-                    data = self.export_state()
-                    json.dump(data, f, indent=4)
+                
+                pdf_display_config = self.export_state()
+                pdf_display_config.save(fileName)
+                
                 print("Daten gespeichert.")
                 QMessageBox.information(self, "Erfolg", f"Konfiguration erfolgreich gespeichert:\n{fileName}")
             except IOError as e:
@@ -814,31 +813,34 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
 
     # --- State helpers ----------------------------------------------------
     def _state_to_dict(self) -> PdfDisplayConfig:
-        """Sammelt den kompletten GUI-Zustand als verschachteltes dict."""
+        """Sammelt den kompletten GUI-Zustand als PdfDisplayConfig mittels der Config-Methoden."""
         if not self.pdfPath:
             raise RuntimeError("Es ist noch keine PDF geladen")
 
-        data = {
-            "pdf_path": self._make_pdf_path_relative(self.pdfPath),
-            "pdf_name": os.path.basename(self.pdfPath),
-            "boxPairs": [],
-            "singleBoxes": [],
-        }
+        config = PdfDisplayConfig()
+        # Setze Metadaten via die setter-Methoden der Config
+        config.set_pdf_path(self._make_pdf_path_relative(self.pdfPath))
+        config.set_pdf_name(os.path.basename(self.pdfPath))
 
-        # Box-Paare
+        # Box-Paare hinzufügen
+        box_pairs = []
         for pair in self.boxPairs:
-            data["boxPairs"].append({
+            box_pairs.append({
                 "id": pair.id,
                 "box1": self._box_to_dict(pair.box1),
                 "box2": self._box_to_dict(pair.box2),
             })
+        config.set_key_value(["boxPairs"], box_pairs)
 
-        # Einzelboxen
+        # Einzelboxen hinzufügen
+        single_boxes = []
         for single in self.singleBoxes:
             d = self._box_to_dict(single)
             d["id"] = single.id
-            data["singleBoxes"].append(d)
-        return data
+            single_boxes.append(d)
+        config.set_key_value(["singleBoxes"], single_boxes)
+
+        return config
 
     def _apply_state_dict(self, config: PdfDisplayConfig, clear_existing: bool = True):
         """Stellt den Zustand aus einem zuvor erzeugten PdfDisplayConfig wieder her,
