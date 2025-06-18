@@ -76,8 +76,8 @@ class MarketObserver:
 
     def connect_signals(self, market) -> None:
         self.data_manager.data_loaded.connect(market.set_market_data)
-        self.pdf_display_config_loader.data_loaded.connect(
-            market.set_pdf_config)
+        self.pdf_display_config_loader.data_loaded.connect(market.set_pdf_config)
+        self.market_config_handler.default_signal_loaded.connect(market.set_default_settings)
 
 
 class MarketFacade(metaclass=SingletonMeta):

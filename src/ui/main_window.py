@@ -44,8 +44,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)   
         self.stack.addWidget(self.main_menu)
         self.stack.addWidget(self.market_view)
-        #self.stack.addWidget(self.pdf_display)
-        
+
         # Das QStackedWidget als zentrales Widget setzen
         self.setCentralWidget(self.stack)
 
@@ -63,8 +62,6 @@ class MainWindow(QMainWindow):
         self.main_menu.on_exit_button_clicked.connect(self.close)
         self.main_menu.on_open_export_button_clicked.connect(self.open_local_market_export)
         self.main_menu.on_open_market_button_clicked.connect(self.open_market_view)
-
-        #self.pdf_display.exit_requested.connect(self.switch_to_last_view)
         
         self.ui.action_tool.triggered.connect(self.open_about_ui)
 

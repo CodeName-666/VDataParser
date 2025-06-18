@@ -144,6 +144,9 @@ class BaseData(JsonHandler, JSONData):
         # Ensure main_numbers_list attribute exists
         return getattr(self, 'main_numbers_list', [])
 
+    def get_settings(self):
+        return getattr(self, 'settings', SettingDataClass()).data[0]
+
     def verify_data(self):
         """ Performs a basic check comparing the number of sellers and main number lists. """
         self._log("INFO", "Prüfe Datenbank:")

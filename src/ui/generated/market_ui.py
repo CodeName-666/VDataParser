@@ -45,7 +45,7 @@ class Ui_Market(object):
 
         self.retranslateUi(Market)
 
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(3)
 
 
         QMetaObject.connectSlotsByName(Market)
@@ -56,6 +56,6 @@ class Ui_Market(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("Market", u"Markt Einstellungen", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("Market", u"Benutzerinformationen", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("Market", u"Verkaufslisten", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QCoreApplication.translate("Market", u"Abholbestätigung", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QCoreApplication.translate("Market", u"Abholbest\u00e4tigung", None))
     # retranslateUi
 

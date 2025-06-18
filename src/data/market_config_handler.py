@@ -1,5 +1,7 @@
 import copy
 import os
+from PySide6.QtCore import QObject, Signal
+
 from pathlib import Path
 from typing import Any, Dict, TYPE_CHECKING, Union
 
@@ -8,9 +10,9 @@ from .data_manager import DataManager
 from log import CustomLogger  # noqa: F401
 
 
-class MarketConfigHandler(JsonHandler):
+class MarketConfigHandler(QObject, JsonHandler):
     """Manage one project‑configuration JSON and expose convenience helpers."""
-
+    default_signal_loaded = Signal(object)  # Signal to notify when the default configuration is loaded
     # --------------------------- defaults --------------------------- #
     _DEFAULT_STRUCTURE: Dict[str, Any] = {
         "database": {"url": "", "port": ""},
@@ -33,7 +35,8 @@ class MarketConfigHandler(JsonHandler):
           build the config programmatically.
         * ``logger`` optional :class:`log.CustomLogger` instance.
         """
-        super().__init__(json_path_or_data or copy.deepcopy(
+        QObject.__init__(self)
+        JsonHandler.__init__(self, json_path_or_data or copy.deepcopy(
             self._DEFAULT_STRUCTURE), logger=logger)
         self._merge_defaults()
        
@@ -162,6 +165,10 @@ class MarketConfigHandler(JsonHandler):
         config_name = os.path.basename(full_path)
         self.set_pdf_coordinates_config(config_path, config_name)
 
+    def get_default_settings(self) -> Dict[str, Any]:
+        """Return the *default_pdf_generation_data* section as a shallow dict."""
+        return self.get_key_value(["dafault_settings"]) or {}
+
     # ------------------------- persistence ------------------------ #
     def save_to(self, destination: Union[str, Path]) -> None:
         """Persist current config to *destination*."""
@@ -200,3 +207,7 @@ class MarketConfigHandler(JsonHandler):
         self.reload_data(json_path)
 
 
+    def load(self, path_or_url):
+        ret = super().load(path_or_url)
+        if ret: 
+            self.default_signal_loaded.emit(self.get_default_settings())

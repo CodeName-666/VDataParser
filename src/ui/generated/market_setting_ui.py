@@ -15,21 +15,22 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QDateTimeEdit, QDialog,
-    QFormLayout, QGroupBox, QHBoxLayout, QLabel,
-    QLineEdit, QPushButton, QRadioButton, QSizePolicy,
-    QSpacerItem, QSpinBox, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QDateEdit, QDateTimeEdit,
+    QDialog, QFormLayout, QGroupBox, QHBoxLayout,
+    QLabel, QLineEdit, QPushButton, QRadioButton,
+    QSizePolicy, QSpacerItem, QSpinBox, QVBoxLayout,
+    QWidget)
 
 class Ui_MarketConfigDialog(object):
     def setupUi(self, MarketConfigDialog):
         if not MarketConfigDialog.objectName():
             MarketConfigDialog.setObjectName(u"MarketConfigDialog")
-        MarketConfigDialog.resize(450, 500)
+        MarketConfigDialog.resize(666, 500)
         self.verticalLayout = QVBoxLayout(MarketConfigDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.titleLabel = QLabel(MarketConfigDialog)
         self.titleLabel.setObjectName(u"titleLabel")
-        self.titleLabel.setAlignment(Qt.AlignCenter)
+        self.titleLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.verticalLayout.addWidget(self.titleLabel)
 
@@ -37,16 +38,16 @@ class Ui_MarketConfigDialog(object):
         self.modeGroupBox.setObjectName(u"modeGroupBox")
         self.horizontalLayout_mode = QHBoxLayout(self.modeGroupBox)
         self.horizontalLayout_mode.setObjectName(u"horizontalLayout_mode")
-        self.radioEdit = QRadioButton(self.modeGroupBox)
-        self.radioEdit.setObjectName(u"radioEdit")
+        self.radioActiveFlohmarkt = QRadioButton(self.modeGroupBox)
+        self.radioActiveFlohmarkt.setObjectName(u"radioActiveFlohmarkt")
 
-        self.horizontalLayout_mode.addWidget(self.radioEdit)
+        self.horizontalLayout_mode.addWidget(self.radioActiveFlohmarkt)
 
-        self.radioNew = QRadioButton(self.modeGroupBox)
-        self.radioNew.setObjectName(u"radioNew")
-        self.radioNew.setChecked(True)
+        self.radioDisbaledFlohmarkt = QRadioButton(self.modeGroupBox)
+        self.radioDisbaledFlohmarkt.setObjectName(u"radioDisbaledFlohmarkt")
+        self.radioDisbaledFlohmarkt.setChecked(True)
 
-        self.horizontalLayout_mode.addWidget(self.radioNew)
+        self.horizontalLayout_mode.addWidget(self.radioDisbaledFlohmarkt)
 
 
         self.verticalLayout.addWidget(self.modeGroupBox)
@@ -84,21 +85,17 @@ class Ui_MarketConfigDialog(object):
 
         self.formLayout.setWidget(2, QFormLayout.LabelRole, self.labelFlohmarktDatum)
 
-        self.dateTimeEditFlohmarkt = QDateTimeEdit(MarketConfigDialog)
-        self.dateTimeEditFlohmarkt.setObjectName(u"dateTimeEditFlohmarkt")
-        self.dateTimeEditFlohmarkt.setDateTime(QDateTime(QDate(0, 0, 0), QTime(0, 0, 0)))
+        self.dateTimeEditFlohmarktCountDown = QDateTimeEdit(MarketConfigDialog)
+        self.dateTimeEditFlohmarktCountDown.setObjectName(u"dateTimeEditFlohmarktCountDown")
+        self.dateTimeEditFlohmarktCountDown.setDateTime(QDateTime(QDate(2000, 1, 1), QTime(0, 0, 0)))
+        self.dateTimeEditFlohmarktCountDown.setCalendarPopup(True)
 
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.dateTimeEditFlohmarkt)
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.dateTimeEditFlohmarktCountDown)
 
         self.labelFlohmarkt = QLabel(MarketConfigDialog)
         self.labelFlohmarkt.setObjectName(u"labelFlohmarkt")
 
         self.formLayout.setWidget(3, QFormLayout.LabelRole, self.labelFlohmarkt)
-
-        self.lineEditFlohmarkt = QLineEdit(MarketConfigDialog)
-        self.lineEditFlohmarkt.setObjectName(u"lineEditFlohmarkt")
-
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.lineEditFlohmarkt)
 
         self.labelFlohmarktNummer = QLabel(MarketConfigDialog)
         self.labelFlohmarktNummer.setObjectName(u"labelFlohmarktNummer")
@@ -165,6 +162,12 @@ class Ui_MarketConfigDialog(object):
 
         self.formLayout.setWidget(9, QFormLayout.SpanningRole, self.checkBoxLoginDisable)
 
+        self.dateTimeEditFlohmarkt = QDateEdit(MarketConfigDialog)
+        self.dateTimeEditFlohmarkt.setObjectName(u"dateTimeEditFlohmarkt")
+        self.dateTimeEditFlohmarkt.setCalendarPopup(True)
+
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.dateTimeEditFlohmarkt)
+
 
         self.verticalLayout.addLayout(self.formLayout)
 
@@ -197,14 +200,13 @@ class Ui_MarketConfigDialog(object):
         MarketConfigDialog.setWindowTitle(QCoreApplication.translate("MarketConfigDialog", u"Markt-Konfiguration", None))
         self.titleLabel.setText(QCoreApplication.translate("MarketConfigDialog", u"<h2>Markt-Konfiguration</h2>", None))
         self.modeGroupBox.setTitle(QCoreApplication.translate("MarketConfigDialog", u"Modus", None))
-        self.radioEdit.setText(QCoreApplication.translate("MarketConfigDialog", u"Verkaufsmarkt anpassen", None))
-        self.radioNew.setText(QCoreApplication.translate("MarketConfigDialog", u"Neuen Verkaufsmarkt erstellen", None))
+        self.radioActiveFlohmarkt.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt Aktivieren", None))
+        self.radioDisbaledFlohmarkt.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt Deaktivieren", None))
         self.labelMaxStammnummer.setText(QCoreApplication.translate("MarketConfigDialog", u"Max. Stammnummern:", None))
         self.labelMaxArtikel.setText(QCoreApplication.translate("MarketConfigDialog", u"Max. Artikel:", None))
-        self.labelFlohmarktDatum.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt Datum:", None))
-        self.dateTimeEditFlohmarkt.setDisplayFormat(QCoreApplication.translate("MarketConfigDialog", u"yyyy-MM-dd HH:mm:ss", None))
-        self.labelFlohmarkt.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt:", None))
-        self.lineEditFlohmarkt.setText(QCoreApplication.translate("MarketConfigDialog", u"Sept. 24", None))
+        self.labelFlohmarktDatum.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt CountDown", None))
+        self.dateTimeEditFlohmarktCountDown.setDisplayFormat(QCoreApplication.translate("MarketConfigDialog", u"yyyy-MM-dd HH:mm:ss", None))
+        self.labelFlohmarkt.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt Start:", None))
         self.labelFlohmarktNummer.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt Nummer:", None))
         self.labelPwLength.setText(QCoreApplication.translate("MarketConfigDialog", u"Passwortl\u00e4nge:", None))
         self.labelTabellePrefix.setText(QCoreApplication.translate("MarketConfigDialog", u"Tabellen-Prefix:", None))

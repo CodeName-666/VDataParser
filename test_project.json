@@ -1,18 +1,28 @@
-{   
-    "database": {
-        "url": "",
-        "port": ""
-    },
+{
+  "database": {
+    "url": "",
+    "port": ""
+  },
 
-    "market": 
-    {
-        "market_path": "C:\\Users\\NoName\\Downloads",
-        "market_name":"test.json"
-    },
+  "market": {
+    "market_path": "C:\\Users\\NoName\\Downloads",
+    "market_name": "test.json"
+  },
 
-    "pfd_coordiantes_config": {
-        "coordinates_config_path": "D:\\Projekte\\Python\\FlohmarktManager",
-        "coordinates_config_name": "pdf_display_config.json"
-    }
-  
+  "pfd_coordiantes_config": {
+    "coordinates_config_path": "D:\\Projekte\\Python\\FlohmarktManager",
+    "coordinates_config_name": "pdf_display_config.json"
+  },
+
+  "dafault_settings": {
+    "max_stammnummern": "250",
+    "max_artikel": "40",
+    "datum_counter": "2025-09-15 12:00:00",
+    "flohmarkt_nr": "6",
+    "psw_laenge": "10",
+    "tabellen_prefix": "str",
+    "verkaufer_liste": "verkeaufer",
+    "max_user_ids": "8",
+    "datum_flohmarkt": "2025-09-15"
+  }
 }

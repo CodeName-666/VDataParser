@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>450</width>
+    <width>666</width>
     <height>500</height>
    </rect>
   </property>
@@ -14,18 +14,16 @@
    <string>Markt-Konfiguration</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <!-- Überschrift -->
    <item>
     <widget class="QLabel" name="titleLabel">
      <property name="text">
-      <string><![CDATA[<h2>Markt-Konfiguration</h2>]]></string>
+      <string>&lt;h2&gt;Markt-Konfiguration&lt;/h2&gt;</string>
      </property>
      <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
     </widget>
    </item>
-   <!-- Modus-Auswahl -->
    <item>
     <widget class="QGroupBox" name="modeGroupBox">
      <property name="title">
@@ -33,16 +31,16 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_mode">
       <item>
-       <widget class="QRadioButton" name="radioEdit">
+       <widget class="QRadioButton" name="radioActiveFlohmarkt">
         <property name="text">
-         <string>Verkaufsmarkt anpassen</string>
+         <string>Flohmarkt Aktivieren</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="radioNew">
+       <widget class="QRadioButton" name="radioDisbaledFlohmarkt">
         <property name="text">
-         <string>Neuen Verkaufsmarkt erstellen</string>
+         <string>Flohmarkt Deaktivieren</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -52,10 +50,8 @@
      </layout>
     </widget>
    </item>
-   <!-- Formular für die Parameter -->
    <item>
     <layout class="QFormLayout" name="formLayout">
-     <!-- MAX_STAMMNUMMERN -->
      <item row="0" column="0">
       <widget class="QLabel" name="labelMaxStammnummer">
        <property name="text">
@@ -76,7 +72,6 @@
        </property>
       </widget>
      </item>
-     <!-- MAX_ARTIKEL -->
      <item row="1" column="0">
       <widget class="QLabel" name="labelMaxArtikel">
        <property name="text">
@@ -97,41 +92,40 @@
        </property>
       </widget>
      </item>
-     <!-- FLOHMARKT_DATUM -->
      <item row="2" column="0">
       <widget class="QLabel" name="labelFlohmarktDatum">
        <property name="text">
-        <string>Flohmarkt Datum:</string>
+        <string>Flohmarkt CountDown</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QDateTimeEdit" name="dateTimeEditFlohmarkt">
+      <widget class="QDateTimeEdit" name="dateTimeEditFlohmarktCountDown">
+       <property name="dateTime">
+        <datetime>
+         <hour>0</hour>
+         <minute>0</minute>
+         <second>0</second>
+         <year>2000</year>
+         <month>1</month>
+         <day>1</day>
+        </datetime>
+       </property>
        <property name="displayFormat">
         <string>yyyy-MM-dd HH:mm:ss</string>
        </property>
-       <!-- Setze das Standard-Datum auf 2025-03-15 12:00:00 -->
-       <property name="dateTime">
-        <dateTime>2025-03-15T12:00:00</dateTime>
+       <property name="calendarPopup">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
-     <!-- FLOHMARKT -->
      <item row="3" column="0">
       <widget class="QLabel" name="labelFlohmarkt">
        <property name="text">
-        <string>Flohmarkt:</string>
+        <string>Flohmarkt Start:</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="lineEditFlohmarkt">
-       <property name="text">
-        <string>Sept. 24</string>
-       </property>
-      </widget>
-     </item>
-     <!-- FLOHMARKTNUMMER -->
      <item row="4" column="0">
       <widget class="QLabel" name="labelFlohmarktNummer">
        <property name="text">
@@ -152,7 +146,6 @@
        </property>
       </widget>
      </item>
-     <!-- PW_LENGTH -->
      <item row="5" column="0">
       <widget class="QLabel" name="labelPwLength">
        <property name="text">
@@ -173,7 +166,6 @@
        </property>
       </widget>
      </item>
-     <!-- TABELLE_PREFIX -->
      <item row="6" column="0">
       <widget class="QLabel" name="labelTabellePrefix">
        <property name="text">
@@ -188,7 +180,6 @@
        </property>
       </widget>
      </item>
-     <!-- TABELLE_VERKAEUFER -->
      <item row="7" column="0">
       <widget class="QLabel" name="labelTabelleVerkaeufer">
        <property name="text">
@@ -203,7 +194,6 @@
        </property>
       </widget>
      </item>
-     <!-- MAXIDPERUSER -->
      <item row="8" column="0">
       <widget class="QLabel" name="labelMaxIdPerUser">
        <property name="text">
@@ -224,7 +214,6 @@
        </property>
       </widget>
      </item>
-     <!-- LOGIN_DISABLE -->
      <item row="9" column="0" colspan="2">
       <widget class="QCheckBox" name="checkBoxLoginDisable">
        <property name="text">
@@ -235,15 +224,21 @@
        </property>
       </widget>
      </item>
+     <item row="3" column="1">
+      <widget class="QDateEdit" name="dateTimeEditFlohmarkt">
+       <property name="calendarPopup">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
-   <!-- Button-Leiste -->
    <item>
     <layout class="QHBoxLayout" name="buttonLayout">
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>

@@ -27,6 +27,15 @@ class Market(BaseUi):
         self.data_view.setup_views(self)
         self.user_info.setup_views(self)
 
+    @Slot(object)
+    def set_default_settings(self, settings: dict):
+        """
+        Sets the default settings for the market view.
+        This method updates the MarketSetting widget with the provided settings.
+        """
+        if isinstance(self.market_setting, MarketSetting):
+            self.market_setting.set_default_settings(settings)
+
 
     @Slot(PdfDisplayConfig)
     def set_pdf_config(self, pdf_config: PdfDisplayConfig):
@@ -94,5 +103,15 @@ class Market(BaseUi):
         if not self.data_manager_ref:
             return {}
         return self.data_manager_ref.get_main_number_tables()
+    
+    def get_settings(self):
+        """
+        Retrieves settings from the DataManager.
+        Returns:
+            dict: A dictionary containing settings.
+        """
+        if not self.data_manager_ref:
+            return {}
+        return self.data_manager_ref.get_settings()
 
             
