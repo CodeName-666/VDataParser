@@ -169,7 +169,7 @@ class DataManager(QObject, BaseData):
         aggregated_dict = self.get_aggregated_users()
         return [self.convert_aggregated_user(email, data) for email, data in aggregated_dict.items()]
 
-    def _log_change(self, action: str, target: str, description: str):
+    def _log_change(self, action: str, target: str, description: str, old_value: Optional[dict] = None):
         """
         Logs a change action for audit purposes.
 
@@ -183,7 +183,8 @@ class DataManager(QObject, BaseData):
             timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             action=action,
             target=target,
-            description=description
+            description=description,
+            old_value=old_value
         )
         self._change_log.append(entry)
         self._unsaved_changes = True
@@ -365,3 +366,95 @@ class DataManager(QObject, BaseData):
         if ret:
             self.data_loaded.emit(self)
         return ret
+    
+    def reset_change(self, change_id: str) -> bool:
+        """
+        Setzt eine Änderung basierend auf der ChangeLogEntry-ID zurück.
+
+        Args:
+            change_id (str): Die ID der Änderung im Änderungsprotokoll.
+
+        Returns:
+            bool: True, wenn erfolgreich zurückgesetzt wurde.
+        """
+        entry = next((e for e in self._change_log if e.id == change_id), None)
+        if not entry or not entry.old_value:
+            return False
+
+        if entry.target.startswith("stnr"):
+            # Artikel zurücksetzen
+            parts = entry.target.split(":")
+            if len(parts) == 2:
+                stnr_id, artikelnummer = parts[0][4:], parts[1]
+                table = self.get_main_number_tables().get(f"stnr{stnr_id}")
+                if table:
+                    for article in table.data:
+                        if article.artikelnummer == artikelnummer:
+                            article.beschreibung = entry.old_value.get("beschreibung", "")
+                            article.groesse = entry.old_value.get("groesse", "0")
+                            article.preis = entry.old_value.get("preis", "0.00")
+                            article.updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            return True
+
+        elif entry.target.startswith("verkaeufer:"):
+            seller_id = entry.target.split(":")[1]
+            for seller in self.get_seller_as_list():
+                if seller.id == seller_id:
+                    seller.vorname = entry.old_value.get("vorname", "")
+                    seller.nachname = entry.old_value.get("nachname", "")
+                    seller.telefon = entry.old_value.get("telefon", "")
+                    seller.email = entry.old_value.get("email", "")
+                    seller.passwort = entry.old_value.get("passwort", "")
+                    seller.updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    return True
+        elif entry.target.startswith("settings:"):
+            key = entry.target.split(":")[1]
+            if hasattr(self.settings.data, key) and key in entry.old_value:
+                setattr(self.settings.data, key, entry.old_value[key])
+                return True
+
+        return False
+
+    def update_setting(self, key: str, new_value: str) -> bool:
+        """
+        Ändert einen Wert in den Settings (nur SettingsContentDataClass) und loggt die Änderung.
+
+        Args:
+            key (str): Der Name des Attributs (z. B. "max_artikel").
+            new_value (str): Der neue Wert als String.
+
+        Returns:
+            bool: True bei Erfolg, False bei Fehler.
+        """
+        if hasattr(self.settings.data, key):
+            old_value = getattr(self.settings.data, key)
+            setattr(self.settings.data, key, new_value)
+            self._log_change(
+                action="UPDATE",
+                target=f"settings:{key}",
+                description=f"Setting '{key}' geändert von {old_value} zu {new_value}",
+                old_value={key: old_value}
+            )
+            return True
+        return False
+
+    def reset_all_changes(self) -> int:
+        """
+        Setzt alle Änderungen zurück, die im Änderungsprotokoll verzeichnet sind.
+
+        Rückgängig gemacht werden:
+        - Artikeländerungen
+        - Verkäuferänderungen
+        - Settings-Änderungen
+
+        Returns:
+            int: Die Anzahl erfolgreich zurückgesetzter Änderungen.
+        """
+        # Wichtig: Um Konflikte zu vermeiden, rückwärts iterieren
+        successful_resets = 0
+        for entry in reversed(self._change_log):
+            if self.reset_change(entry.id):
+                successful_resets += 1
+        self._change_log.clear()
+        self._unsaved_changes = True  # weil Änderungen am Zustand erfolgt sind
+        return successful_resets

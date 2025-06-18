@@ -19,6 +19,7 @@ class ChangeLogEntry:
     action: str
     target: str
     description: str
+    old_value: Optional[dict] = None  # hinzugefügt für Rücksetzfunktion
 
 @dataclass
 class HeaderDataClass:
