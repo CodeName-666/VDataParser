@@ -61,11 +61,17 @@ class SettingDataClass:
             if value not in ("", 0, None):
                 return False
         return True
-   #def __post_init__(self):
-   #    if isinstance(self.data, dict):
-   #        self.data = SettingsContentDataClass(**self.data)
-   #    elif not isinstance(self.data, SettingsContentDataClass):
-   #        raise TypeError("data must be a SettingsDataClassList or a dict")
+   
+    def __post_init__(self):
+        converted_settings = []
+        for setting in self.data:
+            if isinstance(setting, dict):
+                cSetting = SettingsContentDataClass(**setting)
+                converted_settings.append(cSetting)
+        
+        self.data = converted_settings
+       #elif not isinstance(self.data, SettingsContentDataClass):
+       #    raise TypeError("data must be a SettingsDataClassList or a dict")
 
 @dataclass
 class ArticleDataClass:

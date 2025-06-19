@@ -8,7 +8,7 @@ from typing import Any, Dict, TYPE_CHECKING, Union
 from .json_handler import JsonHandler
 from .data_manager import DataManager
 from log import CustomLogger  # noqa: F401
-
+from objects import SettingsContentDataClass
 
 class MarketConfigHandler(QObject, JsonHandler):
     """Manage one project‑configuration JSON and expose convenience helpers."""
@@ -165,9 +165,10 @@ class MarketConfigHandler(QObject, JsonHandler):
         config_name = os.path.basename(full_path)
         self.set_pdf_coordinates_config(config_path, config_name)
 
-    def get_default_settings(self) -> Dict[str, Any]:
+    def get_default_settings(self) -> SettingsContentDataClass:
         """Return the *default_pdf_generation_data* section as a shallow dict."""
-        return self.get_key_value(["dafault_settings"]) or {}
+        dict_settings = self.get_key_value(["dafault_settings"]) or {}
+        return SettingsContentDataClass(**dict_settings) if dict_settings else SettingsContentDataClass()
 
     # ------------------------- persistence ------------------------ #
     def save_to(self, destination: Union[str, Path]) -> None:

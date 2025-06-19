@@ -52,7 +52,7 @@ class DataView(BaseUi):
         self.ui.treeUsers.clear()
         users_list = self.market_widget().get_aggregated_user()
         for email, user in users_list.items():
-            user_text = f'{user["info"].vorname} {user["info"].nachname} ({user["info"].email})'
+            user_text = f'{user["info"].vorname} {user["info"].nachname})'
             user_item = QTreeWidgetItem([user_text])
             # Füge als untergeordnete Elemente die zugehörigen MainNumber-Tabellen hinzu.
             for main_number in user["stamms"]:

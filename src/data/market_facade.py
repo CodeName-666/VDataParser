@@ -56,7 +56,7 @@ class MarketObserver:
             #self.file_generator = FileGenerator(self.data_manager)
         return ret
 
-    def setup_feat_market(self) -> None:
+    def setup_fleat_market(self) -> None:
         
         self.fm: FleatMarket = FleatMarket()
         self.fm.load_sellers(self.data_manager.get_seller_as_list())

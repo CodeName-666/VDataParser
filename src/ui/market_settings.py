@@ -35,16 +35,18 @@ class MarketSetting(BaseUi):
         
         if settings.is_all_empty():
             settings = self.default_settings
-
-        max_stammnummern = settings.get('max_stammnummern', '')
-        max_artikel = settings.get('max_artikel', '')
-        datum_counter = settings.get('datum_counter', '')
-        flohmarkt_nr = settings.get('flohmarkt_nr', '')
-        psw_laenge = settings.get('psw_laenge', '') # Passwortlänge
-        tabellen_prefix = settings.get('tabellen_prefix', '')
-        verkaufer_liste = settings.get('verkaufer_liste', '')
-        datum_flohmarkt = settings.get('datum_flohmarkt', '')
-        max_user_ids = settings.get('max_user_ids', '')
+        else:
+            settings = settings.data[0]
+        
+        max_stammnummern = settings.max_stammnummern
+        max_artikel = settings.max_artikel
+        datum_counter = settings.datum_counter
+        flohmarkt_nr = settings.flohmarkt_nr
+        psw_laenge = settings.psw_laenge
+        verkaufer_liste = settings.verkaufer_liste
+        datum_flohmarkt = settings.datum_flohmarkt
+        max_user_ids = settings.max_user_ids
+        tabellen_prefix = settings.tabellen_prefix
     
         self.ui.spinMaxStammnummer.setValue(int(max_stammnummern) if max_stammnummern.isdigit() else 0)
         self.ui.spinMaxArtikel.setValue(int(max_artikel) if max_artikel.isdigit() else 0)
