@@ -17,8 +17,7 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QMainWindow, QMenu,
-    QMenuBar, QSizePolicy, QStatusBar, QToolBar,
-    QWidget)
+    QMenuBar, QSizePolicy, QToolBar, QWidget)
 import ressources_rc
 
 class Ui_MainWindow(object):
@@ -42,13 +41,13 @@ class Ui_MainWindow(object):
         icon1 = QIcon()
         icon1.addFile(u":/icons/file-database.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.action_Export_Data.setIcon(icon1)
-        self.action_Export_Data.setMenuRole(QAction.MenuRole.NoRole)
+        self.action_Export_Data.setMenuRole(QAction.NoRole)
         self.actionCreate_PDF = QAction(MainWindow)
         self.actionCreate_PDF.setObjectName(u"actionCreate_PDF")
         icon2 = QIcon()
         icon2.addFile(u":/icons/file-type-pdf.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionCreate_PDF.setIcon(icon2)
-        self.actionCreate_PDF.setMenuRole(QAction.MenuRole.NoRole)
+        self.actionCreate_PDF.setMenuRole(QAction.NoRole)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.horizontalLayout = QHBoxLayout(self.centralwidget)
@@ -62,9 +61,6 @@ class Ui_MainWindow(object):
         self.menu_help = QMenu(self.menubar)
         self.menu_help.setObjectName(u"menu_help")
         MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QStatusBar(MainWindow)
-        self.statusbar.setObjectName(u"statusbar")
-        MainWindow.setStatusBar(self.statusbar)
         self.tool_export = QToolBar(MainWindow)
         self.tool_export.setObjectName(u"tool_export")
         self.tool_export.setFloatable(True)

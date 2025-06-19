@@ -1,6 +1,6 @@
 #PySide6 imports
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtWidgets import QMainWindow,  QMessageBox, QFileDialog, QDialog, QLabel
+from PySide6.QtWidgets import QMainWindow,  QMessageBox, QFileDialog, QDialog, QLabel, QLineEdit
 from PySide6.QtCore import QTimer
 
 
@@ -17,6 +17,7 @@ from .pdf_display import PdfDisplay
 from .market_loader_dialog import MarketLoaderDialog
 from .output_window import OutputWindow
 from data import MarketFacade
+from .status_bar import StatusBar
 
 
 
@@ -32,6 +33,7 @@ class MainWindow(QMainWindow):
         #self.pdf_display = PdfDisplay(self.stack)
         self.output_window = OutputWindow()
         self.market_facade = MarketFacade()
+        self.status_bar = StatusBar(self)
 
         
     def setup_ui(self):
@@ -50,22 +52,8 @@ class MainWindow(QMainWindow):
 
         # Das QStackedWidget als zentrales Widget setzen
         self.setCentralWidget(self.stack)
-
-        # Verbindungsstatus-Label
-        self.connection_label = QLabel("Verbindung: Inaktiv")
-
-        self.ui.statusbar.addPermanentWidget(self.connection_label)
-
-        # LED-Anzeige (kleiner farbiger Kreis)
-        self.status_led = QLabel()
-        self.status_led.setFixedSize(12, 12)
-        self.set_led_color("red")
-        self.ui.statusbar.addPermanentWidget(self.status_led)
-
-        # Zum Test: Status nach 3 Sekunden ändern
-        QTimer.singleShot(3000, self.set_connected)
-
-
+        self.setStatusBar(self.status_bar)
+        
 
         self.hide_all_toolbars()
         self.setup_signals()
@@ -130,6 +118,7 @@ class MainWindow(QMainWindow):
         """
         Switches the currently displayed view in the stack to the market view.
         """
+        ret = False
         dialog = MarketLoaderDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             market_loader_info = dialog.get_result()
@@ -203,16 +192,3 @@ class MainWindow(QMainWindow):
         self.adout = AboutUi()
         self.adout.setupUi(self.about_dialog )
         self.about_dialog.exec()
-
-    def set_led_color(self, color):
-        self.status_led.setStyleSheet(f"""
-            QLabel {{
-                background-color: {color};
-                border-radius: 6px;
-                border: 1px solid black;
-            }}
-        """)
-
-    def set_connected(self):
-        self.connection_label.setText("Verbindung: Aktiv")
-        self.set_led_color("green")

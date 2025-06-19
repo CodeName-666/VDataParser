@@ -42,7 +42,6 @@
    <addaction name="menu_file"/>
    <addaction name="menu_help"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="tool_export">
    <property name="windowTitle">
     <string>toolBar</string>
@@ -94,7 +93,7 @@
     <string>$Export Data</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::MenuRole::NoRole</enum>
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionCreate_PDF">
@@ -106,7 +105,7 @@
     <string>Create PDF</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::MenuRole::NoRole</enum>
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>
