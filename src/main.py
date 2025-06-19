@@ -142,6 +142,13 @@ def _run_gui():  # noqa: D401
 
     market_facade = MarketFacade()  # type: ignore[call‑arg]
     app = QApplication(sys.argv)
+    version = app.setApplicationVersion(get_version())
+    app.setApplicationName(f"Flohmarkt Manager {version}")
+    app.setOrganizationName("SeidC")
+    app.setOrganizationDomain("seidc.de")
+    app.setStyle("Fusion")  # Set a default style
+    
+    
     #win = MainWindow(logger=logger)  # type: ignore[call‑arg]
     win = MainWindow()  # 
     win.setup_ui()

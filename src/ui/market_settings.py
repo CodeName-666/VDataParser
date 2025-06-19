@@ -32,38 +32,33 @@ class MarketSetting(BaseUi):
     def load_settings(self):
         """Lädt die Einstellungen aus dem DataManager und aktualisiert die UI."""
         settings = self.market_widget().get_settings()
-        if settings:
-            max_stammnummern = settings.get('max_stammnummern', '')
-            max_artikel = settings.get('max_artikel', '')
-            datum_counter = settings.get('datum_counter', '')
-            flohmarkt_nr = settings.get('flohmarkt_nr', '')
-            psw_laenge = settings.get('psw_laenge', '') # Passwortlänge
-            tabellen_prefix = settings.get('tabellen_prefix', '')
-            verkaufer_liste = settings.get('verkaufer_liste', '')
-            datum_flohmarkt = settings.get('datum_flohmarkt', '')
-            max_user_ids = settings.get('max_user_ids', '')
-        else:
-            max_stammnummern = self.default_settings.get('max_stammnummern', '')
-            max_artikel = self.default_settings.get('max_artikel', '')
-            datum_counter = self.default_settings.get('datum_counter', '')
-            flohmarkt_nr = self.default_settings.get('flohmarkt_nr', '')
-            psw_laenge = self.default_settings.get('psw_laenge', '') # Passwortlänge
-            tabellen_prefix = self.default_settings.get('tabellen_prefix', '')
-            verkaufer_liste = self.default_settings.get('verkaufer_liste', '')
-            datum_flohmarkt = self.default_settings.get('datum_flohmarkt', '')
-            max_user_ids = self.default_settings.get('max_user_ids', '')
-        
+        all_empty = all(v in ("", None) for v in settings.values())
+        if all_empty:
+            settings = self.default_settings
 
-            self.ui.spinMaxStammnummer.setValue(int(max_stammnummern) if max_stammnummern.isdigit() else 0)
-            self.ui.spinMaxArtikel.setValue(int(max_artikel) if max_artikel.isdigit() else 0)
-            self.ui.dateTimeEditFlohmarktCountDown.setDateTime(QDateTime.fromString(datum_counter))
-            self.ui.spinFlohmarktNummer.setValue(int(flohmarkt_nr) if flohmarkt_nr.isdigit() else 0)
-            self.ui.spinMaxIdPerUser.setValue(int(max_user_ids) if max_user_ids.isdigit() else 0)
-            self.ui.spinPwLength.setValue(int(psw_laenge) if psw_laenge.isdigit() else 0)
-            self.ui.lineEditTabellePrefix.setText(tabellen_prefix)
-            self.ui.lineEditTabelleVerkaeufer.setText(verkaufer_liste)
-            self.ui.dateTimeEditFlohmarkt.setDate(QDate.fromString(datum_flohmarkt))
-        
+        max_stammnummern = settings.get('max_stammnummern', '')
+        max_artikel = settings.get('max_artikel', '')
+        datum_counter = settings.get('datum_counter', '')
+        flohmarkt_nr = settings.get('flohmarkt_nr', '')
+        psw_laenge = settings.get('psw_laenge', '') # Passwortlänge
+        tabellen_prefix = settings.get('tabellen_prefix', '')
+        verkaufer_liste = settings.get('verkaufer_liste', '')
+        datum_flohmarkt = settings.get('datum_flohmarkt', '')
+        max_user_ids = settings.get('max_user_ids', '')
+    
+
+    
+
+        self.ui.spinMaxStammnummer.setValue(int(max_stammnummern) if max_stammnummern.isdigit() else 0)
+        self.ui.spinMaxArtikel.setValue(int(max_artikel) if max_artikel.isdigit() else 0)
+        self.ui.dateTimeEditFlohmarktCountDown.setDateTime(QDateTime.fromString(datum_counter))
+        self.ui.spinFlohmarktNummer.setValue(int(flohmarkt_nr) if flohmarkt_nr.isdigit() else 0)
+        self.ui.spinMaxIdPerUser.setValue(int(max_user_ids) if max_user_ids.isdigit() else 0)
+        self.ui.spinPwLength.setValue(int(psw_laenge) if psw_laenge.isdigit() else 0)
+        self.ui.lineEditTabellePrefix.setText(tabellen_prefix)
+        self.ui.lineEditTabelleVerkaeufer.setText(verkaufer_liste)
+        self.ui.dateTimeEditFlohmarkt.setDate(QDate.fromString(datum_flohmarkt))
+    
 
     def save_settings(self):
         """Speichert die aktuellen Einstellungen in den DataManager."""

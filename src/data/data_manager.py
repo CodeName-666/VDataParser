@@ -11,12 +11,11 @@ from PySide6.QtCore import QObject, Signal
 
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
 from .base_data import BaseData
-from  objects import (
+from objects import (
     MainNumberDataClass,
     SellerDataClass,
     ArticleDataClass,
     ChangeLogEntry)
-
 
 
 class DataManager(QObject, BaseData):
@@ -102,7 +101,7 @@ class DataManager(QObject, BaseData):
     def _aggregate_sellers(self) -> Dict[str, Dict]:
         """
         Groups sellers based on their email address.
-        
+
         Returns:
             Dict[str, Dict]: Dictionary with email as key and a dict containing "info", "ids", and "stamms" as value.
         """
@@ -211,7 +210,8 @@ class DataManager(QObject, BaseData):
             raise ValueError(f"Keine Artikelliste für stnr{stnr_id} gefunden.")
         for article in table.data:
             if article.artikelnummer == artikelnummer:
-                old_values = (article.beschreibung, article.groesse, article.preis)
+                old_values = (article.beschreibung,
+                              article.groesse, article.preis)
                 article.beschreibung = beschreibung
                 article.groesse = groesse
                 article.preis = preis
@@ -222,7 +222,8 @@ class DataManager(QObject, BaseData):
                     description=f"Artikel geändert von {old_values} zu ({beschreibung}, {groesse}, {preis})"
                 )
                 return article
-        raise ValueError(f"Artikelnummer {artikelnummer} nicht gefunden in stnr{stnr_id}.")
+        raise ValueError(
+            f"Artikelnummer {artikelnummer} nicht gefunden in stnr{stnr_id}.")
 
     def delete_article(self, stnr_id: str, artikelnummer: str):
         """
@@ -318,7 +319,8 @@ class DataManager(QObject, BaseData):
             bool: True if seller IDs match stnr table IDs, False otherwise.
         """
         seller_ids = {seller.id for seller in self.get_seller_as_list()}
-        stnr_ids = {table.name[4:] for table in self.get_main_number_as_list() if table.name.startswith("stnr")}
+        stnr_ids = {table.name[4:] for table in self.get_main_number_as_list(
+        ) if table.name.startswith("stnr")}
         return seller_ids == stnr_ids
 
     def has_unsaved_changes(self) -> bool:
@@ -366,7 +368,7 @@ class DataManager(QObject, BaseData):
         if ret:
             self.data_loaded.emit(self)
         return ret
-    
+
     def reset_change(self, change_id: str) -> bool:
         """
         Setzt eine Änderung basierend auf der ChangeLogEntry-ID zurück.
@@ -390,9 +392,12 @@ class DataManager(QObject, BaseData):
                 if table:
                     for article in table.data:
                         if article.artikelnummer == artikelnummer:
-                            article.beschreibung = entry.old_value.get("beschreibung", "")
-                            article.groesse = entry.old_value.get("groesse", "0")
-                            article.preis = entry.old_value.get("preis", "0.00")
+                            article.beschreibung = entry.old_value.get(
+                                "beschreibung", "")
+                            article.groesse = entry.old_value.get(
+                                "groesse", "0")
+                            article.preis = entry.old_value.get(
+                                "preis", "0.00")
                             article.updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             return True
 

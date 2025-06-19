@@ -82,7 +82,7 @@ class DataView(BaseUi):
         self.listUsers.clear()
         flat_users = self.market_widget().get_seller()
         for index, seller in enumerate(flat_users, start=1):
-            text = f'{index}. {seller.vorname} {seller.nachname} ({seller.email})'
+            text = f'{index}. {seller.vorname} {seller.nachname}'
             item = QListWidgetItem(text)
             item.setData(Qt.UserRole, seller)
             self.listUsers.addItem(item)
@@ -136,12 +136,12 @@ class DataView(BaseUi):
         Anhand der Verkäufer-ID wird die zugehörige stnr‑Tabelle ermittelt und
         deren Artikel angezeigt.
         """
-        if not self.market_widget().get_main_number():
+        if not self.market_widget().get_main_numbers():
             return
         
         seller = item.data(Qt.UserRole)
         target_stnr = "stnr" + seller.id
-        strnr_tables = self.market_widget().get_main_number()
+        strnr_tables = self.market_widget().get_main_numbers()
         main_number = strnr_tables.get(target_stnr)
         entries = main_number.data if main_number else []
         self.populate_entry_table(entries)

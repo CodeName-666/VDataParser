@@ -73,36 +73,49 @@ class BaseData(JsonHandler, JSONData):
              return ret
 
         try:
-            # Use .get() with default values for safe access
-            header_dict = json_data[0] if len(json_data) >= 1 and isinstance(json_data[0], dict) else {}
-            _export_header = HeaderDataClass(**header_dict)
+            header_dict = {}
+            base_info_dict = {}
+            settings_dict = {}
+            main_number_dicts: List[Dict[str, Any]] = []  # List to hold multiple main number dicts
+            sellers_dict = {}
+            for item in json_data:
 
-            base_info_dict = json_data[1] if len(json_data) >= 2 and isinstance(json_data[1], dict) else {}
-            _base_info = BaseInfoDataClass(**base_info_dict)
+                if item.get("type") == "header":
+                    header_dict = item
+                elif item.get("type") == "database":
+                    base_info_dict = item
+                elif item.get("type") == "settings":
+                    settings_dict = item
+                elif item.get("type") == "table":
+                    # Hier wird angenommen, dass "table" die MainNumbers repräsentiert
+                   # main_number_dicts = main_number_dicts if 'main_number_dicts' in locals() else []
+                    main_number_dicts.append(item)
+                elif item.get("type") == "name":
+                    sellers_dict = item
             
-            settings_dict = json_data[2] if len(json_data) >= 3 and isinstance(json_data[2], dict) else {}
-            _settings= SettingDataClass(**settings_dict)
+                    # Suche anhand des "type" Schlüssels
+            #header_dict = next((item for item in json_data if isinstance(item, dict) and item.get("type") == "header"), {})
+            #base_info_dict = next((item for item in json_data if isinstance(item, dict) and item.get("type") == "database"), {})
+            ## Falls es explizit keine Settings gibt, bleibt das Dict leer und die Defaults der DataClass greifen.
+            #settings_dict = next((item for item in json_data if isinstance(item, dict) and item.get("type") == "settings"), {})
+#
+            ## Für MainNumbers – hier werden alle Items mit "type" == "table" gesammelt.
+            #main_number_dicts = [item for item in json_data if isinstance(item, dict) and item.get("type") == "table"]
+#
+            ## Für Sellers – falls vorhanden, z. B. unter "type": "sellers". Falls nicht, wird ein leeres Dict benutzt.
+            #sellers_dict = next((item for item in json_data if isinstance(item, dict) and item.get("type") == "sellers"), {})
 
-            _main_numbers = []
-            _sellers_dict = {}
-            if len(json_data) >= 4:
-                # Assume main numbers are all dicts between index 2 and the last element
-                main_number_dicts = [item for item in json_data[3:-1] if isinstance(item, dict)]
-                _main_numbers = [MainNumberDataClass(**table) for table in main_number_dicts]
-                # Log if non-dict items were skipped
-                skipped_mn = len(json_data[3:-1]) - len(main_number_dicts)
-                if skipped_mn > 0:
-                     self._log("WARNING", f"Skipped {skipped_mn} non-dictionary items in main numbers section.")
+            _export_header = HeaderDataClass(**header_dict)
+            _base_info = BaseInfoDataClass(**base_info_dict)
+            _settings = SettingDataClass(**settings_dict)
 
-                # Sellers are the last element, if it's a dict
-                _sellers_dict = json_data[-1] if isinstance(json_data[-1], dict) else {}
-            # Else: _main_numbers remains [] and _sellers_dict remains {}
+            _main_numbers = [MainNumberDataClass(**table) for table in main_number_dicts]
+            _sellers = SellerListDataClass(**sellers_dict)
+            
+            # Initialisierung des JSONData-Teils der Klasse
+            JSONData.__init__(self, export_header=_export_header, base_info=_base_info, settings=_settings,
+                            main_numbers_list=_main_numbers, sellers=_sellers)
 
-            _sellers = SellerListDataClass(**_sellers_dict)
-
-            # Initialize the JSONData part of the class
-            JSONData.__init__(self, export_header=_export_header, base_info=_base_info, settings = _settings,
-                              main_numbers_list=_main_numbers, sellers=_sellers)
             self._log("INFO", "JSON data parsed successfully.")
             ret = True
         except TypeError as e:

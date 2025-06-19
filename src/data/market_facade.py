@@ -11,7 +11,7 @@ from typing import List, Dict, Any, Union
 
 class MarketObserver:
 
-    def __init__(self,market = None, json_path: str = ""):
+    def __init__(self, market = None, json_path: str = ""):
         """
 
         Initialize the MarketObserver with a JSON path.
@@ -29,6 +29,7 @@ class MarketObserver:
 
         :param json_path: Path to the local JSON file.
         """
+        ret = False
         if json_path:
             # Load the market configuration from the provided JSON path    
             self.market_config_handler.load(json_path)
