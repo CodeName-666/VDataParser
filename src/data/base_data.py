@@ -84,9 +84,9 @@ class BaseData(JsonHandler, JSONData):
                     header_dict = item
                 elif item.get("type") == "database":
                     base_info_dict = item
-                elif item.get("type") == "table" and item.get("name") == "settings":
+                elif item.get("type") == "table" and item.get("name") == "einstellungen":
                     settings_dict = item
-                elif item.get("type") == "table" and item.get("name").find("strng") != -1:
+                elif item.get("type") == "table" and item.get("name").find("stnr") != -1:
                     # Hier wird angenommen, dass "table" die MainNumbers repräsentiert
                    # main_number_dicts = main_number_dicts if 'main_number_dicts' in locals() else []
                     main_number_dicts.append(item)
@@ -149,12 +149,7 @@ class BaseData(JsonHandler, JSONData):
         return getattr(self, 'main_numbers_list', [])
 
     def get_settings(self):
-        settings = getattr(self, 'settings', SettingDataClass())
-        if len(settings.data) == 0:
-            self._log("WARNING", "Settings data is empty. Returning default settings.")
-            return SettingsContentDataClass()
-        
-        return getattr(self, 'settings', SettingDataClass()).data[0]
+        return getattr(self, 'settings', SettingDataClass())
 
     def verify_data(self):
         """ Performs a basic check comparing the number of sellers and main number lists. """

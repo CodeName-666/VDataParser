@@ -42,22 +42,25 @@ class SettingsContentDataClass:
     tabellen_prefix: str = ""
     verkaufer_liste: str = ""
     max_user_ids: str = ""
-    datum_flohmarkt: str = ""
-
-    def is_all_empty(self) -> bool:
-        for field in fields(self):
-            value = getattr(self, field.name)
-            if value not in ("", 0, None):
-                return False
-        return True
+    datum_flohmarkt: str = ""   
 
 @dataclass
 class SettingDataClass:
     type: str = ""
     name: str = ""
     database: str = ""
-    data: List[SettingsContentDataClass] = field(default_factory=list[SettingsContentDataClass])
+    data: List[SettingsContentDataClass] = field(default_factory=list)
 
+    def is_all_empty(self) -> bool:
+        if not self.data:
+            return True  # Leere Liste gilt als 'alles leer'
+
+        settings = self.data[0]
+        for field_ in fields(settings):
+            value = getattr(settings, field_.name)
+            if value not in ("", 0, None):
+                return False
+        return True
    #def __post_init__(self):
    #    if isinstance(self.data, dict):
    #        self.data = SettingsContentDataClass(**self.data)

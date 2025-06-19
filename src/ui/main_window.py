@@ -47,12 +47,13 @@ class MainWindow(QMainWindow):
             None
         """
         self.ui.setupUi(self)   
+        self.setStatusBar(self.status_bar)
         self.stack.addWidget(self.main_menu)
         self.stack.addWidget(self.market_view)
 
         # Das QStackedWidget als zentrales Widget setzen
         self.setCentralWidget(self.stack)
-        self.setStatusBar(self.status_bar)
+        
         
 
         self.hide_all_toolbars()
