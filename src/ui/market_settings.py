@@ -73,7 +73,7 @@ class MarketSetting(BaseUi):
         self.market_widget().reset_settings()
         self.load_settings()
         # Optional: Zeige eine Bestätigungsmeldung an
-        self.ui.statusLabel.setText("Einstellungen wurden auf Standardwerte zurückgesetzt.")
+        
 
     def market_widget(self):
         """Gibt eine Referenz auf das MarketWidget zurück."""
