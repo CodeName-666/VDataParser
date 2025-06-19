@@ -84,15 +84,16 @@ class BaseData(JsonHandler, JSONData):
                     header_dict = item
                 elif item.get("type") == "database":
                     base_info_dict = item
-                elif item.get("type") == "settings":
+                elif item.get("type") == "table" and item.get("name") == "settings":
                     settings_dict = item
-                elif item.get("type") == "table":
+                elif item.get("type") == "table" and item.get("name").find("strng") != -1:
                     # Hier wird angenommen, dass "table" die MainNumbers repräsentiert
                    # main_number_dicts = main_number_dicts if 'main_number_dicts' in locals() else []
                     main_number_dicts.append(item)
-                elif item.get("type") == "name":
+                elif item.get("type") == "table" and item.get("name") == "verkaeufer":
                     sellers_dict = item
-            
+                else:
+                    pass
                     # Suche anhand des "type" Schlüssels
             #header_dict = next((item for item in json_data if isinstance(item, dict) and item.get("type") == "header"), {})
             #base_info_dict = next((item for item in json_data if isinstance(item, dict) and item.get("type") == "database"), {})
