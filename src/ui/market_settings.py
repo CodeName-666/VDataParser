@@ -32,8 +32,8 @@ class MarketSetting(BaseUi):
     def load_settings(self):
         """Lädt die Einstellungen aus dem DataManager und aktualisiert die UI."""
         settings = self.market_widget().get_settings()
-        all_empty = all(v in ("", None) for v in settings.values())
-        if all_empty:
+        
+        if settings.is_all_empty():
             settings = self.default_settings
 
         max_stammnummern = settings.get('max_stammnummern', '')
@@ -46,9 +46,6 @@ class MarketSetting(BaseUi):
         datum_flohmarkt = settings.get('datum_flohmarkt', '')
         max_user_ids = settings.get('max_user_ids', '')
     
-
-    
-
         self.ui.spinMaxStammnummer.setValue(int(max_stammnummern) if max_stammnummern.isdigit() else 0)
         self.ui.spinMaxArtikel.setValue(int(max_artikel) if max_artikel.isdigit() else 0)
         self.ui.dateTimeEditFlohmarktCountDown.setDateTime(QDateTime.fromString(datum_counter))

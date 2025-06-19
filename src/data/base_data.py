@@ -95,17 +95,7 @@ class BaseData(JsonHandler, JSONData):
                 else:
                     pass
                     # Suche anhand des "type" Schlüssels
-            #header_dict = next((item for item in json_data if isinstance(item, dict) and item.get("type") == "header"), {})
-            #base_info_dict = next((item for item in json_data if isinstance(item, dict) and item.get("type") == "database"), {})
-            ## Falls es explizit keine Settings gibt, bleibt das Dict leer und die Defaults der DataClass greifen.
-            #settings_dict = next((item for item in json_data if isinstance(item, dict) and item.get("type") == "settings"), {})
-#
-            ## Für MainNumbers – hier werden alle Items mit "type" == "table" gesammelt.
-            #main_number_dicts = [item for item in json_data if isinstance(item, dict) and item.get("type") == "table"]
-#
-            ## Für Sellers – falls vorhanden, z. B. unter "type": "sellers". Falls nicht, wird ein leeres Dict benutzt.
-            #sellers_dict = next((item for item in json_data if isinstance(item, dict) and item.get("type") == "sellers"), {})
-
+        
             _export_header = HeaderDataClass(**header_dict)
             _base_info = BaseInfoDataClass(**base_info_dict)
             _settings = SettingDataClass(**settings_dict)
@@ -144,7 +134,7 @@ class BaseData(JsonHandler, JSONData):
         else:
             self._log("ERROR", "Reload failed: Could not load new JSON data.")
             # Keep the old parsed data or reset? Resetting might be safer.
-            JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
+            JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(), settings=SettingDataClass(),
                                main_numbers_list=[], sellers=SellerListDataClass())
             return False
 
@@ -159,6 +149,11 @@ class BaseData(JsonHandler, JSONData):
         return getattr(self, 'main_numbers_list', [])
 
     def get_settings(self):
+        settings = getattr(self, 'settings', SettingDataClass())
+        if len(settings.data) == 0:
+            self._log("WARNING", "Settings data is empty. Returning default settings.")
+            return SettingsContentDataClass()
+        
         return getattr(self, 'settings', SettingDataClass()).data[0]
 
     def verify_data(self):

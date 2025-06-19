@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass,field, fields
 from typing import List, Optional
 
 
@@ -44,12 +44,19 @@ class SettingsContentDataClass:
     max_user_ids: str = ""
     datum_flohmarkt: str = ""
 
+    def is_all_empty(self) -> bool:
+        for field in fields(self):
+            value = getattr(self, field.name)
+            if value not in ("", 0, None):
+                return False
+        return True
+
 @dataclass
 class SettingDataClass:
     type: str = ""
     name: str = ""
     database: str = ""
-    data: List[SettingsContentDataClass] = field(default_factory=SettingsContentDataClass)
+    data: List[SettingsContentDataClass] = field(default_factory=list[SettingsContentDataClass])
 
    #def __post_init__(self):
    #    if isinstance(self.data, dict):

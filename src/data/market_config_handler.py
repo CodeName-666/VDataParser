@@ -209,5 +209,5 @@ class MarketConfigHandler(QObject, JsonHandler):
 
     def load(self, path_or_url):
         ret = super().load(path_or_url)
-        if ret: 
+        if ret:
             self.default_signal_loaded.emit(self.get_default_settings())
