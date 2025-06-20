@@ -208,7 +208,9 @@ class MarketConfigHandler(QObject, JsonHandler):
         self.reload_data(json_path)
 
 
-    def load(self, path_or_url):
+    def load(self, path_or_url)-> bool:
+        """Load the JSON data from the specified path or URL."""
         ret = super().load(path_or_url)
         if ret:
             self.default_signal_loaded.emit(self.get_default_settings())
+        return ret

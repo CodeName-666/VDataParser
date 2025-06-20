@@ -22,7 +22,37 @@ class MarketObserver:
         self.pdf_display_config_loader: PdfDisplayConfig = PdfDisplayConfig()
         self.file_generator: FileGenerator = None
         self.fm: FleatMarket = None
-        self.data_ready = False
+        self._data_ready = False
+        self._project_exists = False
+
+
+    def set_data_ready_satus(self, status: bool) -> None:
+        """
+        Set the data ready status.
+        :param status: Boolean indicating if the data is ready.
+        """
+        self._data_ready = status
+    
+    def is_data_ready(self) -> bool:
+        """
+        Check if the data is ready.
+        :return: True if the data is ready, False otherwise.
+        """
+        return self._data_ready
+
+    def project_exists(self) -> bool:
+        """
+        Check if a project already exists.
+        :return: True if a project exists, False otherwise.
+        """
+        return self._project_exists
+    
+    def set_project_exists(self, status: bool) -> None:
+        """
+        Set the project exists status.
+        :param status: Boolean indicating if a project exists.
+        """
+        self._project_exists = status
 
     def load_local_market_project(self, json_path: str) -> bool:
         """
@@ -33,17 +63,18 @@ class MarketObserver:
         ret = False
         if json_path:
             # Load the market configuration from the provided JSON path    
-            self.market_config_handler.load(json_path)
-
-            market_json_path = self.market_config_handler.get_full_market_path()
-            pdf_display_config = self.market_config_handler.get_full_pdf_coordinates_config_path()
-            # Initialize the DataManager with the market JSON path
-            ret = self.data_manager.load(market_json_path)
+            ret = self.market_config_handler.load(json_path)
             if ret:
-                # Setup the FleatMarket with the loaded data
-                self.setup_data_generation()
-            # Load the PDF display configuration
-            self.pdf_display_config_loader.load(pdf_display_config)
+                self._project_exists = True
+                market_json_path = self.market_config_handler.get_full_market_path()
+                pdf_display_config = self.market_config_handler.get_full_pdf_coordinates_config_path()
+                # Initialize the DataManager with the market JSON path
+                ret = self.data_manager.load(market_json_path)
+                if ret:
+                    # Setup the FleatMarket with the loaded data
+                    self.setup_data_generation()
+                # Load the PDF display configuration
+                self.pdf_display_config_loader.load(pdf_display_config)
 
         return ret
 
@@ -68,7 +99,7 @@ class MarketObserver:
     @Slot()
     def setup_data_generation(self) -> None:
         
-        self.data_ready = True
+        self._data_ready = True
         self.fm: FleatMarket = FleatMarket()
         self.fm.load_sellers(self.data_manager.get_seller_as_list())
         self.fm.load_main_numbers(self.data_manager.get_main_number_as_list())
@@ -87,6 +118,8 @@ class MarketObserver:
 
     def connect_signals(self, market) -> None:
         self.data_manager.data_loaded.connect(market.set_market_data)
+        self.data_manager.data_loaded.connect(market.setup_data_generation)
+
         self.pdf_display_config_loader.data_loaded.connect(market.set_pdf_config)
         self.market_config_handler.default_signal_loaded.connect(market.set_default_settings)
 
@@ -95,12 +128,10 @@ class MarketObserver:
         Generate PDF data for the market.
         This method should be implemented to create the necessary PDF data.
         """
-        if self.fm is None:
-            self.setup_data_generation()
-        self.file_generator.generate_pdf_data(self.get_pdf_data())
-
-    
-
+        if self._data_ready:
+            self.file_generator.create_pdf_data(self.market_config_handler.get_pdf_generation_data())
+        
+        
 
 class MarketFacade(metaclass=SingletonMeta):
     """
