@@ -22,6 +22,7 @@ class MarketObserver:
         self.pdf_display_config_loader: PdfDisplayConfig = PdfDisplayConfig()
         self.file_generator: FileGenerator = None
         self.fm: FleatMarket = None
+        self.data_ready = False
 
     def load_local_market_project(self, json_path: str) -> bool:
         """
@@ -38,6 +39,9 @@ class MarketObserver:
             pdf_display_config = self.market_config_handler.get_full_pdf_coordinates_config_path()
             # Initialize the DataManager with the market JSON path
             ret = self.data_manager.load(market_json_path)
+            if ret:
+                # Setup the FleatMarket with the loaded data
+                self.setup_data_generation()
             # Load the PDF display configuration
             self.pdf_display_config_loader.load(pdf_display_config)
 
@@ -52,16 +56,22 @@ class MarketObserver:
         ret = False
         if json_path:
             ret = self.data_manager.load(json_path)
+            if ret:
+                # Setup the FleatMarket with the loaded data
+                self.setup_data_generation()
+
             self.market_config_handler.set_full_market_path(json_path)
+
             #self.file_generator = FileGenerator(self.data_manager)
         return ret
 
-    def setup_fleat_market(self) -> None:
+    @Slot()
+    def setup_data_generation(self) -> None:
         
+        self.data_ready = True
         self.fm: FleatMarket = FleatMarket()
         self.fm.load_sellers(self.data_manager.get_seller_as_list())
-        self.fm.load_main_numbers(
-        self.data_manager.get_main_number_as_list())
+        self.fm.load_main_numbers(self.data_manager.get_main_number_as_list())
         self.file_generator = FileGenerator(self.fm)
 
     def get_data(self):
@@ -79,6 +89,17 @@ class MarketObserver:
         self.data_manager.data_loaded.connect(market.set_market_data)
         self.pdf_display_config_loader.data_loaded.connect(market.set_pdf_config)
         self.market_config_handler.default_signal_loaded.connect(market.set_default_settings)
+
+    def generate_pdf_data(self) -> None:
+        """
+        Generate PDF data for the market.
+        This method should be implemented to create the necessary PDF data.
+        """
+        if self.fm is None:
+            self.setup_data_generation()
+        self.file_generator.generate_pdf_data(self.get_pdf_data())
+
+    
 
 
 class MarketFacade(metaclass=SingletonMeta):
@@ -155,3 +176,38 @@ class MarketFacade(metaclass=SingletonMeta):
         else:
             observer = self.get_observer(market)
         return observer
+
+    @Slot(object)
+    def create_pdf_data(self, market) ->None:
+        """
+        Create PDF data for the specified market.
+
+        :param market: The market instance for which to create PDF data.
+        """
+        print("Not implemented yet")
+        observer = self.get_observer(market)
+        observer.generate_pdf_data()
+    
+    @Slot(object)
+    def create_market_data(self, market) -> None:
+        """
+        Create market data for the specified market.
+
+        :param market: The market instance for which to create data.
+        """
+        print("Not implemented yet")
+        observer = self.get_observer(market)
+        if observer:
+            market.set_data(observer.get_data())
+        else:
+            raise ValueError("Market observer not found.") 
+        
+
+    @Slot(object)
+    def create_all_data(self, market) -> None:
+        """
+        Create all data for the specified market.
+
+        :param market: The market instance for which to create all data.
+        """
+        print("Not implemented yet")

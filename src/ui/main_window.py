@@ -53,8 +53,6 @@ class MainWindow(QMainWindow):
 
         # Das QStackedWidget als zentrales Widget setzen
         self.setCentralWidget(self.stack)
-        
-        
 
         self.hide_all_toolbars()
         self.setup_signals()
