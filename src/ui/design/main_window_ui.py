@@ -59,10 +59,13 @@ class Ui_MainWindow(object):
         self.tool_export = QToolBar(MainWindow)
         self.tool_export.setObjectName(u"tool_export")
         self.tool_export.setFloatable(True)
-        MainWindow.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tool_export)
+        MainWindow.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tool_export)
         self.tool_project = QToolBar(MainWindow)
         self.tool_project.setObjectName(u"tool_project")
-        MainWindow.addToolBar(Qt.ToolBarArea.RightToolBarArea, self.tool_project)
+        MainWindow.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tool_project)
+        self.toolBar = QToolBar(MainWindow)
+        self.toolBar.setObjectName(u"toolBar")
+        MainWindow.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.toolBar)
 
         self.menubar.addAction(self.menu_file.menuAction())
         self.menubar.addAction(self.menu_help.menuAction())
@@ -85,5 +88,6 @@ class Ui_MainWindow(object):
         self.menu_help.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
         self.tool_export.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
         self.tool_project.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
+        self.toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
     # retranslateUi
 
