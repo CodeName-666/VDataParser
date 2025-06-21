@@ -191,3 +191,35 @@ class MainWindow(QMainWindow):
         self.adout = AboutUi()
         self.adout.setupUi(self.about_dialog )
         self.about_dialog.exec()
+   
+    @Slot()
+    def start_data_generation(self):
+        """
+        Starts the data generation process.
+        This method is a placeholder for future implementation.
+        """
+        QMessageBox.information(self, "Info", "Data generation started. This feature is not yet implemented.")
+
+    @Slot()
+    def start_pdf_generation(self):
+        """
+        Starts the PDF generation process.
+        This method is a placeholder for future implementation.
+        """
+        QMessageBox.information(self, "Info", "PDF generation started. This feature is not yet implemented.")
+
+    @Slot()
+    def start_all_generation(self):
+        """
+        Starts the generation of all data and PDF files.
+        This method is a placeholder for future implementation.
+        """
+        QMessageBox.information(self, "Info", "All generation started. This feature is not yet implemented.")
+
+    @Slot()
+    def create_local_market_export(self):
+        """
+        Creates a local market export.
+        This method is a placeholder for future implementation.
+        """
+        QMessageBox.information(self, "Info", "Local market export created. This feature is not yet implemented.")

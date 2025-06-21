@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icons">
+    <file>radioactive.svg</file>
+    <file>radioactive_filled.svg</file>
     <file>database.svg</file>
     <file>database-export.svg</file>
     <file>database-import.svg</file>

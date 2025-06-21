@@ -29,15 +29,12 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="action"/>
     <addaction name="separator"/>
-    <addaction name="action_close"/>
    </widget>
    <widget class="QMenu" name="menu_help">
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="action_tool"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_help"/>
@@ -55,54 +52,52 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action"/>
-   <addaction name="separator"/>
-   <addaction name="action_Export_Data"/>
-   <addaction name="actionCreate_PDF"/>
+   <addaction name="action_create_pdf"/>
+   <addaction name="action_generate_data"/>
+   <addaction name="action_generate_add"/>
   </widget>
-  <action name="action_tool">
-   <property name="text">
-    <string>&amp;About Flohmarktmanager</string>
+  <widget class="QToolBar" name="tool_project">
+   <property name="windowTitle">
+    <string>toolBar</string>
    </property>
-  </action>
-  <action name="action_close">
-   <property name="text">
-    <string>&amp;Beenden</string>
-   </property>
-  </action>
-  <action name="action">
-   <property name="icon">
-    <iconset resource="../../resource/ressources.qrc">
-     <normaloff>:/icons/folder-open.svg</normaloff>:/icons/folder-open.svg</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Eport Daten öffnen</string>
-   </property>
-  </action>
-  <action name="actionToolbars">
-   <property name="text">
-    <string>Toolbars</string>
-   </property>
-  </action>
-  <action name="action_Export_Data">
-   <property name="icon">
-    <iconset resource="../../resource/ressources.qrc">
-     <normaloff>:/icons/file-database.svg</normaloff>:/icons/file-database.svg</iconset>
-   </property>
-   <property name="text">
-    <string>$Export Data</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::NoRole</enum>
-   </property>
-  </action>
-  <action name="actionCreate_PDF">
+   <attribute name="toolBarArea">
+    <enum>RightToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <action name="action_create_pdf">
    <property name="icon">
     <iconset resource="../../resource/ressources.qrc">
      <normaloff>:/icons/file-type-pdf.svg</normaloff>:/icons/file-type-pdf.svg</iconset>
    </property>
    <property name="text">
-    <string>Create PDF</string>
+    <string>&amp;Create PDF</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_generate_data">
+   <property name="icon">
+    <iconset resource="../../resource/ressources.qrc">
+     <normaloff>:/icons/radioactive.svg</normaloff>:/icons/radioactive.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Daten Generieren</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_generate_add">
+   <property name="icon">
+    <iconset resource="../../resource/ressources.qrc">
+     <normaloff>:/icons/radioactive_filled.svg</normaloff>:/icons/radioactive_filled.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Alles generieren</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
