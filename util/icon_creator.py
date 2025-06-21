@@ -1,23 +1,14 @@
 #!/usr/bin/env python3
 """
-raster2svg.py  –  Bulk-Konverter Raster → SVG (mit Größenskali­erung & Graustufen)
+raster2svg.py  –  Raster → SVG (inkl. Skalierung, Graustufen ODER hartes Schwarz-Weiß)
 
-Installation der Abhängigkeiten:
+Install:
     pip install pillow svgwrite
-
-Aufrufbeispiele
-------------------------------------
-# Alle Bilder in ./pics nach ./svgs, längste Kante max. 512 px
-python raster2svg.py pics svgs --max-size 512
-
-# Feste Zielgröße (Breite=200 px, Höhe=100 px) + Graustufen
-python raster2svg.py pics svgs --width 200 --height 100 --grayscale
 """
 
 import argparse
 import base64
 import io
-import os
 from pathlib import Path
 
 from PIL import Image
@@ -30,32 +21,23 @@ def raster_to_svg(img: Image.Image,
                   width: int | None = None,
                   height: int | None = None,
                   max_size: int | None = None) -> None:
-    """Erzeugt eine SVG-Datei mit dem (ggf. skalierten) Bild als inline-PNG."""
-    # proportional skalieren, wenn max_size gesetzt ist
+    """Speichert ein Pillow-Image als SVG mit inline-PNG."""
     if max_size:
         img.thumbnail((max_size, max_size), Image.LANCZOS)
-
-    # feste Zielabmessungen setzen
     if width or height:
-        new_w = width or img.width
-        new_h = height or img.height
-        img = img.resize((new_w, new_h), Image.LANCZOS)
+        img = img.resize((width or img.width, height or img.height),
+                         Image.LANCZOS)
 
-    # Bild als PNG in-Memory codieren
     buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    b64_png = base64.b64encode(buf.getvalue()).decode("ascii")
+    img.save(buf, "PNG")
+    b64 = base64.b64encode(buf.getvalue()).decode()
 
-    # SVG erstellen
     w, h = img.size
     dwg = svgwrite.Drawing(size=(f"{w}px", f"{h}px"))
-    dwg.add(
-        dwg.image(
-            href=f"data:image/png;base64,{b64_png}",
-            insert=(0, 0),
-            size=(w, h),
-        )
-    )
+    dwg.add(dwg.image(
+        href=f"data:image/png;base64,{b64}",
+        insert=(0, 0),
+        size=(w, h)))
     dwg.saveas(out_path)
 
 
@@ -63,53 +45,59 @@ def raster_to_svg(img: Image.Image,
 def process_folder(src: Path,
                    dst: Path,
                    grayscale: bool,
+                   blackwhite: bool,
                    width: int | None,
                    height: int | None,
                    max_size: int | None) -> None:
     dst.mkdir(parents=True, exist_ok=True)
-    supported = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff"}
+    exts = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff"}
     for file in src.iterdir():
-        if file.suffix.lower() not in supported or not file.is_file():
+        if file.suffix.lower() not in exts or not file.is_file():
             continue
         img = Image.open(file).convert("RGBA")
-        if grayscale:
-            # in L konvertieren, danach wieder RGBA für Transparenz
+
+        if blackwhite:
+            # 1-Bit: erst Graustufe, dann nach 1-Bit mit Default-Dithering
+            img = img.convert("L").convert("1").convert("RGBA")
+        elif grayscale:
             img = img.convert("L").convert("RGBA")
-        out_name = file.stem + ".svg"
-        raster_to_svg(
-            img,
-            dst / out_name,
-            width=width,
-            height=height,
-            max_size=max_size,
-        )
-        print(f"✔  {file.name}  →  {out_name}")
+
+        out_svg = dst / (file.stem + ".svg")
+        raster_to_svg(img, out_svg, width, height, max_size)
+        print(f"✔  {file.name:<30} → {out_svg.name}")
 
 
 # ------------------------------------------------------------
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Konvertiert alle Rasterbilder in einem Ordner zu SVG (inline-PNG)."
-    )
-    parser.add_argument("input_dir", type=Path, help="Quellordner mit Bildern")
-    parser.add_argument("output_dir", type=Path, help="Zielordner für SVGs")
-    size = parser.add_mutually_exclusive_group()
+    p = argparse.ArgumentParser(
+        description="Konvertiert Rasterbilder eines Ordners zu SVGs "
+                    "(inline-PNG, optional skaliert & BW / Graustufe).")
+    p.add_argument("input_dir", type=Path)
+    p.add_argument("output_dir", type=Path)
+
+    size = p.add_mutually_exclusive_group()
     size.add_argument("--max-size", type=int, metavar="PX",
-                      help="Längste Kante maximal PX Pixel (proportional)")
+                      help="Maximale Kantenlänge (proportional)")
     size.add_argument("--width", type=int, metavar="PX",
-                      help="Feste Breite in Pixeln")
-    parser.add_argument("--height", type=int, metavar="PX",
-                        help="Feste Höhe in Pixeln (mit --width kombinierbar)")
-    parser.add_argument("--grayscale", action="store_true",
-                        help="Bilder als Graustufen ausgeben")
-    args = parser.parse_args()
+                      help="Feste Breite")
+    p.add_argument("--height", type=int, metavar="PX",
+                   help="Feste Höhe (mit --width kombinierbar)")
+
+    p.add_argument("--grayscale", action="store_true",
+                   help="Graustufenbild erzeugen")
+    p.add_argument("--bw", "--blackwhite", dest="blackwhite",
+                   action="store_true",
+                   help="Hartes Schwarz-Weiß (1-Bit); überschreibt --grayscale")
+    args = p.parse_args()
 
     if not args.input_dir.is_dir():
-        parser.error("input_dir muss ein existierender Ordner sein.")
+        p.error("input_dir ist kein gültiger Ordner.")
+
     process_folder(
         args.input_dir,
         args.output_dir,
         grayscale=args.grayscale,
+        blackwhite=args.blackwhite,
         width=args.width,
         height=args.height,
         max_size=args.max_size,
