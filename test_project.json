@@ -5,12 +5,12 @@
   },
 
   "market": {
-    "market_path": "C:\\Users\\NoName\\Downloads",
-    "market_name": "test.json"
+    "market_path": "C:\\Users\\Christof\\Downloads",
+    "market_name": "F25.json"
   },
 
   "pfd_coordiantes_config": {
-    "coordinates_config_path": "D:\\Projekte\\Python\\FlohmarktManager",
+    "coordinates_config_path": "C:\\Users\\Christof\\Projects\\Python\\VDataParser",
     "coordinates_config_name": "pdf_display_config.json"
   },
 
