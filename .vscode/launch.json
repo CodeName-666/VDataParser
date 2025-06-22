@@ -70,6 +70,19 @@
             "args": [
                 
             ]
-        }
+        },
+
+         {
+            "name": " Generator",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--rc", 
+                "--qrc-file", ".\\src\\resource\\ressources.qrc"
+               
+            ]
+        },
     ]
 }
