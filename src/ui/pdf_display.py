@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor
 from PySide6.QtCore import Qt, QRectF, QPointF, Signal, Slot, QSize, QObject
 from PySide6.QtPdf import QPdfDocument
+from deepdiff import DeepDiff
 
 from .generated import PdfDisplayUi
 from .base_ui import BaseUi
@@ -28,6 +29,7 @@ DEFAULT_BOX_HEIGHT = 50
 BOX_PAIR_LABEL_1_PREFIX = "USR"
 BOX_PAIR_LABEL_2_PREFIX = "NR"
 SINGLE_BOX_LABEL_PREFIX = "DATE"
+BOX_PAIR_LABEL_PREFIX = "USER/NR"
 LIST_ITEM_DATA_ROLE = Qt.UserRole
 
 
@@ -270,7 +272,7 @@ class BoxPair(QObject):
         self.box2 = DraggableBox(rect, label=f"{BOX_PAIR_LABEL_2_PREFIX}{self.id}")
         self.box2.setPos(startPos + offset)
         self.box2.setPen(QPen(BOX_PAIR_COLOR_2, 2))
-
+        self.label = f"{BOX_PAIR_LABEL_PREFIX}{self.id}"
         scene.addItem(self.box1)
         scene.addItem(self.box2)
 
@@ -286,7 +288,7 @@ class BoxPair(QObject):
         return self.box1, self.box2
 
     def __str__(self):
-        return f"BoxPair {self.id}"
+        return f"BoxPair {self.id} ({self.label})" # More descriptive
 
 
 class SingleBox(DraggableBox):
@@ -314,23 +316,26 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
 
     # Define a signal for the exit button if needed externally
     exit_requested = Signal()
+    storage_path_changed = Signal(str) # Signal for storage path changes
+    data_changed = Signal(object) # Signal for data changes, e.g., box updates
 
-    def __init__(self, parent=None, *, state: dict | None = None, json_path: str | None = None):
+
+    def __init__(self, parent=None, *, state: PdfDisplayConfig | None = None, json_path: str | None = None):
         super().__init__(parent)
      
-
         self.ui = PdfDisplayUi()
         self.ui.setupUi(self)
 
         # --- Member Variables ---
         self.pdfDocument = QPdfDocument(self)
+        
         self.boxPairs = []
         self.singleBoxes = []
         self.pdfPath = ""
         self.pdf_item = None # Keep track of the PDF background item
         self.currentBox = None # Currently selected DraggableBox
         self._block_property_updates = False # Flag to prevent signal loops
-
+        self._config: PdfDisplayConfig = None
         # --- UI Element Access (using self.ui) ---
         # No need to redefine self.graphicsView etc. if BaseUi is QWidget/QMainWindow
         # Access them directly via self.ui.graphicsView, self.ui.btnLoadPDF, etc.
@@ -348,8 +353,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         if state is not None:
             self.import_state(state)
         elif json_path:
-            with open(json_path, "r", encoding="utf-8") as f:
-                self.import_state(json.load(f))
+            self.import_state(PdfDisplayConfig(json_path))
             
 
 
@@ -576,7 +580,6 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
             self.currentBox = None
             self.clear_box_properties_ui()
 
-
     # --- View Control ---
     @Slot()
     def zoom_in(self):
@@ -612,7 +615,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         if fileName:
             try:
                 
-                pdf_display_config = self.export_state()
+                pdf_display_config = self._state_to_dict()
                 pdf_display_config.save(fileName)
                 
                 print("Daten gespeichert.")
@@ -629,8 +632,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         fileName, _ = QFileDialog.getOpenFileName(self, "Konfiguration laden", "", "JSON Dateien (*.json)")
         if fileName:
             try:
-                with open(fileName, "r") as f:
-                    data = json.load(f)
+                config = PdfDisplayConfig(fileName)
             except FileNotFoundError:
                  QMessageBox.critical(self, "Fehler", f"Datei nicht gefunden:\n{fileName}")
                  return
@@ -641,7 +643,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
                 QMessageBox.critical(self, "Fehler", f"Ein unerwarteter Fehler ist aufgetreten:\n{e}")
                 return
 
-            self.import_state(data)
+            self.import_state(config)
    
 
     # --- UI Update Slots ---
@@ -816,7 +818,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         """Sammelt den kompletten GUI-Zustand als PdfDisplayConfig mittels der Config-Methoden."""
         if not self.pdfPath:
             raise RuntimeError("Es ist noch keine PDF geladen")
-
+        
         config = PdfDisplayConfig()
         # Setze Metadaten via die setter-Methoden der Config
         config.set_pdf_path(self._make_pdf_path_relative(self.pdfPath))
@@ -845,16 +847,19 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
     def _apply_state_dict(self, config: PdfDisplayConfig, clear_existing: bool = True):
         """Stellt den Zustand aus einem zuvor erzeugten PdfDisplayConfig wieder her,
         unter Nutzung der Methoden von PdfDisplayConfig."""
+        
+        self._config = config 
         if clear_existing:
             self._clear_all_boxes()
 
         # ---------- PDF ----------
-        if config.get_full_pdf_path():
-            self._load_pdf_from_path(config.get_full_pdf_path())
+        # Set the config for later use
+        if self._config.get_full_pdf_path():
+            self._load_pdf_from_path(self._config.get_full_pdf_path())
 
         # ---------- Box-Paare ----------
         max_pair_id = 0
-        for p in config.get_box_pairs():
+        for p in self._config.get_box_pairs():
             pair = BoxPair(self.scene, QPointF(0, 0))
             pair.id = p.id
             # Wiederherstellung der beiden Boxes aus den Dataclass-Dictionaries
@@ -866,7 +871,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
 
         # ---------- Einzelboxen ----------
         max_single_id = 0
-        for s in config.get_single_boxes():
+        for s in self._config.get_single_boxes():
             rect = QRectF(0, 0, s.width, s.height)
             single = SingleBox(rect)
             single.id = s.id
@@ -902,3 +907,13 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
             self.load_page(0)
         else:
             raise IOError(self.pdfDocument.errorString())
+        
+
+    def validate_changes(self) -> bool:
+        diff = DeepDiff(self._config.to_dict(), self.export_state().to_dict())
+        if diff:
+            # Changes detected, emit signal
+            self._config = 
+            self.data_changed.emit()
+            return True
+        return False

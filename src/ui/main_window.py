@@ -72,6 +72,9 @@ class MainWindow(QMainWindow):
         self.ui.action_create_pdf.triggered.connect(self.start_pdf_generation)
         self.ui.action_generate_data.triggered.connect(self.start_data_generation)
         self.ui.action_generate_add.triggered.connect(self.start_all_generation)
+        
+        self.market_facade.status_info.connect(self.status_bar.post_message)
+        
         #self.ui.action_tool.triggered.connect(self.open_about_ui)
 
         #self.ui.actionCreate_PDF.triggered.connect(self.open_pdf_display)
@@ -152,6 +155,8 @@ class MainWindow(QMainWindow):
 
     def hide_all_toolbars(self):
         self.ui.tool_export.setVisible(False)
+        self.ui.tool_project.setVisible(False)
+        self.ui.toolBar.setVisible(False)
 
     def show_toolbars(self, view_name: str):
         """
@@ -172,6 +177,9 @@ class MainWindow(QMainWindow):
 
             case "Market":
                 self.ui.tool_export.setVisible(True)
+                self.ui.tool_project.setVisible(True)
+                self.ui.toolBar.setVisible(True)
+
             case _:
                 pass
 
@@ -209,6 +217,7 @@ class MainWindow(QMainWindow):
         Starts the PDF generation process.
         This method is a placeholder for future implementation.
         """
+        self.market_facade.create_pdf_data(self.market_view)
         QMessageBox.information(self, "Info", "PDF generation started. This feature is not yet implemented.")
 
     @Slot()
@@ -217,6 +226,7 @@ class MainWindow(QMainWindow):
         Starts the generation of all data and PDF files.
         This method is a placeholder for future implementation.
         """
+        self.market_facade.create_all_data(self.market_view)
         QMessageBox.information(self, "Info", "All generation started. This feature is not yet implemented.")
 
     @Slot()
@@ -225,4 +235,17 @@ class MainWindow(QMainWindow):
         Creates a local market export.
         This method is a placeholder for future implementation.
         """
+        if not self.market_facade.is_project(self.market_view):
+              # Datei-Dialog öffnen
+            file_path, _ = QFileDialog.getSaveFileName(
+                self,
+                "Speicherort für PDF wählen",  # Titel
+                "",                            # Standard-Pfad
+                "PDF Dateien (*.pdf)"          # Filter
+            )
+
+            if not file_path:
+                # Benutzer hat abgebrochen
+                return                                
+        self.market_facade.create_market_data(self.market_view)
         QMessageBox.information(self, "Info", "Local market export created. This feature is not yet implemented.")

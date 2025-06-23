@@ -6,3 +6,4 @@ PySide6 >= 6.8.2.1
 pillow 
 svgwrite
 numpy
+deepdiff

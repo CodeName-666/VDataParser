@@ -1,5 +1,5 @@
 
-from PySide6.QtCore import QObject, Slot
+from PySide6.QtCore import QObject, Slot, Signal
 from .data_manager import DataManager
 from .market_config_handler import MarketConfigHandler
 from .singelton_meta import SingletonMeta
@@ -10,6 +10,8 @@ from typing import List, Dict, Any, Union
 
 
 class MarketObserver:
+
+    status_info = Signal(str)
 
     def __init__(self, market = None, json_path: str = ""):
         """
@@ -131,13 +133,18 @@ class MarketObserver:
         
         
 
-class MarketFacade(metaclass=SingletonMeta):
+class MarketFacade(QObject, metaclass=SingletonMeta):
     """
     A facade for market operations, providing a simplified interface to interact with market data.
     """
 
+    status_info = Signal(str)
+
     def __init__(self):
-        super().__init__()
+
+        QObject.__init__(self)
+
+
         self._market_list: List = []
 
     def load_online_market(self, market, json_path: str) -> None:
@@ -240,3 +247,15 @@ class MarketFacade(metaclass=SingletonMeta):
         :param market: The market instance for which to create all data.
         """
         print("Not implemented yet")
+
+    def is_project(self, market) -> bool:
+        """
+        Check if a project exists for the specified market.
+
+        :param market: The market instance to check.
+        :return: True if a project exists, False otherwise.
+        """
+        observer: MarketObserver = self.get_observer(market)
+        if observer:
+            return observer.project_exists()
+        return False

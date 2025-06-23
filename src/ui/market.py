@@ -14,6 +14,9 @@ from data import PdfDisplayConfig
 
 class Market(BaseUi):
 
+    pdf_display_storage_path_changed = Signal(str) # Signal for storage path changes
+    pdf_display_data_changed = Signal(object) # Signal for data changes, e.g., box updates
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.data_manager_ref: DataManager = None  # Initialize DataManager as None
@@ -26,6 +29,15 @@ class Market(BaseUi):
         self.market_setting.setup_views(self)
         self.data_view.setup_views(self)
         self.user_info.setup_views(self)
+
+    def redirect_signals(self):
+        """
+        Redirects signals from the PdfDisplay widget to the Market widget.
+        This allows the Market widget to handle PDF display events.
+        """
+        if self.pdf_display:
+            self.pdf_display.storage_path_changed.connect(self.pdf_display_storage_path_changed)
+            self.pdf_display.data_changed.connect(self.pdf_display_data_changed)
 
     @Slot(object)
     def set_default_settings(self, settings: dict):
@@ -46,13 +58,13 @@ class Market(BaseUi):
         """
         self.pdf_display.import_state(pdf_config)
 
-
     def setup_ui(self):
         self.ui.setupUi(self)
         self.market_setting = self.add_widget(self.ui.tab, MarketSetting)
         self.data_view = self.add_widget(self.ui.tab_2, DataView)
         self.user_info = self.add_widget(self.ui.tab_3, UserInfo)
         self.pdf_display = self.add_widget(self.ui.tab_4, PdfDisplay)
+        self.redirect_signals()
 
     def get_user_data(self):
         """
