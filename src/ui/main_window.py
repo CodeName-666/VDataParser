@@ -74,6 +74,7 @@ class MainWindow(QMainWindow):
         self.ui.action_generate_add.triggered.connect(self.start_all_generation)
         
         self.market_facade.status_info.connect(self.status_bar.post_message)
+        self.market_view.status_info.connect(self.status_bar.post_message)
         
         #self.ui.action_tool.triggered.connect(self.open_about_ui)
 

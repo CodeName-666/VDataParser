@@ -16,6 +16,7 @@ class Market(BaseUi):
 
     pdf_display_storage_path_changed = Signal(str) # Signal for storage path changes
     pdf_display_data_changed = Signal(object) # Signal for data changes, e.g., box updates
+    status_info = Signal(str)  # Signal for status updates
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -38,6 +39,7 @@ class Market(BaseUi):
         if self.pdf_display:
             self.pdf_display.storage_path_changed.connect(self.pdf_display_storage_path_changed)
             self.pdf_display.data_changed.connect(self.pdf_display_data_changed)
+            self.pdf_display.status_info.connect(self.status_info)
 
     @Slot(object)
     def set_default_settings(self, settings: dict):

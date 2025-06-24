@@ -31,6 +31,7 @@ class JsonHandler():
             logger (Optional[CustomLogger]): An optional CustomLogger instance.
         """
         self.logger = logger
+        self._storage_path = None # Initialize path as None
         self.json_data: Optional[Union[Dict, List]] = None # Initialize as None
 
         if isinstance(json_path_or_data, str):
@@ -147,6 +148,7 @@ class JsonHandler():
             response = requests.get(json_url, timeout=10) # Added timeout
             response.raise_for_status() # Raises HTTPError for bad responses (4xx or 5xx)
             # Use response.json() for automatic decoding and parsing
+            self.set_path_or_url(urlparse(json_url))
             return response.json()
         except requests.exceptions.Timeout:
             self._log_error("load_from_url", f"Request timed out for URL: {json_url}")
@@ -178,6 +180,7 @@ class JsonHandler():
                  raise FileNotFoundError(f"File not found at resolved path: {p}")
 
             with open(p, 'r', encoding='utf-8') as json_file: # Specify UTF-8
+                self.set_path_or_url(json_file_path)
                 return json.load(json_file)
         except FileNotFoundError as e:
             self._log_error("load_from_local", f"JSON file not found", e)
@@ -192,6 +195,18 @@ class JsonHandler():
             self._log_error("load_from_local", f"Unexpected error loading local file: {json_file_path}", e)
             return None
 
+    def set_path_or_url(self, path_or_url: str) -> None:
+        """
+        Set the path or URL for the JSON data.
+
+        Args:
+            path_or_url (str): The path or URL to set.
+        """
+        if not isinstance(path_or_url, str):
+            self._log("ERROR", "set_path_or_url requires a string path or URL.")
+            return
+        self._storage_path = path_or_url
+        self._log("DEBUG", f"Path or URL set to: {self._storage_path}")
     # get_value method seems unused, can be removed or kept if needed elsewhere
     # def get_value(self, data: Union[Dict, List], key: Union[str, int]) -> Optional[Any]: ...
 
@@ -331,11 +346,17 @@ class JsonHandler():
             self._log_error("set_key_value", f"Unexpected error setting value at path '{path_str}'", e)
             return False
 
-    def save(self, path_or_url: str) -> None:
+    def save(self, path_or_url: str = "") -> None:
         """ Saves the current JSON data to the specified local path or URL. """
         if self.json_data is None:
             self._log("ERROR", "Cannot save, no JSON data loaded.")
             return
+
+        if not path_or_url:
+            path_or_url = self._storage_path
+            self._log("INFO", f"No path or URL provided. Use {self._storage_path} to save.")
+            
+
         self._log("INFO", f"Attempting to save JSON data to: {path_or_url}")
         try:
             parsed = urlparse(path_or_url)
