@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'output_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.2
+## Created by: Qt User Interface Compiler version 6.9.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -49,6 +49,11 @@ class Ui_OutputWindow(object):
 
     def retranslateUi(self, OutputWindow):
         OutputWindow.setWindowTitle(QCoreApplication.translate("OutputWindow", u"Print Ausgabe", None))
+        OutputWindow.setStyleSheet(QCoreApplication.translate("OutputWindow", u"QWidget { font-family: \"Segoe UI\", sans-serif; font-size: 10pt; background-color: #f0f0f0; }\n"
+"QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }\n"
+"QPushButton:hover { background-color: #005a9e; }\n"
+"QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
+"QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }", None))
 #if QT_CONFIG(tooltip)
         self.logOutputTextEdit.setToolTip(QCoreApplication.translate("OutputWindow", u"Zeigt die Ausgaben an", None))
 #endif // QT_CONFIG(tooltip)

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.2
+## Created by: Qt User Interface Compiler version 6.9.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -81,6 +81,11 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Benutzer\u00fcbersicht", None))
+        MainWindow.setStyleSheet(QCoreApplication.translate("MainWindow", u"QWidget { font-family: \"Segoe UI\", sans-serif; font-size: 10pt; background-color: #f0f0f0; }\n"
+"QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }\n"
+"QPushButton:hover { background-color: #005a9e; }\n"
+"QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
+"QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }", None))
         self.action_create_pdf.setText(QCoreApplication.translate("MainWindow", u"&Create PDF", None))
         self.action_generate_data.setText(QCoreApplication.translate("MainWindow", u"&Daten Generieren", None))
         self.action_generate_add.setText(QCoreApplication.translate("MainWindow", u"&Alles generieren", None))
