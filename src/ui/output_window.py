@@ -1,15 +1,20 @@
-from PySide6.QtWidgets import QApplication, QDialog, QFileDialog
+from PySide6.QtWidgets import QDialog
 
 from .base_ui import BaseUi
 from .generated import OutputWindowUi
 
 
 class OutputWindow(BaseUi):
-
+    """Simple dialog used to present generation results."""
 
     def __init__(self, parent: QDialog | None = None) -> None:
-        super().__init__(parent)
+        """Create widgets and initialise the dialog.
 
-        # ────────────────────────── UI aufbauen ───────────────────────────
+        Parameters
+        ----------
+        parent:
+            Optional parent dialog this window belongs to.
+        """
+        super().__init__(parent)
         self.ui = OutputWindowUi()
         self.ui.setupUi(self)

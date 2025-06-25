@@ -29,7 +29,20 @@ from log import CustomLogger
 # ---------------------------------------------------------------------------
 
 def _optional(name: str, attr: str | None = None) -> Any | None:  # noqa: D401
-    """Attempt ``import name`` (optionally ``from name import attr``)."""
+    """Attempt ``import name`` (optionally ``from name import attr``).
+
+    Parameters
+    ----------
+    name:
+        Module name to import.
+    attr:
+        Optional attribute to import from the module.
+
+    Returns
+    -------
+    object | None
+        The imported module or attribute or ``None`` if unavailable.
+    """
     try:
         mod = __import__(name, fromlist=[attr] if attr else [])
         return getattr(mod, attr) if attr else mod
@@ -39,6 +52,20 @@ def _optional(name: str, attr: str | None = None) -> Any | None:  # noqa: D401
 
 
 def _bootstrap_logger(verbose: bool, level: str) -> logging.Logger:  # noqa: D401
+    """Initialise the default application logger.
+
+    Parameters
+    ----------
+    verbose:
+        Enable verbose output when ``True``.
+    level:
+        Textual log level name such as ``"INFO"``.
+
+    Returns
+    -------
+    logging.Logger
+        Configured logger instance.
+    """
     try:
       
         return CustomLogger(
@@ -69,6 +96,19 @@ def _bootstrap_logger(verbose: bool, level: str) -> logging.Logger:  # noqa: D40
 # ---------------------------------------------------------------------------
 
 def _build_cli_infra(logger: logging.Logger):  # noqa: D401
+    """Create output and progress tracking helpers for the CLI.
+
+    Parameters
+    ----------
+    logger:
+        Logger used for the created helpers.
+
+    Returns
+    -------
+    tuple
+        ``(output_interface, progress_tracker, progress_bar)`` where each element
+        may be ``None`` if the optional dependency is missing.
+    """
     out = OutputIface() if OutputIface else None
     tracker = ProgressTracker() if ProgressTracker else None
     bar = ConsoleBar(  # type: ignore[call‑arg]
@@ -82,6 +122,13 @@ def _build_cli_infra(logger: logging.Logger):  # noqa: D401
 # ---------------------------------------------------------------------------
 
 def _run_cli(parsed: Arguments):  # noqa: D401
+    """Run the application in command line mode.
+
+    Parameters
+    ----------
+    parsed:
+        Parsed command line arguments.
+    """
     logger = _bootstrap_logger(parsed.verbose, parsed.log_level)
     logger.info(f"Flea Market Generator v{get_version()} – CLI")
 
@@ -133,6 +180,7 @@ def _run_cli(parsed: Arguments):  # noqa: D401
 # ---------------------------------------------------------------------------
 
 def _run_gui():  # noqa: D401
+    """Launch the GUI version of the application."""
     if not (QApplication and MainWindow):  # pragma: no cover – env without GUI
         print("GUI‑Abhängigkeiten fehlen. Bitte PySide6 installieren.")
         sys.exit(1)
@@ -161,7 +209,13 @@ def _run_gui():  # noqa: D401
 # ---------------------------------------------------------------------------
 
 def main():  # noqa: D401
-    """Decide between CLI and GUI based on argv."""
+    """Decide between CLI and GUI based on argv.
+
+    Returns
+    -------
+    None
+        Exits the process when the application terminates.
+    """
     try:
         parsed = Arguments()
     except SystemExit as exc:

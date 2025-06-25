@@ -1,13 +1,20 @@
-from .base_ui import BaseUi
-from .generated import MarketSettingUi
 from PySide6.QtCore import QDate, QDateTime
 
-
+from .base_ui import BaseUi
+from .generated import MarketSettingUi
 
 
 class MarketSetting(BaseUi):
+    """Widget providing access to market configuration values."""
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
+        """Create widgets and connect signals.
+
+        Parameters
+        ----------
+        parent:
+            Optional parent widget.
+        """
         super().__init__(parent)
         self.ui = MarketSettingUi()
         self.market = None
@@ -15,29 +22,42 @@ class MarketSetting(BaseUi):
         self.ui.setupUi(self)
         self.connect_signals()
 
-    def connect_signals(self):
-        """Verbindet die Signale der UI-Elemente mit den entsprechenden Methoden."""
-        #self.ui.btnSaveSettings.clicked.connect(self.save_settings)
-        #self.ui.btnResetSettings.clicked.connect(self.reset_settings)
-        pass 
+    def connect_signals(self) -> None:
+        """Hook up UI signal handlers."""
+        # self.ui.btnSaveSettings.clicked.connect(self.save_settings)
+        # self.ui.btnResetSettings.clicked.connect(self.reset_settings)
+        pass
 
-    def set_default_settings(self, settings: dict):
+    def set_default_settings(self, settings: dict) -> None:
+        """Store default configuration values.
+
+        Parameters
+        ----------
+        settings:
+            Dictionary containing the default settings.
+        """
         self.default_settings = settings
 
     def setup_views(self, market_widget):
-        """Initialisiert die Einstellungen für das MarketWidget."""
+        """Initialise the view for the given ``market_widget``.
+
+        Parameters
+        ----------
+        market_widget:
+            The parent :class:`Market` instance.
+        """
         self.market = market_widget
         self.load_settings()
 
-    def load_settings(self):
-        """Lädt die Einstellungen aus dem DataManager und aktualisiert die UI."""
+    def load_settings(self) -> None:
+        """Load settings from the market widget and update the UI."""
         settings = self.market_widget().get_settings()
-        
+
         if settings.is_all_empty():
             settings = self.default_settings
         else:
             settings = settings.data[0]
-        
+
         max_stammnummern = settings.max_stammnummern
         max_artikel = settings.max_artikel
         datum_counter = settings.datum_counter
@@ -47,7 +67,7 @@ class MarketSetting(BaseUi):
         datum_flohmarkt = settings.datum_flohmarkt
         max_user_ids = settings.max_user_ids
         tabellen_prefix = settings.tabellen_prefix
-    
+
         self.ui.spinMaxStammnummer.setValue(int(max_stammnummern) if max_stammnummern.isdigit() else 0)
         self.ui.spinMaxArtikel.setValue(int(max_artikel) if max_artikel.isdigit() else 0)
         self.ui.dateTimeEditFlohmarktCountDown.setDateTime(QDateTime.fromString(datum_counter))
@@ -57,26 +77,21 @@ class MarketSetting(BaseUi):
         self.ui.lineEditTabellePrefix.setText(tabellen_prefix)
         self.ui.lineEditTabelleVerkaeufer.setText(verkaufer_liste)
         self.ui.dateTimeEditFlohmarkt.setDate(QDate.fromString(datum_flohmarkt))
-    
 
-    def save_settings(self):
-        """Speichert die aktuellen Einstellungen in den DataManager."""
+    def save_settings(self) -> None:
+        """Persist the currently shown settings."""
         settings = {
-            'setting1': self.ui.lineEditSetting1.text(),
-            'setting2': self.ui.lineEditSetting2.text(),
-            # Weitere Einstellungen können hier gespeichert werden
+            "setting1": self.ui.lineEditSetting1.text(),
+            "setting2": self.ui.lineEditSetting2.text(),
         }
         self.market_widget().save_settings(settings)
         self.load_settings()
 
-
-    def reset_settings(self):
-        """Setzt die Einstellungen auf die Standardwerte zurück."""
+    def reset_settings(self) -> None:
+        """Reset settings to their defaults."""
         self.market_widget().reset_settings()
         self.load_settings()
-        # Optional: Zeige eine Bestätigungsmeldung an
-        
 
     def market_widget(self):
-        """Gibt eine Referenz auf das MarketWidget zurück."""
+        """Return the associated market widget."""
         return self.market

@@ -1,3 +1,5 @@
+"""Factory helpers for loading the concrete database interfaces."""
+
 import importlib
 
 from .common_interface import (
@@ -14,9 +16,7 @@ from .mysql_interface import MySQLInterface
 
 # --- Import der spezifischen DB-Implementierungen ---
 def import_db_connector(db_type: str):
-    """
-    Importiert den spezifischen DB-Connector basierend auf dem Typ.
-    """
+    """Import the connector module for ``db_type`` and return its class."""
     try:
         module = importlib.import_module(f"src.backend.interface.{db_type}_interface")
         return getattr(module, f"{db_type.capitalize()}Connector")

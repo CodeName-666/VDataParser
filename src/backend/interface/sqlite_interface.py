@@ -1,4 +1,6 @@
 import sqlite3
+"""SQLite implementation of :class:`DatabaseOperations`."""
+
 import os
 
 
@@ -11,21 +13,25 @@ from .common_interface import (
 
 
 class SQLiteInterface(DatabaseOperations):
-    """Implementierung der Datenbankoperationen für SQLite."""
+    """Concrete :class:`DatabaseOperations` for SQLite databases."""
 
     def __init__(self, **kwargs):
+        """Initialise the interface and check required ``database`` parameter."""
         super().__init__(kwargs)
         if not self.params.get("database"):
-             raise ValueError("Für SQLiteConnector muss ein 'database'-Parameter (Dateipfad) angegeben werden.")
-        self._db_path_template = self.params["database"] # Store the base path
+             raise ValueError("SQLiteInterface requires a 'database' file path.")
+        self._db_path_template = self.params["database"]
 
     def get_placeholder_style(self) -> str:
+        """Return the SQLite placeholder style."""
         return "?"
 
     def get_db_specific_error_types(self) -> tuple:
+        """Return the tuple of SQLite error classes."""
         return (sqlite3.Error,)
 
     def connect_db(self, database_override: str = None):
+        """Open a SQLite connection to the given or configured file."""
         db_to_connect = database_override or self._db_path_template
         if not db_to_connect:
              raise ValueError("Kein Dateipfad für SQLite-Verbindung angegeben.")
@@ -55,6 +61,7 @@ class SQLiteInterface(DatabaseOperations):
             raise DatabaseConnectionError(f"Fehler beim Verbinden (SQLite): {e}") from e
 
     def disconnect_db(self, conn):
+        """Close the SQLite connection if open."""
         if conn:
             try:
                 conn.close()
@@ -63,8 +70,9 @@ class SQLiteInterface(DatabaseOperations):
                  print(f"Fehler beim Trennen der SQLite-Verbindung: {e}")
 
     def execute_db_query(self, conn, query: str, params: tuple = None, fetch: str = None):
+        """Execute ``query`` on ``conn`` and optionally fetch results."""
         if not conn:
-             raise DatabaseConnectionError("Keine aktive SQLite-Verbindung für Query.")
+             raise DatabaseConnectionError("No active SQLite connection for query.")
 
         # Adapt placeholder style for SQLite
         internal_query = query.replace('%s', '?')
@@ -120,12 +128,13 @@ class SQLiteInterface(DatabaseOperations):
                      print(f"Warnung: Fehler beim Schließen des SQLite Cursors im Finally-Block: {final_close_e}")
 
     def check_database_exists(self, db_name: str) -> bool:
-        # For SQLite, existence is just file existence
+        """Return ``True`` if the SQLite file exists."""
         exists = os.path.exists(db_name)
         print(f"SQLite-Datenbankdatei '{db_name}' existiert: {exists}")
         return exists
 
     def create_db(self, new_db_name: str):
+        """Create a new SQLite database file if needed."""
         if not new_db_name:
              raise ValueError("Dateipfad (new_db_name) für SQLite muss angegeben werden.")
         if os.path.exists(new_db_name):
