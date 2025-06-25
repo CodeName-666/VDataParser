@@ -9,7 +9,7 @@ from objects import FleatMarket
 from typing import List, Dict, Any, Union
 
 
-class MarketObserver:
+class MarketObserver(QObject):
 
     status_info = Signal(str, str)
 
@@ -19,6 +19,7 @@ class MarketObserver:
         Initialize the MarketObserver with a JSON path.
         :param json_path: Path to the JSON file.
         """
+        QObject.__init__(self)
         self.market_config_handler: MarketConfigHandler = MarketConfigHandler()
         self.data_manager: DataManager = DataManager()
         self.pdf_display_config_loader: PdfDisplayConfig = PdfDisplayConfig()
