@@ -1,47 +1,62 @@
-# Python Project: Flea Market Data Generator
+# VDataParser – Flohmarkt Daten und PDF Generator
 
-## Projektbeschreibung
+## Projektüberblick
 
-Dieses Python-Projekt ist darauf ausgelegt, Verkaufsdaten und Artikellisten zu generieren, die in einem Flohmarkt- oder Verkaufsumfeld verwendet werden können. Es unterstützt die Verwaltung von Artikeln, Verkäufern und Preislisten. Das Projekt bietet Funktionen zum Laden von Daten aus JSON-Dateien und zur Generierung von Berichten oder Datenlisten in verschiedenen Formaten.
+Dieses Repository enthält eine Python‑Anwendung zur Verwaltung und Aufbereitung von Flohmarkt‑Daten. Aus einer JSON‑Datei oder einer Datenbank werden Verkäufer, Artikellisten sowie weitere Informationen eingelesen und in verschiedene Ausgabeformate überführt. Neben klassischen `.dat`‑Dateien kann das Programm auch Abholbestätigungen als PDF erzeugen. Die Anwendung besitzt einen Kommandozeilenmodus und eine Qt‑basierte GUI.
 
-## Architektur
+## Installation
 
-Das Projekt ist modular aufgebaut und besteht aus mehreren Komponenten:
+1. Python 3.10 oder neuer installieren.
+2. Abhängigkeiten mittels `pip` einrichten:
+   ```bash
+   pip install -r src/requirements.txt
+   ```
+   Für die optionalen MySQL‑Funktionen muss zusätzlich `mysql-connector-python` vorhanden sein.
 
-- **main.py**: Der Einstiegspunkt des Programms. Dieser führt die verschiedenen Module und Generatoren zusammen.
-- **data**: Beinhaltet alle Klassen und Funktionen, die für das Laden und Verarbeiten von Daten aus externen Dateien (z. B. JSON) notwendig sind.
-  - `base_data.py`: Basisklasse für alle Datenmodelle.
-  - `data_class_definition.py`: Definiert die Datenklassen für das Projekt.
-  - `json_loader.py`: Lädt Daten aus JSON-Dateien.
-- **generator**: Enthält verschiedene Generatoren zur Erstellung von Daten wie Artikellisten, Preislisten oder Verkäufern.
-  - `data_generator.py`: Verantwortlich für die Generierung von Datenobjekten.
-  - `file_generator.py`: Erzeugt Dateien basierend auf den generierten Daten.
-  - `price_list_generator.py`: Erzeugt Preislisten für Artikel.
-  - `seller_data_generator.py`: Generiert Verkäuferdaten.
-- **log**: Loggt wichtige Ereignisse und Informationen, um die Nachverfolgbarkeit zu gewährleisten.
-  - `logger.py`: Enthält die Logik zur Protokollierung.
-- **objects**: Definiert die Hauptobjekte wie Artikel, Verkäufer und Flohmarkt, die in den Datenmodellen verwendet werden.
-  - `article.py`: Modelliert einen Verkaufsartikel.
-  - `fleat_market.py`: Modelliert einen Flohmarkt.
-  - `main_number.py`: Beinhaltet die Logik für die Hauptnummernverwaltung.
-  - `seller.py`: Modelliert einen Verkäufer.
+## Nutzung
 
-## Implementierung
+Das Programm kann entweder als CLI oder über die GUI gestartet werden. Wird beim Aufruf ein JSON‑Pfad übergeben, startet automatisch der CLI‑Modus. Ohne Parameter öffnet sich die GUI.
 
-### Installation
-
-Um das Projekt auszuführen, benötigen Sie Python 3.x und einige Abhängigkeiten, die in der Datei `requirements.txt` aufgelistet sein sollten. Wenn keine vorhanden ist, können Sie die Abhängigkeiten manuell installieren:
-
+### CLI
 ```bash
-pip install -r requirements.txt
-
+python -m src.main -f <path/to/data.json> [-p <out-dir>] [--pdf-template <template.pdf>]
 ```
+Eine ausführliche Hilfe zu allen Optionen erhält man über `-h`.
 
-### Ausführung
-
-Das Projekt kann über die main.py ausgeführt werden. Dies ist der zentrale Startpunkt für alle Datenoperationen und Generierungen.
-
+### GUI
 ```bash
-python main.py
-
+python -m src.main
 ```
+In der grafischen Oberfläche lassen sich Projekte laden, Daten kontrollieren und alle Ausgabedateien erzeugen.
+
+## Projektstruktur
+
+- **src/main.py** – Einstiegspunkt, entscheidet je nach Argumenten zwischen CLI und GUI.
+- **src/args.py** – Sammelt sämtliche Kommandozeilenparameter.
+- **src/backend/** – Datenbankschicht mit einheitlicher Schnittstelle (`DatabaseOperations`). Implementierungen für SQLite und MySQL ermöglichen den Austausch der konkreten Technik (Strategy‑Pattern).
+- **src/data/** – Laden und Aufbereiten der JSON‑ bzw. Projektdaten. Enthält u. a. `DataManager`, `MarketConfigHandler` und `PdfDisplayConfig`.
+- **src/generator/** – Verschiedene Generatoren zum Erstellen von Dateien (Preislisten, Verkäufer‑ und Statistikdaten sowie PDFs). `FileGenerator` koordiniert alle Untergeneratoren.
+- **src/objects/** – Domänenobjekte wie `Seller`, `Article` und `MainNumber` mitsamt zugehöriger Dataklassen.
+- **src/display/** – Abstraktionen für Fortschrittsbalken und Ausgabekanäle (Konsole oder Qt Widgets).
+- **src/ui/** – Qt‑Oberfläche.
+- **src/log/** – Schlankes Logging‑System (`CustomLogger`).
+
+## Architektur und wichtige Techniken
+
+- **Singleton**: `SingletonMeta` garantiert einzelne Instanzen für Klassen wie `MarketFacade`. Dadurch existiert die Anwendung global nur einmal pro Markt‑Facade.
+- **Facade**: `MarketFacade` kapselt komplexe Abläufe (Laden von Projekten, Erzeugen der Dateien) hinter einer vereinfachten Schnittstelle für die GUI.
+- **Observer (Signal/Slot)**: In der GUI kommunizieren Klassen über Qt‑Signale (`data_loaded`, `status_info`). So werden Statusänderungen an die Oberfläche weitergereicht.
+- **Strategy**: Für Datenbankzugriffe wird über `DatabaseOperations` eine gemeinsame Schnittstelle definiert. `SQLiteInterface` und `MySQLInterface` implementieren dieselben Methoden, sodass `BasicDBConnector` beide Varianten nutzen kann.
+- **Dataclasses**: Datenstrukturen wie Artikel oder Verkäufer basieren auf Python‑`dataclasses` und erlauben eine einfache Serialisierung/Deserialisierung.
+- **Progress‑Tracker**: Über abstrakte Tracker und Progressbars kann der Fortschritt sowohl in der Konsole als auch in der GUI angezeigt werden.
+
+## Hinweise zum Einsatz
+
+- Die JSON‑Struktur des Flohmarktes entspricht den Klassen in `src/objects/data_class_definition.py`. Beispiel‑ und Testdateien befinden sich im Repository (`test_db.json`, `test_project.json`).
+- Pfade im Projekt (z. B. zu PDF‑Vorlagen) werden relativ zum Arbeitsverzeichnis aufgelöst. Stellen Sie sicher, dass Vorlagen vorhanden sind.
+- Bei Verwendung von MySQL müssen Zugangsdaten in der Konfiguration hinterlegt sein.
+- Fehler und Statusmeldungen werden je nach Modus auf der Konsole, in Logdateien oder innerhalb der GUI ausgegeben.
+
+## Weiterführende Informationen
+
+Die detaillierte API der einzelnen Module ist in den Quelltexten kommentiert. Für eigene Anpassungen können neue Generatoren oder Datenquellen über die vorhandenen Abstraktionen implementiert werden.
