@@ -147,6 +147,11 @@ def _run_gui():  # noqa: D401
     app.setOrganizationName("SeidC")
     app.setOrganizationDomain("seidc.de")
     app.setStyle("Fusion")  # Set a default style
+    # Load the shared stylesheet for a modern look
+    style_file = Path(__file__).parent / "ui" / "design" / "modern.qss"
+    if style_file.exists():
+        with open(style_file, "r", encoding="utf-8") as fh:
+            app.setStyleSheet(fh.read())
     
     
     #win = MainWindow(logger=logger)  # type: ignore[call‑arg]

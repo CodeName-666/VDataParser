@@ -1,0 +1,42 @@
+/* Modern style for all UI dialogs */
+QWidget {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 10pt;
+    background-color: #fafafa;
+}
+
+QPushButton {
+    border: 1px solid #0078d7;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background-color: #0078d7;
+    color: white;
+}
+
+QPushButton:hover {
+    background-color: #005a9e;
+}
+
+QPushButton:disabled {
+    background-color: #c0c0c0;
+    border-color: #c0c0c0;
+}
+
+QLineEdit, QPlainTextEdit, QTextEdit {
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    padding: 4px;
+    background-color: white;
+}
+
+QGroupBox {
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    margin-top: 6px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 6px;
+}
