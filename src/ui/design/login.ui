@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>217</width>
-    <height>186</height>
+    <height>193</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -82,7 +82,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QToolButton" name="toolButton">
+      <widget class="QPushButton" name="pushButton">
        <property name="text">
         <string>...</string>
        </property>
@@ -102,7 +102,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
       </spacer>
      </item>
      <item>
-      <widget class="QToolButton" name="toolButtonLogin">
+      <widget class="QPushButton" name="pushButtonLogin">
        <property name="text">
         <string>Einloggen</string>
        </property>
