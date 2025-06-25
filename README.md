@@ -87,6 +87,12 @@ Weitere Beispiele und Testskripte liegen im Verzeichnis `examples` bzw. `test_co
 - **Observer (Signal/Slot)**: Durch die Qt-Signale werden Statusmeldungen und Daten zwischen Komponenten ausgetauscht (z. B. in `DataManager.data_loaded`).
 - **Template Method**: Die Klassen in `generator/` erben von `DataGenerator` und implementieren jeweils ihre spezifische `generate` Methode.
 - **Abstraktion/Adapter**: In `display/` sind Schnittstellen für Fortschrittsbalken und Ausgaben definiert, wodurch sowohl Konsolen- als auch GUI-Varianten genutzt werden können.
+## Architekturdiagramme
+
+- [UML Klassendiagramm](architecture/uml_class_diagram.md)
+- [Abhängigkeitsdiagramm](architecture/dependency_diagram.md)
+- [Architektur-Klassendiagramm](architecture/architecture_class_diagram.md)
+
 
 ## Tests
 
