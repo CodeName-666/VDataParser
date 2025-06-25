@@ -11,7 +11,7 @@ from typing import List, Dict, Any, Union
 
 class MarketObserver:
 
-    status_info = Signal(str)
+    status_info = Signal(str, str)
 
     def __init__(self, market = None, json_path: str = ""):
         """
@@ -64,7 +64,7 @@ class MarketObserver:
         """
         ret = False
         if json_path:
-            # Load the market configuration from the provided JSON path    
+            # Load the market configuration from the provided JSON path
             ret = self.market_config_handler.load(json_path)
             if ret:
                 self._project_exists = True
@@ -75,8 +75,13 @@ class MarketObserver:
                 if ret:
                     # Setup the FleatMarket with the loaded data
                     self.setup_data_generation()
+                    self.status_info.emit("INFO", f"Projekt geladen: {json_path}")
+                else:
+                    self.status_info.emit("ERROR", "Daten konnten nicht geladen werden")
                 # Load the PDF display configuration
                 self.pdf_display_config_loader.load(pdf_display_config)
+            else:
+                self.status_info.emit("ERROR", "Projektkonfiguration konnte nicht geladen werden")
 
         return ret
 
@@ -92,6 +97,9 @@ class MarketObserver:
             if ret:
                 # Setup the FleatMarket with the loaded data
                 self.setup_data_generation()
+                self.status_info.emit("INFO", f"Export geladen: {json_path}")
+            else:
+                self.status_info.emit("ERROR", "Export konnte nicht geladen werden")
 
             self.market_config_handler.set_full_market_path(json_path)
 
@@ -138,7 +146,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
     A facade for market operations, providing a simplified interface to interact with market data.
     """
 
-    status_info = Signal(str)
+    status_info = Signal(str, str)
 
     def __init__(self):
 
@@ -222,7 +230,11 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         """
         print("Not implemented yet")
         observer = self.get_observer(market)
-        observer.generate_pdf_data()
+        if observer:
+            observer.generate_pdf_data()
+            self.status_info.emit("INFO", "PDF Daten generiert")
+        else:
+            self.status_info.emit("ERROR", "Kein Observer gefunden")
     
     @Slot(object)
     def create_market_data(self, market) -> None:
@@ -235,8 +247,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         observer = self.get_observer(market)
         if observer:
             market.set_data(observer.get_data())
+            self.status_info.emit("INFO", "Marktdaten generiert")
         else:
-            raise ValueError("Market observer not found.") 
+            self.status_info.emit("ERROR", "Market observer not found")
         
 
     @Slot(object)
@@ -247,6 +260,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         :param market: The market instance for which to create all data.
         """
         print("Not implemented yet")
+        self.status_info.emit("INFO", "Alle Daten erstellt")
 
     def is_project(self, market) -> bool:
         """

@@ -318,7 +318,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
     exit_requested = Signal()
     storage_path_changed = Signal(str) # Signal for storage path changes
     data_changed = Signal(object) # Signal for data changes, e.g., box updates
-    status_info = Signal(str) # Signal for status updates
+    status_info = Signal(str, str)  # Signal for status updates
 
     def __init__(self, parent=None, *, state: PdfDisplayConfig | None = None, json_path: str | None = None):
         super().__init__(parent)
@@ -480,7 +480,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
     def add_single_box(self):
         """Adds a new single box to the scene and list."""
         if not self.pdf_item:
-            self.status_info.emit("Bitte laden Sie zuerst eine PDF-Datei.")
+            self.status_info.emit("WARNING", "Bitte laden Sie zuerst eine PDF-Datei.")
             QMessageBox.warning(self, "Aktion nicht möglich", "Bitte laden Sie zuerst eine PDF-Datei.")
             return
         view_rect = self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect()).boundingRect()
@@ -617,8 +617,8 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
                 
                 pdf_display_config = self._state_to_dict()
                 pdf_display_config.save(fileName)
-                self.storage_path_changed.emit(fileName)                
-                self.status_info.emit(f"Konfiguration gespeichert: {fileName}")
+                self.storage_path_changed.emit(fileName)
+                self.status_info.emit("INFO", f"Konfiguration gespeichert: {fileName}")
                 QMessageBox.information(self, "Erfolg", f"Konfiguration erfolgreich gespeichert:\n{fileName}")
             except IOError as e:
                 QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
@@ -631,7 +631,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         try:
             config = self._state_to_dict()
             self.data_changed.emit(config)  # Emit data changed signal           
-            self.status_info.emit(f"Konfiguration gespeichert")
+            self.status_info.emit("INFO", "Konfiguration gespeichert")
         except IOError as e:
             QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
         except json.JSONDecodeError as e:
@@ -645,7 +645,7 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         if fileName:
             try:
                 config = PdfDisplayConfig(fileName)
-                self.status_info.emit(f"Konfiguration geladen: {fileName}")
+                self.status_info.emit("INFO", f"Konfiguration geladen: {fileName}")
             except FileNotFoundError:
                  QMessageBox.critical(self, "Fehler", f"Datei nicht gefunden:\n{fileName}")
                  return

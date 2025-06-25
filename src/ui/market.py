@@ -16,7 +16,7 @@ class Market(BaseUi):
 
     pdf_display_storage_path_changed = Signal(str) # Signal for storage path changes
     pdf_display_data_changed = Signal(object) # Signal for data changes, e.g., box updates
-    status_info = Signal(str)  # Signal for status updates
+    status_info = Signal(str, str)  # Signal for status updates
 
     def __init__(self, parent=None):
         super().__init__(parent)
