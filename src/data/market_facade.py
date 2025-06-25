@@ -1,4 +1,6 @@
 
+"""High level facade combining various market related components."""
+
 from PySide6.QtCore import QObject, Slot, Signal
 from .data_manager import DataManager
 from .market_config_handler import MarketConfigHandler

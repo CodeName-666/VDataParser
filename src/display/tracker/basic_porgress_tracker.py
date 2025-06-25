@@ -7,22 +7,10 @@ from .progress_tracker_abstraction import ProgressTrackerAbstraction
 
 
 class BasicProgressTracker(ProgressTrackerAbstraction):
-    """
-    Eine grundlegende, Thread-sichere Implementierung des ProgressTrackerInterface.
-    Verwaltet den Zustand und bietet Methoden zur Aktualisierung und Abfrage.
-    Diese Implementierung benachrichtigt nicht aktiv über Änderungen (Polling-basiert).
-    """
+    """Thread safe tracker storing progress state locally."""
 
     def __init__(self, total: int = 100):
-        """
-        Initialisiert den Tracker.
-
-        Args:
-            total (int): Der Gesamtwert, der 100% Fortschritt entspricht. Muss >= 0 sein.
-
-        Raises:
-            ValueError: Wenn total negativ ist.
-        """
+        """Initialise the tracker with ``total`` steps."""
         if total < 0:
             raise ValueError("Total muss nicht-negativ sein.")
         self._total = total
@@ -35,7 +23,7 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
         self._calculate_percentage_unsafe()
 
     def reset(self, total: Optional[int] = None) -> None:
-        """Setzt den Fortschritt zurück und optional den Gesamtwert neu."""
+        """Reset progress and optionally set a new ``total`` value."""
         with self._lock:
             self._current = 0
             self._error = None
@@ -49,7 +37,7 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
             self._calculate_percentage_unsafe()
 
     def increment(self, value: int = 1) -> None:
-        """Erhöht den aktuellen Fortschrittswert."""
+        """Increase progress by ``value``."""
         if value < 0:
             raise ValueError(
                 f"Versuch, Fortschritt um negativen Wert {value} zu erhöhen.")
@@ -59,7 +47,7 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
             self._calculate_percentage_unsafe()
 
     def set_progress(self, current: int) -> None:
-        """Setzt den aktuellen Fortschrittswert direkt."""
+        """Directly set the current progress value."""
         if current < 0:
             raise ValueError(
                 f"Versuch, Fortschritt auf negativen Wert {current} zu setzen.")
@@ -69,7 +57,7 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
             self._calculate_percentage_unsafe()
 
     def set_percentage(self, percentage: int) -> None:
-        """Setzt den Prozentsatz direkt (0-100). Passt 'current' näherungsweise an."""
+        """Set the completion percentage (0-100)."""
         if not (0 <= percentage <= 100):
             raise ValueError(
                 f"Versuch, Prozentsatz auf ungültigen Wert {percentage} zu setzen (muss 0-100 sein).")
@@ -90,16 +78,14 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
             self._calculate_percentage_unsafe()
 
     def set_error(self, error: Exception) -> None:
-        """Markiert den Tracker mit einem Fehler."""
+        """Store ``error`` and mark progress as failed."""
         with self._lock:
             self._error = error
             # Optional: Setze Prozentsatz auf bestimmten Wert bei Fehler? Z.B. 100 oder 0?
             # Hängt vom Anwendungsfall ab. Aktuell bleibt er unverändert.
 
     def _calculate_percentage_unsafe(self) -> None:
-        """
-        Berechnet den Prozentsatz. Muss innerhalb eines Locks aufgerufen werden!
-        """
+        """Recompute the percentage. Caller must hold the lock."""
         if self._total > 0:
             # Begrenze Prozentsatz auf 0-100
             perc = (self._current / self._total) * 100
@@ -112,13 +98,13 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
 
     @property
     def current(self) -> int:
-        """Gibt den aktuellen Fortschrittswert zurück."""
+        """Return the current progress value."""
         with self._lock:
             return self._current
 
     @property
     def total(self) -> int:
-        """Gibt den Gesamtwert zurück, der 100% entspricht."""
+        """Return the maximum progress value."""
         # Total ist nach Initialisierung konstant (außer bei reset), kein Lock nötig?
         # Sicherer mit Lock, falls total doch änderbar gemacht wird.
         with self._lock:
@@ -126,7 +112,7 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
 
     @property
     def percentage(self) -> int:
-        """Gibt den aktuellen Fortschritt in Prozent (0-100) zurück."""
+        """Return progress as percentage (0‑100)."""
         with self._lock:
             # Stelle sicher, dass der Wert aktuell ist, falls z.B. nur current geändert wurde
             # _calculate_percentage_unsafe() # Wird jetzt in increment/set_progress etc. aufgerufen
@@ -134,18 +120,18 @@ class BasicProgressTracker(ProgressTrackerAbstraction):
 
     @property
     def error(self) -> Optional[Exception]:
-        """Gibt den aufgetretenen Fehler zurück oder None."""
+        """Return the stored error if any."""
         with self._lock:
             return self._error
 
     @property
     def has_error(self) -> bool:
-        """Gibt True zurück, wenn ein Fehler aufgetreten ist."""
+        """Return ``True`` if an error was set."""
         with self._lock:
             return self._error is not None
 
     def get_state(self) -> Dict[str, Any]:
-        """Gibt den aktuellen Zustand als Dictionary zurück."""
+        """Return the current state as a dictionary."""
         with self._lock:
             # Stelle sicher, dass % aktuell ist (obwohl es durch andere Methoden aktuell sein sollte)
             # self._calculate_percentage_unsafe() # Normalerweise nicht nötig, da in settern/increment aufgerufen

@@ -13,8 +13,16 @@ from PySide6.QtWidgets import QStyle
 
 
 class StatusBar(QStatusBar):
+    """Custom status bar with message queue and connection indicator."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
+        """Initialise labels, LED and internal timers.
+
+        Parameters
+        ----------
+        parent:
+            Optional parent widget.
+        """
         super().__init__(parent)
         self.setObjectName("statusbar")
         self.setSizeGripEnabled(True)
@@ -61,27 +69,39 @@ class StatusBar(QStatusBar):
         self._history_popup: QWidget | None = None
         self.info_label.mousePressEvent = self._on_info_label_clicked
 
-    def set_led_color(self, color):
-        self.status_led.setStyleSheet(f"""
+    def set_led_color(self, color: str) -> None:
+        """Change the LED color of the connection indicator.
+
+        Parameters
+        ----------
+        color:
+            Name of the CSS color to apply.
+        """
+        self.status_led.setStyleSheet(
+            f"""
             QLabel {{
                 background-color: {color};
                 border-radius: 6px;
                 border: 1px solid black;
             }}
-        """)
+            """
+        )
 
-    def set_connected(self):
+    def set_connected(self) -> None:
+        """Switch the indicator to the connected state."""
         self.connection_label.setText("Verbindung: Aktiv")
         self.set_led_color("green")
-        # Beispiel-Nachricht bei Verbindung
+        # Inform the user about the new connection
         self.post_message("Datenbank verbunden")
 
     def _add_to_history(self, message: str, level: str) -> None:
+        """Store ``message`` in the internal history list."""
         self._message_history.append((message, level))
         if len(self._message_history) > self._history_limit:
             self._message_history.pop(0)
 
     def _enqueue_message(self, message: str, level: str) -> None:
+        """Add ``message`` to the queue and trigger display if idle."""
         self._add_to_history(message, level)
         self._message_queue.append((message, level))
         if not self._message_timer.isActive():
@@ -89,7 +109,15 @@ class StatusBar(QStatusBar):
 
     @Slot(str, str)
     def handle_status(self, level: str, message: str) -> None:
-        """General entry point for status messages."""
+        """General entry point for status messages.
+
+        Parameters
+        ----------
+        level:
+            Severity level of the message (``info``, ``warning`` or ``error``).
+        message:
+            The human readable text.
+        """
         level = level.lower()
         if level == "warning":
             self.post_warning(message)
@@ -100,20 +128,21 @@ class StatusBar(QStatusBar):
 
     @Slot(str)
     def post_message(self, message: str) -> None:
-        """Adds an informational message to the queue."""
+        """Add an informational message to the queue."""
         self._enqueue_message(message, "info")
 
     @Slot(str)
     def post_warning(self, message: str) -> None:
-        """Adds a warning message to the queue."""
+        """Add a warning message to the queue."""
         self._enqueue_message(message, "warning")
 
     @Slot(str)
     def post_error(self, message: str) -> None:
-        """Adds an error message to the queue."""
+        """Add an error message to the queue."""
         self._enqueue_message(message, "error")
 
-    def _show_next_message(self):
+    def _show_next_message(self) -> None:
+        """Display the next queued message if available."""
         if self._message_queue:
             text, _level = self._message_queue.pop(0)
             self.info_label.setText(text)
@@ -121,12 +150,20 @@ class StatusBar(QStatusBar):
         else:
             self.info_label.setText("")
 
-    def _on_info_label_clicked(self, event):
+    def _on_info_label_clicked(self, event) -> None:
+        """Open the history popup when the label is clicked.
+
+        Parameters
+        ----------
+        event:
+            Mouse event triggering the handler.
+        """
         self._show_history_popup()
         if event:
             event.accept()
 
-    def _show_history_popup(self):
+    def _show_history_popup(self) -> None:
+        """Display a popup with the last messages that were shown."""
         if self._history_popup is None:
             self._history_popup = QWidget(self, Qt.Popup)
             layout = QVBoxLayout(self._history_popup)

@@ -1,5 +1,7 @@
 
 
+"""MySQL implementation of :class:`DatabaseOperations`."""
+
 from .common_interface import (
     DatabaseConnectionError,
     DatabaseQueryError,
@@ -28,27 +30,31 @@ except AttributeError:
 
 # --- Concrete MySQL Implementation ---
 class MySQLInterface(DatabaseOperations):
-    """Implementierung der Datenbankoperationen für MySQL."""
+    """Concrete :class:`DatabaseOperations` for MySQL databases."""
 
     def __init__(self, **kwargs):
+        """Initialise the interface and verify the ``mysql-connector`` package."""
         super().__init__(kwargs)
         if not MYSQL_AVAILABLE:
-            raise ImportError("MySQLConnector erfordert installiertes und funktionsfähiges 'mysql-connector-python'.")
-        # Basic check for essential params
-        if not self.params.get("user"): # Password might be optional depending on MySQL setup
-             print("WARNUNG: MySQL 'user' nicht in den Parametern gefunden.")
-             # raise ValueError("MySQL 'user' Parameter ist erforderlich.")
+            raise ImportError(
+                "MySQLInterface requires a functional 'mysql-connector-python' installation."
+            )
+        if not self.params.get("user"):
+            # Password might be optional depending on MySQL setup
+            print("WARNING: MySQL 'user' parameter not provided.")
 
 
     def get_placeholder_style(self) -> str:
+        """Return the placeholder style used by MySQL."""
         return "%s"
 
     def get_db_specific_error_types(self) -> tuple:
-        # Ensure mysql_connector_lib is not None before accessing Error
+        """Return the tuple of MySQL error classes."""
         return (mysql_connector_lib.Error,) if mysql_connector_lib else tuple()
 
     def connect_db(self, database_override: str = None):
-        db_to_connect = database_override or self.params.get("database") # Can be None
+        """Create a connection to the configured MySQL server."""
+        db_to_connect = database_override or self.params.get("database")  # Can be None
 
         connect_args = {
             "host": self.params.get("host", "localhost"),
@@ -70,6 +76,7 @@ class MySQLInterface(DatabaseOperations):
              raise DatabaseConnectionError(f"Unerwarteter Fehler beim MySQL Verbindungsaufbau: {e}") from e
 
     def disconnect_db(self, conn):
+        """Close an existing MySQL connection."""
         if conn and conn.is_connected():
             try:
                 conn.close()
@@ -81,6 +88,7 @@ class MySQLInterface(DatabaseOperations):
 
 
     def execute_db_query(self, conn, query: str, params: tuple = None, fetch: str = None):
+        """Execute ``query`` and optionally fetch results."""
         if not conn or not conn.is_connected():
              raise DatabaseConnectionError("Keine aktive MySQL-Verbindung für Query.")
 
@@ -141,6 +149,7 @@ class MySQLInterface(DatabaseOperations):
 
 
     def check_database_exists(self, db_name: str) -> bool:
+        """Return ``True`` if ``db_name`` exists on the server."""
         temp_conn = None
         cursor = None
         try:
@@ -174,6 +183,7 @@ class MySQLInterface(DatabaseOperations):
                 except Exception as conn_e: print(f"Warnung: Fehler beim Schließen der temp. MySQL-Verbindung: {conn_e}")
 
     def create_db(self, new_db_name: str):
+        """Create ``new_db_name`` if it does not already exist."""
         # Check existence first using the method above
         if self.check_database_exists(new_db_name):
              print(f"MySQL-Datenbank '{new_db_name}' existiert bereits.")
