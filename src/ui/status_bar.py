@@ -87,18 +87,29 @@ class StatusBar(QStatusBar):
         if not self._message_timer.isActive():
             self._show_next_message()
 
+    @Slot(str, str)
+    def handle_status(self, level: str, message: str) -> None:
+        """General entry point for status messages."""
+        level = level.lower()
+        if level == "warning":
+            self.post_warning(message)
+        elif level == "error":
+            self.post_error(message)
+        else:
+            self.post_message(message)
+
     @Slot(str)
-    def post_message(self, message: str):
+    def post_message(self, message: str) -> None:
         """Adds an informational message to the queue."""
         self._enqueue_message(message, "info")
 
     @Slot(str)
-    def post_warning(self, message: str):
+    def post_warning(self, message: str) -> None:
         """Adds a warning message to the queue."""
         self._enqueue_message(message, "warning")
 
     @Slot(str)
-    def post_error(self, message: str):
+    def post_error(self, message: str) -> None:
         """Adds an error message to the queue."""
         self._enqueue_message(message, "error")
 
