@@ -1,47 +1,101 @@
-# Python Project: Flea Market Data Generator
+# Flea Market Data Generator
 
-## Projektbeschreibung
+Dieses Projekt dient zur Erzeugung von Datendateien und PDF-Dokumenten für Flohmarktveranstaltungen. Anhand einer JSON-Eingabedatei werden Informationen über Verkäufer und deren Artikellisten verarbeitet und im Anschluss verschiedene Ausgabedateien erzeugt.
 
-Dieses Python-Projekt ist darauf ausgelegt, Verkaufsdaten und Artikellisten zu generieren, die in einem Flohmarkt- oder Verkaufsumfeld verwendet werden können. Es unterstützt die Verwaltung von Artikeln, Verkäufern und Preislisten. Das Projekt bietet Funktionen zum Laden von Daten aus JSON-Dateien und zur Generierung von Berichten oder Datenlisten in verschiedenen Formaten.
+## Funktionsüberblick
 
-## Architektur
+- Erzeugen von Preislisten, Kundendaten und Statistikdateien (jeweils im `.dat` Format)
+- Generierung von Abholbestätigungen als PDF
+- Sowohl reine Kommandozeilenausführung als auch ein grafisches Qt-basiertes Interface
+- Fortschrittsanzeige über Console- oder GUI-Progressbar
 
-Das Projekt ist modular aufgebaut und besteht aus mehreren Komponenten:
+## Installationshinweise
 
-- **main.py**: Der Einstiegspunkt des Programms. Dieser führt die verschiedenen Module und Generatoren zusammen.
-- **data**: Beinhaltet alle Klassen und Funktionen, die für das Laden und Verarbeiten von Daten aus externen Dateien (z. B. JSON) notwendig sind.
-  - `base_data.py`: Basisklasse für alle Datenmodelle.
-  - `data_class_definition.py`: Definiert die Datenklassen für das Projekt.
-  - `json_loader.py`: Lädt Daten aus JSON-Dateien.
-- **generator**: Enthält verschiedene Generatoren zur Erstellung von Daten wie Artikellisten, Preislisten oder Verkäufern.
-  - `data_generator.py`: Verantwortlich für die Generierung von Datenobjekten.
-  - `file_generator.py`: Erzeugt Dateien basierend auf den generierten Daten.
-  - `price_list_generator.py`: Erzeugt Preislisten für Artikel.
-  - `seller_data_generator.py`: Generiert Verkäuferdaten.
-- **log**: Loggt wichtige Ereignisse und Informationen, um die Nachverfolgbarkeit zu gewährleisten.
-  - `logger.py`: Enthält die Logik zur Protokollierung.
-- **objects**: Definiert die Hauptobjekte wie Artikel, Verkäufer und Flohmarkt, die in den Datenmodellen verwendet werden.
-  - `article.py`: Modelliert einen Verkaufsartikel.
-  - `fleat_market.py`: Modelliert einen Flohmarkt.
-  - `main_number.py`: Beinhaltet die Logik für die Hauptnummernverwaltung.
-  - `seller.py`: Modelliert einen Verkäufer.
-
-## Implementierung
-
-### Installation
-
-Um das Projekt auszuführen, benötigen Sie Python 3.x und einige Abhängigkeiten, die in der Datei `requirements.txt` aufgelistet sein sollten. Wenn keine vorhanden ist, können Sie die Abhängigkeiten manuell installieren:
+1. Python 3.11 oder neuer installieren
+2. Abhängigkeiten installieren:
 
 ```bash
-pip install -r requirements.txt
-
+pip install -r src/requirements.txt
 ```
 
-### Ausführung
+Die Abhängigkeiten umfassen unter anderem `PySide6` für die GUI, `pypdf` und `reportlab` für die PDF-Erzeugung sowie `mysql-connector-python` für optionale Datenbankanbindung.
 
-Das Projekt kann über die main.py ausgeführt werden. Dies ist der zentrale Startpunkt für alle Datenoperationen und Generierungen.
+## Verwendung
+
+### Kommandozeile
+
+Das Programm kann direkt über `src/main.py` gestartet werden. Ohne Parameter wird die grafische Oberfläche geöffnet. Durch Angabe einer JSON-Datei lassen sich alle Dateien auch rein über die CLI generieren:
 
 ```bash
-python main.py
+python src/main.py -f <path/to/data.json> -p <output/dir>
+```
+
+Wichtige Optionen:
+
+- `-f`, `--file` – Pfad zur Eingabe-JSON (erforderlich im CLI-Modus)
+- `-p`, `--path` – Zielverzeichnis für die generierten Dateien
+- `--seller-filename` – Basisname der Kundendatei (Standard `kundendaten`)
+- `--price-filename` – Basisname der Preisliste (Standard `preisliste`)
+- `--stats-filename` – Basisname der Statistikdatei (Standard `versand`)
+- `--pdf-template` – Hintergrund-PDF für die Abholbestätigungen
+- `--pdf-output` – Dateiname der erzeugten PDF
+- `--verbose` – detailliertere Konsolenausgabe
+
+```bash
+python src/main.py -h  # zeigt alle Optionen an
+```
+
+### Grafische Oberfläche
+
+Wird das Programm ohne die oben genannten Parameter gestartet, öffnet sich eine Qt-basierte GUI. Über diese können Projekte geladen, Daten eingesehen und die Dateigenerierung gestartet werden.
+
+## Projektstruktur
 
 ```
+src/
+├── args.py                    # Parsen der Kommandozeilenargumente
+├── main.py                    # Einstiegspunkt (CLI oder GUI)
+├── data/                      # Laden und Verwalten der JSON-Daten
+│   ├── base.py                # Basisklasse mit Logging-/Output-Funktionen
+│   ├── base_data.py           # Laden und Parsen der Hauptdaten
+│   ├── data_manager.py        # Erweiterte Logik und Aggregation
+│   ├── market_config_handler.py   # Projektkonfigurationen
+│   ├── market_facade.py       # Fassade für Marktvorgänge
+│   ├── pdf_display_config.py  # Konfiguration für PDF-Layout
+│   └── singelton_meta.py      # Implementierung des Singleton-Metaclasses
+├── generator/                 # Klassen zum Erzeugen der Ausgabedateien
+│   ├── file_generator.py      # Orchestriert alle Generatoren
+│   ├── price_list_generator.py
+│   ├── seller_data_generator.py
+│   ├── statistic_data_generator.py
+│   └── receive_info_pdf_generator.py
+├── display/                   # Ausgabe- und Fortschrittsabstraktionen
+│   ├── output/                # Console/Qt Output-Schnittstellen
+│   ├── tracker/               # Fortschritts-Tracker
+│   └── progress_bar/          # Anzeige von Fortschritt
+├── objects/                   # Domänenobjekte (Artikel, Verkäufer ...)
+│   └── data_class_definition.py
+└── ui/                        # Qt UI Komponenten
+```
+
+Weitere Beispiele und Testskripte liegen im Verzeichnis `examples` bzw. `test_code`.
+
+## Wichtige Programmtechniken und Muster
+
+- **Singleton**: Über `SingletonMeta` wird z. B. `MarketFacade` als Singleton umgesetzt, sodass es nur eine Instanz in der Anwendung gibt.
+- **Fassade**: `MarketFacade` kapselt das Zusammenspiel aus Datenverwaltung (`DataManager`), Projektdaten und Dateigenerierung.
+- **Observer (Signal/Slot)**: Durch die Qt-Signale werden Statusmeldungen und Daten zwischen Komponenten ausgetauscht (z. B. in `DataManager.data_loaded`).
+- **Template Method**: Die Klassen in `generator/` erben von `DataGenerator` und implementieren jeweils ihre spezifische `generate` Methode.
+- **Abstraktion/Adapter**: In `display/` sind Schnittstellen für Fortschrittsbalken und Ausgaben definiert, wodurch sowohl Konsolen- als auch GUI-Varianten genutzt werden können.
+
+## Tests
+
+Einige Beispiel-Tests befinden sich im Ordner `test_code`. Das Starten von `pytest` benötigt jedoch die vollständigen GUI-Abhängigkeiten. In eingeschränkten Umgebungen kann die Ausführung daher fehlschlagen.
+
+```bash
+pytest
+```
+
+## Lizenz
+
+Dieses Projekt wurde zu Demonstrationszwecken bereitgestellt. Weitere Informationen zur Lizenzierung oder Beiträgen sind aktuell nicht definiert.
