@@ -16,17 +16,31 @@ from src.data import DataManager
 
 
 class DataView(BaseUi):
+    """Widget used to browse seller and article information."""
+
     def __init__(self, parent=None):
+        """Create UI elements and initialise state.
+
+        Parameters
+        ----------
+        parent:
+            Optional Qt parent widget.
+        """
         super().__init__(parent)
         self.ui = DataViewUi()
-        # Aufbau der UI (erstellt alle Widgets und Layouts)
-        self.market = None  # Zugriff auf das MarketWidget
+        self.market = None  # reference to the Market widget
         self.ui.setupUi(self)
         
         
       
     def setup_views(self, market_widget):
-        """Initialisiert die Ansichten (Baum- und Listenansicht)."""
+        """Initialise tree and list views.
+
+        Parameters
+        ----------
+        market_widget:
+            The :class:`Market` widget providing data access.
+        """
         self.market = market_widget
         self.listUsers = QListWidget()
         self.setup_connections()
@@ -35,17 +49,13 @@ class DataView(BaseUi):
         self.listUsers.hide()
 
     def setup_connections(self):
-        """Verbindet UI-Elemente mit ihren Event-Handlern."""
+        """Connect UI widgets to their event handlers."""
         self.ui.btnToggleView.clicked.connect(self.toggle_view)
         self.ui.treeUsers.itemClicked.connect(self.user_item_clicked)
         self.listUsers.itemClicked.connect(self.user_list_item_clicked)
 
     def populate_user_tree(self):
-        """
-        Befüllt die Baumansicht mit aggregierten Verkäufern und ihren zugehörigen
-        MainNumber-Tabellen (stnr‑Tabellen). Jeder Verkäufer wird über seine E‑Mail
-        aggregiert und als Knoten dargestellt.
-        """
+        """Fill the tree view with aggregated sellers and their tables."""
         if not self.market_widget().get_aggregated_user():
             return
         
@@ -61,19 +71,15 @@ class DataView(BaseUi):
             self.ui.treeUsers.addTopLevelItem(user_item)
 
     def market_widget(self):
+        """Return the associated :class:`Market` instance."""
         return self.market
 
     def populate_user_list(self):
-        """
-        Populates the list widget with seller information retrieved from the data manager.
-        This method first checks if the data manager is available. If not, it exits without performing
-        any operations. Otherwise, it clears the current items in the user list widget and iterates
-        through the collection of sellers provided by the data manager. For each seller, it formats a
-        display string that includes the seller's index, first name, last name, and email address. A new
-        QListWidgetItem is created with this display text, and the corresponding seller object is attached
-        to the item using the Qt.UserRole, enabling later retrieval of the full seller data.
-        Returns:
-            None
+        """Fill the list widget with seller information.
+
+        The method uses :func:`Market.get_seller` to obtain the data. Each
+        seller is formatted as ``"{index}. {first} {last}"`` and attached to a
+        :class:`QListWidgetItem` via :data:`Qt.UserRole` for later retrieval.
         """
         
         if not self.market_widget().get_seller():
@@ -88,7 +94,7 @@ class DataView(BaseUi):
             self.listUsers.addItem(item)
 
     def toggle_view(self):
-       
+        """Switch between tree and list representations."""
         if self.ui.treeUsers.isVisible():
             self.ui.treeUsers.hide()
             self.populate_user_list()
@@ -100,7 +106,15 @@ class DataView(BaseUi):
             self.ui.btnToggleView.setText("Listenansicht")
 
     def user_item_clicked(self, item, column):
-  
+        """Handle clicks on items inside the tree view.
+
+        Parameters
+        ----------
+        item:
+            The clicked :class:`QTreeWidgetItem`.
+        column:
+            Column index where the click occurred.
+        """
         if not self.market_widget().get_aggregated_user():
             return
 
@@ -131,10 +145,12 @@ class DataView(BaseUi):
         self.populate_entry_table(entries)
 
     def user_list_item_clicked(self, item):
-        """
-        Reagiert auf Klicks in der flachen Listenansicht:
-        Anhand der Verkäufer-ID wird die zugehörige stnr‑Tabelle ermittelt und
-        deren Artikel angezeigt.
+        """Handle clicks in the plain list view.
+
+        Parameters
+        ----------
+        item:
+            The clicked :class:`QListWidgetItem` containing seller data.
         """
         if not self.market_widget().get_main_numbers():
             return
@@ -147,9 +163,13 @@ class DataView(BaseUi):
         self.populate_entry_table(entries)
 
     def populate_entry_table(self, entries):
-        """
-        Befüllt das Tabellen-Widget mit den Detail-Artikeln.
-        Dabei wird auf die Artikelattribute (aus ArticleDataClass) über Attribute zugegriffen.
+        """Populate the table widget with article details.
+
+        Parameters
+        ----------
+        entries:
+            Iterable of objects providing ``beschreibung``, ``groesse``,
+            ``preis`` and ``created_at`` attributes.
         """
         #headers = ["artikelnummer", "beschreibung", "groesse", "preis", "created_at"]
         headers = ["Beschreibung", "Groesse", "Preis", "Created_At"]

@@ -1,10 +1,11 @@
+"""Console based output implementation."""
+
 from .output_interface_abstraction import OutputInterfaceAbstraction
 
 
 class ConsoleOutput(OutputInterfaceAbstraction):
-    """
-    Implementierung von OutputInterface für die Standard-Konsolenausgabe (print).
-    """
-    def write_message(self, message: str):
-        """Gibt die Nachricht auf der Konsole aus."""
+    """Emit messages using the built‑in :func:`print`."""
+
+    def write_message(self, message: str) -> None:
+        """Write ``message`` to ``stdout``."""
         print(message)

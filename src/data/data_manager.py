@@ -370,15 +370,7 @@ class DataManager(QObject, BaseData):
         return ret
 
     def reset_change(self, change_id: str) -> bool:
-        """
-        Setzt eine Änderung basierend auf der ChangeLogEntry-ID zurück.
-
-        Args:
-            change_id (str): Die ID der Änderung im Änderungsprotokoll.
-
-        Returns:
-            bool: True, wenn erfolgreich zurückgesetzt wurde.
-        """
+        """Revert a change from the log identified by ``change_id``."""
         entry = next((e for e in self._change_log if e.id == change_id), None)
         if not entry or not entry.old_value:
             return False
@@ -421,16 +413,7 @@ class DataManager(QObject, BaseData):
         return False
 
     def update_setting(self, key: str, new_value: str) -> bool:
-        """
-        Ändert einen Wert in den Settings (nur SettingsContentDataClass) und loggt die Änderung.
-
-        Args:
-            key (str): Der Name des Attributs (z. B. "max_artikel").
-            new_value (str): Der neue Wert als String.
-
-        Returns:
-            bool: True bei Erfolg, False bei Fehler.
-        """
+        """Update a setting value and log the modification."""
         if hasattr(self.settings.data, key):
             old_value = getattr(self.settings.data, key)
             setattr(self.settings.data, key, new_value)
@@ -444,17 +427,7 @@ class DataManager(QObject, BaseData):
         return False
 
     def reset_all_changes(self) -> int:
-        """
-        Setzt alle Änderungen zurück, die im Änderungsprotokoll verzeichnet sind.
-
-        Rückgängig gemacht werden:
-        - Artikeländerungen
-        - Verkäuferänderungen
-        - Settings-Änderungen
-
-        Returns:
-            int: Die Anzahl erfolgreich zurückgesetzter Änderungen.
-        """
+        """Reset all logged changes and return the number of reverted entries."""
         # Wichtig: Um Konflikte zu vermeiden, rückwärts iterieren
         successful_resets = 0
         for entry in reversed(self._change_log):

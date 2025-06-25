@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Helpers to manipulate ``pdf_display_config.json`` using dataclasses."""
+
 import copy
 import os
 from PySide6.QtCore import QObject, Signal
@@ -55,7 +57,7 @@ class BoxPair:
 # Spezial‑Handler
 # -----------------------------------------------------------------------------
 class PdfDisplayConfig(QObject, JsonHandler):
-    """Komfortabler Zugriff auf *pdf_display_config.json* via JsonHandler‑API."""
+    """Convenient access wrapper around ``pdf_display_config.json``."""
 
 
     data_loaded = Signal(object)  # Signal to notify when data is loaded
@@ -71,10 +73,11 @@ class PdfDisplayConfig(QObject, JsonHandler):
     # Konstruktor
     # ------------------------------------------------------------------
     def __init__(self, json_path_or_data: Optional[Union[str, Dict]] = None,logger=None) -> None:
-        
+        """Initialise and optionally load from ``json_path_or_data``."""
+
         QObject.__init__(self)
         JsonHandler.__init__(self,json_path_or_data, logger)
-        # Bei leerem Handler Grundgerüst erzeugen
+        # Create default template when constructed empty
         if self.json_data is None:
             self.json_data = self._clone_template()
 
@@ -82,24 +85,28 @@ class PdfDisplayConfig(QObject, JsonHandler):
     # Metadaten (pdf_path / pdf_name)
     # ------------------------------------------------------------------
     def get_pdf_path(self) -> str:
+        """Return the configured PDF directory path."""
         return str(self.get_key_value(["pdf_path"]) or "")
 
     
     def set_pdf_path(self, value: str) -> None:
+        """Set the PDF directory path and update ``pdf_name`` if empty."""
         self.set_key_value(["pdf_path"], str(value))
         if value and not self.get_key_value(["pdf_name"]):
             self.set_key_value(["pdf_name"], Path(value).name)
 
     
     def get_pdf_name(self) -> str:
+        """Return the configured PDF file name."""
         return str(self.get_key_value(["pdf_name"]) or "")
 
     
     def set_pdf_name(self, value: str) -> None:
+        """Set the PDF file name."""
         self.set_key_value(["pdf_name"], str(value))
 
     def get_full_pdf_path(self) -> str:
-        """Gibt den vollständigen Pfad zur PDF zurück, bestehend aus dem PDF-Pfad und -Namen."""
+        """Return the absolute PDF path composed of directory and file name."""
         path = self.get_pdf_path()
         return self.ensure_trailing_sep(path) + self.get_pdf_name()
 
@@ -194,19 +201,7 @@ class PdfDisplayConfig(QObject, JsonHandler):
         return ret
     
     def convert_json_to_coordinates(self, box_id: int) -> CoordinatesConfig:
-        """
-        Wandelt JSON-Koordinaten in ein CoordinatesConfig-Objekt um basierend auf der übergebenen box_id.
-
-        Es wird erwartet, dass json_data zwei Schlüssel besitzt:
-        - "pairboxes": Eine Liste von Boxen mit Struktur
-              { "id": int, "first": {"x": Wert, "y": Wert}, "second": {"x": Wert, "y": Wert} }
-          Der Eintrag mit id == box_id wird genutzt, um x1/y1 (erster Punkt) und x2/y2 (zweiter Punkt) zu belegen.
-        - "singleboxes": Eine Liste von Boxen mit Struktur
-              { "id": int, "x": Wert, "y": Wert }
-          Der Eintrag mit id == box_id wird genutzt, um x3/y3 zu belegen.
-        
-        Falls einzelne Werte fehlen, werden standardmäßig 0.0 bzw. font_size = 12 gesetzt.
-        """
+        """Convert JSON box information for ``box_id`` into ``CoordinatesConfig``."""
 
         # Verarbeitung der PairBox mit der übergebenen box_id
         pairboxes = self.get_box_pairs()

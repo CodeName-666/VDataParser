@@ -22,9 +22,18 @@ from .status_bar import StatusBar
 
 
 
-class MainWindow(QMainWindow): 
+class MainWindow(QMainWindow):
     
-    def __init__(self, parent=None, flags=Qt.WindowFlags()):  
+    def __init__(self, parent=None, flags=Qt.WindowFlags()):
+        """Create a new application window.
+
+        Parameters
+        ----------
+        parent:
+            Optional Qt parent widget.
+        flags:
+            Window flags used during initialisation.
+        """
         super().__init__(parent, flags)
         self.ui = MainWindowUi()
         self.stack = StackWidget()
@@ -83,7 +92,7 @@ class MainWindow(QMainWindow):
         #self.ui.action_open_export.triggered.connect(self.open_market_view)
         #self.ui.action_open_file.triggered.connect(self.open_file_dialog)
 
-    def open_view(self, view_name:str):
+    def open_view(self, view_name: str):
         """
         Switches the current view in the stack to the specified view name.
 
@@ -186,11 +195,16 @@ class MainWindow(QMainWindow):
 
     def open_file_dialog(self):
         """
-        Opens a file dialog to select a JSON file and loads its content.
+        Opens a file dialog to select a JSON file.
+
+        Returns
+        -------
+        str | None
+            The chosen file path or ``None`` if the dialog was cancelled.
         """
         file_name, _ = QFileDialog.getOpenFileName(self, "Open JSON File", "", "JSON Files (*.json)")
         if file_name:
-            return file_name                
+            return file_name
         else:            
             QMessageBox.critical(self, "Error", f"Failed to load JSON file: {e}")
             return None

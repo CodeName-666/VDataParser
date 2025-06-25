@@ -1,4 +1,6 @@
 
+"""Re‑export convenient database connectors and helper types."""
+
 from .interface import (
     DatabaseConnectionError,
     DatabaseQueryError,
