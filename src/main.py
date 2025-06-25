@@ -23,6 +23,8 @@ from display import ConsoleOutput as OutputIface
 
 from ui import MainWindow
 from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QFile, QTextStream
+from PySide6.QtCore import QFile, QTextStream
 from log import CustomLogger
 # ---------------------------------------------------------------------------
 # Helpers
@@ -147,8 +149,13 @@ def _run_gui():  # noqa: D401
     app.setOrganizationName("SeidC")
     app.setOrganizationDomain("seidc.de")
     app.setStyle("Fusion")  # Set a default style
-    
-    
+
+    style_file = QFile(':/other/style.qss')
+    if style_file.open(QFile.ReadOnly | QFile.Text):
+        stream = QTextStream(style_file)
+        app.setStyleSheet(stream.readAll())
+        style_file.close()
+
     #win = MainWindow(logger=logger)  # type: ignore[call‑arg]
     win = MainWindow()  # 
     win.setup_ui()

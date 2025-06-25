@@ -29,5 +29,6 @@
     <file>Signs/ChatGPT Image 21. Juni 2025, 22_05_47.png</file>
     <file>Signs/ChatGPT Image 21. Juni 2025, 22_36_35.png</file>
     <file>Signs/ChatGPT Image 21. Juni 2025, 22_39_44.png</file>
+    <file alias="style.qss">../ui/style.qss</file>
   </qresource>
 </RCC>

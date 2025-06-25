@@ -1,0 +1,29 @@
+QWidget {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 10pt;
+    background-color: #fafafa;
+    color: #333333;
+}
+QPushButton {
+    border: 1px solid #0078d7;
+    background-color: #0078d7;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+}
+QPushButton:hover {
+    background-color: #005a9e;
+}
+QPushButton:pressed {
+    background-color: #003f6f;
+}
+QGroupBox {
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    margin-top: 6px;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 6px;
+}
