@@ -1,62 +1,101 @@
-# VDataParser – Flohmarkt Daten und PDF Generator
+# Flea Market Data Generator
 
-## Projektüberblick
+Dieses Projekt dient zur Erzeugung von Datendateien und PDF-Dokumenten für Flohmarktveranstaltungen. Anhand einer JSON-Eingabedatei werden Informationen über Verkäufer und deren Artikellisten verarbeitet und im Anschluss verschiedene Ausgabedateien erzeugt.
 
-Dieses Repository enthält eine Python‑Anwendung zur Verwaltung und Aufbereitung von Flohmarkt‑Daten. Aus einer JSON‑Datei oder einer Datenbank werden Verkäufer, Artikellisten sowie weitere Informationen eingelesen und in verschiedene Ausgabeformate überführt. Neben klassischen `.dat`‑Dateien kann das Programm auch Abholbestätigungen als PDF erzeugen. Die Anwendung besitzt einen Kommandozeilenmodus und eine Qt‑basierte GUI.
+## Funktionsüberblick
 
-## Installation
+- Erzeugen von Preislisten, Kundendaten und Statistikdateien (jeweils im `.dat` Format)
+- Generierung von Abholbestätigungen als PDF
+- Sowohl reine Kommandozeilenausführung als auch ein grafisches Qt-basiertes Interface
+- Fortschrittsanzeige über Console- oder GUI-Progressbar
 
-1. Python 3.10 oder neuer installieren.
-2. Abhängigkeiten mittels `pip` einrichten:
-   ```bash
-   pip install -r src/requirements.txt
-   ```
-   Für die optionalen MySQL‑Funktionen muss zusätzlich `mysql-connector-python` vorhanden sein.
+## Installationshinweise
 
-## Nutzung
+1. Python 3.11 oder neuer installieren
+2. Abhängigkeiten installieren:
 
-Das Programm kann entweder als CLI oder über die GUI gestartet werden. Wird beim Aufruf ein JSON‑Pfad übergeben, startet automatisch der CLI‑Modus. Ohne Parameter öffnet sich die GUI.
-
-### CLI
 ```bash
-python -m src.main -f <path/to/data.json> [-p <out-dir>] [--pdf-template <template.pdf>]
+pip install -r src/requirements.txt
 ```
-Eine ausführliche Hilfe zu allen Optionen erhält man über `-h`.
 
-### GUI
+Die Abhängigkeiten umfassen unter anderem `PySide6` für die GUI, `pypdf` und `reportlab` für die PDF-Erzeugung sowie `mysql-connector-python` für optionale Datenbankanbindung.
+
+## Verwendung
+
+### Kommandozeile
+
+Das Programm kann direkt über `src/main.py` gestartet werden. Ohne Parameter wird die grafische Oberfläche geöffnet. Durch Angabe einer JSON-Datei lassen sich alle Dateien auch rein über die CLI generieren:
+
 ```bash
-python -m src.main
+python src/main.py -f <path/to/data.json> -p <output/dir>
 ```
-In der grafischen Oberfläche lassen sich Projekte laden, Daten kontrollieren und alle Ausgabedateien erzeugen.
+
+Wichtige Optionen:
+
+- `-f`, `--file` – Pfad zur Eingabe-JSON (erforderlich im CLI-Modus)
+- `-p`, `--path` – Zielverzeichnis für die generierten Dateien
+- `--seller-filename` – Basisname der Kundendatei (Standard `kundendaten`)
+- `--price-filename` – Basisname der Preisliste (Standard `preisliste`)
+- `--stats-filename` – Basisname der Statistikdatei (Standard `versand`)
+- `--pdf-template` – Hintergrund-PDF für die Abholbestätigungen
+- `--pdf-output` – Dateiname der erzeugten PDF
+- `--verbose` – detailliertere Konsolenausgabe
+
+```bash
+python src/main.py -h  # zeigt alle Optionen an
+```
+
+### Grafische Oberfläche
+
+Wird das Programm ohne die oben genannten Parameter gestartet, öffnet sich eine Qt-basierte GUI. Über diese können Projekte geladen, Daten eingesehen und die Dateigenerierung gestartet werden.
 
 ## Projektstruktur
 
-- **src/main.py** – Einstiegspunkt, entscheidet je nach Argumenten zwischen CLI und GUI.
-- **src/args.py** – Sammelt sämtliche Kommandozeilenparameter.
-- **src/backend/** – Datenbankschicht mit einheitlicher Schnittstelle (`DatabaseOperations`). Implementierungen für SQLite und MySQL ermöglichen den Austausch der konkreten Technik (Strategy‑Pattern).
-- **src/data/** – Laden und Aufbereiten der JSON‑ bzw. Projektdaten. Enthält u. a. `DataManager`, `MarketConfigHandler` und `PdfDisplayConfig`.
-- **src/generator/** – Verschiedene Generatoren zum Erstellen von Dateien (Preislisten, Verkäufer‑ und Statistikdaten sowie PDFs). `FileGenerator` koordiniert alle Untergeneratoren.
-- **src/objects/** – Domänenobjekte wie `Seller`, `Article` und `MainNumber` mitsamt zugehöriger Dataklassen.
-- **src/display/** – Abstraktionen für Fortschrittsbalken und Ausgabekanäle (Konsole oder Qt Widgets).
-- **src/ui/** – Qt‑Oberfläche.
-- **src/log/** – Schlankes Logging‑System (`CustomLogger`).
+```
+src/
+├── args.py                    # Parsen der Kommandozeilenargumente
+├── main.py                    # Einstiegspunkt (CLI oder GUI)
+├── data/                      # Laden und Verwalten der JSON-Daten
+│   ├── base.py                # Basisklasse mit Logging-/Output-Funktionen
+│   ├── base_data.py           # Laden und Parsen der Hauptdaten
+│   ├── data_manager.py        # Erweiterte Logik und Aggregation
+│   ├── market_config_handler.py   # Projektkonfigurationen
+│   ├── market_facade.py       # Fassade für Marktvorgänge
+│   ├── pdf_display_config.py  # Konfiguration für PDF-Layout
+│   └── singelton_meta.py      # Implementierung des Singleton-Metaclasses
+├── generator/                 # Klassen zum Erzeugen der Ausgabedateien
+│   ├── file_generator.py      # Orchestriert alle Generatoren
+│   ├── price_list_generator.py
+│   ├── seller_data_generator.py
+│   ├── statistic_data_generator.py
+│   └── receive_info_pdf_generator.py
+├── display/                   # Ausgabe- und Fortschrittsabstraktionen
+│   ├── output/                # Console/Qt Output-Schnittstellen
+│   ├── tracker/               # Fortschritts-Tracker
+│   └── progress_bar/          # Anzeige von Fortschritt
+├── objects/                   # Domänenobjekte (Artikel, Verkäufer ...)
+│   └── data_class_definition.py
+└── ui/                        # Qt UI Komponenten
+```
 
-## Architektur und wichtige Techniken
+Weitere Beispiele und Testskripte liegen im Verzeichnis `examples` bzw. `test_code`.
 
-- **Singleton**: `SingletonMeta` garantiert einzelne Instanzen für Klassen wie `MarketFacade`. Dadurch existiert die Anwendung global nur einmal pro Markt‑Facade.
-- **Facade**: `MarketFacade` kapselt komplexe Abläufe (Laden von Projekten, Erzeugen der Dateien) hinter einer vereinfachten Schnittstelle für die GUI.
-- **Observer (Signal/Slot)**: In der GUI kommunizieren Klassen über Qt‑Signale (`data_loaded`, `status_info`). So werden Statusänderungen an die Oberfläche weitergereicht.
-- **Strategy**: Für Datenbankzugriffe wird über `DatabaseOperations` eine gemeinsame Schnittstelle definiert. `SQLiteInterface` und `MySQLInterface` implementieren dieselben Methoden, sodass `BasicDBConnector` beide Varianten nutzen kann.
-- **Dataclasses**: Datenstrukturen wie Artikel oder Verkäufer basieren auf Python‑`dataclasses` und erlauben eine einfache Serialisierung/Deserialisierung.
-- **Progress‑Tracker**: Über abstrakte Tracker und Progressbars kann der Fortschritt sowohl in der Konsole als auch in der GUI angezeigt werden.
+## Wichtige Programmtechniken und Muster
 
-## Hinweise zum Einsatz
+- **Singleton**: Über `SingletonMeta` wird z. B. `MarketFacade` als Singleton umgesetzt, sodass es nur eine Instanz in der Anwendung gibt.
+- **Fassade**: `MarketFacade` kapselt das Zusammenspiel aus Datenverwaltung (`DataManager`), Projektdaten und Dateigenerierung.
+- **Observer (Signal/Slot)**: Durch die Qt-Signale werden Statusmeldungen und Daten zwischen Komponenten ausgetauscht (z. B. in `DataManager.data_loaded`).
+- **Template Method**: Die Klassen in `generator/` erben von `DataGenerator` und implementieren jeweils ihre spezifische `generate` Methode.
+- **Abstraktion/Adapter**: In `display/` sind Schnittstellen für Fortschrittsbalken und Ausgaben definiert, wodurch sowohl Konsolen- als auch GUI-Varianten genutzt werden können.
 
-- Die JSON‑Struktur des Flohmarktes entspricht den Klassen in `src/objects/data_class_definition.py`. Beispiel‑ und Testdateien befinden sich im Repository (`test_db.json`, `test_project.json`).
-- Pfade im Projekt (z. B. zu PDF‑Vorlagen) werden relativ zum Arbeitsverzeichnis aufgelöst. Stellen Sie sicher, dass Vorlagen vorhanden sind.
-- Bei Verwendung von MySQL müssen Zugangsdaten in der Konfiguration hinterlegt sein.
-- Fehler und Statusmeldungen werden je nach Modus auf der Konsole, in Logdateien oder innerhalb der GUI ausgegeben.
+## Tests
 
-## Weiterführende Informationen
+Einige Beispiel-Tests befinden sich im Ordner `test_code`. Das Starten von `pytest` benötigt jedoch die vollständigen GUI-Abhängigkeiten. In eingeschränkten Umgebungen kann die Ausführung daher fehlschlagen.
 
-Die detaillierte API der einzelnen Module ist in den Quelltexten kommentiert. Für eigene Anpassungen können neue Generatoren oder Datenquellen über die vorhandenen Abstraktionen implementiert werden.
+```bash
+pytest
+```
+
+## Lizenz
+
+Dieses Projekt wurde zu Demonstrationszwecken bereitgestellt. Weitere Informationen zur Lizenzierung oder Beiträgen sind aktuell nicht definiert.
