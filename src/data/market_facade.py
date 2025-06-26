@@ -14,6 +14,8 @@ from typing import List, Dict, Any, Union
 class MarketObserver(QObject):
 
     status_info = Signal(str, str)
+    data_manager_loaded = Signal(object)
+    pdf_display_config_loaded = Signal(object)
 
     def __init__(self, market = None, json_path: str = ""):
         """
@@ -77,12 +79,18 @@ class MarketObserver(QObject):
                 ret = self.data_manager.load(market_json_path)
                 if ret:
                     # Setup the FleatMarket with the loaded data
+                    self.data_manager_loaded.emit(self.data_manager)
+                    self.pdf_display_config_loaded.emit(self.pdf_display_config_loader) # Send empty config
                     self.setup_data_generation()
+
                     self.status_info.emit("INFO", f"Projekt geladen: {json_path}")
                 else:
                     self.status_info.emit("ERROR", "Daten konnten nicht geladen werden")
                 # Load the PDF display configuration
-                self.pdf_display_config_loader.load(pdf_display_config)
+                ret = self.pdf_display_config_loader.load(pdf_display_config)
+                if ret:
+                    self.pdf_display_config_loaded.emit(self.pdf_display_config_loader)
+
             else:
                 self.status_info.emit("ERROR", "Projektkonfiguration konnte nicht geladen werden")
 
@@ -130,8 +138,8 @@ class MarketObserver(QObject):
         return self.market_config_handler.get_pdf_generation_data()
 
     def connect_signals(self, market) -> None:
-        self.data_manager.data_loaded.connect(market.set_market_data)
-        self.pdf_display_config_loader.data_loaded.connect(market.set_pdf_config)
+        self.data_manager_loaded.connect(market.set_market_data)
+        self.pdf_display_config_loaded.connect(market.set_pdf_config)
         self.market_config_handler.default_signal_loaded.connect(market.set_default_settings)
 
     def generate_pdf_data(self) -> None:

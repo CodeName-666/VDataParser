@@ -14,7 +14,7 @@ class Market(BaseUi):
     """Main widget bundling all market related sub views."""
 
     pdf_display_storage_path_changed = Signal(str)
-    pdf_display_data_changed = Signal(object)
+    pdf_display_data_changed = Signal(bool)
     status_info = Signal(str, str)
 
     def __init__(self, parent=None):
@@ -27,6 +27,7 @@ class Market(BaseUi):
         """
         super().__init__(parent)
         self.data_manager_ref: DataManager | None = None
+        self.pdf_tab_txt: str = ''
         self.ui = MarketUi()
         self.setup_ui()
 
@@ -44,12 +45,21 @@ class Market(BaseUi):
         self.data_view.setup_views(self)
         self.user_info.setup_views(self)
 
-    def redirect_signals(self) -> None:
+    def connect_signals(self) -> None:
         """Forward signals from the PDF display to this widget."""
         if self.pdf_display:
             self.pdf_display.storage_path_changed.connect(self.pdf_display_storage_path_changed)
             self.pdf_display.data_changed.connect(self.pdf_display_data_changed)
             self.pdf_display.status_info.connect(self.status_info)
+            self.pdf_display.data_changed.connect(self.pdf_data_changed)
+
+    @Slot(bool)
+    def pdf_data_changed(self, status: bool):
+        if status == True: 
+            txt = f"{self.pdf_tab_txt} *"
+        else: 
+            txt = self.pdf_tab_txt
+        self.ui.tabWidget.setTabText(self.ui.tabWidget.indexOf(self.ui.tab_4),txt)
 
     @Slot(object)
     def set_default_settings(self, settings: dict) -> None:
@@ -81,7 +91,9 @@ class Market(BaseUi):
         self.data_view = self.add_widget(self.ui.tab_2, DataView)
         self.user_info = self.add_widget(self.ui.tab_3, UserInfo)
         self.pdf_display = self.add_widget(self.ui.tab_4, PdfDisplay)
-        self.redirect_signals()
+        
+        self.pdf_tab_txt = self.ui.tabWidget.tabText(self.ui.tabWidget.indexOf(self.ui.tab_4))
+        self.connect_signals()
 
     def get_user_data(self):
         """Return seller data as simple dictionaries."""

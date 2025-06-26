@@ -89,12 +89,15 @@ class PdfDisplayConfig(QObject, JsonHandler):
         return str(self.get_key_value(["pdf_path"]) or "")
 
     
-    def set_pdf_path(self, value: str) -> None:
+    def set_full_pdf_path(self, value: str) -> None:
         """Set the PDF directory path and update ``pdf_name`` if empty."""
-        self.set_key_value(["pdf_path"], str(value))
+        file = Path(value)
+        self.set_key_value(["pdf_path"], str(file.parent))
         if value and not self.get_key_value(["pdf_name"]):
-            self.set_key_value(["pdf_name"], Path(value).name)
+            self.set_key_value(["pdf_name"], file.name)
 
+    def set_pdf_path(self, value: str) -> None:
+        self.set_key_value(["pdf_path"], str(value))
     
     def get_pdf_name(self) -> str:
         """Return the configured PDF file name."""
@@ -228,4 +231,17 @@ class PdfDisplayConfig(QObject, JsonHandler):
             x3=x3,
             y3=y3,
             font_size=12
-        )
+        )           
+        
+    def is_empty(self):
+        box_pairs_empty   = not self.get_box_pairs()      # True, wenn key fehlt oder Liste leer ist
+        single_boxes_empty = not self.get_single_boxes()
+        path_empty = not self.get_full_pdf_path()
+
+        if box_pairs_empty and single_boxes_empty and path_empty:
+            return True
+        else:
+            return False 
+    
+
+    

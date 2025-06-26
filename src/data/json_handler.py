@@ -406,5 +406,34 @@ class JsonHandler():
     def get_data(self) -> Optional[Union[Dict, List]]:
         """ Returns the loaded JSON data. """
         return self.json_data
+    
+    def data_equal(self, other: 'JsonHandler') -> bool:
+        """
+        Compare this JsonHandler's data with another JsonHandler's data.
+
+        Args:
+            other (JsonHandler): Another instance of JsonHandler to compare with.
+
+        Returns:
+            bool: True if both JSON data are equal, False otherwise.
+        """
+        if not isinstance(other, JsonHandler):
+            self._log("ERROR", "compare_data requires another JsonHandler instance.")
+            return False
+        return self.json_data == other.get_data()
+    
+
+    def update_data(self, other: 'JsonHandler') -> None:
+        """
+        Update the current JSON data with data from another JsonHandler object.
+
+        Args:
+            other (JsonHandler): Another JsonHandler instance whose data will be used.
+        """
+        if not isinstance(other, JsonHandler):
+            self._log("ERROR", "update_data requires a JsonHandler instance.")
+            return
+        self.json_data = copy.deepcopy(other.get_data())
+        self._log("INFO", "JSON data updated successfully from another JsonHandler.")
 
 # --- END OF FILE json_handler.py ---
