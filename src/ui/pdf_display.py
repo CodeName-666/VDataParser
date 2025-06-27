@@ -385,6 +385,9 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
                 self.pdfPath = fileName
                 self.setWindowTitle(f"PDF Editor - {Path(fileName).name}") # Update title
                 self.load_page(0) # Load the first page
+                
+                self._config_changed()
+
                 # Optionally clear existing boxes when loading a *new* PDF
                 # self._clear_all_boxes()
             else:
@@ -620,6 +623,8 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
                 
                 pdf_display_config = self._state_to_dict()
                 pdf_display_config.save(fileName)
+                self._config.update_json_data(pdf_display_config)
+                self._config.set_path_or_url(fileName)
                 self.storage_path_changed.emit(fileName)
                 self.status_info.emit("INFO", f"Konfiguration gespeichert: {fileName}")
                 QMessageBox.information(self, "Erfolg", f"Konfiguration erfolgreich gespeichert:\n{fileName}")
@@ -633,15 +638,18 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
     @Slot()
     def save_state(self):
         """Saves the current state to a JSON file."""
-        try:
-            self._config.update_data(self._state_to_dict())
-            self._config.save()
-            if not self._config_changed():  # Emit data changed signal   
-                self.status_info.emit("INFO", "Konfiguration gespeichert")
-        except IOError as e:
-            QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
-        except json.JSONDecodeError as e:
-             QMessageBox.critical(self, "Fehler", f"Fehler beim Erstellen der JSON-Daten:\n{e}")
+        if self._config.get_storage_full_path():
+            try:
+                self._config.update_json_data(self._state_to_dict())
+                self._config.save()
+                if not self._config_changed():  # Emit data changed signal   
+                    self.status_info.emit("INFO", "Konfiguration gespeichert")
+            except IOError as e:
+                QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
+            except json.JSONDecodeError as e:
+                QMessageBox.critical(self, "Fehler", f"Fehler beim Erstellen der JSON-Daten:\n{e}")
+        else: 
+            self.save_as_state()
 
 
     @Slot()
