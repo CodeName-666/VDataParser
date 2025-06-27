@@ -94,6 +94,7 @@ class Market(BaseUi):
         
         self.pdf_tab_txt = self.ui.tabWidget.tabText(self.ui.tabWidget.indexOf(self.ui.tab_4))
         self.connect_signals()
+        self.ui.tabWidget.setCurrentIndex(0)
 
     def get_user_data(self):
         """Return seller data as simple dictionaries."""

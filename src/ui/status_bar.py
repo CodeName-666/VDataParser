@@ -29,7 +29,7 @@ class StatusBar(QStatusBar):
 
         # Info-Label für Statusnachrichten
         self.info_label = QLabel()
-        self.info_label.setText("")  # Leer initial
+        self.info_label.setText("    ...")  # Leer initial
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         self.info_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
@@ -148,7 +148,7 @@ class StatusBar(QStatusBar):
             self.info_label.setText(text)
             self._message_timer.start(3000)
         else:
-            self.info_label.setText("")
+            self.info_label.setText("    ...")
 
     def _on_info_label_clicked(self, event) -> None:
         """Open the history popup when the label is clicked.
