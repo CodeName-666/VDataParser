@@ -126,6 +126,11 @@ class MarketObserver(QObject):
         self.fm.load_main_numbers(self.data_manager.get_main_number_as_list())
         self.file_generator = FileGenerator(self.fm)
 
+    @Slot(str)
+    def storage_path_changed(self,path: str):
+        self.market_config_handler.set_full_pdf_coordinates_config_path(path)
+        print("PAUSE")
+
     def get_data(self):
         return self.data_manager
 
@@ -141,6 +146,8 @@ class MarketObserver(QObject):
         self.data_manager_loaded.connect(market.set_market_data)
         self.pdf_display_config_loaded.connect(market.set_pdf_config)
         self.market_config_handler.default_signal_loaded.connect(market.set_default_settings)
+        market.pdf_display_storage_path_changed.connect(self.storage_path_changed)
+
 
     def generate_pdf_data(self) -> None:
         """

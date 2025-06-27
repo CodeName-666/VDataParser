@@ -15,16 +15,22 @@ class MarketConfigHandler(QObject, JsonHandler):
     default_signal_loaded = Signal(object)  # Signal to notify when the default configuration is loaded
     # --------------------------- defaults --------------------------- #
     _DEFAULT_STRUCTURE: Dict[str, Any] = {
-        "database": {"url": "", "port": ""},
-        "market": {"market_path": "", "market_name": ""},
-        "default_pdf_generation_data": {
-            "template_info": {
-                "pdf_path": "",
-                "pdf_name": "Abholung_Template.pdf",
-            },
-            "coordinates": {"boxPairs": [], "singleBoxes": []},
-        },
-    }
+                "database": {"url": "","port": ""},
+                "market": {"market_path": "", "market_name": ""},
+                "pfd_coordiantes_config": {"coordinates_config_path": "", "coordinates_config_name": ""},
+                "dafault_settings": {
+                    "max_stammnummern": "250",
+                    "max_artikel": "40",
+                    "datum_counter": "2025-09-15 12:00:00",
+                    "flohmarkt_nr": "6",
+                    "psw_laenge": "10",
+                    "tabellen_prefix": "str",
+                    "verkaufer_liste": "verkeaufer",
+                    "max_user_ids": "8",
+                    "datum_flohmarkt": "2025-09-15"
+                }
+            }
+
 
     # ------------------------ construction ------------------------- #
     def __init__(self, json_path_or_data: Union[str, Path, Dict[str, Any]] = "", logger: CustomLogger or None = None) -> None:
