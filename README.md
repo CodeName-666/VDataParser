@@ -80,6 +80,25 @@ src/
 
 Weitere Beispiele und Testskripte liegen im Verzeichnis `examples` bzw. `test_code`.
 
+## Qt-Artefakte erzeugen
+
+Mit dem Skript `util/generate_qt_artefacts.py` lassen sich aus den mit Qt
+Designer erstellten `.ui`-Dateien sowie aus der Ressourcenbeschreibung
+`resources.qrc` die benötigten Python-Module erzeugen. Ein typischer Aufruf ist
+
+```bash
+python util/generate_qt_artefacts.py --all
+```
+
+Damit werden alle UI-Dateien aus `src/ui/design` nach `src/ui/generated`
+konvertiert und gleichzeitig die Ressourcendatei `resources_rc.py` erstellt.
+Weitere Optionen können über `-h` angezeigt werden.
+
+Für den späteren Bau einer ausführbaren Datei mit *auto-py-to-exe* existiert die
+Konfigurationsdatei `autopy_build_config.json` (im Repository noch unter dem
+Tippfehlernamen `auotpi_build_config.json`). Sie speichert die PyInstaller-
+Einstellungen, die von dem Tool eingelesen werden können.
+
 ## Wichtige Programmtechniken und Muster
 
 - **Singleton**: Über `SingletonMeta` wird z. B. `MarketFacade` als Singleton umgesetzt, sodass es nur eine Instanz in der Anwendung gibt.
