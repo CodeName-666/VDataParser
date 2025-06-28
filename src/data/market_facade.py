@@ -160,6 +160,16 @@ class MarketObserver(QObject):
         """
         if self._data_ready:
             self.file_generator.create_pdf_data(self.market_config_handler.get_pdf_generation_data())
+
+    def generate_seller_data(self) -> None:
+        """Generate seller related data files (DAT, statistics, etc.)."""
+        if self._data_ready:
+            self.file_generator.create_seller_data()
+
+    def generate_all(self) -> None:
+        """Generate all data and the PDF using stored settings."""
+        if self._data_ready:
+            self.file_generator.create_all(self.market_config_handler.get_pdf_generation_data())
         
         
 
@@ -300,6 +310,19 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             self.status_info.emit("INFO", "PDF Daten generiert")
         except Exception as err:  # pragma: no cover - runtime errors handled
             self.status_info.emit("ERROR", str(err))
+
+    @Slot(object)
+    def create_seller_data(self, market) -> None:
+        """Create seller related data files for the specified market."""
+        observer = self.get_observer(market)
+        if not observer:
+            self.status_info.emit("ERROR", "Kein Observer gefunden")
+            return
+        try:
+            observer.generate_seller_data()
+            self.status_info.emit("INFO", "Verkäuferdaten generiert")
+        except Exception as err:  # pragma: no cover - runtime errors handled
+            self.status_info.emit("ERROR", str(err))
     
     @Slot(object)
     def create_market_data(self, market) -> None:
@@ -332,7 +355,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             return
         try:
             if observer.file_generator:
-                observer.file_generator.generate()
+                observer.generate_all()
                 self.status_info.emit("INFO", "Alle Daten erstellt")
             else:
                 raise RuntimeError("FileGenerator nicht bereit")
