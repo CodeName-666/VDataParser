@@ -246,13 +246,15 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
         :param market: The market instance for which to create PDF data.
         """
-        print("Not implemented yet")
         observer = self.get_observer(market)
-        if observer:
+        if not observer:
+            self.status_info.emit("ERROR", "Kein Observer gefunden")
+            return
+        try:
             observer.generate_pdf_data()
             self.status_info.emit("INFO", "PDF Daten generiert")
-        else:
-            self.status_info.emit("ERROR", "Kein Observer gefunden")
+        except Exception as err:  # pragma: no cover - runtime errors handled
+            self.status_info.emit("ERROR", str(err))
     
     @Slot(object)
     def create_market_data(self, market) -> None:
@@ -261,13 +263,15 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
         :param market: The market instance for which to create data.
         """
-        print("Not implemented yet")
         observer = self.get_observer(market)
-        if observer:
+        if not observer:
+            self.status_info.emit("ERROR", "Market observer not found")
+            return
+        try:
             market.set_data(observer.get_data())
             self.status_info.emit("INFO", "Marktdaten generiert")
-        else:
-            self.status_info.emit("ERROR", "Market observer not found")
+        except Exception as err:  # pragma: no cover - runtime errors handled
+            self.status_info.emit("ERROR", str(err))
         
 
     @Slot(object)
@@ -277,8 +281,18 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
         :param market: The market instance for which to create all data.
         """
-        print("Not implemented yet")
-        self.status_info.emit("INFO", "Alle Daten erstellt")
+        observer = self.get_observer(market)
+        if not observer:
+            self.status_info.emit("ERROR", "Kein Observer gefunden")
+            return
+        try:
+            if observer.file_generator:
+                observer.file_generator.generate()
+                self.status_info.emit("INFO", "Alle Daten erstellt")
+            else:
+                raise RuntimeError("FileGenerator nicht bereit")
+        except Exception as err:  # pragma: no cover - runtime errors handled
+            self.status_info.emit("ERROR", str(err))
 
     def is_project(self, market) -> bool:
         """
