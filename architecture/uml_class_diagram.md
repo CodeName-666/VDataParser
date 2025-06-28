@@ -17,6 +17,7 @@ classDiagram
     class DataManager
     class BaseData
     class BasicDBConnector
+    class AdvancedDBManager
     class MySQLInterface
     class FileGenerator
     class PriceListGenerator
@@ -39,7 +40,8 @@ classDiagram
     DataManager --|> BaseData
     DataManager --> SellerDataClass
     DataManager --> MainNumberDataClass
-    DataManager --> BasicDBConnector
+    MarketFacade --> AdvancedDBManager
+    AdvancedDBManager --|> BasicDBConnector
     BasicDBConnector --> MySQLInterface
     FileGenerator --> PriceListGenerator
     FileGenerator --> SellerDataGenerator

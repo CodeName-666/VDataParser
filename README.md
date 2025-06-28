@@ -127,6 +127,7 @@ classDiagram
     class DataManager
     class BaseData
     class BasicDBConnector
+    class AdvancedDBManager
     class MySQLInterface
     class FileGenerator
     class PriceListGenerator
@@ -149,7 +150,8 @@ classDiagram
     DataManager --|> BaseData
     DataManager --> SellerDataClass
     DataManager --> MainNumberDataClass
-    DataManager --> BasicDBConnector
+    MarketFacade --> AdvancedDBManager
+    AdvancedDBManager --|> BasicDBConnector
     BasicDBConnector --> MySQLInterface
     FileGenerator --> PriceListGenerator
     FileGenerator --> SellerDataGenerator
@@ -171,7 +173,7 @@ graph TD
     MarketFacade --> MarketConfigHandler
     MarketFacade --> PdfDisplayConfig
     DataManager --> Objects
-    DataManager --> Backend
+    MarketFacade --> Backend
     Backend --> MySQLInterface
     FileGenerator --> Generators
     Generators --> PriceListGenerator
@@ -206,6 +208,7 @@ classDiagram
         +get_main_number_as_list()
     }
     class BasicDBConnector
+    class AdvancedDBManager
     class MySQLInterface
     class FileGenerator {
         +generate()
@@ -232,7 +235,8 @@ classDiagram
     FileGenerator --> FleatMarket : liest Daten
     DataManager --> SellerDataClass
     DataManager --> MainNumberDataClass
-    DataManager --> BasicDBConnector
+    MarketFacade --> AdvancedDBManager : nutzt DB
+    AdvancedDBManager --|> BasicDBConnector
     BasicDBConnector --> MySQLInterface
     MainWindow --> MarketFacade : benutzt
 ```
