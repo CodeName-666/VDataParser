@@ -115,7 +115,13 @@ Einstellungen, die von dem Tool eingelesen werden können.
 
 ## Tests
 
-Einige Beispiel-Tests befinden sich im Ordner `test_code`. Das Starten von `pytest` benötigt jedoch die vollständigen GUI-Abhängigkeiten. In eingeschränkten Umgebungen kann die Ausführung daher fehlschlagen.
+Einige Beispiel-Tests befinden sich im Ordner `test_code`. Zusätzlich gibt es PyTest-Dateien im Verzeichnis `tests`. Das Starten von `pytest` benötigt die GUI-Bibliotheken. Wenn `PySide6` nicht installiert ist, werden entsprechende Tests automatisch übersprungen.
+
+Zur Ausführung aller Tests müssen die optionalen Abhängigkeiten aus `requirements-test.txt` installiert werden:
+
+```bash
+pip install -r requirements-test.txt
+```
 
 ```bash
 pytest
