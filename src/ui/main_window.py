@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
             if market_loader_info["mode"] == "json":
                 ret = self.market_facade.load_local_market_porject(self.market_view,market_loader_info["path"])
             elif market_loader_info["mode"] == "mysql":
-                pass
+                ret = self.market_facade.load_online_market(self.market_view, market_loader_info)
             else:
                 #QMessageBox.critical(self, "Error", "Invalid market loader mode selected.")
                 return
