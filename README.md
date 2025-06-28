@@ -108,9 +108,134 @@ Einstellungen, die von dem Tool eingelesen werden können.
 - **Abstraktion/Adapter**: In `display/` sind Schnittstellen für Fortschrittsbalken und Ausgaben definiert, wodurch sowohl Konsolen- als auch GUI-Varianten genutzt werden können.
 ## Architekturdiagramme
 
-- [UML Klassendiagramm](architecture/uml_class_diagram.md)
-- [Abhängigkeitsdiagramm](architecture/dependency_diagram.md)
-- [Architektur-Klassendiagramm](architecture/architecture_class_diagram.md)
+Die folgenden Mermaid-Diagramme veranschaulichen den Aufbau der Anwendung. Die
+entsprechenden Quelldateien liegen im Ordner `architecture` und sind hier direkt
+eingebunden.
+
+### UML Klassendiagramm
+
+```mermaid
+classDiagram
+    class Main {
+        +main()
+    }
+    class MainWindow
+    class MarketObserver
+    class MarketFacade
+    class MarketConfigHandler
+    class PdfDisplayConfig
+    class DataManager
+    class BaseData
+    class BasicDBConnector
+    class MySQLInterface
+    class FileGenerator
+    class PriceListGenerator
+    class SellerDataGenerator
+    class StatisticDataGenerator
+    class ReceiveInfoPdfGenerator
+    class FleatMarket
+    class SellerDataClass
+    class MainNumberDataClass
+
+    Main --> MarketFacade
+    Main --> MainWindow
+    MainWindow --> MarketObserver
+    MarketObserver --> MarketFacade
+    MarketFacade --> DataManager
+    MarketFacade --> FileGenerator
+    MarketFacade --> FleatMarket
+    MarketFacade --> MarketConfigHandler
+    MarketFacade --> PdfDisplayConfig
+    DataManager --|> BaseData
+    DataManager --> SellerDataClass
+    DataManager --> MainNumberDataClass
+    DataManager --> BasicDBConnector
+    BasicDBConnector --> MySQLInterface
+    FileGenerator --> PriceListGenerator
+    FileGenerator --> SellerDataGenerator
+    FileGenerator --> StatisticDataGenerator
+    FileGenerator --> ReceiveInfoPdfGenerator
+```
+
+### Abhängigkeitsdiagramm
+
+```mermaid
+graph TD
+    Main --> Args
+    Main --> MarketFacade
+    Main --> UI
+    UI --> MarketObserver
+    MarketObserver --> MarketFacade
+    MarketFacade --> DataManager
+    MarketFacade --> FileGenerator
+    MarketFacade --> MarketConfigHandler
+    MarketFacade --> PdfDisplayConfig
+    DataManager --> Objects
+    DataManager --> Backend
+    Backend --> MySQLInterface
+    FileGenerator --> Generators
+    Generators --> PriceListGenerator
+    Generators --> SellerDataGenerator
+    Generators --> StatisticDataGenerator
+    Generators --> ReceiveInfoPdfGenerator
+    Main --> Display
+    Display --> ProgressBar
+    Display --> Output
+```
+
+### Architektur-Klassendiagramm
+
+```mermaid
+classDiagram
+    class MarketFacade {
+        +load_local_market_project()
+        +load_local_market_export()
+        +create_pdf_data()
+        +create_market_data()
+    }
+    class MarketConfigHandler {
+        +load()
+    }
+    class PdfDisplayConfig {
+        +load()
+    }
+    class MarketObserver
+    class DataManager {
+        +load()
+        +get_seller_as_list()
+        +get_main_number_as_list()
+    }
+    class BasicDBConnector
+    class MySQLInterface
+    class FileGenerator {
+        +generate()
+    }
+    class PriceListGenerator
+    class SellerDataGenerator
+    class StatisticDataGenerator
+    class ReceiveInfoPdfGenerator
+    class FleatMarket {
+        +load_sellers()
+        +load_main_numbers()
+    }
+    class MainWindow
+    MarketFacade --> MarketConfigHandler : konfiguriert
+    MarketFacade --> PdfDisplayConfig : PDF-Layout
+    MarketFacade --> MarketObserver : informiert
+    MarketFacade --> DataManager : verwendet
+    MarketFacade --> FleatMarket : erstellt
+    MarketFacade --> FileGenerator : nutzt
+    FileGenerator --> PriceListGenerator
+    FileGenerator --> SellerDataGenerator
+    FileGenerator --> StatisticDataGenerator
+    FileGenerator --> ReceiveInfoPdfGenerator
+    FileGenerator --> FleatMarket : liest Daten
+    DataManager --> SellerDataClass
+    DataManager --> MainNumberDataClass
+    DataManager --> BasicDBConnector
+    BasicDBConnector --> MySQLInterface
+    MainWindow --> MarketFacade : benutzt
+```
 
 
 ## Tests
