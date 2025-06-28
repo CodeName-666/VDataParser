@@ -16,8 +16,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QFormLayout, QGroupBox,
-    QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
-    QSizePolicy, QTableWidget, QAbstractItemView, QVBoxLayout, QWidget)
+    QHBoxLayout, QHeaderView, QLabel, QListWidget,
+    QListWidgetItem, QSizePolicy, QTableWidget, QTableWidgetItem,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindowWidget(object):
     def setupUi(self, MainWindowWidget):
@@ -125,7 +126,6 @@ class Ui_MainWindowWidget(object):
         if (self.tableIDs.columnCount() < 3):
             self.tableIDs.setColumnCount(3)
         self.tableIDs.setObjectName(u"tableIDs")
-        self.tableIDs.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.tableIDs.setColumnCount(3)
 
         self.formLayoutDetails.setWidget(6, QFormLayout.ItemRole.FieldRole, self.tableIDs)
@@ -141,25 +141,33 @@ class Ui_MainWindowWidget(object):
 
     def retranslateUi(self, MainWindowWidget):
         MainWindowWidget.setWindowTitle(QCoreApplication.translate("MainWindowWidget", u"Benutzer\u00fcbersicht", None))
-        MainWindowWidget.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"QWidget { font-family: \"Segoe UI\", sans-serif; font-size: 10pt; background-color: #f0f0f0; }\n"
-"QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }\n"
-"QPushButton:hover { background-color: #005a9e; }\n"
-"QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
-"QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }", None))
+        MainWindowWidget.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"QWidget { font-family: \"Segoe UI\", sans-serif; font-size: 11pt; background-color: #fafafa; color: #333; }\n"
+"QPushButton { border: none; padding: 8px 16px; border-radius: 6px; background-color: #2d89ef; color: white; }\n"
+"QPushButton:hover { background-color: #1b68c7; }\n"
+"QGroupBox { border: 1px solid #d1d1d1; border-radius: 8px; margin-top: 8px; padding: 4px; }\n"
+"QGroupBox::title { subcontrol-origin: margin; left: 8px; padding: 0 6px; font-weight: bold; }\n"
+"QListWidget { background: white; border: 1px solid #d1d1d1; }\n"
+"QTableWidget { background: white; gridline-color: #d1d1d1; }", None))
         self.checkboxUnique.setText(QCoreApplication.translate("MainWindowWidget", u"Eindeutige Benutzer anzeigen", None))
         self.groupBoxDetails.setTitle(QCoreApplication.translate("MainWindowWidget", u"Benutzerdetails", None))
         self.labelVorname.setText(QCoreApplication.translate("MainWindowWidget", u"Vorname:", None))
         self.valueVorname.setText("")
+        self.valueVorname.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
         self.labelNachname.setText(QCoreApplication.translate("MainWindowWidget", u"Nachname:", None))
         self.valueNachname.setText("")
+        self.valueNachname.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
         self.labelTelefon.setText(QCoreApplication.translate("MainWindowWidget", u"Telefon:", None))
         self.valueTelefon.setText("")
+        self.valueTelefon.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
         self.labelEmail.setText(QCoreApplication.translate("MainWindowWidget", u"E-Mail:", None))
         self.valueEmail.setText("")
+        self.valueEmail.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
         self.labelCreatedAt.setText(QCoreApplication.translate("MainWindowWidget", u"Created At:", None))
         self.valueCreatedAt.setText("")
+        self.valueCreatedAt.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
         self.labelUpdatedAt.setText(QCoreApplication.translate("MainWindowWidget", u"Updated At:", None))
         self.valueUpdatedAt.setText("")
+        self.valueUpdatedAt.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
         self.labelIDs.setText(QCoreApplication.translate("MainWindowWidget", u"IDs:", None))
         self.tableIDs.setProperty(u"horizontalHeaderLabels", [
             QCoreApplication.translate("MainWindowWidget", u"ID", None),
