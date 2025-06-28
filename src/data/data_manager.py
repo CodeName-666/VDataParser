@@ -158,6 +158,42 @@ class DataManager(QObject, BaseData):
         """
         return [self.convert_seller_to_dict(seller) for seller in self.get_seller_as_list()]
 
+    def get_article_count(self, stnr_id: str) -> int:
+        """Return the number of articles for the given ``stnr`` table.
+
+        Parameters
+        ----------
+        stnr_id:
+            Either just the numeric id or the table name (e.g. ``"1"`` or ``"stnr1"``).
+
+        Returns
+        -------
+        int
+            Count of articles contained in the table. Returns ``0`` if the table
+            does not exist.
+        """
+        tables = self.get_main_number_tables()
+        key = stnr_id if stnr_id.startswith("stnr") else f"stnr{stnr_id}"
+        table = tables.get(key)
+        if not table:
+            return 0
+        return len(getattr(table, "data", []))
+
+    def get_article_sum(self, stnr_id: str) -> float:
+        """Return the total price of all articles for the given ``stnr`` table."""
+        tables = self.get_main_number_tables()
+        key = stnr_id if stnr_id.startswith("stnr") else f"stnr{stnr_id}"
+        table = tables.get(key)
+        if not table:
+            return 0.0
+        total = 0.0
+        for article in getattr(table, "data", []):
+            try:
+                total += float(article.preis)
+            except (ValueError, TypeError):
+                continue
+        return round(total, 2)
+
     def get_aggregated_users_data(self) -> List[dict]:
         """
         Returns aggregated seller data as a list of dictionaries.
