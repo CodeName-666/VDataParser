@@ -1,5 +1,9 @@
 import sys
-import time # Für Demo-Zwecke
+import time  # Für Demo-Zwecke
+import pytest
+
+pytest.importorskip("PySide6")
+
 from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtCore import QThread, Signal, Slot
 
