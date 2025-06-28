@@ -17,7 +17,7 @@ graph TD
     MarketFacade --> MarketConfigHandler
     MarketFacade --> PdfDisplayConfig
     DataManager --> Objects
-    DataManager --> Backend
+    MarketFacade --> Backend
     Backend --> MySQLInterface
     FileGenerator --> Generators
     Generators --> PriceListGenerator

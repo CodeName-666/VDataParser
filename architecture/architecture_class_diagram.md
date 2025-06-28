@@ -27,6 +27,7 @@ classDiagram
         +get_main_number_as_list()
     }
     class BasicDBConnector
+    class AdvancedDBManager
     class MySQLInterface
     class FileGenerator {
         +generate()
@@ -53,7 +54,8 @@ classDiagram
     FileGenerator --> FleatMarket : liest Daten
     DataManager --> SellerDataClass
     DataManager --> MainNumberDataClass
-    DataManager --> BasicDBConnector
+    MarketFacade --> AdvancedDBManager : nutzt DB
+    AdvancedDBManager --|> BasicDBConnector
     BasicDBConnector --> MySQLInterface
     MainWindow --> MarketFacade : benutzt
 ```
