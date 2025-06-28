@@ -9,6 +9,10 @@ from .pdf_display_config import PdfDisplayConfig
 from generator import FileGenerator
 from objects import FleatMarket
 from typing import List, Dict, Any, Union
+import tempfile
+import os
+from backend import MySQLInterface
+from backend.advance_db_connector import AdvancedDBManager
 
 
 class MarketObserver(QObject):
@@ -173,14 +177,55 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
         self._market_list: List = []
 
-    def load_online_market(self, market, json_path: str) -> None:
-        """
-        Load a project from a JSON file.
+    def load_online_market(self, market, info: dict) -> bool:
+        """Load market data from a MySQL database.
 
-        :param json_path: Path to the JSON file containing project data.
+        Parameters
+        ----------
+        market:
+            Target :class:`Market` view.
+        info:
+            Dictionary containing connection parameters (host, port, database,
+            user and password).
         """
 
-        pass
+        host = info.get("host")
+        port = info.get("port")
+        database = info.get("database")
+        user = info.get("user")
+        password = info.get("password")
+
+        tmp_path = None
+        ret = False
+        try:
+            mysql_if = MySQLInterface(host=host, user=user, password=password,
+                                      database=database, port=port)
+            with AdvancedDBManager(mysql_if) as db:
+                fd, tmp_path = tempfile.mkstemp(suffix=".json")
+                os.close(fd)
+                db.export_to_custom_json(tmp_path)
+
+            new_observer = self.create_observer(market)
+            new_observer.connect_signals(market)
+            ret = new_observer.load_local_market_export(tmp_path)
+
+            if ret:
+                self.status_info.emit(
+                    "INFO",
+                    f"Online-Datenbank geladen: {database}@{host}:{port}"
+                )
+            else:
+                self.status_info.emit("ERROR", "Daten konnten nicht geladen werden")
+        except Exception as e:
+            self.status_info.emit("ERROR", f"Fehler beim Laden der Datenbank: {e}")
+            ret = False
+        finally:
+            if tmp_path and os.path.exists(tmp_path):
+                try:
+                    os.remove(tmp_path)
+                except OSError:
+                    pass
+        return ret
 
     def load_local_market_porject(self, market, json_path: str) -> bool:
         """
