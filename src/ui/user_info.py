@@ -1,3 +1,4 @@
+from PySide6.QtWidgets import QTableWidgetItem
 from .base_ui import BaseUi
 from .generated import UserInfoUi
 
@@ -59,7 +60,8 @@ class UserInfo(BaseUi):
         self.ui.valueEmail.setText("")
         self.ui.valueCreatedAt.setText("")
         self.ui.valueUpdatedAt.setText("")
-        self.ui.valueIDs.setText("")
+        self.ui.tableIDs.clearContents()
+        self.ui.tableIDs.setRowCount(0)
 
     def display_user_details(self, index):
         """Aktualisiert die Detailfelder mit den Daten des ausgewählten Benutzers."""
@@ -73,8 +75,15 @@ class UserInfo(BaseUi):
         self.ui.valueCreatedAt.setText(user.get("created_at", ""))
         self.ui.valueUpdatedAt.setText(user.get("updated_at", ""))
         if self.ui.checkboxUnique.isChecked():
-            # Aggregierter Modus: Alle IDs, kommasepariert
             ids = user.get("ids", [])
-            self.ui.valueIDs.setText(", ".join(ids))
         else:
-            self.ui.valueIDs.setText(user.get("id", ""))
+            ids = [user.get("id", "")]
+
+        dm = self.market_widget().data_manager_ref
+        self.ui.tableIDs.setRowCount(len(ids))
+        for row, id_ in enumerate(ids):
+            count = dm.get_article_count(id_) if dm else 0
+            total = dm.get_article_sum(id_) if dm else 0.0
+            self.ui.tableIDs.setItem(row, 0, QTableWidgetItem(str(id_)))
+            self.ui.tableIDs.setItem(row, 1, QTableWidgetItem(str(count)))
+            self.ui.tableIDs.setItem(row, 2, QTableWidgetItem(f"{total:.2f}"))

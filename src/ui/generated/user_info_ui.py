@@ -17,7 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QFormLayout, QGroupBox,
     QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
-    QSizePolicy, QVBoxLayout, QWidget)
+    QSizePolicy, QTableWidget, QAbstractItemView, QVBoxLayout, QWidget)
 
 class Ui_MainWindowWidget(object):
     def setupUi(self, MainWindowWidget):
@@ -121,10 +121,14 @@ class Ui_MainWindowWidget(object):
 
         self.formLayoutDetails.setWidget(6, QFormLayout.ItemRole.LabelRole, self.labelIDs)
 
-        self.valueIDs = QLabel(self.groupBoxDetails)
-        self.valueIDs.setObjectName(u"valueIDs")
+        self.tableIDs = QTableWidget(self.groupBoxDetails)
+        if (self.tableIDs.columnCount() < 3):
+            self.tableIDs.setColumnCount(3)
+        self.tableIDs.setObjectName(u"tableIDs")
+        self.tableIDs.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.tableIDs.setColumnCount(3)
 
-        self.formLayoutDetails.setWidget(6, QFormLayout.ItemRole.FieldRole, self.valueIDs)
+        self.formLayoutDetails.setWidget(6, QFormLayout.ItemRole.FieldRole, self.tableIDs)
 
 
         self.horizontalLayout.addWidget(self.groupBoxDetails)
@@ -157,6 +161,9 @@ class Ui_MainWindowWidget(object):
         self.labelUpdatedAt.setText(QCoreApplication.translate("MainWindowWidget", u"Updated At:", None))
         self.valueUpdatedAt.setText("")
         self.labelIDs.setText(QCoreApplication.translate("MainWindowWidget", u"IDs:", None))
-        self.valueIDs.setText("")
+        self.tableIDs.setProperty(u"horizontalHeaderLabels", [
+            QCoreApplication.translate("MainWindowWidget", u"ID", None),
+            QCoreApplication.translate("MainWindowWidget", u"Anzahl", None),
+            QCoreApplication.translate("MainWindowWidget", u"Summe", None)])
     # retranslateUi
 
