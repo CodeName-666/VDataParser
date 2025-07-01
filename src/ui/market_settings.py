@@ -14,6 +14,7 @@ class MarketSetting(BaseUi):
 
     storage_path_changed = Signal(str)
     status_info = Signal(str, str)
+    data_changed = Signal(bool)
 
     def __init__(self, parent=None):
         """Create widgets and connect signals.
@@ -35,6 +36,15 @@ class MarketSetting(BaseUi):
         """Hook up UI signal handlers."""
         self.ui.buttonSave.clicked.connect(self.save)
         self.ui.buttonCancel.clicked.connect(self.restore)
+        self.ui.spinMaxStammnummer.valueChanged.connect(self._config_changed)
+        self.ui.spinMaxArtikel.valueChanged.connect(self._config_changed)
+        self.ui.dateTimeEditFlohmarktCountDown.dateTimeChanged.connect(self._config_changed)
+        self.ui.spinFlohmarktNummer.valueChanged.connect(self._config_changed)
+        self.ui.spinPwLength.valueChanged.connect(self._config_changed)
+        self.ui.lineEditTabellePrefix.textChanged.connect(self._config_changed)
+        self.ui.lineEditTabelleVerkaeufer.textChanged.connect(self._config_changed)
+        self.ui.spinMaxIdPerUser.valueChanged.connect(self._config_changed)
+        self.ui.dateTimeEditFlohmarkt.dateChanged.connect(self._config_changed)
 
     def set_default_settings(self, settings: SettingsContentDataClass | dict) -> None:
         """Store default configuration values.
@@ -71,6 +81,8 @@ class MarketSetting(BaseUi):
             settings_obj = settings.data[0]
 
         self._apply_state_dataclass(settings_obj)
+        self._config.json_data = asdict(settings_obj)
+        self._config_changed()
 
     # ------------------------------------------------------------------
     # Persistence helpers similar to PdfDisplay
@@ -82,6 +94,8 @@ class MarketSetting(BaseUi):
     def import_state(self, state: SettingsContentDataClass) -> None:
         """Apply the given state to the UI."""
         self._apply_state_dataclass(state)
+        self._config.json_data = asdict(state)
+        self._config_changed()
 
     def _state_to_dataclass(self) -> SettingsContentDataClass:
         return SettingsContentDataClass(
@@ -111,6 +125,13 @@ class MarketSetting(BaseUi):
             QDate.fromString(state.datum_flohmarkt, "yyyy-MM-dd")
         )
 
+    def _config_changed(self) -> bool:
+        if self._config.get_data() is not None:
+            ret = asdict(self.export_state()) != self._config.get_data()
+            self.data_changed.emit(ret)
+            return ret
+        return False
+
     # --- Save/Load ----------------------------------------------------
     @Slot()
     def save_as(self) -> None:
@@ -125,6 +146,7 @@ class MarketSetting(BaseUi):
                 self._config.json_data = data
                 self.storage_path_changed.emit(file_name)
                 self.status_info.emit("INFO", f"Einstellungen gespeichert: {file_name}")
+                self._config_changed()
             except IOError as e:
                 self.status_info.emit("ERROR", f"Fehler beim Speichern der Datei:\n{e}")
                 QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
@@ -137,7 +159,8 @@ class MarketSetting(BaseUi):
             try:
                 self._config.json_data = asdict(self.export_state())
                 self._config.save(path)
-                self.status_info.emit("INFO", "Einstellungen gespeichert")
+                if not self._config_changed():
+                    self.status_info.emit("INFO", "Einstellungen gespeichert")
             except IOError as e:
                 QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
         else:
@@ -157,6 +180,7 @@ class MarketSetting(BaseUi):
                 self._config.set_path_or_url(file_name)
                 self.storage_path_changed.emit(file_name)
                 self.status_info.emit("INFO", f"Einstellungen geladen: {file_name}")
+                self._config_changed()
             except (IOError, json.JSONDecodeError) as e:
                 QMessageBox.critical(self, "Fehler", f"Fehler beim Laden der Datei:\n{e}")
 
