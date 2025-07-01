@@ -110,8 +110,9 @@ class MarketObserver(QObject):
             ret = self.data_manager.load(json_path)
             if ret:
                 # Setup the FleatMarket with the loaded data
-                self.setup_data_generation()
+                self.data_manager_loaded.emit(self.data_manager)
                 self.pdf_display_config_loaded.emit(self.pdf_display_config_loader) # Send empty config
+                self.setup_data_generation()
                 self.status_info.emit("INFO", f"Export geladen: {json_path}")
             else:
                 self.status_info.emit("ERROR", "Export konnte nicht geladen werden")

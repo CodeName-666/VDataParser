@@ -650,6 +650,10 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
                 QMessageBox.critical(self, "Fehler", f"Fehler beim Erstellen der JSON-Daten:\n{e}")
         else: 
             self.save_as_state()
+    @Slot()
+    def restore_state(self):
+        self._apply_state_dict(self._config)
+        
 
 
     @Slot()
