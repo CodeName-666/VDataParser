@@ -107,7 +107,9 @@ class MarketSetting(BaseUi):
         self.ui.spinPwLength.setValue(int(str(state.psw_laenge)) if str(state.psw_laenge).isdigit() else 0)
         self.ui.lineEditTabellePrefix.setText(state.tabellen_prefix)
         self.ui.lineEditTabelleVerkaeufer.setText(state.verkaufer_liste)
-        self.ui.dateTimeEditFlohmarkt.setDate(QDate.fromString(state.datum_flohmarkt))
+        self.ui.dateTimeEditFlohmarkt.setDate(
+            QDate.fromString(state.datum_flohmarkt, "yyyy-MM-dd")
+        )
 
     # --- Save/Load ----------------------------------------------------
     @Slot()
