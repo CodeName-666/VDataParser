@@ -1,4 +1,9 @@
-from PySide6.QtCore import QDate, QDateTime
+import json
+from dataclasses import asdict
+from PySide6.QtCore import QDate, QDateTime, Signal, Slot
+from PySide6.QtWidgets import QFileDialog, QMessageBox
+from data.json_handler import JsonHandler
+from objects import SettingsContentDataClass
 
 from .base_ui import BaseUi
 from .generated import MarketSettingUi
@@ -6,6 +11,10 @@ from .generated import MarketSettingUi
 
 class MarketSetting(BaseUi):
     """Widget providing access to market configuration values."""
+
+    storage_path_changed = Signal(str)
+    status_info = Signal(str, str)
+    data_changed = Signal(bool)
 
     def __init__(self, parent=None):
         """Create widgets and connect signals.
@@ -18,25 +27,23 @@ class MarketSetting(BaseUi):
         super().__init__(parent)
         self.ui = MarketSettingUi()
         self.market = None
-        self.default_settings = {}
+        self._config = JsonHandler()
         self.ui.setupUi(self)
         self.connect_signals()
 
     def connect_signals(self) -> None:
         """Hook up UI signal handlers."""
-        # self.ui.btnSaveSettings.clicked.connect(self.save_settings)
-        # self.ui.btnResetSettings.clicked.connect(self.reset_settings)
-        pass
-
-    def set_default_settings(self, settings: dict) -> None:
-        """Store default configuration values.
-
-        Parameters
-        ----------
-        settings:
-            Dictionary containing the default settings.
-        """
-        self.default_settings = settings
+        self.ui.buttonSave.clicked.connect(self.save)
+        self.ui.buttonCancel.clicked.connect(self.restore)
+        self.ui.spinMaxStammnummer.valueChanged.connect(self._config_changed)
+        self.ui.spinMaxArtikel.valueChanged.connect(self._config_changed)
+        self.ui.dateTimeEditFlohmarktCountDown.dateTimeChanged.connect(self._config_changed)
+        self.ui.spinFlohmarktNummer.valueChanged.connect(self._config_changed)
+        self.ui.spinPwLength.valueChanged.connect(self._config_changed)
+        self.ui.lineEditTabellePrefix.textChanged.connect(self._config_changed)
+        self.ui.lineEditTabelleVerkaeufer.textChanged.connect(self._config_changed)
+        self.ui.spinMaxIdPerUser.valueChanged.connect(self._config_changed)
+        self.ui.dateTimeEditFlohmarkt.dateChanged.connect(self._config_changed)
 
     def setup_views(self, market_widget):
         """Initialise the view for the given ``market_widget``.
@@ -54,43 +61,113 @@ class MarketSetting(BaseUi):
         settings = self.market_widget().get_settings()
 
         if settings.is_all_empty():
-            settings = self.default_settings
+            settings_obj = self.default_settings
         else:
-            settings = settings.data[0]
+            settings_obj = settings.data[0]
 
-        max_stammnummern = settings.max_stammnummern
-        max_artikel = settings.max_artikel
-        datum_counter = settings.datum_counter
-        flohmarkt_nr = settings.flohmarkt_nr
-        psw_laenge = settings.psw_laenge
-        verkaufer_liste = settings.verkaufer_liste
-        datum_flohmarkt = settings.datum_flohmarkt
-        max_user_ids = settings.max_user_ids
-        tabellen_prefix = settings.tabellen_prefix
+        self._apply_state_dataclass(settings_obj)
+        self._config.json_data = asdict(settings_obj)
+        self._config_changed()
 
-        self.ui.spinMaxStammnummer.setValue(int(max_stammnummern) if max_stammnummern.isdigit() else 0)
-        self.ui.spinMaxArtikel.setValue(int(max_artikel) if max_artikel.isdigit() else 0)
-        self.ui.dateTimeEditFlohmarktCountDown.setDateTime(QDateTime.fromString(datum_counter))
-        self.ui.spinFlohmarktNummer.setValue(int(flohmarkt_nr) if flohmarkt_nr.isdigit() else 0)
-        self.ui.spinMaxIdPerUser.setValue(int(max_user_ids) if max_user_ids.isdigit() else 0)
-        self.ui.spinPwLength.setValue(int(psw_laenge) if psw_laenge.isdigit() else 0)
-        self.ui.lineEditTabellePrefix.setText(tabellen_prefix)
-        self.ui.lineEditTabelleVerkaeufer.setText(verkaufer_liste)
-        self.ui.dateTimeEditFlohmarkt.setDate(QDate.fromString(datum_flohmarkt))
+    # ------------------------------------------------------------------
+    # Persistence helpers similar to PdfDisplay
+    # ------------------------------------------------------------------
+    def export_state(self) -> SettingsContentDataClass:
+        """Return the current UI state as dataclass."""
+        return self._state_to_dataclass()
 
-    def save_settings(self) -> None:
-        """Persist the currently shown settings."""
-        settings = {
-            "setting1": self.ui.lineEditSetting1.text(),
-            "setting2": self.ui.lineEditSetting2.text(),
-        }
-        self.market_widget().save_settings(settings)
-        self.load_settings()
+    def import_state(self, state: SettingsContentDataClass) -> None:
+        """Apply the given state to the UI."""
+        self._apply_state_dataclass(state)
+        self._config.json_data = asdict(state)
+        self._config_changed()
 
-    def reset_settings(self) -> None:
-        """Reset settings to their defaults."""
-        self.market_widget().reset_settings()
-        self.load_settings()
+    def _state_to_dataclass(self) -> SettingsContentDataClass:
+        return SettingsContentDataClass(
+            max_stammnummern=str(self.ui.spinMaxStammnummer.value()),
+            max_artikel=str(self.ui.spinMaxArtikel.value()),
+            datum_counter=self.ui.dateTimeEditFlohmarktCountDown.dateTime().toString("yyyy-MM-dd HH:mm:ss"),
+            flohmarkt_nr=str(self.ui.spinFlohmarktNummer.value()),
+            psw_laenge=str(self.ui.spinPwLength.value()),
+            tabellen_prefix=self.ui.lineEditTabellePrefix.text(),
+            verkaufer_liste=self.ui.lineEditTabelleVerkaeufer.text(),
+            max_user_ids=str(self.ui.spinMaxIdPerUser.value()),
+            datum_flohmarkt=self.ui.dateTimeEditFlohmarkt.date().toString("yyyy-MM-dd"),
+        )
+
+    def _apply_state_dataclass(self, state: SettingsContentDataClass) -> None:
+        self.ui.spinMaxStammnummer.setValue(int(str(state.max_stammnummern)) if str(state.max_stammnummern).isdigit() else 0)
+        self.ui.spinMaxArtikel.setValue(int(str(state.max_artikel)) if str(state.max_artikel).isdigit() else 0)
+        self.ui.dateTimeEditFlohmarktCountDown.setDateTime(
+            QDateTime.fromString(state.datum_counter, "yyyy-MM-dd HH:mm:ss")
+        )
+        self.ui.spinFlohmarktNummer.setValue(int(str(state.flohmarkt_nr)) if str(state.flohmarkt_nr).isdigit() else 0)
+        self.ui.spinMaxIdPerUser.setValue(int(str(state.max_user_ids)) if str(state.max_user_ids).isdigit() else 0)
+        self.ui.spinPwLength.setValue(int(str(state.psw_laenge)) if str(state.psw_laenge).isdigit() else 0)
+        self.ui.lineEditTabellePrefix.setText(state.tabellen_prefix)
+        self.ui.lineEditTabelleVerkaeufer.setText(state.verkaufer_liste)
+        self.ui.dateTimeEditFlohmarkt.setDate(
+            QDate.fromString(state.datum_flohmarkt, "yyyy-MM-dd")
+        )
+
+    def _config_changed(self) -> bool:
+        if self._config.get_data() is not None:
+            ret = asdict(self.export_state()) != self._config.get_data()
+            self.data_changed.emit(ret)
+            return ret
+        return False
+
+    # --- Save/Load ----------------------------------------------------
+    @Slot()
+    def save_as(self) -> None:
+        """Save settings to a new JSON file."""
+        file_name, _ = QFileDialog.getSaveFileName(self, "Einstellungen speichern", "", "JSON (*.json)")
+        if file_name:
+            try:
+                data = asdict(self.export_state())
+                with open(file_name, "w", encoding="utf-8") as fh:
+                    json.dump(data, fh, indent=4, ensure_ascii=False)
+                self._config.set_path_or_url(file_name)
+                self._config.json_data = data
+                self.storage_path_changed.emit(file_name)
+                self.status_info.emit("INFO", f"Einstellungen gespeichert: {file_name}")
+                self._config_changed()
+            except IOError as e:
+                self.status_info.emit("ERROR", f"Fehler beim Speichern der Datei:\n{e}")
+                QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
+
+    @Slot()
+    def save(self) -> None:
+        """Save settings using the current storage path."""
+        path = self._config.get_storage_full_path()
+        if path:
+            try:
+                self._config.json_data = asdict(self.export_state())
+                self._config.save(path)
+                if not self._config_changed():
+                    self.status_info.emit("INFO", "Einstellungen gespeichert")
+            except IOError as e:
+                QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
+        else:
+            self.save_as()
+
+    @Slot()
+    def restore(self) -> None:
+        """Load settings from a JSON file."""
+        file_name, _ = QFileDialog.getOpenFileName(self, "Einstellungen laden", "", "JSON (*.json)")
+        if file_name:
+            try:
+                with open(file_name, "r", encoding="utf-8") as fh:
+                    data = json.load(fh)
+                state = SettingsContentDataClass(**data)
+                self.import_state(state)
+                self._config.json_data = data
+                self._config.set_path_or_url(file_name)
+                self.storage_path_changed.emit(file_name)
+                self.status_info.emit("INFO", f"Einstellungen geladen: {file_name}")
+                self._config_changed()
+            except (IOError, json.JSONDecodeError) as e:
+                QMessageBox.critical(self, "Fehler", f"Fehler beim Laden der Datei:\n{e}")
 
     def market_widget(self):
         """Return the associated market widget."""

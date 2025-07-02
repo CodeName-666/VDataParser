@@ -12,7 +12,7 @@ from objects import SettingsContentDataClass
 
 class MarketConfigHandler(QObject, JsonHandler):
     """Manage one project‑configuration JSON and expose convenience helpers."""
-    default_signal_loaded = Signal(object)  # Signal to notify when the default configuration is loaded
+
     # --------------------------- defaults --------------------------- #
     _DEFAULT_STRUCTURE: Dict[str, Any] = {
                 "database": {"url": "","port": ""},

@@ -82,6 +82,9 @@ class MarketObserver(QObject):
                 # Initialize the DataManager with the market JSON path
                 ret = self.data_manager.load(market_json_path)
                 if ret:
+                    if not self.data_manager.settings_available():
+                        default_settings = self.market_config_handler.get_default_settings()
+                        self.data_manager.set_default_settings(default_settings)
                     # Setup the FleatMarket with the loaded data
                     self.data_manager_loaded.emit(self.data_manager)
                     self.setup_data_generation()
@@ -110,8 +113,9 @@ class MarketObserver(QObject):
             ret = self.data_manager.load(json_path)
             if ret:
                 # Setup the FleatMarket with the loaded data
-                self.setup_data_generation()
+                self.data_manager_loaded.emit(self.data_manager)
                 self.pdf_display_config_loaded.emit(self.pdf_display_config_loader) # Send empty config
+                self.setup_data_generation()
                 self.status_info.emit("INFO", f"Export geladen: {json_path}")
             else:
                 self.status_info.emit("ERROR", "Export konnte nicht geladen werden")
@@ -149,7 +153,7 @@ class MarketObserver(QObject):
     def connect_signals(self, market) -> None:
         self.data_manager_loaded.connect(market.set_market_data)
         self.pdf_display_config_loaded.connect(market.set_pdf_config)
-        self.market_config_handler.default_signal_loaded.connect(market.set_default_settings)
+       
         market.pdf_display_storage_path_changed.connect(self.storage_path_changed)
 
 
