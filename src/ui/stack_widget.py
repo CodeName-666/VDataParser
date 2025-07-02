@@ -2,11 +2,6 @@ from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import QStackedWidget, QWidget
 
 
-
-
-
-
-
 class StackWidget(QStackedWidget):
     """QStackedWidget extension that keeps track of navigation history."""
 

@@ -3,10 +3,8 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from copy import deepcopy
 import uuid
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields 
 from datetime import datetime
-
-from .singelton_meta import SingletonMeta
 from PySide6.QtCore import QObject, Signal
 
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
@@ -15,7 +13,8 @@ from objects import (
     MainNumberDataClass,
     SellerDataClass,
     ArticleDataClass,
-    ChangeLogEntry)
+    ChangeLogEntry,
+    SettingsContentDataClass)
 
 
 class DataManager(QObject, BaseData):
@@ -461,6 +460,20 @@ class DataManager(QObject, BaseData):
             )
             return True
         return False
+    
+    def settings_available(self) -> bool:
+        return self.settings.is_all_empty()
+
+   
+    def set_default_settings(self, default_settings: SettingsContentDataClass):
+        """
+        Setzt die Default-Werte für die Settings (überschreibt alle Felder).
+        """
+        if not self.settings.data:
+            self.settings.data.append(default_settings)
+        else:
+            for field_ in fields(default_settings):
+                setattr(self.data[0], field_.name, getattr(default_settings, field_.name))
 
     def reset_all_changes(self) -> int:
         """Reset all logged changes and return the number of reverted entries."""

@@ -27,7 +27,6 @@ class MarketSetting(BaseUi):
         super().__init__(parent)
         self.ui = MarketSettingUi()
         self.market = None
-        self.default_settings = {}
         self._config = JsonHandler()
         self.ui.setupUi(self)
         self.connect_signals()
@@ -45,20 +44,6 @@ class MarketSetting(BaseUi):
         self.ui.lineEditTabelleVerkaeufer.textChanged.connect(self._config_changed)
         self.ui.spinMaxIdPerUser.valueChanged.connect(self._config_changed)
         self.ui.dateTimeEditFlohmarkt.dateChanged.connect(self._config_changed)
-
-    def set_default_settings(self, settings: SettingsContentDataClass | dict) -> None:
-        """Store default configuration values.
-
-        Parameters
-        ----------
-        settings:
-            ``SettingsContentDataClass`` instance or a plain dictionary
-            containing the default settings.
-        """
-        if isinstance(settings, dict):
-            self.default_settings = SettingsContentDataClass(**settings)
-        else:
-            self.default_settings = settings
 
     def setup_views(self, market_widget):
         """Initialise the view for the given ``market_widget``.
