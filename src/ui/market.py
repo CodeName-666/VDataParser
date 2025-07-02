@@ -51,11 +51,16 @@ class Market(BaseUi):
 
         self.ui.tabWidget.currentChanged.connect(self.tab_changed)
         """Forward signals from the PDF display to this widget."""
-        if self.pdf_display:
-            self.pdf_display.storage_path_changed.connect(self.pdf_display_storage_path_changed)
-            self.pdf_display.data_changed.connect(self.pdf_display_data_changed)
-            self.pdf_display.status_info.connect(self.status_info)
-            self.pdf_display.data_changed.connect(self.data_changed)
+        
+        self.pdf_display.storage_path_changed.connect(self.pdf_display_storage_path_changed)
+        self.pdf_display.data_changed.connect(self.pdf_display_data_changed)
+        self.pdf_display.status_info.connect(self.status_info)
+        self.pdf_display.data_changed.connect(self.data_changed)
+
+        self.market_setting.data_changed.connect(self.data_changed)
+        
+
+        
 
     @Slot(int)
     def tab_changed(self, index: int):
