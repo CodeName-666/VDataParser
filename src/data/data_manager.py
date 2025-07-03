@@ -24,7 +24,7 @@ class DataManager(QObject, BaseData):
     - Aggregates sellers based on their email addresses.
     - Assigns MainNumberDataClass instances (stnr tables) to the respective sellers.
     """
-
+    status_info = Signal(str, str)
     data_loaded = Signal(object)  # Signal to notify when data is loaded
 
     def __init__(self, json_file_path: str = None, error_handler=None) -> None:
@@ -469,12 +469,18 @@ class DataManager(QObject, BaseData):
         """
         Setzt die Default-Werte für die Settings (überschreibt alle Felder).
         """
+        # Wenn noch keine Settings drin sind, einfach anhängen
         if not self.settings.data:
             self.settings.data.append(default_settings)
         else:
+            # Ansonsten alle Felder der ersten Settings-Instanz überschreiben
             for field_ in fields(default_settings):
-                setattr(self.data[0], field_.name, getattr(default_settings, field_.name))
-
+                setattr(
+                    self.settings.data[0],                     # <- hier korrigiert
+                    field_.name,
+                    getattr(default_settings, field_.name)
+                )
+    
     def reset_all_changes(self) -> int:
         """Reset all logged changes and return the number of reverted entries."""
         # Wichtig: Um Konflikte zu vermeiden, rückwärts iterieren
