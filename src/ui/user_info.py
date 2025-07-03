@@ -40,13 +40,14 @@ class UserInfo(BaseUi):
             self.current_user_list = self.aggregated_users_data
             for user in self.current_user_list:
                 count_ids = len(user.get("ids", []))
-
-                text = f"{user.get('vorname', '')} {user.get('nachname', '')} ({count_ids})"
+                name = f"{user.get('vorname', '')} {user.get('nachname', '')}".strip()
+                text = f"{name} ({count_ids})"
                 self.ui.listWidgetUsers.addItem(text)
         else:
             self.current_user_list = self.users_data
             for idx, user in enumerate(self.current_user_list):
-                text = f"{idx+1}: {user.get('vorname', '')} {user.get('nachname', '')}"
+                name = f"{user.get('vorname', '')} {user.get('nachname', '')}".strip()
+                text = f"{idx+1}: {name}"
                 self.ui.listWidgetUsers.addItem(text)
         if self.ui.listWidgetUsers.count() > 0:
             self.ui.listWidgetUsers.setCurrentRow(0)

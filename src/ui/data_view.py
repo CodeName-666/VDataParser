@@ -62,7 +62,11 @@ class DataView(BaseUi):
         self.ui.treeUsers.clear()
         users_list = self.market_widget().get_aggregated_user()
         for email, user in users_list.items():
-            user_text = f'{user["info"].vorname} {user["info"].nachname})'
+            info = user["info"]
+            name = f"{info.vorname} {info.nachname}".strip()
+            if DataManager.seller_is_empty(info):
+                name = "<Leer>"
+            user_text = name
             user_item = QTreeWidgetItem([user_text])
             # Füge als untergeordnete Elemente die zugehörigen MainNumber-Tabellen hinzu.
             for main_number in user["stamms"]:
@@ -88,7 +92,10 @@ class DataView(BaseUi):
         self.listUsers.clear()
         flat_users = self.market_widget().get_seller()
         for index, seller in enumerate(flat_users, start=1):
-            text = f'{index}. {seller.vorname} {seller.nachname}'
+            name = f"{seller.vorname} {seller.nachname}".strip()
+            if DataManager.seller_is_empty(seller):
+                name = "<Leer>"
+            text = f"{index}. {name}"
             item = QListWidgetItem(text)
             item.setData(Qt.UserRole, seller)
             self.listUsers.addItem(item)
@@ -136,8 +143,10 @@ class DataView(BaseUi):
             user_text = item.text(0)
             users_list = self.market_widget().get_aggregated_user()
             for user in users_list.values():
-                #info_text = f'{user["info"].vorname} {user["info"].nachname} ({user["info"].email})'
-                info_text = f'{user["info"].vorname} {user["info"].nachname}'
+                info = user["info"]
+                info_text = f"{info.vorname} {info.nachname}".strip()
+                if DataManager.seller_is_empty(info):
+                    info_text = "<Leer>"
                 if info_text == user_text:
                     for main_number in user["stamms"]:
                         entries.extend(main_number.data)
