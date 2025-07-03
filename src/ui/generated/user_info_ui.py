@@ -123,10 +123,10 @@ class Ui_MainWindowWidget(object):
         self.formLayoutDetails.setWidget(6, QFormLayout.ItemRole.LabelRole, self.labelIDs)
 
         self.tableIDs = QTableWidget(self.groupBoxDetails)
-        if (self.tableIDs.columnCount() < 3):
-            self.tableIDs.setColumnCount(3)
+        if (self.tableIDs.columnCount() < 5):
+            self.tableIDs.setColumnCount(5)
         self.tableIDs.setObjectName(u"tableIDs")
-        self.tableIDs.setColumnCount(3)
+        self.tableIDs.setColumnCount(5)
 
         self.formLayoutDetails.setWidget(6, QFormLayout.ItemRole.FieldRole, self.tableIDs)
 
@@ -171,7 +171,9 @@ class Ui_MainWindowWidget(object):
         self.labelIDs.setText(QCoreApplication.translate("MainWindowWidget", u"IDs:", None))
         self.tableIDs.setProperty(u"horizontalHeaderLabels", [
             QCoreApplication.translate("MainWindowWidget", u"ID", None),
-            QCoreApplication.translate("MainWindowWidget", u"Anzahl", None),
+            QCoreApplication.translate("MainWindowWidget", u"Vollst\u00e4ndig", None),
+            QCoreApplication.translate("MainWindowWidget", u"Teilweise", None),
+            QCoreApplication.translate("MainWindowWidget", u"Offen", None),
             QCoreApplication.translate("MainWindowWidget", u"Summe", None)])
     # retranslateUi
 

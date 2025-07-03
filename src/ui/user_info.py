@@ -8,6 +8,7 @@ class UserInfo(BaseUi):
         self.ui = UserInfoUi()
         self.market = None  # Zugriff auf das MarketWidget
         self.ui.setupUi(self)
+        self.ui.tableIDs.setColumnCount(5)
         self.setup_signals()
 
     def setup_views(self, market_widget):
@@ -82,8 +83,12 @@ class UserInfo(BaseUi):
         dm = self.market_widget().data_manager_ref
         self.ui.tableIDs.setRowCount(len(ids))
         for row, id_ in enumerate(ids):
-            count = dm.get_article_count(id_) if dm else 0
+            voll = dm.get_article_count(id_) if dm else 0
+            teil = dm.get_partial_article_count(id_) if dm else 0
+            offen = dm.get_open_article_count(id_) if dm else 0
             total = dm.get_article_sum(id_) if dm else 0.0
             self.ui.tableIDs.setItem(row, 0, QTableWidgetItem(str(id_)))
-            self.ui.tableIDs.setItem(row, 1, QTableWidgetItem(str(count)))
-            self.ui.tableIDs.setItem(row, 2, QTableWidgetItem(f"{total:.2f}"))
+            self.ui.tableIDs.setItem(row, 1, QTableWidgetItem(str(voll)))
+            self.ui.tableIDs.setItem(row, 2, QTableWidgetItem(str(teil)))
+            self.ui.tableIDs.setItem(row, 3, QTableWidgetItem(str(offen)))
+            self.ui.tableIDs.setItem(row, 4, QTableWidgetItem(f"{total:.2f}"))

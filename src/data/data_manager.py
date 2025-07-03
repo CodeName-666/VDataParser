@@ -157,26 +157,37 @@ class DataManager(QObject, BaseData):
         """
         return [self.convert_seller_to_dict(seller) for seller in self.get_seller_as_list()]
 
-    def get_article_count(self, stnr_id: str) -> int:
-        """Return the number of articles for the given ``stnr`` table.
-
-        Parameters
-        ----------
-        stnr_id:
-            Either just the numeric id or the table name (e.g. ``"1"`` or ``"stnr1"``).
-
-        Returns
-        -------
-        int
-            Count of articles contained in the table. Returns ``0`` if the table
-            does not exist.
-        """
+    def _article_status_counts(self, stnr_id: str) -> Dict[str, int]:
+        """Return counts for complete, partial and open articles for ``stnr_id``."""
         tables = self.get_main_number_tables()
         key = stnr_id if stnr_id.startswith("stnr") else f"stnr{stnr_id}"
         table = tables.get(key)
+        counts = {"vollstaendig": 0, "teilweise": 0, "offen": 0}
         if not table:
-            return 0
-        return len(getattr(table, "data", []))
+            return counts
+        for article in getattr(table, "data", []):
+            desc = bool(getattr(article, "beschreibung", "").strip())
+            preis_raw = getattr(article, "preis", None)
+            preis = preis_raw not in (None, "", "None")
+            if desc and preis:
+                counts["vollstaendig"] += 1
+            elif desc or preis:
+                counts["teilweise"] += 1
+            else:
+                counts["offen"] += 1
+        return counts
+
+    def get_article_count(self, stnr_id: str) -> int:
+        """Return the number of *complete* articles for the given ``stnr`` table."""
+        return self._article_status_counts(stnr_id)["vollstaendig"]
+
+    def get_partial_article_count(self, stnr_id: str) -> int:
+        """Return the number of partially filled articles for ``stnr_id``."""
+        return self._article_status_counts(stnr_id)["teilweise"]
+
+    def get_open_article_count(self, stnr_id: str) -> int:
+        """Return the number of open (empty) articles for ``stnr_id``."""
+        return self._article_status_counts(stnr_id)["offen"]
 
     def get_article_sum(self, stnr_id: str) -> float:
         """Return the total price of all articles for the given ``stnr`` table."""
