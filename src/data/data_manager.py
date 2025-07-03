@@ -128,7 +128,9 @@ class DataManager(QObject, BaseData):
                 users[key] = {"info": seller, "ids": [], "stamms": []}
             if seller.id and seller.id not in users[key]["ids"]:
                 users[key]["ids"].append(seller.id)
-
+        
+        users = self.__move_empty_to_end(users)
+        
         return users
 
     def _assign_main_numbers_to_sellers(self) -> Dict[str, Dict]:
@@ -159,6 +161,8 @@ class DataManager(QObject, BaseData):
                     }
                 sellers[empty_key]["ids"].append(stnr_num)
                 sellers[empty_key]["stamms"].append(main)
+
+        sellers = self.__move_empty_to_end(sellers)
         return sellers
 
     def get_aggregated_users(self) -> Dict[str, Dict]:
@@ -168,7 +172,9 @@ class DataManager(QObject, BaseData):
         Returns:
             Dict[str, Dict]: Aggregated users grouped by email with "info", "ids", and "stamms".
         """
-        return self._assign_main_numbers_to_sellers()
+        sellers = self._assign_main_numbers_to_sellers()
+        sellers = self.__move_empty_to_end(sellers)
+        return 
 
     def get_main_number_tables(self) -> Dict[str, MainNumberDataClass]:
         """
@@ -243,7 +249,8 @@ class DataManager(QObject, BaseData):
             List[dict]: List of aggregated seller data dictionaries.
         """
         aggregated_dict = self.get_aggregated_users()
-        return [self.convert_aggregated_user(email, data) for email, data in aggregated_dict.items()]
+        result = [self.convert_aggregated_user(email, data) for email, data in aggregated_dict.items()]
+        return result
 
     def _log_change(self, action: str, target: str, description: str, old_value: Optional[dict] = None):
         """
@@ -488,6 +495,13 @@ class DataManager(QObject, BaseData):
                 return True
 
         return False
+    
+    def __move_empty_to_end(self, data_list):
+        empty_key = "<LEER>"
+        if empty_key in data_list:
+            empty_entry = data_list.pop(empty_key)
+            data_list[empty_key] = empty_entry
+        return data_list
 
     def update_setting(self, key: str, new_value: str) -> bool:
         """Update a setting value and log the modification."""
