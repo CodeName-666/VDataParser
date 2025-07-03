@@ -58,7 +58,7 @@ class Market(BaseUi):
         self.pdf_display.data_changed.connect(self.data_changed)
 
         self.market_setting.data_changed.connect(self.data_changed)
-        
+
 
         
 
@@ -116,18 +116,6 @@ class Market(BaseUi):
                 txt = txt.replace(self.safe_indiction_sign,'')
 
         self.ui.tabWidget.setTabText(self.ui.tabWidget.indexOf(sender_tab),txt)
-
-    @Slot(object)
-    def set_default_settings(self, settings: dict) -> None:
-        """Apply default settings to the :class:`MarketSetting` widget.
-
-        Parameters
-        ----------
-        settings:
-            Dictionary containing default configuration values.
-        """
-        if isinstance(self.market_setting, MarketSetting):
-            self.market_setting.set_default_settings(settings)
 
     @Slot(PdfDisplayConfig)
     def set_pdf_config(self, pdf_config: PdfDisplayConfig) -> None:
