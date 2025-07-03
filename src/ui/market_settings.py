@@ -1,20 +1,17 @@
 import json
 from dataclasses import asdict
-from PySide6.QtCore import QDate, QDateTime, Signal, Slot
+from PySide6.QtCore import QDate, QDateTime, Slot
 from PySide6.QtWidgets import QFileDialog, QMessageBox
 from data.json_handler import JsonHandler
 from objects import SettingsContentDataClass
 
-from .base_ui import BaseUi
+from .persistent_base_ui import PersistentBaseUi
 from .generated import MarketSettingUi
 
 
-class MarketSetting(BaseUi):
+class MarketSetting(PersistentBaseUi):
     """Widget providing access to market configuration values."""
 
-    storage_path_changed = Signal(str)
-    status_info = Signal(str, str)
-    data_changed = Signal(bool)
 
     def __init__(self, parent=None):
         """Create widgets and connect signals.
@@ -33,8 +30,8 @@ class MarketSetting(BaseUi):
 
     def connect_signals(self) -> None:
         """Hook up UI signal handlers."""
-        self.ui.buttonSave.clicked.connect(self.save)
-        self.ui.buttonCancel.clicked.connect(self.restore)
+        self.ui.buttonSave.clicked.connect(self.save_state)
+        self.ui.buttonCancel.clicked.connect(self.restore_state)
         self.ui.spinMaxStammnummer.valueChanged.connect(self._config_changed)
         self.ui.spinMaxArtikel.valueChanged.connect(self._config_changed)
         self.ui.dateTimeEditFlohmarktCountDown.dateTimeChanged.connect(self._config_changed)
@@ -119,40 +116,17 @@ class MarketSetting(BaseUi):
 
     # --- Save/Load ----------------------------------------------------
     @Slot()
-    def save_as(self) -> None:
+    def save_as_state(self) -> None:
         """Save settings to a new JSON file."""
-        file_name, _ = QFileDialog.getSaveFileName(self, "Einstellungen speichern", "", "JSON (*.json)")
-        if file_name:
-            try:
-                data = asdict(self.export_state())
-                with open(file_name, "w", encoding="utf-8") as fh:
-                    json.dump(data, fh, indent=4, ensure_ascii=False)
-                self._config.set_path_or_url(file_name)
-                self._config.json_data = data
-                self.storage_path_changed.emit(file_name)
-                self.status_info.emit("INFO", f"Einstellungen gespeichert: {file_name}")
-                self._config_changed()
-            except IOError as e:
-                self.status_info.emit("ERROR", f"Fehler beim Speichern der Datei:\n{e}")
-                QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
+        super().save_as_state()
 
     @Slot()
-    def save(self) -> None:
+    def save_state(self) -> None:
         """Save settings using the current storage path."""
-        path = self._config.get_storage_full_path()
-        if path:
-            try:
-                self._config.json_data = asdict(self.export_state())
-                self._config.save(path)
-                if not self._config_changed():
-                    self.status_info.emit("INFO", "Einstellungen gespeichert")
-            except IOError as e:
-                QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
-        else:
-            self.save_as()
+        super().save_state()
 
     @Slot()
-    def restore(self) -> None:
+    def load_state(self) -> None:
         """Load settings from a JSON file."""
         file_name, _ = QFileDialog.getOpenFileName(self, "Einstellungen laden", "", "JSON (*.json)")
         if file_name:
@@ -168,6 +142,14 @@ class MarketSetting(BaseUi):
                 self._config_changed()
             except (IOError, json.JSONDecodeError) as e:
                 QMessageBox.critical(self, "Fehler", f"Fehler beim Laden der Datei:\n{e}")
+
+    @Slot()
+    def restore_state(self) -> None:
+        data = self._config.get_data()
+        if data is not None:
+            state = SettingsContentDataClass(**data)
+            self.import_state(state)
+            self._config_changed()
 
     def market_widget(self):
         """Return the associated market widget."""

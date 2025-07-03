@@ -11,7 +11,7 @@ from PySide6.QtPdf import QPdfDocument
 from pathlib import Path
 
 from .generated import PdfDisplayUi
-from .base_ui import BaseUi
+from .persistent_base_ui import PersistentBaseUi
 from data import PdfDisplayConfig
 
 # --- Konstanten ---
@@ -311,13 +311,10 @@ class SingleBox(DraggableBox):
 
 
 # --- Main Application Widget ---
-class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWindow)
+class PdfDisplay(PersistentBaseUi):
 
     # Define a signal for the exit button if needed externally
     exit_requested = Signal()
-    storage_path_changed = Signal(str) # Signal for storage path changes
-    data_changed = Signal(bool) # Signal for data changes, e.g., box updates
-    status_info = Signal(str, str)  # Signal for status updates
 
     def __init__(self, parent=None, *, state: PdfDisplayConfig | None = None, json_path: str | None = None):
         super().__init__(parent)
@@ -612,69 +609,13 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
     @Slot()
     def save_as_state(self):
         """Saves the current state (PDF path, boxes) to a JSON file."""
-        
+
         if not self.pdfPath:
             QMessageBox.warning(self, "Speichern nicht möglich", "Keine PDF geladen.")
             return
-        
-        fileName, _ = QFileDialog.getSaveFileName(self, "Konfiguration speichern", "", "JSON (*.json)")
-        if fileName:
-            try:
-                
-                pdf_display_config = self._state_to_dict()
-                pdf_display_config.save(fileName)
-                self._config.update_json_data(pdf_display_config)
-                self._config.set_path_or_url(fileName)
-                self.storage_path_changed.emit(fileName)
-                self.status_info.emit("INFO", f"Konfiguration gespeichert: {fileName}")
-                QMessageBox.information(self, "Erfolg", f"Konfiguration erfolgreich gespeichert:\n{fileName}")
-            except IOError as e:
-                self.status_info.emit("ERROR", f"Fehler beim Speichern der Datei:\n{e}")
-                QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
-            except json.JSONDecodeError as e:
-                self.status_info.emit("ERROR", f"Fehler beim Erstellen der JSON-Daten:\n{e}")
-                QMessageBox.critical(self, "Fehler", f"Fehler beim Erstellen der JSON-Daten:\n{e}")
 
-    @Slot()
-    def save_state(self):
-        """Saves the current state to a JSON file."""
-        if self._config.get_storage_full_path():
-            try:
-                self._config.update_json_data(self._state_to_dict())
-                self._config.save()
-                if not self._config_changed():  # Emit data changed signal   
-                    self.status_info.emit("INFO", "Konfiguration gespeichert")
-            except IOError as e:
-                QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
-            except json.JSONDecodeError as e:
-                QMessageBox.critical(self, "Fehler", f"Fehler beim Erstellen der JSON-Daten:\n{e}")
-        else: 
-            self.save_as_state()
-
-    @Slot()
-    def restore_state(self):
-        self._apply_state_dict(self._config)
-        self._config_changed()
-        
-    @Slot()
-    def load_state(self):
-        """Loads state from a JSON file."""
-        fileName, _ = QFileDialog.getOpenFileName(self, "Konfiguration laden", "", "JSON Dateien (*.json)")
-        if fileName:
-            try:
-                config = PdfDisplayConfig(fileName)
-                self.status_info.emit("INFO", f"Konfiguration geladen: {fileName}")
-            except FileNotFoundError:
-                 QMessageBox.critical(self, "Fehler", f"Datei nicht gefunden:\n{fileName}")
-                 return
-            except json.JSONDecodeError as e:
-                 QMessageBox.critical(self, "Fehler", f"Fehler beim Lesen der JSON-Datei:\n{e}")
-                 return
-            except Exception as e: # Catch other potential file reading errors
-                QMessageBox.critical(self, "Fehler", f"Ein unerwarteter Fehler ist aufgetreten:\n{e}")
-                return
-
-            self.import_state(config)
+        super().save_as_state()
+        QMessageBox.information(self, "Erfolg", f"Konfiguration erfolgreich gespeichert:\n{self._config.get_storage_full_path()}")
    
 
     # --- UI Update Slots ---
