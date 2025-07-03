@@ -26,5 +26,7 @@ def test_empty_seller_grouping():
     # representation helpers
     agg_list = dm.get_aggregated_users_data()
     assert any(u["vorname"] == "<Leer>" for u in agg_list)
+    assert agg_list[-1]["vorname"] == "<Leer>"
     flat_list = dm.get_users_data()
     assert any(u["id"] == "2" and u["vorname"] == "<Leer>" for u in flat_list)
+    assert flat_list[-1]["vorname"] == "<Leer>"
