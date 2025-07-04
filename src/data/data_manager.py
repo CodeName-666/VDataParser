@@ -105,13 +105,26 @@ class DataManager(QObject, BaseData):
             Dict[str, Dict]: Dictionary with email as key and a dict containing "info", "ids", and "stamms" as value.
         """
         users: Dict[str, Dict] = {}
+        empty_key = "<LEER>"
+
+        def is_empty(s: SellerDataClass) -> bool:
+            return not any(
+                getattr(s, attr).strip() for attr in [
+                    "vorname",
+                    "nachname",
+                    "telefon",
+                    "email",
+                    "passwort",
+                ]
+            )
+
         for seller in self.get_seller_as_list():
-            key = seller.email
+            key = seller.email if not is_empty(seller) else empty_key
             if key not in users:
-                users[key] = {"info": seller, "ids": [seller.id], "stamms": []}
-            else:
-                if seller.id not in users[key]["ids"]:
-                    users[key]["ids"].append(seller.id)
+                users[key] = {"info": seller, "ids": [], "stamms": []}
+            if seller.id and seller.id not in users[key]["ids"]:
+                users[key]["ids"].append(seller.id)
+
         return users
 
     def _assign_main_numbers_to_sellers(self) -> Dict[str, Dict]:
@@ -122,12 +135,26 @@ class DataManager(QObject, BaseData):
             Dict[str, Dict]: Sellers dictionary with assigned stnr tables in "stamms".
         """
         sellers = self._aggregate_sellers()
+        empty_key = "<LEER>"
         for main in self.main_numbers_list:
-            if main.name.startswith("stnr"):
-                stnr_num = main.name[4:]  # e.g. "1" from "stnr1"
-                for user in sellers.values():
-                    if stnr_num in user["ids"]:
-                        user["stamms"].append(main)
+            if not main.name.startswith("stnr"):
+                continue
+            stnr_num = main.name[4:]  # e.g. "1" from "stnr1"
+            assigned = False
+            for user in sellers.values():
+                if stnr_num in user["ids"]:
+                    user["stamms"].append(main)
+                    assigned = True
+                    break
+            if not assigned:
+                if empty_key not in sellers:
+                    sellers[empty_key] = {
+                        "info": SellerDataClass(),
+                        "ids": [],
+                        "stamms": [],
+                    }
+                sellers[empty_key]["ids"].append(stnr_num)
+                sellers[empty_key]["stamms"].append(main)
         return sellers
 
     def get_aggregated_users(self) -> Dict[str, Dict]:
