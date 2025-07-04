@@ -128,12 +128,9 @@ class DataManager(QObject, BaseData):
                 users[key] = {"info": seller, "ids": [], "stamms": []}
             if seller.id and seller.id not in users[key]["ids"]:
                 users[key]["ids"].append(seller.id)
-
-        # ensure "<LEER>" group appears last when iterating
-        if empty_key in users:
-            empty_entry = users.pop(empty_key)
-            users[empty_key] = empty_entry
-
+        
+        users = self.__move_empty_to_end(users)
+        
         return users
 
     def _assign_main_numbers_to_sellers(self) -> Dict[str, Dict]:
@@ -165,10 +162,7 @@ class DataManager(QObject, BaseData):
                 sellers[empty_key]["ids"].append(stnr_num)
                 sellers[empty_key]["stamms"].append(main)
 
-        if empty_key in sellers:
-            empty_entry = sellers.pop(empty_key)
-            sellers[empty_key] = empty_entry
-
+        sellers = self.__move_empty_to_end(sellers)
         return sellers
 
     def get_aggregated_users(self) -> Dict[str, Dict]:
@@ -179,11 +173,8 @@ class DataManager(QObject, BaseData):
             Dict[str, Dict]: Aggregated users grouped by email with "info", "ids", and "stamms".
         """
         sellers = self._assign_main_numbers_to_sellers()
-        empty_key = "<LEER>"
-        if empty_key in sellers:
-            empty_entry = sellers.pop(empty_key)
-            sellers[empty_key] = empty_entry
-        return sellers
+        sellers = self.__move_empty_to_end(sellers)
+        return 
 
     def get_main_number_tables(self) -> Dict[str, MainNumberDataClass]:
         """
@@ -201,9 +192,7 @@ class DataManager(QObject, BaseData):
         Returns:
             List[dict]: List of seller dictionaries.
         """
-        users = [self.convert_seller_to_dict(seller) for seller in self.get_seller_as_list()]
-        users.sort(key=lambda u: u.get("vorname") == "<Leer>")
-        return users
+        return [self.convert_seller_to_dict(seller) for seller in self.get_seller_as_list()]
 
     def _article_status_counts(self, stnr_id: str) -> Dict[str, int]:
         """Return counts for complete, partial and open articles for ``stnr_id``."""
@@ -261,7 +250,6 @@ class DataManager(QObject, BaseData):
         """
         aggregated_dict = self.get_aggregated_users()
         result = [self.convert_aggregated_user(email, data) for email, data in aggregated_dict.items()]
-        result.sort(key=lambda u: u.get("vorname") == "<Leer>")
         return result
 
     def _log_change(self, action: str, target: str, description: str, old_value: Optional[dict] = None):
@@ -507,6 +495,13 @@ class DataManager(QObject, BaseData):
                 return True
 
         return False
+    
+    def __move_empty_to_end(self, data_list):
+        empty_key = "<LEER>"
+        if empty_key in data_list:
+            empty_entry = data_list.pop(empty_key)
+            data_list[empty_key] = empty_entry
+        return data_list
 
     def update_setting(self, key: str, new_value: str) -> bool:
         """Update a setting value and log the modification."""
