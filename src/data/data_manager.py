@@ -473,7 +473,7 @@ class DataManager(QObject, BaseData):
         return False
     
     def settings_available(self) -> bool:
-        return self.settings.is_all_empty()
+        return not self.settings.is_all_empty()
 
    
     def set_default_settings(self, default_settings: SettingsContentDataClass):
