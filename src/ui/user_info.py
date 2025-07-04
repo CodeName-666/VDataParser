@@ -8,7 +8,10 @@ class UserInfo(BaseUi):
         self.ui = UserInfoUi()
         self.market = None  # Zugriff auf das MarketWidget
         self.ui.setupUi(self)
-        self.ui.tableIDs.setColumnCount(5)
+
+        headers = ["StNr.", "Fertig", "Offen","Leer"," Summe"]
+        self.ui.tableIDs.setColumnCount(len(headers))
+        self.ui.tableIDs.setHorizontalHeaderLabels(headers)
         self.setup_signals()
 
     def setup_views(self, market_widget):

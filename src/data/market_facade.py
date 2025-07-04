@@ -85,6 +85,7 @@ class MarketObserver(QObject):
                     if not self.data_manager.settings_available():
                         default_settings = self.market_config_handler.get_default_settings()
                         self.data_manager.set_default_settings(default_settings)
+                        self.status_info.emit("WARNING", f"Keine Settings gefunden. Default Einstellungen wurden geladen.")
                     # Setup the FleatMarket with the loaded data
                     self.data_manager_loaded.emit(self.data_manager)
                     self.setup_data_generation()
@@ -293,6 +294,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
         if not self.market_already_exists(market):
             observer = MarketObserver()
+            observer.status_info.connect(self.status_info)
             self._market_list.append((market, observer))
         else:
             observer = self.get_observer(market)

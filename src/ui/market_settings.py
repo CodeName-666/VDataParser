@@ -56,14 +56,9 @@ class MarketSetting(PersistentBaseUi):
     def load_settings(self) -> None:
         """Load settings from the market widget and update the UI."""
         settings = self.market_widget().get_settings()
-
-        if settings.is_all_empty():
-            settings_obj = self.default_settings
-        else:
-            settings_obj = settings.data[0]
-
-        self._apply_state_dataclass(settings_obj)
-        self._config.json_data = asdict(settings_obj)
+      
+        self._apply_state_dataclass(settings.data[0])
+        self._config.json_data = asdict(settings.data[0])
         self._config_changed()
 
     # ------------------------------------------------------------------

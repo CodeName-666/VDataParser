@@ -122,13 +122,24 @@ class DataManager(QObject, BaseData):
         users: Dict[str, Dict] = {}
         empty_key = "<LEER>"
 
+        def is_empty(s: SellerDataClass) -> bool:
+            return not any(
+                getattr(s, attr).strip() for attr in [
+                    "vorname",
+                    "nachname",
+                    "telefon",
+                    "email",
+                    "passwort",
+                ]
+            )
+
         for seller in self.get_seller_as_list():
-            key = seller.email if not self.seller_is_empty(seller) else empty_key
+            key = seller.email if not is_empty(seller) else empty_key
             if key not in users:
-                users[key] = {"info": seller, "ids": [], "stamms": []}
-            if seller.id and seller.id not in users[key]["ids"]:
-                users[key]["ids"].append(seller.id)
-        
+                users[key] = {"info": seller, "ids": [seller.id], "stamms": []}
+            else:
+                if seller.id not in users[key]["ids"]:
+                    users[key]["ids"].append(seller.id)
         users = self.__move_empty_to_end(users)
         
         return users
@@ -518,7 +529,7 @@ class DataManager(QObject, BaseData):
         return False
     
     def settings_available(self) -> bool:
-        return self.settings.is_all_empty()
+        return not self.settings.is_all_empty()
 
    
     def set_default_settings(self, default_settings: SettingsContentDataClass):
