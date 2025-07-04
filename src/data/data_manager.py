@@ -185,7 +185,7 @@ class DataManager(QObject, BaseData):
         """
         sellers = self._assign_main_numbers_to_sellers()
         sellers = self.__move_empty_to_end(sellers)
-        return 
+        return sellers
 
     def get_main_number_tables(self) -> Dict[str, MainNumberDataClass]:
         """
