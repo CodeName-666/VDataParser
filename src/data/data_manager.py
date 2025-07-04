@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from copy import deepcopy
 import uuid
-from dataclasses import asdict, dataclass, fields 
+from dataclasses import asdict, dataclass, fields
 from datetime import datetime
 from PySide6.QtCore import QObject, Signal
 
@@ -42,6 +42,19 @@ class DataManager(QObject, BaseData):
         self._unsaved_changes: bool = False
         self._change_log: List[ChangeLogEntry] = []
 
+    @staticmethod
+    def seller_is_empty(seller: SellerDataClass) -> bool:
+        """Return ``True`` if the seller has no identifying information."""
+        return not any(
+            getattr(seller, attr).strip() for attr in [
+                "vorname",
+                "nachname",
+                "telefon",
+                "email",
+                "passwort",
+            ]
+        )
+
     def convert_seller_to_dict(self, seller: SellerDataClass) -> dict:
         """
         Converts a SellerDataClass entry into a dictionary with required keys.
@@ -52,9 +65,10 @@ class DataManager(QObject, BaseData):
         Returns:
             dict: Dictionary containing seller information.
         """
+        empty = self.seller_is_empty(seller)
         return {
-            "vorname": seller.vorname,
-            "nachname": seller.nachname,
+            "vorname": "<Leer>" if empty else seller.vorname,
+            "nachname": "" if empty else seller.nachname,
             "telefon": seller.telefon,
             "email": seller.email,
             "created_at": seller.created_at,
@@ -74,9 +88,10 @@ class DataManager(QObject, BaseData):
             dict: UI-friendly seller data.
         """
         seller = data["info"]
+        empty = self.seller_is_empty(seller)
         return {
-            "vorname": seller.vorname,
-            "nachname": seller.nachname,
+            "vorname": "<Leer>" if empty else seller.vorname,
+            "nachname": "" if empty else seller.nachname,
             "telefon": seller.telefon,
             "email": seller.email,
             "created_at": seller.created_at,
@@ -121,10 +136,12 @@ class DataManager(QObject, BaseData):
         for seller in self.get_seller_as_list():
             key = seller.email if not is_empty(seller) else empty_key
             if key not in users:
-                users[key] = {"info": seller, "ids": [], "stamms": []}
-            if seller.id and seller.id not in users[key]["ids"]:
-                users[key]["ids"].append(seller.id)
-
+                users[key] = {"info": seller, "ids": [seller.id], "stamms": []}
+            else:
+                if seller.id not in users[key]["ids"]:
+                    users[key]["ids"].append(seller.id)
+        users = self.__move_empty_to_end(users)
+        
         return users
 
     def _assign_main_numbers_to_sellers(self) -> Dict[str, Dict]:
@@ -155,6 +172,8 @@ class DataManager(QObject, BaseData):
                     }
                 sellers[empty_key]["ids"].append(stnr_num)
                 sellers[empty_key]["stamms"].append(main)
+
+        sellers = self.__move_empty_to_end(sellers)
         return sellers
 
     def get_aggregated_users(self) -> Dict[str, Dict]:
@@ -164,7 +183,9 @@ class DataManager(QObject, BaseData):
         Returns:
             Dict[str, Dict]: Aggregated users grouped by email with "info", "ids", and "stamms".
         """
-        return self._assign_main_numbers_to_sellers()
+        sellers = self._assign_main_numbers_to_sellers()
+        sellers = self.__move_empty_to_end(sellers)
+        return sellers
 
     def get_main_number_tables(self) -> Dict[str, MainNumberDataClass]:
         """
@@ -239,7 +260,8 @@ class DataManager(QObject, BaseData):
             List[dict]: List of aggregated seller data dictionaries.
         """
         aggregated_dict = self.get_aggregated_users()
-        return [self.convert_aggregated_user(email, data) for email, data in aggregated_dict.items()]
+        result = [self.convert_aggregated_user(email, data) for email, data in aggregated_dict.items()]
+        return result
 
     def _log_change(self, action: str, target: str, description: str, old_value: Optional[dict] = None):
         """
@@ -484,6 +506,13 @@ class DataManager(QObject, BaseData):
                 return True
 
         return False
+    
+    def __move_empty_to_end(self, data_list):
+        empty_key = "<LEER>"
+        if empty_key in data_list:
+            empty_entry = data_list.pop(empty_key)
+            data_list[empty_key] = empty_entry
+        return data_list
 
     def update_setting(self, key: str, new_value: str) -> bool:
         """Update a setting value and log the modification."""
