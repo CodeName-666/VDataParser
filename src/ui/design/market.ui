@@ -24,7 +24,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -42,12 +42,17 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
       </attribute>
      </widget>
      <widget class="QWidget" name="tab_4">
-      <attribute name="title">
-       <string>Abholbestätigung</string>
-      </attribute>
-     </widget>
+     <attribute name="title">
+      <string>Abholbestätigung</string>
+     </attribute>
     </widget>
-   </item>
+    <widget class="QWidget" name="tab_statistics">
+     <attribute name="title">
+      <string>Statistik</string>
+     </attribute>
+    </widget>
+   </widget>
+  </item>
   </layout>
  </widget>
  <resources/>
