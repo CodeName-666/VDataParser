@@ -1,10 +1,10 @@
 # --- Beispielhafte Nutzung (Angepasst an die neue Struktur) ---
 
 import os
-import sys
 from pathlib import Path
+import sys
 
-sys.path.insert(0, Path(__file__).parent.parent.__str__())
+sys.path.insert(0, Path(__file__).parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
 from src.backend.basic_db_connector import BasicDBConnector
 from src.backend import SQLiteInterface
 from src.backend import MySQLInterface
@@ -235,7 +235,7 @@ def mysql_example():
 
 # --- Hauptausführung ---
 if __name__ == "__main__":
-    sqlite_example()
+    #sqlite_example()
 
     # --- MySQL Beispiel aktivieren ---
     # Stelle sicher, dass die Konfiguration in mysql_example() korrekt ist.

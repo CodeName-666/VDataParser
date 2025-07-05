@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'market_setting.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.2
+## Created by: Qt User Interface Compiler version 6.9.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -15,21 +15,22 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QDateTimeEdit, QDialog,
-    QFormLayout, QGroupBox, QHBoxLayout, QLabel,
-    QLineEdit, QPushButton, QRadioButton, QSizePolicy,
-    QSpacerItem, QSpinBox, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QDateEdit, QDateTimeEdit,
+    QDialog, QFormLayout, QGroupBox, QHBoxLayout,
+    QLabel, QLineEdit, QPushButton, QRadioButton,
+    QSizePolicy, QSpacerItem, QSpinBox, QVBoxLayout,
+    QWidget)
 
 class Ui_MarketConfigDialog(object):
     def setupUi(self, MarketConfigDialog):
         if not MarketConfigDialog.objectName():
             MarketConfigDialog.setObjectName(u"MarketConfigDialog")
-        MarketConfigDialog.resize(450, 500)
+        MarketConfigDialog.resize(666, 500)
         self.verticalLayout = QVBoxLayout(MarketConfigDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.titleLabel = QLabel(MarketConfigDialog)
         self.titleLabel.setObjectName(u"titleLabel")
-        self.titleLabel.setAlignment(Qt.AlignCenter)
+        self.titleLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.verticalLayout.addWidget(self.titleLabel)
 
@@ -37,16 +38,16 @@ class Ui_MarketConfigDialog(object):
         self.modeGroupBox.setObjectName(u"modeGroupBox")
         self.horizontalLayout_mode = QHBoxLayout(self.modeGroupBox)
         self.horizontalLayout_mode.setObjectName(u"horizontalLayout_mode")
-        self.radioEdit = QRadioButton(self.modeGroupBox)
-        self.radioEdit.setObjectName(u"radioEdit")
+        self.radioActiveFlohmarkt = QRadioButton(self.modeGroupBox)
+        self.radioActiveFlohmarkt.setObjectName(u"radioActiveFlohmarkt")
 
-        self.horizontalLayout_mode.addWidget(self.radioEdit)
+        self.horizontalLayout_mode.addWidget(self.radioActiveFlohmarkt)
 
-        self.radioNew = QRadioButton(self.modeGroupBox)
-        self.radioNew.setObjectName(u"radioNew")
-        self.radioNew.setChecked(True)
+        self.radioDisbaledFlohmarkt = QRadioButton(self.modeGroupBox)
+        self.radioDisbaledFlohmarkt.setObjectName(u"radioDisbaledFlohmarkt")
+        self.radioDisbaledFlohmarkt.setChecked(True)
 
-        self.horizontalLayout_mode.addWidget(self.radioNew)
+        self.horizontalLayout_mode.addWidget(self.radioDisbaledFlohmarkt)
 
 
         self.verticalLayout.addWidget(self.modeGroupBox)
@@ -56,7 +57,7 @@ class Ui_MarketConfigDialog(object):
         self.labelMaxStammnummer = QLabel(MarketConfigDialog)
         self.labelMaxStammnummer.setObjectName(u"labelMaxStammnummer")
 
-        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.labelMaxStammnummer)
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelMaxStammnummer)
 
         self.spinMaxStammnummer = QSpinBox(MarketConfigDialog)
         self.spinMaxStammnummer.setObjectName(u"spinMaxStammnummer")
@@ -64,12 +65,12 @@ class Ui_MarketConfigDialog(object):
         self.spinMaxStammnummer.setMaximum(10000)
         self.spinMaxStammnummer.setValue(250)
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.spinMaxStammnummer)
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.spinMaxStammnummer)
 
         self.labelMaxArtikel = QLabel(MarketConfigDialog)
         self.labelMaxArtikel.setObjectName(u"labelMaxArtikel")
 
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.labelMaxArtikel)
+        self.formLayout.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelMaxArtikel)
 
         self.spinMaxArtikel = QSpinBox(MarketConfigDialog)
         self.spinMaxArtikel.setObjectName(u"spinMaxArtikel")
@@ -77,33 +78,29 @@ class Ui_MarketConfigDialog(object):
         self.spinMaxArtikel.setMaximum(1000)
         self.spinMaxArtikel.setValue(40)
 
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.spinMaxArtikel)
+        self.formLayout.setWidget(1, QFormLayout.ItemRole.FieldRole, self.spinMaxArtikel)
 
         self.labelFlohmarktDatum = QLabel(MarketConfigDialog)
         self.labelFlohmarktDatum.setObjectName(u"labelFlohmarktDatum")
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.labelFlohmarktDatum)
+        self.formLayout.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labelFlohmarktDatum)
 
-        self.dateTimeEditFlohmarkt = QDateTimeEdit(MarketConfigDialog)
-        self.dateTimeEditFlohmarkt.setObjectName(u"dateTimeEditFlohmarkt")
-        self.dateTimeEditFlohmarkt.setDateTime(QDateTime(QDate(0, 0, 0), QTime(0, 0, 0)))
+        self.dateTimeEditFlohmarktCountDown = QDateTimeEdit(MarketConfigDialog)
+        self.dateTimeEditFlohmarktCountDown.setObjectName(u"dateTimeEditFlohmarktCountDown")
+        self.dateTimeEditFlohmarktCountDown.setDateTime(QDateTime(QDate(2000, 1, 1), QTime(0, 0, 0)))
+        self.dateTimeEditFlohmarktCountDown.setCalendarPopup(True)
 
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.dateTimeEditFlohmarkt)
+        self.formLayout.setWidget(2, QFormLayout.ItemRole.FieldRole, self.dateTimeEditFlohmarktCountDown)
 
         self.labelFlohmarkt = QLabel(MarketConfigDialog)
         self.labelFlohmarkt.setObjectName(u"labelFlohmarkt")
 
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.labelFlohmarkt)
-
-        self.lineEditFlohmarkt = QLineEdit(MarketConfigDialog)
-        self.lineEditFlohmarkt.setObjectName(u"lineEditFlohmarkt")
-
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.lineEditFlohmarkt)
+        self.formLayout.setWidget(3, QFormLayout.ItemRole.LabelRole, self.labelFlohmarkt)
 
         self.labelFlohmarktNummer = QLabel(MarketConfigDialog)
         self.labelFlohmarktNummer.setObjectName(u"labelFlohmarktNummer")
 
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.labelFlohmarktNummer)
+        self.formLayout.setWidget(4, QFormLayout.ItemRole.LabelRole, self.labelFlohmarktNummer)
 
         self.spinFlohmarktNummer = QSpinBox(MarketConfigDialog)
         self.spinFlohmarktNummer.setObjectName(u"spinFlohmarktNummer")
@@ -111,12 +108,12 @@ class Ui_MarketConfigDialog(object):
         self.spinFlohmarktNummer.setMaximum(100)
         self.spinFlohmarktNummer.setValue(5)
 
-        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.spinFlohmarktNummer)
+        self.formLayout.setWidget(4, QFormLayout.ItemRole.FieldRole, self.spinFlohmarktNummer)
 
         self.labelPwLength = QLabel(MarketConfigDialog)
         self.labelPwLength.setObjectName(u"labelPwLength")
 
-        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.labelPwLength)
+        self.formLayout.setWidget(5, QFormLayout.ItemRole.LabelRole, self.labelPwLength)
 
         self.spinPwLength = QSpinBox(MarketConfigDialog)
         self.spinPwLength.setObjectName(u"spinPwLength")
@@ -124,32 +121,32 @@ class Ui_MarketConfigDialog(object):
         self.spinPwLength.setMaximum(50)
         self.spinPwLength.setValue(10)
 
-        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.spinPwLength)
+        self.formLayout.setWidget(5, QFormLayout.ItemRole.FieldRole, self.spinPwLength)
 
         self.labelTabellePrefix = QLabel(MarketConfigDialog)
         self.labelTabellePrefix.setObjectName(u"labelTabellePrefix")
 
-        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.labelTabellePrefix)
+        self.formLayout.setWidget(6, QFormLayout.ItemRole.LabelRole, self.labelTabellePrefix)
 
         self.lineEditTabellePrefix = QLineEdit(MarketConfigDialog)
         self.lineEditTabellePrefix.setObjectName(u"lineEditTabellePrefix")
 
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.lineEditTabellePrefix)
+        self.formLayout.setWidget(6, QFormLayout.ItemRole.FieldRole, self.lineEditTabellePrefix)
 
         self.labelTabelleVerkaeufer = QLabel(MarketConfigDialog)
         self.labelTabelleVerkaeufer.setObjectName(u"labelTabelleVerkaeufer")
 
-        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.labelTabelleVerkaeufer)
+        self.formLayout.setWidget(7, QFormLayout.ItemRole.LabelRole, self.labelTabelleVerkaeufer)
 
         self.lineEditTabelleVerkaeufer = QLineEdit(MarketConfigDialog)
         self.lineEditTabelleVerkaeufer.setObjectName(u"lineEditTabelleVerkaeufer")
 
-        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.lineEditTabelleVerkaeufer)
+        self.formLayout.setWidget(7, QFormLayout.ItemRole.FieldRole, self.lineEditTabelleVerkaeufer)
 
         self.labelMaxIdPerUser = QLabel(MarketConfigDialog)
         self.labelMaxIdPerUser.setObjectName(u"labelMaxIdPerUser")
 
-        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.labelMaxIdPerUser)
+        self.formLayout.setWidget(8, QFormLayout.ItemRole.LabelRole, self.labelMaxIdPerUser)
 
         self.spinMaxIdPerUser = QSpinBox(MarketConfigDialog)
         self.spinMaxIdPerUser.setObjectName(u"spinMaxIdPerUser")
@@ -157,13 +154,19 @@ class Ui_MarketConfigDialog(object):
         self.spinMaxIdPerUser.setMaximum(100)
         self.spinMaxIdPerUser.setValue(8)
 
-        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.spinMaxIdPerUser)
+        self.formLayout.setWidget(8, QFormLayout.ItemRole.FieldRole, self.spinMaxIdPerUser)
 
         self.checkBoxLoginDisable = QCheckBox(MarketConfigDialog)
         self.checkBoxLoginDisable.setObjectName(u"checkBoxLoginDisable")
         self.checkBoxLoginDisable.setChecked(False)
 
-        self.formLayout.setWidget(9, QFormLayout.SpanningRole, self.checkBoxLoginDisable)
+        self.formLayout.setWidget(9, QFormLayout.ItemRole.SpanningRole, self.checkBoxLoginDisable)
+
+        self.dateTimeEditFlohmarkt = QDateEdit(MarketConfigDialog)
+        self.dateTimeEditFlohmarkt.setObjectName(u"dateTimeEditFlohmarkt")
+        self.dateTimeEditFlohmarkt.setCalendarPopup(True)
+
+        self.formLayout.setWidget(3, QFormLayout.ItemRole.FieldRole, self.dateTimeEditFlohmarkt)
 
 
         self.verticalLayout.addLayout(self.formLayout)
@@ -195,16 +198,20 @@ class Ui_MarketConfigDialog(object):
 
     def retranslateUi(self, MarketConfigDialog):
         MarketConfigDialog.setWindowTitle(QCoreApplication.translate("MarketConfigDialog", u"Markt-Konfiguration", None))
+        MarketConfigDialog.setStyleSheet(QCoreApplication.translate("MarketConfigDialog", u"QWidget { font-family: \"Segoe UI\", sans-serif; font-size: 10pt; background-color: #f0f0f0; }\n"
+"QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }\n"
+"QPushButton:hover { background-color: #005a9e; }\n"
+"QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
+"QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }", None))
         self.titleLabel.setText(QCoreApplication.translate("MarketConfigDialog", u"<h2>Markt-Konfiguration</h2>", None))
         self.modeGroupBox.setTitle(QCoreApplication.translate("MarketConfigDialog", u"Modus", None))
-        self.radioEdit.setText(QCoreApplication.translate("MarketConfigDialog", u"Verkaufsmarkt anpassen", None))
-        self.radioNew.setText(QCoreApplication.translate("MarketConfigDialog", u"Neuen Verkaufsmarkt erstellen", None))
+        self.radioActiveFlohmarkt.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt Aktivieren", None))
+        self.radioDisbaledFlohmarkt.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt Deaktivieren", None))
         self.labelMaxStammnummer.setText(QCoreApplication.translate("MarketConfigDialog", u"Max. Stammnummern:", None))
         self.labelMaxArtikel.setText(QCoreApplication.translate("MarketConfigDialog", u"Max. Artikel:", None))
-        self.labelFlohmarktDatum.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt Datum:", None))
-        self.dateTimeEditFlohmarkt.setDisplayFormat(QCoreApplication.translate("MarketConfigDialog", u"yyyy-MM-dd HH:mm:ss", None))
-        self.labelFlohmarkt.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt:", None))
-        self.lineEditFlohmarkt.setText(QCoreApplication.translate("MarketConfigDialog", u"Sept. 24", None))
+        self.labelFlohmarktDatum.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt CountDown", None))
+        self.dateTimeEditFlohmarktCountDown.setDisplayFormat(QCoreApplication.translate("MarketConfigDialog", u"yyyy-MM-dd HH:mm:ss", None))
+        self.labelFlohmarkt.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt Start:", None))
         self.labelFlohmarktNummer.setText(QCoreApplication.translate("MarketConfigDialog", u"Flohmarkt Nummer:", None))
         self.labelPwLength.setText(QCoreApplication.translate("MarketConfigDialog", u"Passwortl\u00e4nge:", None))
         self.labelTabellePrefix.setText(QCoreApplication.translate("MarketConfigDialog", u"Tabellen-Prefix:", None))

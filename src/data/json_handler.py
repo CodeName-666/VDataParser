@@ -6,11 +6,11 @@ import copy
 import sys # For stderr fallback
 from typing import Union, Dict, List, Optional, Any # Added Optional, Any
 from pathlib import Path
-
+import os
 
 from log import CustomLogger, LogType # Import LogType if used
 import requests
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 class JsonHandler():
     """
@@ -31,6 +31,7 @@ class JsonHandler():
             logger (Optional[CustomLogger]): An optional CustomLogger instance.
         """
         self.logger = logger
+        self._storage_path: str = '' # Initialize path as None
         self.json_data: Optional[Union[Dict, List]] = None # Initialize as None
 
         if isinstance(json_path_or_data, str):
@@ -96,7 +97,7 @@ class JsonHandler():
              print(f"ERROR: {full_error_msg}", file=sys.stderr)
 
 
-    def load(self, path_or_url: str) -> None:
+    def load(self, path_or_url: str) -> bool:
         """
         Load JSON data from a path or URL and store it in self.json_data.
         Resets self.json_data to None if loading fails.
@@ -104,6 +105,7 @@ class JsonHandler():
         Args:
             path_or_url (str): The path or URL to the JSON file.
         """
+        ret: bool = False # 
         self._log("INFO", f"Attempting to load JSON from: {path_or_url}")
         self.json_data = None # Reset before loading
         try:
@@ -117,13 +119,16 @@ class JsonHandler():
 
             if self.json_data is not None:
                  self._log("INFO", "JSON data loaded successfully.")
+                 ret = True
             # else: error already logged in load_from_url/local
 
         except Exception as e:
              # Catch potential errors from urlparse or other unexpected issues
              self._log_error("load", f"Unexpected error during loading preparation for '{path_or_url}'", e)
              self.json_data = None
-
+             ret = False
+             
+        return ret
 
     def load_from_url(self, json_url: str) -> Optional[Union[Dict, List]]:
         """
@@ -143,6 +148,7 @@ class JsonHandler():
             response = requests.get(json_url, timeout=10) # Added timeout
             response.raise_for_status() # Raises HTTPError for bad responses (4xx or 5xx)
             # Use response.json() for automatic decoding and parsing
+            self.set_path_or_url(urlparse(json_url))
             return response.json()
         except requests.exceptions.Timeout:
             self._log_error("load_from_url", f"Request timed out for URL: {json_url}")
@@ -174,6 +180,7 @@ class JsonHandler():
                  raise FileNotFoundError(f"File not found at resolved path: {p}")
 
             with open(p, 'r', encoding='utf-8') as json_file: # Specify UTF-8
+                self.set_path_or_url(json_file_path)
                 return json.load(json_file)
         except FileNotFoundError as e:
             self._log_error("load_from_local", f"JSON file not found", e)
@@ -188,6 +195,18 @@ class JsonHandler():
             self._log_error("load_from_local", f"Unexpected error loading local file: {json_file_path}", e)
             return None
 
+    def set_path_or_url(self, path_or_url: str) -> None:
+        """
+        Set the path or URL for the JSON data.
+
+        Args:
+            path_or_url (str): The path or URL to set.
+        """
+        if not isinstance(path_or_url, str):
+            self._log("ERROR", "set_path_or_url requires a string path or URL.")
+            return
+        self._storage_path = path_or_url
+        self._log("DEBUG", f"Path or URL set to: {str(self._storage_path)}")
     # get_value method seems unused, can be removed or kept if needed elsewhere
     # def get_value(self, data: Union[Dict, List], key: Union[str, int]) -> Optional[Any]: ...
 
@@ -327,11 +346,17 @@ class JsonHandler():
             self._log_error("set_key_value", f"Unexpected error setting value at path '{path_str}'", e)
             return False
 
-    def save(self, path_or_url: str) -> None:
+    def save(self, path_or_url: str = "") -> None:
         """ Saves the current JSON data to the specified local path or URL. """
         if self.json_data is None:
             self._log("ERROR", "Cannot save, no JSON data loaded.")
             return
+
+        if not path_or_url:
+            path_or_url = str(self._storage_path)
+            self._log("INFO", f"No path or URL provided. Use {str(self._storage_path)} to save.")
+            
+
         self._log("INFO", f"Attempting to save JSON data to: {path_or_url}")
         try:
             parsed = urlparse(path_or_url)
@@ -339,6 +364,9 @@ class JsonHandler():
                 self.save_to_url(path_or_url)
             else:
                 self.save_to_local(path_or_url)
+
+            self.set_path_or_url(path_or_url)
+            
         except Exception as e:
              self._log_error("save", f"Unexpected error during save preparation for '{path_or_url}'", e)
 
@@ -381,5 +409,78 @@ class JsonHandler():
     def get_data(self) -> Optional[Union[Dict, List]]:
         """ Returns the loaded JSON data. """
         return self.json_data
+    
+    def data_equal(self, other: 'JsonHandler') -> bool:
+        """
+        Compare this JsonHandler's data with another JsonHandler's data.
+
+        Args:
+            other (JsonHandler): Another instance of JsonHandler to compare with.
+
+        Returns:
+            bool: True if both JSON data are equal, False otherwise.
+        """
+        if not isinstance(other, JsonHandler):
+            self._log("ERROR", "compare_data requires another JsonHandler instance.")
+            return False
+        return self.json_data == other.get_data()
+    
+    def split_path_and_filename(path_str: str) -> tuple[str, str]:
+        """
+        Teilt einen String (URL oder lokaler Pfad) in
+        (restlichen Pfad, Dateiname).
+        
+        Für URLs (scheme + netloc vorhanden):
+        • entfernt Query und Fragment
+        • gibt base_url (inkl. scheme://host/…/) und filename zurück
+        
+        Für lokale Pfade:
+        • nutzt os.path.split
+        • hängt am Ende des Verzeichnisteils einen os.sep an (wenn nicht schon vorhanden)
+        """
+        parsed = urlparse(path_str)
+        # Wenn scheme und netloc vorhanden sind, behandeln wir es als URL
+        if parsed.scheme and parsed.netloc:
+            # parsed.path ist der reine Pfad-Teil ("/foo/bar/file.txt")
+            dirpath, filename = os.path.split(parsed.path)
+            # sicherstellen, dass der Verzeichnis-Teil mit "/" endet
+            if dirpath and not dirpath.endswith('/'):
+                dirpath += '/'
+            # Query und Fragment entfernen, path auf dirpath anpassen
+            new_parsed = parsed._replace(path=dirpath, params='', query='', fragment='')
+            base_url = urlunparse(new_parsed)
+            return base_url, filename
+        
+        # sonst lokaler Pfad
+        dirpath, filename = os.path.split(path_str)
+        # Verzeichnis mit trailing separator
+        if dirpath and not (dirpath.endswith(os.sep) or dirpath.endswith('/')):
+            dirpath += os.sep
+        return dirpath, filename
+
+    def update_json_data(self, other: 'JsonHandler') -> None:
+        """
+        Update the current JSON data with data from another JsonHandler object.
+
+        Args:
+            other (JsonHandler): Another JsonHandler instance whose data will be used.
+        """
+        if not isinstance(other, JsonHandler):
+            self._log("ERROR", "update_data requires a JsonHandler instance.")
+            return
+        self.json_data = copy.deepcopy(other.get_data())
+        self._log("INFO", "JSON data updated successfully from another JsonHandler.")
+
+    def get_storage_full_path(self) -> str:
+        
+        return self._storage_path
+
+    def get_storage_file_name(self) -> str:
+        _ , name =  self.split_path_and_filename(self._storage_path)
+        return name
+    
+    def get_storage_path(self) -> str:
+        dir , _ =  self.split_path_and_filename(self._storage_path)
+        return dir
 
 # --- END OF FILE json_handler.py ---

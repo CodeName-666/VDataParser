@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'about.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.2
+## Created by: Qt User Interface Compiler version 6.9.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -116,6 +116,11 @@ class Ui_AboutDialog(object):
 
     def retranslateUi(self, AboutDialog):
         AboutDialog.setWindowTitle(QCoreApplication.translate("AboutDialog", u"\u00dcber MeinTool", None))
+        AboutDialog.setStyleSheet(QCoreApplication.translate("AboutDialog", u"QWidget { font-family: \"Segoe UI\", sans-serif; font-size: 10pt; background-color: #f0f0f0; }\n"
+"QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }\n"
+"QPushButton:hover { background-color: #005a9e; }\n"
+"QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
+"QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }", None))
         self.labelLogo.setText("")
         self.labelToolName.setText(QCoreApplication.translate("AboutDialog", u"MeinTool", None))
         self.labelVersion.setText(QCoreApplication.translate("AboutDialog", u"Version 1.0.0", None))

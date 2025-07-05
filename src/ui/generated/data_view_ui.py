@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'data_view.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.2
+## Created by: Qt User Interface Compiler version 6.9.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -70,6 +70,11 @@ class Ui_DataView(object):
 
     def retranslateUi(self, DataView):
         DataView.setWindowTitle(QCoreApplication.translate("DataView", u"Form", None))
+        DataView.setStyleSheet(QCoreApplication.translate("DataView", u"QWidget { font-family: \"Segoe UI\", sans-serif; font-size: 10pt; background-color: #f0f0f0; }\n"
+"QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }\n"
+"QPushButton:hover { background-color: #005a9e; }\n"
+"QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
+"QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }", None))
         self.btnToggleView.setText(QCoreApplication.translate("DataView", u"Ansicht umschalten", None))
         self.treeUsers.setProperty(u"headerLabels", [
             QCoreApplication.translate("DataView", u"Benutzer", None)])

@@ -1,6 +1,16 @@
-from dataclasses import dataclass, field
-from typing import List
+from dataclasses import dataclass,field, fields
+from typing import List, Optional
 
+
+@dataclass
+class CoordinatesConfig:
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    x3: float
+    y3: float
+    font_size: int = 12
 
 @dataclass
 class ChangeLogEntry:
@@ -9,17 +19,59 @@ class ChangeLogEntry:
     action: str
     target: str
     description: str
+    old_value: Optional[dict] = None  # hinzugefügt für Rücksetzfunktion
 
 @dataclass
 class HeaderDataClass:
-    type: str
-    version: str
-    comment: str
+    type: str = ""
+    version: str = ""
+    comment: str = ""
 
 @dataclass
 class BaseInfoDataClass:
-    type: str 
-    name: str
+    type: str = ""
+    name: str = ""
+
+@dataclass
+class SettingsContentDataClass:
+    max_stammnummern: str = ""
+    max_artikel: str = 0
+    datum_counter: str = ""
+    flohmarkt_nr: str = ""
+    psw_laenge: str = ""
+    tabellen_prefix: str = ""
+    verkaufer_liste: str = ""
+    max_user_ids: str = ""
+    datum_flohmarkt: str = ""   
+
+@dataclass
+class SettingDataClass:
+    type: str = ""
+    name: str = ""
+    database: str = ""
+    data: List[SettingsContentDataClass] = field(default_factory=list)
+
+    def is_all_empty(self) -> bool:
+        if not self.data:
+            return True  # Leere Liste gilt als 'alles leer'
+
+        settings = self.data[0]
+        for field_ in fields(settings):
+            value = getattr(settings, field_.name)
+            if value not in ("", 0, None):
+                return False
+        return True
+   
+    def __post_init__(self):
+        converted_settings = []
+        for setting in self.data:
+            if isinstance(setting, dict):
+                cSetting = SettingsContentDataClass(**setting)
+                converted_settings.append(cSetting)
+        
+        self.data = converted_settings
+       #elif not isinstance(self.data, SettingsContentDataClass):
+       #    raise TypeError("data must be a SettingsDataClassList or a dict")
 
 @dataclass
 class ArticleDataClass:
@@ -95,5 +147,6 @@ class SellerListDataClass:
 class JSONData:
     export_header: HeaderDataClass
     base_info: BaseInfoDataClass
+    settings: SettingDataClass
     main_numbers_list: List[MainNumberDataClass]
     sellers: SellerListDataClass

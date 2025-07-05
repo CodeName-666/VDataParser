@@ -45,31 +45,48 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
     ) -> None:
         
         # Housekeeping -------------------------------------------------
-        
         Base.__init__(logger, output_interface)
         self._fm = fleat_market_data
         self._path = Path(output_path)
-        self._path.mkdir(parents=True, exist_ok=True)
-
         self._tracker = progress_tracker
         self._bar = progress_bar
 
-        # Log basic environment info
+        # Parameter für spätere Initialisierung merken
+        self._seller_file_name = seller_file_name
+        self._price_list_file_name = price_list_file_name
+        self._statistic_file_name = statistic_file_name
+        self._pdf_template_path_input = pdf_template_path_input
+        self._pdf_output_file_name = pdf_output_file_name
+
+        self._tasks: List[Tuple[str, object]] = []
+
+    def _ensure_output_folder(self) -> None:
+        """Erstellt den Output-Ordner falls nötig und loggt den Pfad."""
+        self._path.mkdir(parents=True, exist_ok=True)
         self._log("debug", f"Output path: {self._path.resolve()}")
 
-        # Instantiate sub‑generators ----------------------------------
-        common = dict(fleat_market_data=fleat_market_data,path=str(self._path))
-
-        self._tasks: List[Tuple[str, object]] = [
-            ("Verkäuferdaten", SellerDataGenerator(**common, file_name=seller_file_name)),
-            ("Preisliste",     PriceListGenerator(**common, file_name=price_list_file_name)),
-            ("Statistik",      StatisticDataGenerator(**common, file_name=statistic_file_name)),
-            ("Abholbestätigung", ReceiveInfoPdfGenerator(**common, pdf_template = pdf_template_path_input, output_name= pdf_output_file_name)),
+    def _build_tasks(self) -> List[Tuple[str, object]]:
+        """Erzeuge die Liste aller Sub‑Generatoren."""
+        common = dict(fleat_market_data=self._fm, path=str(self._path))
+        return [
+            ("Verkäuferdaten", SellerDataGenerator(**common, file_name=self._seller_file_name)),
+            ("Preisliste", PriceListGenerator(**common, file_name=self._price_list_file_name)),
+            ("Statistik", StatisticDataGenerator(**common, file_name=self._statistic_file_name)),
+            (
+                "Abholbestätigung",
+                ReceiveInfoPdfGenerator(
+                    **common,
+                    pdf_template=self._pdf_template_path_input,
+                    output_name=self._pdf_output_file_name,
+                ),
+            ),
         ]
 
+    def _init_tasks(self) -> None:
+        """Initialisiert die Sub-Generatoren-Tasks."""
+        self._tasks = self._build_tasks()
         if self._tracker and hasattr(self._tracker, "reset"):
             self._tracker.reset(total=len(self._tasks)*2)  # type: ignore[misc]
-            #self._tracker.reset(total=6)  # type: ignore[misc]
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -88,15 +105,17 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         except Exception:  # pragma: no cover
             pass
 
-    # ------------------------------------------------------------------
-    # Public entry point
-    # ------------------------------------------------------------------
-    def generate(self) -> None:  # noqa: D401
-        self._output("INFO", "Starte Dateigenerierung …")
+    def _run_tasks(self, tasks: List[Tuple[str, object]], headline: str) -> None:
+        """Execute the given tasks with progress tracking."""
+        self._ensure_output_folder()
+        if self._tracker and hasattr(self._tracker, "reset"):
+            self._tracker.reset(total=len(tasks) * 2)  # type: ignore[misc]
+
+        self._output("INFO", headline)
         start = time.time()
         success = True
 
-        for name, task in self._tasks:
+        for name, task in tasks:
             self._output("INFO", f"→ {name} …")
             step_ok = True
             try:
@@ -112,7 +131,6 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
                 self._update_bar()
             self._output("INFO" if step_ok else "ERROR", f"← {name} {'ok' if step_ok else 'fehlgeschlagen'}")
 
-        # Final wrap‑up --------------------------------------------------
         duration = time.time() - start
         if success:
             self._output("INFO", f"Alle Aufgaben abgeschlossen in {duration:.2f}s.")
@@ -122,3 +140,52 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
             self._output("ERROR", f"Generierung mit Fehlern beendet ({duration:.2f}s).")
             if self._bar:
                 self._bar.complete(success=False)  # type: ignore[misc]
+
+    # ------------------------------------------------------------------
+    # Public entry point
+    # ------------------------------------------------------------------
+    def generate(self) -> None:  # noqa: D401
+        self._init_tasks()
+        self._run_tasks(self._tasks, "Starte Dateigenerierung …")
+
+    def set_output_folder_path(self, path: str | Path) -> None:
+        """Setzt den Pfad zum Output-Ordner."""
+        self._path = Path(path)
+
+    def get_output_folder_path(self) -> Path:
+        """Gibt den Pfad zum Output-Ordner zurück."""
+        return self._path
+
+    # ------------------------------------------------------------------
+    # Public helpers for partial generation
+    # ------------------------------------------------------------------
+    def _apply_pdf_settings(self, settings: Optional[dict]) -> None:
+        """Update internal paths based on ``settings`` dictionary."""
+        if not settings:
+            return
+        out = settings.get("output_path") or settings.get("pdf_path")
+        if out:
+            self._path = Path(out)
+        template = settings.get("pdf_template") or settings.get("pdf_template_path_input")
+        if template:
+            self._pdf_template_path_input = template
+        output = settings.get("pdf_output") or settings.get("pdf_output_file_name") or settings.get("pdf_name")
+        if output:
+            self._pdf_output_file_name = output
+
+    def create_pdf_data(self, settings: Optional[dict] = None) -> None:
+        """Generate only the PDF based on ``settings``."""
+        self._apply_pdf_settings(settings)
+        tasks = [self._build_tasks()[-1]]  # only PDF task
+        self._run_tasks(tasks, "Starte PDF‑Generierung …")
+
+    def create_seller_data(self) -> None:
+        """Generate seller related data files (DAT)."""
+        tasks = self._build_tasks()[:-1]
+        self._run_tasks(tasks, "Starte Dateigenerierung …")
+
+    def create_all(self, settings: Optional[dict] = None) -> None:
+        """Generate all data and PDF files."""
+        self._apply_pdf_settings(settings)
+        tasks = self._build_tasks()
+        self._run_tasks(tasks, "Starte Dateigenerierung …")

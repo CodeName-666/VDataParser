@@ -1,5 +1,4 @@
-import sys
-import os
+
 import json
 from PySide6.QtWidgets import (
     QApplication, QWidget, QGraphicsScene, QGraphicsPixmapItem,
@@ -9,14 +8,11 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor
 from PySide6.QtCore import Qt, QRectF, QPointF, Signal, Slot, QSize, QObject
 from PySide6.QtPdf import QPdfDocument
+from pathlib import Path
 
-# Importiere die konvertierte UI-Klasse (Annahme: Name und Pfad sind korrekt)
-# Falls PdfDisplayUi in derselben Datei wie PdfDisplay ist:
-# from <current_module> import PdfDisplayUi
-# Falls in einem Unterordner 'generated':
 from .generated import PdfDisplayUi
-# Importiere die Basisklasse (Annahme: Pfad ist korrekt)
-from .base_ui import BaseUi
+from .persistent_base_ui import PersistentBaseUi
+from data import PdfDisplayConfig
 
 # --- Konstanten ---
 BOX_BORDER_PEN = QPen(QColor("black"), 2)
@@ -32,6 +28,7 @@ DEFAULT_BOX_HEIGHT = 50
 BOX_PAIR_LABEL_1_PREFIX = "USR"
 BOX_PAIR_LABEL_2_PREFIX = "NR"
 SINGLE_BOX_LABEL_PREFIX = "DATE"
+BOX_PAIR_LABEL_PREFIX = "USER/NR"
 LIST_ITEM_DATA_ROLE = Qt.UserRole
 
 
@@ -274,7 +271,7 @@ class BoxPair(QObject):
         self.box2 = DraggableBox(rect, label=f"{BOX_PAIR_LABEL_2_PREFIX}{self.id}")
         self.box2.setPos(startPos + offset)
         self.box2.setPen(QPen(BOX_PAIR_COLOR_2, 2))
-
+        self.label = f"{BOX_PAIR_LABEL_PREFIX}{self.id}"
         scene.addItem(self.box1)
         scene.addItem(self.box2)
 
@@ -290,7 +287,7 @@ class BoxPair(QObject):
         return self.box1, self.box2
 
     def __str__(self):
-        return f"BoxPair {self.id}"
+        return f"BoxPair {self.id} ({self.label})" # More descriptive
 
 
 class SingleBox(DraggableBox):
@@ -314,25 +311,27 @@ class SingleBox(DraggableBox):
 
 
 # --- Main Application Widget ---
-class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWindow)
+class PdfDisplay(PersistentBaseUi):
 
     # Define a signal for the exit button if needed externally
     exit_requested = Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, *, state: PdfDisplayConfig | None = None, json_path: str | None = None):
         super().__init__(parent)
+     
         self.ui = PdfDisplayUi()
         self.ui.setupUi(self)
 
         # --- Member Variables ---
         self.pdfDocument = QPdfDocument(self)
+        
         self.boxPairs = []
         self.singleBoxes = []
         self.pdfPath = ""
         self.pdf_item = None # Keep track of the PDF background item
         self.currentBox = None # Currently selected DraggableBox
         self._block_property_updates = False # Flag to prevent signal loops
-
+        self._config: PdfDisplayConfig = None
         # --- UI Element Access (using self.ui) ---
         # No need to redefine self.graphicsView etc. if BaseUi is QWidget/QMainWindow
         # Access them directly via self.ui.graphicsView, self.ui.btnLoadPDF, etc.
@@ -346,7 +345,12 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         # --- Connect Signals ---
         self.setup_connections()
 
-
+        # Zustand sofort herstellen, falls übergeben
+        if state is not None:
+            self.import_state(state)
+        elif json_path:
+            self.import_state(PdfDisplayConfig(json_path))
+            
     def setup_connections(self):
         """Connects UI signals to slots."""
         self.ui.btnLoadPDF.clicked.connect(self.load_pdf)
@@ -355,10 +359,9 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         self.ui.btnRemoveBoxPair.clicked.connect(self.remove_selected_list_item) # Renamed for clarity
         self.ui.btnZoomIn.clicked.connect(self.zoom_in)
         self.ui.btnZoomOut.clicked.connect(self.zoom_out)
-        self.ui.btnSave.clicked.connect(self.save_state)
-        self.ui.btnLoad.clicked.connect(self.load_state)
-        self.ui.btnClosePDF.clicked.connect(self.exit_requested.emit) # Emit custom signal
-        self.ui.btnClosePDF.clicked.connect(self.close) # Also close the window directly
+        self.ui.btnSaveAsConfig.clicked.connect(self.save_as_state)
+        self.ui.btnSaveConfig.clicked.connect(self.save_state)
+        self.ui.btnLoadConfig.clicked.connect(self.load_state)
         
         self.scene.selectionChanged.connect(self.on_scene_selection_changed)
         self.ui.listBoxPairs.itemSelectionChanged.connect(self.on_list_selection_changed)
@@ -377,8 +380,11 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
             status = self.pdfDocument.load(fileName)
             if status == QPdfDocument.Error.None_:
                 self.pdfPath = fileName
-                self.setWindowTitle(f"PDF Editor - {os.path.basename(fileName)}") # Update title
+                self.setWindowTitle(f"PDF Editor - {Path(fileName).name}") # Update title
                 self.load_page(0) # Load the first page
+                
+                self._config_changed()
+
                 # Optionally clear existing boxes when loading a *new* PDF
                 # self._clear_all_boxes()
             else:
@@ -448,6 +454,8 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         if sender_box and sender_box == self.currentBox:
             self.update_box_properties_from_item(sender_box)
 
+        self._config_changed()
+
 
     @Slot()
     def add_box_pair(self):
@@ -466,11 +474,13 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         # Connect signals for the new boxes
         self._connect_box_signals(newPair.box1)
         self._connect_box_signals(newPair.box2)
+        self._config_changed()
 
     @Slot()
     def add_single_box(self):
         """Adds a new single box to the scene and list."""
         if not self.pdf_item:
+            self.status_info.emit("WARNING", "Bitte laden Sie zuerst eine PDF-Datei.")
             QMessageBox.warning(self, "Aktion nicht möglich", "Bitte laden Sie zuerst eine PDF-Datei.")
             return
         view_rect = self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect()).boundingRect()
@@ -485,39 +495,40 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         self.ui.listBoxPairs.setCurrentItem(list_item)
         # Connect signal
         self._connect_box_signals(newSingle)
+        self._config_changed()
 
 
     def _clear_all_boxes(self):
-         """Removes all boxes from scene, lists, and list widget."""
-         # Use a loop that doesn't modify the list while iterating
-         items_to_remove = []
-         for i in range(self.ui.listBoxPairs.count()):
-              items_to_remove.append(self.ui.listBoxPairs.item(i))
+        """Removes all boxes from scene, lists, and list widget."""
+        # Use a loop that doesn't modify the list while iterating
+        items_to_remove = []
+        for i in range(self.ui.listBoxPairs.count()):
+            items_to_remove.append(self.ui.listBoxPairs.item(i))
 
-         for item in items_to_remove:
-              self._remove_box_object(item.data(LIST_ITEM_DATA_ROLE))
+        for item in items_to_remove:
+            self._remove_box_object(item.data(LIST_ITEM_DATA_ROLE))
 
-         self.ui.listBoxPairs.clear()
-         self.boxPairs.clear()
-         self.singleBoxes.clear()
-         BoxPair.manager.reset()
-         SingleBox.manager.reset()
-         self.currentBox = None
-         self.clear_box_properties_ui()
-
+        self.ui.listBoxPairs.clear()
+        self.boxPairs.clear()
+        self.singleBoxes.clear()
+        BoxPair.manager.reset()
+        SingleBox.manager.reset()
+        self.currentBox = None
+        self.clear_box_properties_ui()
+        self._config_changed()
 
     def _remove_box_object(self, obj):
-         """Removes a BoxPair or SingleBox object completely."""
-         if isinstance(obj, BoxPair):
-              # Disconnect signals before removing
-              obj.box1.geometryChangedByUser.disconnect(self.on_box_geometry_changed_by_user)
-              obj.box2.geometryChangedByUser.disconnect(self.on_box_geometry_changed_by_user)
-              obj.remove_from_scene()
-              if obj in self.boxPairs: self.boxPairs.remove(obj)
-         elif isinstance(obj, SingleBox):
-              obj.geometryChangedByUser.disconnect(self.on_box_geometry_changed_by_user)
-              obj.remove_from_scene()
-              if obj in self.singleBoxes: self.singleBoxes.remove(obj)
+        """Removes a BoxPair or SingleBox object completely."""
+        if isinstance(obj, BoxPair):
+            # Disconnect signals before removing
+            obj.box1.geometryChangedByUser.disconnect(self.on_box_geometry_changed_by_user)
+            obj.box2.geometryChangedByUser.disconnect(self.on_box_geometry_changed_by_user)
+            obj.remove_from_scene()
+            if obj in self.boxPairs: self.boxPairs.remove(obj)
+        elif isinstance(obj, SingleBox):
+            obj.geometryChangedByUser.disconnect(self.on_box_geometry_changed_by_user)
+            obj.remove_from_scene()
+            if obj in self.singleBoxes: self.singleBoxes.remove(obj)
 
 
     @Slot()
@@ -569,7 +580,8 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
 
             self.currentBox = None
             self.clear_box_properties_ui()
-
+        
+        self._config_changed()
 
     # --- View Control ---
     @Slot()
@@ -595,176 +607,16 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
          }
 
     @Slot()
-    def save_state(self):
+    def save_as_state(self):
         """Saves the current state (PDF path, boxes) to a JSON file."""
+
         if not self.pdfPath:
             QMessageBox.warning(self, "Speichern nicht möglich", "Keine PDF geladen.")
             return
 
-        data = {}
-        # Save relative path if possible, otherwise absolute
-        try:
-             # Check if PDF path is relative to current working directory
-             relative_path = os.path.relpath(self.pdfPath)
-             data["pdf_path"] = relative_path
-             print(f"Saving relative PDF path: {relative_path}")
-        except ValueError:
-             # Happens if paths are on different drives (Windows)
-             data["pdf_path"] = self.pdfPath # Fallback to absolute path
-             print(f"Saving absolute PDF path: {self.pdfPath}")
-
-        data["pdf_name"] = os.path.basename(self.pdfPath) # For reference
-
-        data["boxPairs"] = []
-        for pair in self.boxPairs:
-            box1_data = self._box_to_dict(pair.box1)
-            box2_data = self._box_to_dict(pair.box2)
-            pair_data = {"id": pair.id, "box1": box1_data, "box2": box2_data}
-            data["boxPairs"].append(pair_data)
-
-        data["singleBoxes"] = []
-        for single in self.singleBoxes:
-            single_data = self._box_to_dict(single)
-            # Add ID separately as it's managed by SingleBox directly
-            single_data["id"] = single.id
-            data["singleBoxes"].append(single_data)
-
-        # Get save file name
-        fileName, _ = QFileDialog.getSaveFileName(self, "Konfiguration speichern", "", "JSON Dateien (*.json)")
-        if fileName:
-            try:
-                with open(fileName, "w") as f:
-                    json.dump(data, f, indent=4)
-                print("Daten gespeichert.")
-                QMessageBox.information(self, "Erfolg", f"Konfiguration erfolgreich gespeichert:\n{fileName}")
-            except IOError as e:
-                QMessageBox.critical(self, "Fehler", f"Fehler beim Speichern der Datei:\n{e}")
-            except json.JSONDecodeError as e:
-                 QMessageBox.critical(self, "Fehler", f"Fehler beim Erstellen der JSON-Daten:\n{e}")
-
-
-    @Slot()
-    def load_state(self):
-        """Loads state from a JSON file."""
-        fileName, _ = QFileDialog.getOpenFileName(self, "Konfiguration laden", "", "JSON Dateien (*.json)")
-        if fileName:
-            try:
-                with open(fileName, "r") as f:
-                    data = json.load(f)
-            except FileNotFoundError:
-                 QMessageBox.critical(self, "Fehler", f"Datei nicht gefunden:\n{fileName}")
-                 return
-            except json.JSONDecodeError as e:
-                 QMessageBox.critical(self, "Fehler", f"Fehler beim Lesen der JSON-Datei:\n{e}")
-                 return
-            except Exception as e: # Catch other potential file reading errors
-                QMessageBox.critical(self, "Fehler", f"Ein unerwarteter Fehler ist aufgetreten:\n{e}")
-                return
-
-            # --- Load PDF ---
-            pdf_path_saved = data.get("pdf_path", "")
-            if not pdf_path_saved:
-                 QMessageBox.warning(self, "Warnung", "Kein PDF-Pfad in der Konfigurationsdatei gefunden.")
-                 # Optionally proceed without loading PDF or stop here
-                 # return
-
-            # Try to load PDF from saved path (could be relative or absolute)
-            pdf_path_to_load = pdf_path_saved
-            if not os.path.isabs(pdf_path_to_load):
-                 # If relative, assume it's relative to the JSON file's directory
-                 json_dir = os.path.dirname(fileName)
-                 pdf_path_to_load = os.path.join(json_dir, pdf_path_to_load)
-                 pdf_path_to_load = os.path.normpath(pdf_path_to_load) # Clean up path
-
-            if not os.path.exists(pdf_path_to_load):
-                 QMessageBox.warning(self, "Warnung", f"Die PDF-Datei konnte nicht gefunden werden:\n{pdf_path_to_load}\nBitte manuell laden.")
-                 self.pdfPath = ""
-                 self.setWindowTitle("PDF Editor")
-                 # Clear scene if needed, or leave old PDF
-                 if self.pdf_item: self.scene.removeItem(self.pdf_item)
-                 self.pdf_item = None
-                 self.scene.setSceneRect(QRectF()) # Reset scene rect
-            else:
-                status = self.pdfDocument.load(pdf_path_to_load)
-                if status != QPdfDocument.Error.None_:
-                    QMessageBox.critical(self, "Fehler", f"Fehler beim Laden der PDF aus Konfiguration:\n{pdf_path_to_load}\n{self.pdfDocument.errorString()}")
-                    self.pdfPath = ""
-                    self.setWindowTitle("PDF Editor")
-                else:
-                    self.pdfPath = pdf_path_to_load
-                    self.setWindowTitle(f"PDF Editor - {os.path.basename(self.pdfPath)}")
-                    self.load_page(0) # Display loaded PDF
-
-            # --- Clear existing boxes ---
-            self._clear_all_boxes()
-
-            # --- Load Boxes ---
-            max_pair_id = 0
-            try:
-                for pair_data in data.get("boxPairs", []):
-                    pair_id = pair_data.get("id", -1)
-                    box1_data = pair_data.get("box1")
-                    box2_data = pair_data.get("box2")
-                    if pair_id == -1 or not box1_data or not box2_data:
-                         print(f"Skipping invalid box pair data: {pair_data}")
-                         continue
-
-                    # Create pair - ID will be managed internally
-                    newPair = BoxPair(self.scene, QPointF(0,0)) # Temp pos
-                    # Restore state
-                    newPair.id = pair_id # Force ID from save file
-                    box1 = newPair.box1
-                    box2 = newPair.box2
-
-                    box1.setLabel(box1_data["label"])
-                    box1.setPos(QPointF(box1_data["x"], box1_data["y"]))
-                    box1.setRect(QRectF(0, 0, box1_data["width"], box1_data["height"]))
-
-                    box2.setLabel(box2_data["label"])
-                    box2.setPos(QPointF(box2_data["x"], box2_data["y"]))
-                    box2.setRect(QRectF(0, 0, box2_data["width"], box2_data["height"]))
-
-                    self.boxPairs.append(newPair)
-                    self._add_list_item(str(newPair), newPair)
-                    self._connect_box_signals(box1)
-                    self._connect_box_signals(box2)
-                    max_pair_id = max(max_pair_id, newPair.id)
-
-                max_single_id = 0
-                for single_data in data.get("singleBoxes", []):
-                    single_id = single_data.get("id", -1)
-                    if single_id == -1:
-                         print(f"Skipping invalid single box data: {single_data}")
-                         continue
-
-                    rect = QRectF(0, 0, single_data["width"], single_data["height"])
-                    # Create single box - ID will be managed internally
-                    newSingle = SingleBox(rect) # Temp rect
-                    # Restore state
-                    newSingle.id = single_id # Force ID
-                    newSingle.setLabel(single_data["label"])
-                    newSingle.setPos(QPointF(single_data["x"], single_data["y"]))
-                    newSingle.setRect(QRectF(0, 0, single_data["width"], single_data["height"]))
-
-                    self.scene.addItem(newSingle) # Add to scene
-                    self.singleBoxes.append(newSingle)
-                    self._add_list_item(str(newSingle), newSingle)
-                    self._connect_box_signals(newSingle)
-                    max_single_id = max(max_single_id, newSingle.id)
-
-                # Reset ID managers based on loaded data
-                BoxPair.manager.reset(max_pair_id)
-                SingleBox.manager.reset(max_single_id)
-                print("Daten geladen.")
-                QMessageBox.information(self, "Erfolg", f"Konfiguration erfolgreich geladen:\n{fileName}")
-
-            except KeyError as e:
-                 QMessageBox.critical(self, "Fehler", f"Fehler beim Lesen der Box-Daten (fehlender Schlüssel): {e}")
-                 self._clear_all_boxes() # Clear partially loaded state
-            except Exception as e: # Catch other potential errors during box creation/loading
-                 QMessageBox.critical(self, "Fehler", f"Fehler beim Verarbeiten der Box-Daten: {e}")
-                 self._clear_all_boxes()
-
+        super().save_as_state()
+        QMessageBox.information(self, "Erfolg", f"Konfiguration erfolgreich gespeichert:\n{self._config.get_storage_full_path()}")
+   
 
     # --- UI Update Slots ---
     @Slot()
@@ -922,3 +774,119 @@ class PdfDisplay(BaseUi): # Inherit from your base UI class (QWidget or QMainWin
         else:
             # Allow base class or parent to handle other keys
             super().keyPressEvent(event)
+
+    # ---------------------------------------------------------------------
+    def export_state(self) -> PdfDisplayConfig:
+        """Öffentliche, side-effect-freie Methode (z.B. für Tests)."""
+        return self._state_to_dict()
+
+    def import_state(self, config: PdfDisplayConfig):
+        """Öffentliche Methode, die den GUI-Zustand setzt."""
+        self._apply_state_dict(config)
+
+
+    # --- State helpers ----------------------------------------------------
+    def _state_to_dict(self) -> PdfDisplayConfig:
+        """Sammelt den kompletten GUI-Zustand als PdfDisplayConfig mittels der Config-Methoden."""
+        if not self.pdfPath:
+            raise RuntimeError("Es ist noch keine PDF geladen")
+        
+        config = PdfDisplayConfig()
+        # Setze Metadaten via die setter-Methoden der Config
+        
+        config.set_full_pdf_path(self.pdfPath)
+        
+
+        # Box-Paare hinzufügen
+        box_pairs = []
+        for pair in self.boxPairs:
+            box_pairs.append({
+                "id": pair.id,
+                "box1": self._box_to_dict(pair.box1),
+                "box2": self._box_to_dict(pair.box2),
+            })
+        config.set_key_value(["boxPairs"], box_pairs)
+
+        # Einzelboxen hinzufügen
+        single_boxes = []
+        for single in self.singleBoxes:
+            d = self._box_to_dict(single)
+            d["id"] = single.id
+            single_boxes.append(d)
+        config.set_key_value(["singleBoxes"], single_boxes)
+
+        return config
+
+    def _apply_state_dict(self, config: PdfDisplayConfig, clear_existing: bool = True):
+        """Stellt den Zustand aus einem zuvor erzeugten PdfDisplayConfig wieder her,
+        unter Nutzung der Methoden von PdfDisplayConfig."""
+        
+        self._config = config 
+
+        if not self._config.is_empty():
+
+            if clear_existing:
+                self._clear_all_boxes()
+
+            # ---------- PDF ----------
+            # Set the config for later use
+            if self._config.get_full_pdf_path():
+                self._load_pdf_from_path(self._config.get_full_pdf_path())
+
+            # ---------- Box-Paare ----------
+            max_pair_id = 0
+            for p in self._config.get_box_pairs():
+                pair = BoxPair(self.scene, QPointF(0, 0))
+                pair.id = p.id
+                # Wiederherstellung der beiden Boxes aus den Dataclass-Dictionaries
+                self._restore_box(pair.box1, p.box1.to_dict())
+                self._restore_box(pair.box2, p.box2.to_dict())
+                self.boxPairs.append(pair)
+                self._add_list_item(str(pair), pair)
+                max_pair_id = max(max_pair_id, pair.id)
+
+            # ---------- Einzelboxen ----------
+            max_single_id = 0
+            for s in self._config.get_single_boxes():
+                rect = QRectF(0, 0, s.width, s.height)
+                single = SingleBox(rect)
+                single.id = s.id
+                self._restore_box(single, s.to_dict())
+                self.scene.addItem(single)
+                self.singleBoxes.append(single)
+                self._add_list_item(str(single), single)
+                max_single_id = max(max_single_id, single.id)
+
+            # Update der ID-Manager
+            BoxPair.manager.reset(max_pair_id)
+            SingleBox.manager.reset(max_single_id)
+
+  
+
+    def _restore_box(self, box: DraggableBox, d: dict):
+        box.setLabel(d["label"])
+        box.setPos(QPointF(d["x"], d["y"]))
+        box.setRect(QRectF(0, 0, d["width"], d["height"]))
+        self._connect_box_signals(box)
+
+    def _load_pdf_from_path(self, path: str):
+        pdf_path = Path(path)
+        if not pdf_path.is_absolute():
+            pdf_path = pdf_path.resolve()
+        if self.pdfDocument.load(str(pdf_path)) == QPdfDocument.Error.None_:
+            self.pdfPath = str(pdf_path)
+            self.setWindowTitle(f"PDF Editor - {pdf_path.name}")
+            self.load_page(0)
+        else:
+            raise IOError(self.pdfDocument.errorString())
+        
+
+    def _config_changed(self) -> bool:
+        if self.pdfPath:
+            ret = not self._config.data_equal(self.export_state())
+            self.data_changed.emit(ret)
+            return ret
+        else:
+            return False
+    
+

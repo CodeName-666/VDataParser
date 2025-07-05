@@ -1,3 +1,5 @@
+"""Base class providing logging and output helpers."""
+
 from typing import overload, Optional, Any
 from log import CustomLogger
 from display import OutputInterfaceAbstraction
@@ -10,11 +12,8 @@ class Base:
     # ----------------------------------------------------------
     # Initialisierung
     # ----------------------------------------------------------
-    def __init__(
-        self,
-        logger: Optional[CustomLogger] = None,
-        output_interface: Optional[OutputInterfaceAbstraction] = None,
-    ) -> None:
+    def __init__(self, logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None) -> None:
+        """Store optional :class:`CustomLogger` and output interface on the class."""
         if logger is not None:
             Base.logger = logger
         if output_interface is not None:
@@ -37,10 +36,7 @@ class Base:
         on_verbose: bool = False,
         exc: Exception | None = None,
     ) -> None:
-        """
-        Variante 1: _log("INFO", "text", on_verbose=True)
-        Variante 2: _log("ERROR", "text", exc=e)
-        """
+        """Internal helper to log a message using the stored logger."""
         if not self.logger:
             return
 
@@ -69,10 +65,7 @@ class Base:
     def _output(self, level: str, msg: str) -> None: ...
 
     def _output(self, *args: Any) -> None:
-        """
-        _output("Nur Text")
-        _output("INFO", "Text mit Level")
-        """
+        """Write ``message`` to the output interface and optionally log it."""
         if not args:
             return
         if len(args) == 1:
@@ -97,10 +90,7 @@ class Base:
     def _echo(self, prefix: str, msg: str) -> None: ...
 
     def _echo(self, *args: str) -> None:
-        """
-        _echo("Text")
-        _echo("INFO", "Text")
-        """
+        """Directly forward a message to the output interface."""
         if not self.output_interface:
             return
 
@@ -116,6 +106,7 @@ class Base:
     def _output_and_log(
         self, level: str, message: str, on_verbose: bool = False
     ) -> None:
+        """Log ``message`` and, for important levels, also output it."""
         self._log(level, message, on_verbose=on_verbose)
         if level.upper() in {"INFO", "WARNING", "ERROR", "CRITICAL"}:
             self._output(message)

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>OutputWindow</class>
+ <widget class="QWidget" name="OutputWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>450</width>
+    <height>350</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Print Ausgabe</string>
+  </property>
+  <property name="styleSheet">
+   <string>QWidget { font-family: "Segoe UI", sans-serif; font-size: 10pt; background-color: #f0f0f0; }
+QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }
+QPushButton:hover { background-color: #005a9e; }
+QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }
+QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QPlainTextEdit" name="logOutputTextEdit">
+     <property name="toolTip">
+      <string>Zeigt die Ausgaben an</string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="placeholderText">
+      <string>Warte auf Ausgabe...</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="toolTip">
+      <string>Zeigt den Fortschritt der Ausgabe an</string>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <number>100</number>
+     </property>
+     <property name="textVisible">
+      <bool>true</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

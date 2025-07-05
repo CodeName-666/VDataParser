@@ -1,5 +1,5 @@
 {
-    "pdf_path": "Abholung_Template.pdf",
+    "pdf_path": "D:\\Projekte\\Python\\FlohmarktManager",
     "pdf_name": "Abholung_Template.pdf",
     "boxPairs": [
         {
@@ -52,6 +52,23 @@
                 "width": 100.0,
                 "height": 50.0
             }
+        },
+        {
+            "id": 4,
+            "box1": {
+                "label": "USR4",
+                "x": 1050.0,
+                "y": 705.5,
+                "width": 280.0,
+                "height": 50.0
+            },
+            "box2": {
+                "label": "NR4",
+                "x": 1481.0,
+                "y": 706.5,
+                "width": 107.0,
+                "height": 50.0
+            }
         }
     ],
     "singleBoxes": [
@@ -65,11 +82,27 @@
         },
         {
             "label": "DATE2",
-            "x": 175.5,
-            "y": 860.5,
+            "x": 175.0,
+            "y": 860.0,
             "width": 518.0,
             "height": 37.0,
             "id": 2
+        },
+        {
+            "label": "DATE3",
+            "x": 992.0,
+            "y": 860.0,
+            "width": 518.0,
+            "height": 37.0,
+            "id": 3
+        },
+        {
+            "label": "DATE4",
+            "x": 992.0,
+            "y": 325.0,
+            "width": 473.0,
+            "height": 53.0,
+            "id": 4
         }
     ]
 }

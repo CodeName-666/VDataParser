@@ -1,6 +1,9 @@
 import sys
 import json
 from pathlib import Path
+import pytest
+
+pytest.importorskip("PySide6")
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QListWidget, QTableWidget, QTableWidgetItem,

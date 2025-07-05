@@ -1,51 +1,31 @@
-# --- console_progress_bar.py ---
+"""Console implementation of :class:`ProgressBarAbstraction`."""
 import sys
 import time
 import threading
 from typing import Optional, Callable, Dict, Any, Tuple
 
-# Import the Abstraction
-try:
 
-    from .progress_bar_abstraction import ProgressBarAbstraction
-except ImportError:
-    # Fallback if running standalone or structure differs
-    try:
-        from progress_bar_abstraction import ProgressBarAbstraction
-    except ImportError:
-        print("Error: Cannot find ProgressBarAbstraction.", file=sys.stderr)
-        ProgressBarAbstraction = object # type: ignore # Basic fallback
+from display import ProgressBarAbstraction
+from display import ProgressTrackerAbstraction
+from log import CustomLogger 
 
-# Import the INTERFACE, not the implementation
-try:
-    from ..tracker.progress_tracker_abstraction import ProgressTrackerAbstraction
-except ImportError:
-    ProgressTrackerAbstraction = None # type: ignore
-
-# Conditional import of CustomLogger (remain the same)
-try:
-    from log import CustomLogger
-except ImportError:
-    CustomLogger = None
 
 # Inherit from the Abstraction
 class ConsoleProgressBar(ProgressBarAbstraction):
-    """
-    Zeigt den Fortschritt einer Aufgabe in der Konsole an.
-    Verwendet ein ProgressTrackerInterface zur Abfrage des Zustands.
-    Implementiert ProgressBarAbstraction.
-    """
+    """Display task progress on the console."""
     FILL_CHAR = '█'
     EMPTY_CHAR = '-'
 
-    def __init__(self,
-                 length: int = 50, # Console-specific parameter
-                 description: str = "Fortschritt",
-                 update_interval: float = 0.1,
-                 logger: Optional[CustomLogger] = None):
-        # Call the base class initializer
+    def __init__(
+        self,
+        length: int = 50,
+        description: str = "Progress",
+        update_interval: float = 0.1,
+        logger: Optional[CustomLogger] = None,
+    ) -> None:
+        """Initialise the console bar."""
         super().__init__(description=description, update_interval=update_interval, logger=logger)
-        self.length = length # Store console-specific length
+        self.length = length
 
         # _stop_event, _progress_thread, _current_state are handled by base class now
         # self._stop_event = threading.Event()
@@ -56,8 +36,14 @@ class ConsoleProgressBar(ProgressBarAbstraction):
     # _log method is inherited from base class
 
     # Implement the abstract update method
-    def update(self, percentage: int, current: Optional[int] = None, total: Optional[int] = None, error: Optional[Exception] = None):
-        """Aktualisiert die Fortschrittsanzeige in der Konsole."""
+    def update(
+        self,
+        percentage: int,
+        current: Optional[int] = None,
+        total: Optional[int] = None,
+        error: Optional[Exception] = None,
+    ) -> None:
+        """Render the progress line with optional ``current`` and ``error``."""
         perc = max(0, min(100, percentage)) # Clamp percentage
         filled_length = int(self.length * perc / 100)
         bar = self.FILL_CHAR * filled_length + self.EMPTY_CHAR * (self.length - filled_length)
@@ -92,8 +78,8 @@ class ConsoleProgressBar(ProgressBarAbstraction):
 
 
     # Implement the abstract _monitor_progress method
-    def _monitor_progress(self, tracker: ProgressTrackerAbstraction):
-        """Thread-Funktion, die den Tracker überwacht und die Anzeige aktualisiert."""
+    def _monitor_progress(self, tracker: ProgressTrackerAbstraction) -> None:
+        """Background thread polling the tracker and calling :meth:`update`."""
         if tracker is None:
              self._log("ERROR", "Kein Tracker zum Überwachen übergeben.")
              return
@@ -151,20 +137,7 @@ class ConsoleProgressBar(ProgressBarAbstraction):
 
     # Implement the abstract run_with_progress method
     def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerAbstraction = None) -> Optional[Exception]:
-        """
-        Führt eine Funktion 'target' aus und zeigt währenddessen den Fortschritt
-        mithilfe des 'tracker' in der Konsole an.
-
-        Args:
-            target: Die auszuführende Funktion.
-            args: Argumente für die target-Funktion.
-            kwargs: Keyword-Argumente für die target-Funktion.
-            tracker: Das ProgressTrackerInterface-Objekt, das von 'target' aktualisiert wird.
-
-        Returns:
-            Optional[Exception]: Der Fehler, der im Tracker gesetzt wurde oder während
-                                 der Ausführung von 'target' aufgetreten ist, oder None bei Erfolg.
-        """
+        """Execute ``target`` while the bar listens to ``tracker``."""
         if not isinstance(tracker, ProgressTrackerAbstraction): # type: ignore # Check if it's a valid tracker
             raise ValueError("Ein gültiges ProgressTrackerInterface-Objekt muss übergeben werden.")
         if kwargs is None:
@@ -218,8 +191,8 @@ class ConsoleProgressBar(ProgressBarAbstraction):
 
 
     # Implement the abstract complete method
-    def complete(self, success: bool = True, final_message: Optional[str] = None):
-        """Schließt die Fortschrittsanzeige ab und gibt eine Endnachricht aus."""
+    def complete(self, success: bool = True, final_message: Optional[str] = None) -> None:
+        """Terminate the display and print ``final_message`` if given."""
         # The final update should have been done by _monitor_progress finishing
         # or run_with_progress after task completion.
 

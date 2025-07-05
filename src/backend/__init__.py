@@ -1,5 +1,7 @@
 
-from interface import (
+"""Re‑export convenient database connectors and helper types."""
+
+from .interface import (
     DatabaseConnectionError,
     DatabaseQueryError,
     DatabaseOperations,
@@ -7,8 +9,8 @@ from interface import (
 )
     
 
-from interface import SQLiteInterface
-from interface import MySQLInterface
+from .interface import SQLiteInterface
+from .interface import MySQLInterface
 
 
 

@@ -70,12 +70,12 @@ class MainWindow(QMainWindow):
         # Erzeugen eines Dictionary zur schnellen Zuordnung der Stammnummer-Tabellen mit Schlüsseln main_number.name
         self.stnr_tables = {
             main_number.name: main_number.data 
-            for main_number in self.data.get_main_number_list()
+            for main_number in self.data.get_main_number_as_list()
         }
 
         # Aggregierung der Benutzer aus der 'verkaeufer'-Tabelle anhand der E-Mail
         self.users = {}
-        for user in self.data.get_seller_list():
+        for user in self.data.get_seller_as_list():
             key = user.email
             if key not in self.users:
                 # Hier gehen wir davon aus, dass user.id und main_number.name übereinstimmen
@@ -85,7 +85,7 @@ class MainWindow(QMainWindow):
                     self.users[key]["ids"].append(str(user.id))
 
         # Zuordnung der Stammnummer-Tabellen zu den Benutzern
-        for main_number in self.data.get_main_number_list():
+        for main_number in self.data.get_main_number_as_list():
             stnr_name = main_number.name
             for user in self.users.values():
                 # Anstatt main_number.id verwenden wir main_number.name

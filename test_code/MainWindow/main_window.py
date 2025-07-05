@@ -39,7 +39,7 @@ class MainWindow(QMainWindow):
         # Erzeugen Sie ein Dictionary zur schnellen Zuordnung der stnr‑Tabellen
         # Beispiel: "stnr1": [Einträge aus Tabelle stnr1], etc.
         self.stnr_tables = {}
-        for main_number in self.data.get_main_number_list():
+        for main_number in self.data.get_main_number_as_list():
             #table_name = f"stnr{main_number.id}"
             table_name = main_number.name
             self.stnr_tables[table_name] = main_number.data
@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         # Hier werden Benutzer anhand ihrer E-Mail zusammengefasst.
         # Dabei werden alle in der Spalte "id" auftretenden Werte (bei Duplikaten) gesammelt.
         self.users = {}  # Schlüssel: E-Mail, Wert: { "info": erste Benutzerdaten, "ids": [alle IDs], "stamms": [] }
-        for user in self.data.get_seller_list():
+        for user in self.data.get_seller_as_list():
             key = user.email
             if key not in self.users:
                 self.users[key] = {"info": user, "ids": [user.id], "stamms": []}
@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
 
         # Ordnen Sie nun zu jedem Benutzer die zugehörigen stnr‑Tabellen zu,
         # wenn der Tabellenname (z. B. "stnr2") mit einer der gesammelten IDs übereinstimmt.
-        for main_number in self.data.get_main_number_list():
+        for main_number in self.data.get_main_number_as_list():
             #stnr_name = f"stnr{main_number.id}"
             stnr_name = main_number.name
             for user in self.users.values():
@@ -101,7 +101,7 @@ class MainWindow(QMainWindow):
     def populate_user_list(self):
         """Füllt das QListWidget (flache Listenansicht) mit allen Benutzereinträgen aus der 'verkaeufer'-Tabelle."""
         self.listUsers.clear()
-        flat_users = self.data.get_seller_list()
+        flat_users = self.data.get_seller_as_list()
         for index, user in enumerate(flat_users, start=1):
             # Nummerierung und Anzeige-Text z. B.: "1. Sabrina Willkomm (sabimi@gmail.com)"
             text = f'{index}. {user.vorname} {user.nachname} ({user.email})'

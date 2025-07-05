@@ -1,6 +1,6 @@
 # --- Version ---
 __major__ = 0
-__minor__ = 5 # Incremented version due to architecture change
+__minor__ = 6 # Incremented version due to architecture change
 __patch__ = 0
 __version__ = f"{__major__}.{__minor__}.{__patch__}"
 

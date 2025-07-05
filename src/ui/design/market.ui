@@ -13,11 +13,18 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string>QWidget { font-family: "Segoe UI", sans-serif; font-size: 10pt; background-color: #f0f0f0; }
+QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }
+QPushButton:hover { background-color: #005a9e; }
+QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }
+QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -32,6 +39,11 @@
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
        <string>Verkaufslisten</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>Abholbestätigung</string>
       </attribute>
      </widget>
     </widget>

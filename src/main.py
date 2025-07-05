@@ -10,14 +10,17 @@ from version import get_version
 
 from data import Base
 from data import BaseData
-from data import SellerDataClass
-from data import MainNumberDataClass
+from data import MarketFacade
+from objects import SellerDataClass
+from objects import MainNumberDataClass
+from objects import FleatMarket
+
 
 from generator import FileGenerator
 from display import BasicProgressTracker as ProgressTracker
 from display import ConsoleProgressBar as ConsoleBar
 from display import ConsoleOutput as OutputIface
-from objects import FleatMarket
+
 from ui import MainWindow
 from PySide6.QtWidgets import QApplication
 from log import CustomLogger
@@ -26,7 +29,20 @@ from log import CustomLogger
 # ---------------------------------------------------------------------------
 
 def _optional(name: str, attr: str | None = None) -> Any | None:  # noqa: D401
-    """Attempt ``import name`` (optionally ``from name import attr``)."""
+    """Attempt ``import name`` (optionally ``from name import attr``).
+
+    Parameters
+    ----------
+    name:
+        Module name to import.
+    attr:
+        Optional attribute to import from the module.
+
+    Returns
+    -------
+    object | None
+        The imported module or attribute or ``None`` if unavailable.
+    """
     try:
         mod = __import__(name, fromlist=[attr] if attr else [])
         return getattr(mod, attr) if attr else mod
@@ -36,6 +52,20 @@ def _optional(name: str, attr: str | None = None) -> Any | None:  # noqa: D401
 
 
 def _bootstrap_logger(verbose: bool, level: str) -> logging.Logger:  # noqa: D401
+    """Initialise the default application logger.
+
+    Parameters
+    ----------
+    verbose:
+        Enable verbose output when ``True``.
+    level:
+        Textual log level name such as ``"INFO"``.
+
+    Returns
+    -------
+    logging.Logger
+        Configured logger instance.
+    """
     try:
       
         return CustomLogger(
@@ -66,6 +96,19 @@ def _bootstrap_logger(verbose: bool, level: str) -> logging.Logger:  # noqa: D40
 # ---------------------------------------------------------------------------
 
 def _build_cli_infra(logger: logging.Logger):  # noqa: D401
+    """Create output and progress tracking helpers for the CLI.
+
+    Parameters
+    ----------
+    logger:
+        Logger used for the created helpers.
+
+    Returns
+    -------
+    tuple
+        ``(output_interface, progress_tracker, progress_bar)`` where each element
+        may be ``None`` if the optional dependency is missing.
+    """
     out = OutputIface() if OutputIface else None
     tracker = ProgressTracker() if ProgressTracker else None
     bar = ConsoleBar(  # type: ignore[call‑arg]
@@ -79,6 +122,13 @@ def _build_cli_infra(logger: logging.Logger):  # noqa: D401
 # ---------------------------------------------------------------------------
 
 def _run_cli(parsed: Arguments):  # noqa: D401
+    """Run the application in command line mode.
+
+    Parameters
+    ----------
+    parsed:
+        Parsed command line arguments.
+    """
     logger = _bootstrap_logger(parsed.verbose, parsed.log_level)
     logger.info(f"Flea Market Generator v{get_version()} – CLI")
 
@@ -91,8 +141,8 @@ def _run_cli(parsed: Arguments):  # noqa: D401
         Base(logger=logger, output_interface=out)  # type: ignore[call‑arg]
         base_data = BaseData(data_file, logger=logger)  # type: ignore[arg‑type]
         base_data.verify_data()
-        sellers: List[SellerDataClass] = base_data.get_seller_list()  # type: ignore[assignment]
-        main_numbers: List[MainNumberDataClass] = base_data.get_main_number_list()  # type: ignore[assignment]
+        sellers: List[SellerDataClass] = base_data.get_seller_as_list()  # type: ignore[assignment]
+        main_numbers: List[MainNumberDataClass] = base_data.get_main_number_as_list()  # type: ignore[assignment]
     except FileNotFoundError:
         (out or logger).error("Datendatei nicht gefunden: %s", data_file)  # type: ignore[attr‑defined]
         sys.exit(1)
@@ -130,6 +180,7 @@ def _run_cli(parsed: Arguments):  # noqa: D401
 # ---------------------------------------------------------------------------
 
 def _run_gui():  # noqa: D401
+    """Launch the GUI version of the application."""
     if not (QApplication and MainWindow):  # pragma: no cover – env without GUI
         print("GUI‑Abhängigkeiten fehlen. Bitte PySide6 installieren.")
         sys.exit(1)
@@ -137,7 +188,15 @@ def _run_gui():  # noqa: D401
     logger = _bootstrap_logger(verbose=False, level="INFO")
     #logger.info("Flea Market Generator v%s – GUI", get_version())
 
+    market_facade = MarketFacade()  # type: ignore[call‑arg]
     app = QApplication(sys.argv)
+    version = app.setApplicationVersion(get_version())
+    app.setApplicationName(f"Flohmarkt Manager {version}")
+    app.setOrganizationName("SeidC")
+    app.setOrganizationDomain("seidc.de")
+    app.setStyle("Fusion")  # Set a default style
+    
+    
     #win = MainWindow(logger=logger)  # type: ignore[call‑arg]
     win = MainWindow()  # 
     win.setup_ui()
@@ -150,7 +209,13 @@ def _run_gui():  # noqa: D401
 # ---------------------------------------------------------------------------
 
 def main():  # noqa: D401
-    """Decide between CLI and GUI based on argv."""
+    """Decide between CLI and GUI based on argv.
+
+    Returns
+    -------
+    None
+        Exits the process when the application terminates.
+    """
     try:
         parsed = Arguments()
     except SystemExit as exc:

@@ -1,9 +1,8 @@
-from interface import (
+from .interface import (
     DatabaseConnectionError,
     DatabaseQueryError,
     DatabaseOperations
-    )
-import os
+)
 
 
 # (Code from the previous response: Imports, Exceptions, DatabaseOperations,
@@ -11,14 +10,10 @@ import os
 
 # --- Main BasicDBConnector (Continued) ---
 class BasicDBConnector:
-    def __init__(self, db_operator: DatabaseOperations):
-        """
-        Initialisiert den DB-Connector mit einer spezifischen Implementierung
-        der Datenbankoperationen.
+    """Generic helper that delegates all operations to a ``DatabaseOperations`` implementation."""
 
-        :param db_operator: Eine Instanz einer Klasse, die von DatabaseOperations erbt
-                            (z.B. SQLiteConnector, MySQLConnector).
-        """
+    def __init__(self, db_operator: DatabaseOperations):
+        """Initialise the connector with a concrete ``DatabaseOperations`` instance."""
         if not isinstance(db_operator, DatabaseOperations):
             raise TypeError("db_operator muss eine Instanz einer DatabaseOperations-Implementierung sein.")
         self.operator = db_operator
@@ -28,12 +23,7 @@ class BasicDBConnector:
 
 
     def connect(self, database_override: str = None):
-        """
-        Stellt die Verbindung zur Datenbank her, delegiert an den Operator.
-
-        :param database_override: Optionaler Datenbankname/Datei zum Verbinden.
-        :raises DatabaseConnectionError: If connection fails.
-        """
+        """Connect to the database via the provided operator."""
         if self.conn:
             print(f"Bereits verbunden ({self.db_type_name}).")
             return
@@ -51,7 +41,7 @@ class BasicDBConnector:
 
 
     def disconnect(self):
-        """Beendet die Verbindung zur Datenbank, delegiert an den Operator."""
+        """Close the database connection using the operator."""
         if self.conn:
             # Delegate disconnection to the specific operator
             print(f"Trenne Verbindung via {type(self.operator).__name__}...")
@@ -61,18 +51,18 @@ class BasicDBConnector:
             print("Keine aktive Datenbankverbindung zum Trennen vorhanden.")
 
     def __enter__(self):
-        """Ermöglicht die Nutzung mit 'with'-Statement."""
+        """Enable use as a context manager."""
         if not self.conn:
              self.connect() # connect() raises error on failure
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Ermöglicht die Nutzung mit 'with'-Statement."""
+        """Leave the context manager and close the connection."""
         self.disconnect()
         return False # Propagate exceptions from the with block
 
     def database_exists(self, db_name: str) -> bool:
-        """Prüft, ob eine Datenbank existiert, delegiert an den Operator."""
+        """Check whether ``db_name`` exists via the operator."""
         try:
             # Delegate check to the specific operator
             print(f"Prüfe DB-Existenz '{db_name}' via {type(self.operator).__name__}...")
@@ -87,7 +77,7 @@ class BasicDBConnector:
 
 
     def create_database(self, new_db_name: str):
-        """Erstellt eine neue Datenbank, delegiert an den Operator."""
+        """Create a new database via the operator."""
         try:
              # Delegate creation to the specific operator
              print(f"Erstelle DB '{new_db_name}' via {type(self.operator).__name__}...")
@@ -102,10 +92,7 @@ class BasicDBConnector:
 
 
     def execute_query(self, query: str, params: tuple = None, fetch: str = None):
-        """
-        Führt eine SQL-Abfrage aus, delegiert an den Operator.
-        Verwendet IMMER %s als Platzhalter im Input-Query. Der Operator passt es ggf. an.
-        """
+        """Execute an SQL query via the operator using ``%s`` placeholders."""
         if not self.conn:
              raise DatabaseConnectionError(f"Nicht verbunden ({self.db_type_name}). Rufen Sie zuerst connect() auf oder verwenden Sie 'with'.")
 
@@ -128,9 +115,7 @@ class BasicDBConnector:
     # Sie müssen nur sicherstellen, dass sie %s als Platzhalter verwenden.
 
     def insert(self, table: str, data: dict) -> int | None:
-        """
-        Fügt einen neuen Datensatz ein (verwendet %s Platzhalter).
-        """
+        """Insert a new record using ``%s`` placeholders."""
         if not data:
             raise ValueError("Keine Daten zum Einfügen angegeben.")
 
@@ -155,9 +140,7 @@ class BasicDBConnector:
 
 
     def update(self, table: str, data: dict, where_clause: str, where_params: tuple) -> int:
-        """
-        Aktualisiert Datensätze (verwendet %s Platzhalter in where_clause).
-        """
+        """Update records using ``%s`` placeholders in ``where_clause``."""
         if not data:
              raise ValueError("Keine Daten zum Aktualisieren angegeben.")
         if not where_clause or where_params is None:
@@ -186,17 +169,7 @@ class BasicDBConnector:
 
 
     def delete(self, table: str, where_clause: str, where_params: tuple) -> int:
-        """
-        Löscht Datensätze (verwendet %s Platzhalter in where_clause).
-
-        :param table: Name der Tabelle.
-        :param where_clause: SQL-Bedingung ohne 'WHERE' (z.B., "id = %s").
-                             Verwenden Sie %s als Platzhalter.
-        :param where_params: Tuple mit Werten für die Platzhalter in where_clause.
-        :return: Anzahl der gelöschten Zeilen (rowcount). Returns 0 if no rows matched.
-        :raises DatabaseQueryError: If the delete operation fails.
-        :raises ValueError: If where_clause/where_params are missing or invalid.
-        """
+        """Delete records using ``%s`` placeholders in ``where_clause``."""
         if not where_clause or where_params is None:
              raise ValueError("where_clause und where_params sind für DELETE erforderlich.")
         if not isinstance(where_params, tuple):
@@ -218,18 +191,7 @@ class BasicDBConnector:
             raise DatabaseQueryError(f"Unerwarteter Fehler beim Delete: {e}") from e
 
     def select(self, query: str, params: tuple = None, fetch: str = 'all'):
-        """
-        Führt eine SELECT-Abfrage aus und gibt die Ergebnisse zurück
-        (verwendet %s Platzhalter).
-
-        :param query: Die vollständige SELECT-SQL-Abfrage (mit %s Platzhaltern).
-        :param params: Optionales Tuple mit Werten für die Platzhalter.
-        :param fetch: 'one' für eine Zeile, 'all' für alle Zeilen (default).
-        :return: Eine einzelne Zeile (als Tuple) oder eine Liste von Zeilen (als Tuples).
-                 Returns None if fetch='one' finds no rows. Returns empty list if fetch='all' finds no rows.
-        :raises DatabaseQueryError: If the select operation fails.
-        :raises ValueError: If query doesn't start with SELECT or fetch mode is invalid.
-        """
+        """Run a SELECT query and return the results."""
         if not query.strip().upper().startswith("SELECT"):
              raise ValueError("Diese Methode ist nur für SELECT-Abfragen vorgesehen.")
         if fetch not in ['one', 'all']:
@@ -259,13 +221,7 @@ class BasicDBConnector:
 
 
     def select_all(self, table: str) -> list:
-        """
-        Liest alle Datensätze aus einer Tabelle (vereinfachte Methode).
-
-        :param table: Name der Tabelle.
-        :return: Liste von Datensätzen (jeder Datensatz als Tuple). Leere Liste wenn Tabelle leer.
-        :raises DatabaseQueryError: If the select operation fails.
-        """
+        """Convenience wrapper returning all rows from ``table``."""
         # Quote table name
         query = f"SELECT * FROM `{table}`"
         # Reuse the more generic select method, uses %s implicitly (as there are no params)

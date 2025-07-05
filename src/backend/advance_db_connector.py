@@ -1,15 +1,15 @@
 
+"""Utility helpers for exporting and updating databases using JSON."""
+
 from .basic_db_connector import BasicDBConnector
 import json
 
-# Erweiterte Klasse zum Exportieren, Aktualisieren und Modifizieren von JSON-Daten
+
 class AdvancedDBManager(BasicDBConnector):
+    """Extension of :class:`BasicDBConnector` with JSON export features."""
+    
     def export_to_custom_json(self, output_file: str):
-        """
-        Exportiert die komplette Datenbank in ein JSON-Format, das dem in deinem Export-Beispiel entspricht.
-        Das erzeugte JSON besteht aus einer Liste, die einen Header, einen Datenbank-Eintrag und für jede Tabelle
-        ein Objekt mit Name, Datenbank und Inhalt enthält.
-        """
+        """Export the entire database into a phpMyAdmin compatible JSON file."""
         export_data = []
         # Header hinzufügen
         header = {
@@ -67,11 +67,7 @@ class AdvancedDBManager(BasicDBConnector):
             print("Fehler beim Speichern des Exports:", e)
 
     def update_from_custom_json(self, json_file: str):
-        """
-        Liest den JSON-Export ein und aktualisiert die Datenbank.
-        Für jede Tabelle im Export werden alle vorhandenen Einträge gelöscht und
-        anschließend aus dem Export die neuen Zeilen eingefügt.
-        """
+        """Load a JSON export and update the database accordingly."""
         try:
             with open(json_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -96,12 +92,7 @@ class AdvancedDBManager(BasicDBConnector):
             print("Fehler beim Aktualisieren der Datenbank aus JSON:", e)
 
     def modify_export_data(self, json_file: str, modification_func):
-        """
-        Lädt den JSON-Export, wendet eine Modifikationsfunktion auf die Daten an und speichert den modifizierten Export.
-        :param json_file: Pfad zur JSON-Exportdatei
-        :param modification_func: Funktion, die eine Liste von Dictionaries (Export-Daten) entgegennimmt und die
-                                  modifizierte Liste zurückgibt.
-        """
+        """Load a JSON export, apply ``modification_func`` and save it back."""
         try:
             with open(json_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
