@@ -81,6 +81,8 @@ class MainWindow(QMainWindow):
         self.ui.action_create_pdf.triggered.connect(self.start_pdf_generation)
         self.ui.action_generate_data.triggered.connect(self.start_data_generation)
         self.ui.action_generate_add.triggered.connect(self.start_all_generation)
+        self.ui.action_save_project.triggered.connect(self.save_project)
+        self.ui.action_save_project_as.triggered.connect(self.save_project_as)
         
         self.market_facade.status_info.connect(self.status_bar.handle_status)
         self.market_view.status_info.connect(self.status_bar.handle_status)
@@ -208,6 +210,20 @@ class MainWindow(QMainWindow):
         else:            
             QMessageBox.critical(self, "Error", f"Failed to load JSON file: {e}")
             return None
+
+    @Slot()
+    def save_project(self):
+        """Save current project to a selected directory."""
+        chosen_dir = QFileDialog.getExistingDirectory(self, "Projekt speichern")
+        if chosen_dir:
+            self.market_facade.save_project(self.market_view, chosen_dir)
+
+    @Slot()
+    def save_project_as(self):
+        """Save current project to a user chosen directory."""
+        chosen_dir = QFileDialog.getExistingDirectory(self, "Projekt speichern unter")
+        if chosen_dir:
+            self.market_facade.save_project(self.market_view, chosen_dir)
 
     def open_about_ui(self):
         """
