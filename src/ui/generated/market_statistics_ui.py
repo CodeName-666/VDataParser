@@ -32,30 +32,63 @@ class Ui_MarketStatistics(object):
         self.verticalLayoutMainNumbers.setObjectName(u"verticalLayoutMainNumbers")
         self.chartMainNumbers = QChartView(self.groupBoxMainNumbers)
         self.chartMainNumbers.setObjectName(u"chartMainNumbers")
+        self.chartMainNumbers.setMinimumSize(QSize(0, 250))
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.chartMainNumbers.setSizePolicy(sizePolicy)
 
         self.verticalLayoutMainNumbers.addWidget(self.chartMainNumbers)
 
         self.formLayoutMainNumbers = QFormLayout()
         self.formLayoutMainNumbers.setObjectName(u"formLayoutMainNumbers")
-        self.labelUsed = QLabel(self.groupBoxMainNumbers)
-        self.labelUsed.setObjectName(u"labelUsed")
+        self.labelCompleteNums = QLabel(self.groupBoxMainNumbers)
+        self.labelCompleteNums.setObjectName(u"labelCompleteNums")
 
-        self.formLayoutMainNumbers.setWidget(0, QFormLayout.LabelRole, self.labelUsed)
+        self.formLayoutMainNumbers.setWidget(0, QFormLayout.LabelRole, self.labelCompleteNums)
 
-        self.valueUsed = QLabel(self.groupBoxMainNumbers)
-        self.valueUsed.setObjectName(u"valueUsed")
+        self.valueCompleteNums = QLabel(self.groupBoxMainNumbers)
+        self.valueCompleteNums.setObjectName(u"valueCompleteNums")
 
-        self.formLayoutMainNumbers.setWidget(0, QFormLayout.FieldRole, self.valueUsed)
+        self.formLayoutMainNumbers.setWidget(0, QFormLayout.FieldRole, self.valueCompleteNums)
 
-        self.labelFree = QLabel(self.groupBoxMainNumbers)
-        self.labelFree.setObjectName(u"labelFree")
+        self.labelAlmostNums = QLabel(self.groupBoxMainNumbers)
+        self.labelAlmostNums.setObjectName(u"labelAlmostNums")
 
-        self.formLayoutMainNumbers.setWidget(1, QFormLayout.LabelRole, self.labelFree)
+        self.formLayoutMainNumbers.setWidget(1, QFormLayout.LabelRole, self.labelAlmostNums)
 
-        self.valueFree = QLabel(self.groupBoxMainNumbers)
-        self.valueFree.setObjectName(u"valueFree")
+        self.valueAlmostNums = QLabel(self.groupBoxMainNumbers)
+        self.valueAlmostNums.setObjectName(u"valueAlmostNums")
 
-        self.formLayoutMainNumbers.setWidget(1, QFormLayout.FieldRole, self.valueFree)
+        self.formLayoutMainNumbers.setWidget(1, QFormLayout.FieldRole, self.valueAlmostNums)
+
+        self.labelHalfNums = QLabel(self.groupBoxMainNumbers)
+        self.labelHalfNums.setObjectName(u"labelHalfNums")
+
+        self.formLayoutMainNumbers.setWidget(2, QFormLayout.LabelRole, self.labelHalfNums)
+
+        self.valueHalfNums = QLabel(self.groupBoxMainNumbers)
+        self.valueHalfNums.setObjectName(u"valueHalfNums")
+
+        self.formLayoutMainNumbers.setWidget(2, QFormLayout.FieldRole, self.valueHalfNums)
+
+        self.labelInProgressNums = QLabel(self.groupBoxMainNumbers)
+        self.labelInProgressNums.setObjectName(u"labelInProgressNums")
+
+        self.formLayoutMainNumbers.setWidget(3, QFormLayout.LabelRole, self.labelInProgressNums)
+
+        self.valueInProgressNums = QLabel(self.groupBoxMainNumbers)
+        self.valueInProgressNums.setObjectName(u"valueInProgressNums")
+
+        self.formLayoutMainNumbers.setWidget(3, QFormLayout.FieldRole, self.valueInProgressNums)
+
+        self.labelStartedNums = QLabel(self.groupBoxMainNumbers)
+        self.labelStartedNums.setObjectName(u"labelStartedNums")
+
+        self.formLayoutMainNumbers.setWidget(4, QFormLayout.LabelRole, self.labelStartedNums)
+
+        self.valueStartedNums = QLabel(self.groupBoxMainNumbers)
+        self.valueStartedNums.setObjectName(u"valueStartedNums")
+
+        self.formLayoutMainNumbers.setWidget(4, QFormLayout.FieldRole, self.valueStartedNums)
 
 
         self.verticalLayoutMainNumbers.addLayout(self.formLayoutMainNumbers)
@@ -68,6 +101,9 @@ class Ui_MarketStatistics(object):
         self.verticalLayoutArticles.setObjectName(u"verticalLayoutArticles")
         self.chartArticles = QChartView(self.groupBoxArticles)
         self.chartArticles.setObjectName(u"chartArticles")
+        self.chartArticles.setMinimumSize(QSize(0, 250))
+        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.chartArticles.setSizePolicy(sizePolicy1)
 
         self.verticalLayoutArticles.addWidget(self.chartArticles)
 
@@ -153,8 +189,11 @@ class Ui_MarketStatistics(object):
             None
         ))
         self.groupBoxMainNumbers.setTitle(QCoreApplication.translate("MarketStatistics", u"Stammnummern", None))
-        self.labelUsed.setText(QCoreApplication.translate("MarketStatistics", u"Verwendet:", None))
-        self.labelFree.setText(QCoreApplication.translate("MarketStatistics", u"Frei:", None))
+        self.labelCompleteNums.setText(QCoreApplication.translate("MarketStatistics", u"Vollst\u00e4ndig:", None))
+        self.labelAlmostNums.setText(QCoreApplication.translate("MarketStatistics", u"Fast fertig:", None))
+        self.labelHalfNums.setText(QCoreApplication.translate("MarketStatistics", u"Halb fertig:", None))
+        self.labelInProgressNums.setText(QCoreApplication.translate("MarketStatistics", u"In Arbeit:", None))
+        self.labelStartedNums.setText(QCoreApplication.translate("MarketStatistics", u"Angefangen:", None))
         self.groupBoxArticles.setTitle(QCoreApplication.translate("MarketStatistics", u"Artikel", None))
         self.labelTotal.setText(QCoreApplication.translate("MarketStatistics", u"Gesamt:", None))
         self.labelComplete.setText(QCoreApplication.translate("MarketStatistics", u"Fertig:", None))

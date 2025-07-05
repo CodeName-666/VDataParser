@@ -29,29 +29,72 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      </property>
      <layout class="QVBoxLayout" name="verticalLayoutMainNumbers">
       <item>
-       <widget class="QtCharts.QChartView" name="chartMainNumbers"/>
+       <widget class="QtCharts.QChartView" name="chartMainNumbers">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>250</height>
+         </size>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QFormLayout" name="formLayoutMainNumbers">
         <item row="0" column="0">
-         <widget class="QLabel" name="labelUsed">
+         <widget class="QLabel" name="labelCompleteNums">
           <property name="text">
-           <string>Verwendet:</string>
+           <string>Vollständig:</string>
           </property>
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLabel" name="valueUsed"/>
+         <widget class="QLabel" name="valueCompleteNums"/>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="labelFree">
+         <widget class="QLabel" name="labelAlmostNums">
           <property name="text">
-           <string>Frei:</string>
+           <string>Fast fertig:</string>
           </property>
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLabel" name="valueFree"/>
+         <widget class="QLabel" name="valueAlmostNums"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="labelHalfNums">
+          <property name="text">
+           <string>Halb fertig:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="valueHalfNums"/>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="labelInProgressNums">
+          <property name="text">
+           <string>In Arbeit:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="valueInProgressNums"/>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="labelStartedNums">
+          <property name="text">
+           <string>Angefangen:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLabel" name="valueStartedNums"/>
         </item>
        </layout>
       </item>
@@ -65,7 +108,20 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      </property>
      <layout class="QVBoxLayout" name="verticalLayoutArticles">
       <item>
-       <widget class="QtCharts.QChartView" name="chartArticles"/>
+       <widget class="QtCharts.QChartView" name="chartArticles">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>250</height>
+         </size>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QFormLayout" name="formLayoutArticles">
