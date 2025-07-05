@@ -35,6 +35,8 @@ class MarketObserver(QObject):
         self.fm: FleatMarket = None
         self._data_ready = False
         self._project_exists = False
+        self._market = market
+        self._project_dir = ""
 
 
     def set_data_ready_satus(self, status: bool) -> None:
@@ -138,7 +140,9 @@ class MarketObserver(QObject):
     @Slot(str)
     def storage_path_changed(self,path: str):
         self.market_config_handler.set_full_pdf_coordinates_config_path(path)
-        print("PAUSE")
+        if not self._project_dir:
+            self._project_dir = os.path.dirname(path)
+        MarketFacade().save_project(self._market, self._project_dir)
 
     def get_data(self):
         return self.data_manager
@@ -152,9 +156,10 @@ class MarketObserver(QObject):
         return self.market_config_handler.get_pdf_generation_data()
 
     def connect_signals(self, market) -> None:
+        self._market = market
         self.data_manager_loaded.connect(market.set_market_data)
         self.pdf_display_config_loaded.connect(market.set_pdf_config)
-       
+
         market.pdf_display_storage_path_changed.connect(self.storage_path_changed)
 
 
@@ -379,3 +384,48 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         if observer:
             return observer.project_exists()
         return False
+
+    @Slot(object, str)
+    def save_project(self, market, dir_path: str) -> bool:
+        """Save the current market project to ``dir_path``.
+
+        This writes the market data, PDF layout configuration and the project
+        configuration JSON into the given directory.
+        """
+        observer = self.get_observer(market)
+        if not observer:
+            self.status_info.emit("ERROR", "Kein Observer gefunden")
+            return False
+
+        try:
+            os.makedirs(dir_path, exist_ok=True)
+
+            market_file = os.path.join(
+                dir_path,
+                observer.market_config_handler.get_market_name() or "market.json",
+            )
+            pdf_file = os.path.join(
+                dir_path,
+                observer.market_config_handler.get_pdf_coordinates_config_name()
+                or "pdf_display_config.json",
+            )
+            project_file = os.path.join(
+                dir_path,
+                observer.market_config_handler.get_storage_file_name() or "project.json",
+            )
+
+            observer.data_manager.json_data = observer.data_manager.export_to_json()
+            observer.data_manager.save(market_file)
+
+            observer.pdf_display_config_loader.save(pdf_file)
+
+            observer.market_config_handler.set_full_market_path(market_file)
+            observer.market_config_handler.set_full_pdf_coordinates_config_path(pdf_file)
+            observer.market_config_handler.save_to(project_file)
+
+            observer.set_project_exists(True)
+            self.status_info.emit("INFO", f"Projekt gespeichert: {project_file}")
+            return True
+        except Exception as err:  # pragma: no cover - runtime errors handled
+            self.status_info.emit("ERROR", f"Fehler beim Speichern: {err}")
+            return False
