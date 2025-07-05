@@ -65,6 +65,14 @@ class MarketObserver(QObject):
         """
         self._project_exists = status
 
+    def init_project(self, export_path: str) -> None:
+        """Initialise a new project based on an exported market file."""
+
+        # reset the config handler to its defaults and point it to the export
+        self.market_config_handler = MarketConfigHandler()
+        self.market_config_handler.set_full_market_path(export_path)
+        self._project_exists = True
+
     def load_local_market_project(self, json_path: str) -> bool:
         """
         Load a local market project from a JSON file.
@@ -263,7 +271,10 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         """
         new_observer = self.create_observer(market)
         new_observer.connect_signals(market)
-        return new_observer.load_local_market_export(json_path)
+        ret = new_observer.load_local_market_export(json_path)
+        if ret:
+            self.create_project_from_export(market, json_path, "")
+        return ret
 
     def market_already_exists(self, market) -> bool:
         market = next(
@@ -299,6 +310,17 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         else:
             observer = self.get_observer(market)
         return observer
+
+    def create_project_from_export(self, market, export_path: str, target_dir: str) -> bool:
+        """Create a project configuration from a loaded export."""
+
+        observer = self.get_observer(market)
+        if not observer:
+            self.status_info.emit("ERROR", "Kein Observer gefunden")
+            return False
+
+        observer.init_project(export_path)
+        return True
 
     @Slot(object)
     def create_pdf_data(self, market) ->None:
