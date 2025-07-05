@@ -17,6 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFormLayout, QGroupBox, QLabel,
     QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtCharts import QChartView
 
 class Ui_MarketStatistics(object):
     def setupUi(self, MarketStatistics):
@@ -27,7 +28,14 @@ class Ui_MarketStatistics(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.groupBoxMainNumbers = QGroupBox(MarketStatistics)
         self.groupBoxMainNumbers.setObjectName(u"groupBoxMainNumbers")
-        self.formLayoutMainNumbers = QFormLayout(self.groupBoxMainNumbers)
+        self.verticalLayoutMainNumbers = QVBoxLayout(self.groupBoxMainNumbers)
+        self.verticalLayoutMainNumbers.setObjectName(u"verticalLayoutMainNumbers")
+        self.chartMainNumbers = QChartView(self.groupBoxMainNumbers)
+        self.chartMainNumbers.setObjectName(u"chartMainNumbers")
+
+        self.verticalLayoutMainNumbers.addWidget(self.chartMainNumbers)
+
+        self.formLayoutMainNumbers = QFormLayout()
         self.formLayoutMainNumbers.setObjectName(u"formLayoutMainNumbers")
         self.labelUsed = QLabel(self.groupBoxMainNumbers)
         self.labelUsed.setObjectName(u"labelUsed")
@@ -50,11 +58,20 @@ class Ui_MarketStatistics(object):
         self.formLayoutMainNumbers.setWidget(1, QFormLayout.FieldRole, self.valueFree)
 
 
+        self.verticalLayoutMainNumbers.addLayout(self.formLayoutMainNumbers)
+
         self.verticalLayout.addWidget(self.groupBoxMainNumbers)
 
         self.groupBoxArticles = QGroupBox(MarketStatistics)
         self.groupBoxArticles.setObjectName(u"groupBoxArticles")
-        self.formLayoutArticles = QFormLayout(self.groupBoxArticles)
+        self.verticalLayoutArticles = QVBoxLayout(self.groupBoxArticles)
+        self.verticalLayoutArticles.setObjectName(u"verticalLayoutArticles")
+        self.chartArticles = QChartView(self.groupBoxArticles)
+        self.chartArticles.setObjectName(u"chartArticles")
+
+        self.verticalLayoutArticles.addWidget(self.chartArticles)
+
+        self.formLayoutArticles = QFormLayout()
         self.formLayoutArticles.setObjectName(u"formLayoutArticles")
         self.labelTotal = QLabel(self.groupBoxArticles)
         self.labelTotal.setObjectName(u"labelTotal")
@@ -97,6 +114,8 @@ class Ui_MarketStatistics(object):
         self.formLayoutArticles.setWidget(3, QFormLayout.FieldRole, self.valueOpen)
 
 
+        self.verticalLayoutArticles.addLayout(self.formLayoutArticles)
+
         self.verticalLayout.addWidget(self.groupBoxArticles)
 
         self.groupBoxUsers = QGroupBox(MarketStatistics)
@@ -124,28 +143,23 @@ class Ui_MarketStatistics(object):
 
     def retranslateUi(self, MarketStatistics):
         MarketStatistics.setWindowTitle(QCoreApplication.translate("MarketStatistics", u"Statistik", None))
-        MarketStatistics.setStyleSheet(QCoreApplication.translate("MarketStatistics", u"QWidget { font-family: \"Segoe UI\", sans-serif; font-size: 10pt; background-color: #f0f0f0; }\n"
-"QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }\n"
-"QPushButton:hover { background-color: #005a9e; }\n"
-"QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
-"QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }\n"
-"", None))
+        MarketStatistics.setStyleSheet(QCoreApplication.translate(
+            "MarketStatistics",
+            u"QWidget { font-family: \"Segoe UI\", sans-serif; font-size: 10pt; background-color: #f0f0f0; }\n"
+            "QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }\n"
+            "QPushButton:hover { background-color: #005a9e; }\n"
+            "QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
+            "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }\n",
+            None
+        ))
         self.groupBoxMainNumbers.setTitle(QCoreApplication.translate("MarketStatistics", u"Stammnummern", None))
         self.labelUsed.setText(QCoreApplication.translate("MarketStatistics", u"Verwendet:", None))
-        self.valueUsed.setText("")
         self.labelFree.setText(QCoreApplication.translate("MarketStatistics", u"Frei:", None))
-        self.valueFree.setText("")
         self.groupBoxArticles.setTitle(QCoreApplication.translate("MarketStatistics", u"Artikel", None))
         self.labelTotal.setText(QCoreApplication.translate("MarketStatistics", u"Gesamt:", None))
-        self.valueTotal.setText("")
         self.labelComplete.setText(QCoreApplication.translate("MarketStatistics", u"Fertig:", None))
-        self.valueComplete.setText("")
         self.labelPartial.setText(QCoreApplication.translate("MarketStatistics", u"Aktuell:", None))
-        self.valuePartial.setText("")
         self.labelOpen.setText(QCoreApplication.translate("MarketStatistics", u"Offen:", None))
-        self.valueOpen.setText("")
         self.groupBoxUsers.setTitle(QCoreApplication.translate("MarketStatistics", u"Benutzer", None))
         self.labelUserCount.setText(QCoreApplication.translate("MarketStatistics", u"Anzahl:", None))
-        self.valueUserCount.setText("")
     # retranslateUi
-

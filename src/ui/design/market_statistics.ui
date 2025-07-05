@@ -27,34 +27,33 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      <property name="title">
       <string>Stammnummern</string>
      </property>
-     <layout class="QFormLayout" name="formLayoutMainNumbers">
-      <item row="0" column="0">
-       <widget class="QLabel" name="labelUsed">
-        <property name="text">
-         <string>Verwendet:</string>
-        </property>
-       </widget>
+     <layout class="QVBoxLayout" name="verticalLayoutMainNumbers">
+      <item>
+       <widget class="QtCharts.QChartView" name="chartMainNumbers"/>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="valueUsed">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="labelFree">
-        <property name="text">
-         <string>Frei:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="valueFree">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+      <item>
+       <layout class="QFormLayout" name="formLayoutMainNumbers">
+        <item row="0" column="0">
+         <widget class="QLabel" name="labelUsed">
+          <property name="text">
+           <string>Verwendet:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="valueUsed"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="labelFree">
+          <property name="text">
+           <string>Frei:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="valueFree"/>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -64,62 +63,53 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      <property name="title">
       <string>Artikel</string>
      </property>
-     <layout class="QFormLayout" name="formLayoutArticles">
-      <item row="0" column="0">
-       <widget class="QLabel" name="labelTotal">
-        <property name="text">
-         <string>Gesamt:</string>
-        </property>
-       </widget>
+     <layout class="QVBoxLayout" name="verticalLayoutArticles">
+      <item>
+       <widget class="QtCharts.QChartView" name="chartArticles"/>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="valueTotal">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="labelComplete">
-        <property name="text">
-         <string>Fertig:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="valueComplete">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="labelPartial">
-        <property name="text">
-         <string>Aktuell:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLabel" name="valuePartial">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="labelOpen">
-        <property name="text">
-         <string>Offen:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLabel" name="valueOpen">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+      <item>
+       <layout class="QFormLayout" name="formLayoutArticles">
+        <item row="0" column="0">
+         <widget class="QLabel" name="labelTotal">
+          <property name="text">
+           <string>Gesamt:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="valueTotal"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="labelComplete">
+          <property name="text">
+           <string>Fertig:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="valueComplete"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="labelPartial">
+          <property name="text">
+           <string>Aktuell:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="valuePartial"/>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="labelOpen">
+          <property name="text">
+           <string>Offen:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="valueOpen"/>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -138,11 +128,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLabel" name="valueUserCount">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+       <widget class="QLabel" name="valueUserCount"/>
       </item>
      </layout>
     </widget>
