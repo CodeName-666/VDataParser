@@ -175,6 +175,26 @@ class MarketObserver(QObject):
         """Generate all data and the PDF using stored settings."""
         if self._data_ready:
             self.file_generator.create_all(self.market_config_handler.get_pdf_generation_data())
+
+    def save_project(self, dir_path: str) -> bool:
+        """Save the current project to ``dir_path``."""
+        import os
+        import shutil
+
+        try:
+            market_file = self.market_config_handler.get_market_name()
+            os.makedirs(dir_path, exist_ok=True)
+            self.data_manager.save(os.path.join(dir_path, market_file))
+            self.pdf_display_config_loader.save(os.path.join(dir_path, "pdf_display_config.json"))
+            self.market_config_handler.save_to(os.path.join(dir_path, "project.json"))
+            pdf_path = self.pdf_display_config_loader.get_full_pdf_path()
+            if pdf_path and os.path.isfile(pdf_path):
+                shutil.copy(pdf_path, os.path.join(dir_path, os.path.basename(pdf_path)))
+            self.status_info.emit("INFO", f"Projekt gespeichert: {dir_path}")
+            return True
+        except Exception as err:  # pragma: no cover - runtime errors handled
+            self.status_info.emit("ERROR", str(err))
+            return False
         
         
 
@@ -379,3 +399,11 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         if observer:
             return observer.project_exists()
         return False
+
+    def save_project(self, market, dir_path: str) -> bool:
+        """Save the project of ``market`` into ``dir_path``."""
+        observer = self.get_observer(market)
+        if not observer:
+            self.status_info.emit("ERROR", "Kein Observer gefunden")
+            return False
+        return observer.save_project(dir_path)
