@@ -49,6 +49,26 @@ python src/main.py -h  # zeigt alle Optionen an
 
 Wird das Programm ohne die oben genannten Parameter gestartet, öffnet sich eine Qt-basierte GUI. Über diese können Projekte geladen, Daten eingesehen und die Dateigenerierung gestartet werden.
 
+## Projektverwaltung
+
+Die Anwendung kann JSON-Exporte laden und in ein dauerhaftes Projekt überführen.
+
+- **Export laden und umwandeln** – Über *Datei → Export öffnen…* wird eine Export-JSON geladen. Mit *Projekt → Speichern unter…* lässt sich daraus ein neues Projekt anlegen.
+- **Projekt speichern** – Beim Speichern erstellt das Programm im Projektordner
+  - `<name>.json` – die Projektdatei mit Pfaden und Einstellungen,
+  - `pdf_display_config.json` – Layoutdaten für die PDF-Erzeugung,
+  - die ursprüngliche Exportdatei.
+  Außerdem erzeugt die Datengenerierung im Ausgabeverzeichnis `kundendaten.dat`, `preisliste.dat`, `versand.dat` und `Abholbestaetigungen.pdf`.
+
+### Beispiel
+
+```bash
+python src/main.py -f /pfad/zum/export.json -p output
+```
+
+In der GUI wählt man **Datei → Export öffnen…**, prüft die Daten und speichert anschließend über **Projekt → Speichern unter…**.
+
+
 ## Projektstruktur
 
 ```
