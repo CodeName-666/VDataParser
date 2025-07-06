@@ -142,11 +142,12 @@ class Market(BaseUi):
         """Create and attach all sub widgets."""
         self.ui.setupUi(self)
         self.set_tab_names()
+        self.market_stats = self.add_widget(self.ui.tab_statistics, MarketStatistics)
         self.market_setting = self.add_widget(self.ui.tab, MarketSetting)
         self.data_view = self.add_widget(self.ui.tab_2, DataView)
         self.user_info = self.add_widget(self.ui.tab_3, UserInfo)
         self.pdf_display = self.add_widget(self.ui.tab_4, PdfDisplay)
-        self.market_stats = self.add_widget(self.ui.tab_statistics, MarketStatistics)
+        
         
         self.pdf_tab_txt = self.ui.tabWidget.tabText(self.ui.tabWidget.indexOf(self.ui.tab_4))
         self.connect_signals()

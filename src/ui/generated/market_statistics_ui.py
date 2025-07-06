@@ -3,11 +3,12 @@
 ################################################################################
 ## Form generated from reading UI file 'market_statistics.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.0
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
+from PySide6.QtCharts import QChartView
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
@@ -17,13 +18,12 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFormLayout, QGroupBox, QLabel,
     QSizePolicy, QVBoxLayout, QWidget)
-from PySide6.QtCharts import QChartView
 
 class Ui_MarketStatistics(object):
     def setupUi(self, MarketStatistics):
         if not MarketStatistics.objectName():
             MarketStatistics.setObjectName(u"MarketStatistics")
-        MarketStatistics.resize(400, 300)
+        MarketStatistics.resize(976, 836)
         self.verticalLayout = QVBoxLayout(MarketStatistics)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.groupBoxMainNumbers = QGroupBox(MarketStatistics)
@@ -32,9 +32,12 @@ class Ui_MarketStatistics(object):
         self.verticalLayoutMainNumbers.setObjectName(u"verticalLayoutMainNumbers")
         self.chartMainNumbers = QChartView(self.groupBoxMainNumbers)
         self.chartMainNumbers.setObjectName(u"chartMainNumbers")
-        self.chartMainNumbers.setMinimumSize(QSize(0, 250))
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.chartMainNumbers.sizePolicy().hasHeightForWidth())
         self.chartMainNumbers.setSizePolicy(sizePolicy)
+        self.chartMainNumbers.setMinimumSize(QSize(0, 250))
 
         self.verticalLayoutMainNumbers.addWidget(self.chartMainNumbers)
 
@@ -93,6 +96,7 @@ class Ui_MarketStatistics(object):
 
         self.verticalLayoutMainNumbers.addLayout(self.formLayoutMainNumbers)
 
+
         self.verticalLayout.addWidget(self.groupBoxMainNumbers)
 
         self.groupBoxArticles = QGroupBox(MarketStatistics)
@@ -101,9 +105,9 @@ class Ui_MarketStatistics(object):
         self.verticalLayoutArticles.setObjectName(u"verticalLayoutArticles")
         self.chartArticles = QChartView(self.groupBoxArticles)
         self.chartArticles.setObjectName(u"chartArticles")
+        sizePolicy.setHeightForWidth(self.chartArticles.sizePolicy().hasHeightForWidth())
+        self.chartArticles.setSizePolicy(sizePolicy)
         self.chartArticles.setMinimumSize(QSize(0, 250))
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.chartArticles.setSizePolicy(sizePolicy1)
 
         self.verticalLayoutArticles.addWidget(self.chartArticles)
 
@@ -152,6 +156,7 @@ class Ui_MarketStatistics(object):
 
         self.verticalLayoutArticles.addLayout(self.formLayoutArticles)
 
+
         self.verticalLayout.addWidget(self.groupBoxArticles)
 
         self.groupBoxUsers = QGroupBox(MarketStatistics)
@@ -179,15 +184,12 @@ class Ui_MarketStatistics(object):
 
     def retranslateUi(self, MarketStatistics):
         MarketStatistics.setWindowTitle(QCoreApplication.translate("MarketStatistics", u"Statistik", None))
-        MarketStatistics.setStyleSheet(QCoreApplication.translate(
-            "MarketStatistics",
-            u"QWidget { font-family: \"Segoe UI\", sans-serif; font-size: 10pt; background-color: #f0f0f0; }\n"
-            "QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }\n"
-            "QPushButton:hover { background-color: #005a9e; }\n"
-            "QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
-            "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }\n",
-            None
-        ))
+        MarketStatistics.setStyleSheet(QCoreApplication.translate("MarketStatistics", u"QWidget { font-family: \"Segoe UI\", sans-serif; font-size: 10pt; background-color: #f0f0f0; }\n"
+"QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }\n"
+"QPushButton:hover { background-color: #005a9e; }\n"
+"QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
+"QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }\n"
+"", None))
         self.groupBoxMainNumbers.setTitle(QCoreApplication.translate("MarketStatistics", u"Stammnummern", None))
         self.labelCompleteNums.setText(QCoreApplication.translate("MarketStatistics", u"Vollst\u00e4ndig:", None))
         self.labelAlmostNums.setText(QCoreApplication.translate("MarketStatistics", u"Fast fertig:", None))
@@ -202,3 +204,4 @@ class Ui_MarketStatistics(object):
         self.groupBoxUsers.setTitle(QCoreApplication.translate("MarketStatistics", u"Benutzer", None))
         self.labelUserCount.setText(QCoreApplication.translate("MarketStatistics", u"Anzahl:", None))
     # retranslateUi
+

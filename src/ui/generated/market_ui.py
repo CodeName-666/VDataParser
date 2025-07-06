@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'market.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.0
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -27,6 +27,9 @@ class Ui_Market(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.tabWidget = QTabWidget(Market)
         self.tabWidget.setObjectName(u"tabWidget")
+        self.tab_statistics = QWidget()
+        self.tab_statistics.setObjectName(u"tab_statistics")
+        self.tabWidget.addTab(self.tab_statistics, "")
         self.tab = QWidget()
         self.tab.setObjectName(u"tab")
         self.tabWidget.addTab(self.tab, "")
@@ -39,16 +42,13 @@ class Ui_Market(object):
         self.tab_4 = QWidget()
         self.tab_4.setObjectName(u"tab_4")
         self.tabWidget.addTab(self.tab_4, "")
-        self.tab_statistics = QWidget()
-        self.tab_statistics.setObjectName(u"tab_statistics")
-        self.tabWidget.addTab(self.tab_statistics, "")
 
         self.verticalLayout.addWidget(self.tabWidget)
 
 
         self.retranslateUi(Market)
 
-        self.tabWidget.setCurrentIndex(4)
+        self.tabWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(Market)
@@ -61,10 +61,10 @@ class Ui_Market(object):
 "QPushButton:hover { background-color: #005a9e; }\n"
 "QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
 "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_statistics), QCoreApplication.translate("Market", u"Statistik", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("Market", u"Markt Einstellungen", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("Market", u"Benutzerinformationen", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("Market", u"Verkaufslisten", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), QCoreApplication.translate("Market", u"Abholbest\u00e4tigung", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_statistics), QCoreApplication.translate("Market", u"Statistik", None))
     # retranslateUi
 
