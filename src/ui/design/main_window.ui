@@ -33,11 +33,13 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
     </rect>
    </property>
    <widget class="QMenu" name="menu_file">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="separator"/>
-   </widget>
+   <property name="title">
+    <string>File</string>
+   </property>
+   <addaction name="action_save_project"/>
+   <addaction name="action_save_project_as"/>
+   <addaction name="separator"/>
+  </widget>
    <widget class="QMenu" name="menu_help">
     <property name="title">
      <string>Help</string>
@@ -70,9 +72,11 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    <attribute name="toolBarArea">
     <enum>LeftToolBarArea</enum>
    </attribute>
-   <attribute name="toolBarBreak">
+  <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="action_save_project"/>
+   <addaction name="action_save_project_as"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
@@ -116,6 +120,30 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    </property>
    <property name="text">
     <string>&amp;Alles generieren</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_save_project">
+   <property name="icon">
+    <iconset resource="../../resource/ressources.qrc">
+     <normaloff>:/icons/file-database.svg</normaloff>:/icons/file-database.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Projekt speichern</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_save_project_as">
+   <property name="icon">
+    <iconset resource="../../resource/ressources.qrc">
+     <normaloff>:/icons/database-export.svg</normaloff>:/icons/database-export.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Projekt speichern unter</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

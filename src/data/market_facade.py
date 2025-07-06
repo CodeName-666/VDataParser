@@ -35,6 +35,8 @@ class MarketObserver(QObject):
         self.fm: FleatMarket = None
         self._data_ready = False
         self._project_exists = False
+        self._market = market
+        self._project_dir = ""
 
 
     def set_data_ready_satus(self, status: bool) -> None:
@@ -64,6 +66,14 @@ class MarketObserver(QObject):
         :param status: Boolean indicating if a project exists.
         """
         self._project_exists = status
+
+    def init_project(self, export_path: str) -> None:
+        """Initialise a new project based on an exported market file."""
+
+        # reset the config handler to its defaults and point it to the export
+        self.market_config_handler = MarketConfigHandler()
+        self.market_config_handler.set_full_market_path(export_path)
+        self._project_exists = True
 
     def load_local_market_project(self, json_path: str) -> bool:
         """
@@ -138,7 +148,9 @@ class MarketObserver(QObject):
     @Slot(str)
     def storage_path_changed(self,path: str):
         self.market_config_handler.set_full_pdf_coordinates_config_path(path)
-        print("PAUSE")
+        if not self._project_dir:
+            self._project_dir = os.path.dirname(path)
+        MarketFacade().save_project(self._market, self._project_dir)
 
     def get_data(self):
         return self.data_manager
@@ -152,9 +164,10 @@ class MarketObserver(QObject):
         return self.market_config_handler.get_pdf_generation_data()
 
     def connect_signals(self, market) -> None:
+        self._market = market
         self.data_manager_loaded.connect(market.set_market_data)
         self.pdf_display_config_loaded.connect(market.set_pdf_config)
-       
+
         market.pdf_display_storage_path_changed.connect(self.storage_path_changed)
 
 
@@ -175,6 +188,26 @@ class MarketObserver(QObject):
         """Generate all data and the PDF using stored settings."""
         if self._data_ready:
             self.file_generator.create_all(self.market_config_handler.get_pdf_generation_data())
+
+    def save_project(self, dir_path: str) -> bool:
+        """Save the current project to ``dir_path``."""
+        import os
+        import shutil
+
+        try:
+            market_file = self.market_config_handler.get_market_name()
+            os.makedirs(dir_path, exist_ok=True)
+            self.data_manager.save(os.path.join(dir_path, market_file))
+            self.pdf_display_config_loader.save(os.path.join(dir_path, "pdf_display_config.json"))
+            self.market_config_handler.save_to(os.path.join(dir_path, "project.json"))
+            pdf_path = self.pdf_display_config_loader.get_full_pdf_path()
+            if pdf_path and os.path.isfile(pdf_path):
+                shutil.copy(pdf_path, os.path.join(dir_path, os.path.basename(pdf_path)))
+            self.status_info.emit("INFO", f"Projekt gespeichert: {dir_path}")
+            return True
+        except Exception as err:  # pragma: no cover - runtime errors handled
+            self.status_info.emit("ERROR", str(err))
+            return False
         
         
 
@@ -263,7 +296,10 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         """
         new_observer = self.create_observer(market)
         new_observer.connect_signals(market)
-        return new_observer.load_local_market_export(json_path)
+        ret = new_observer.load_local_market_export(json_path)
+        if ret:
+            self.create_project_from_export(market, json_path, "")
+        return ret
 
     def market_already_exists(self, market) -> bool:
         market = next(
@@ -299,6 +335,17 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         else:
             observer = self.get_observer(market)
         return observer
+
+    def create_project_from_export(self, market, export_path: str, target_dir: str) -> bool:
+        """Create a project configuration from a loaded export."""
+
+        observer = self.get_observer(market)
+        if not observer:
+            self.status_info.emit("ERROR", "Kein Observer gefunden")
+            return False
+
+        observer.init_project(export_path)
+        return True
 
     @Slot(object)
     def create_pdf_data(self, market) ->None:
@@ -379,3 +426,47 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         if observer:
             return observer.project_exists()
         return False
+
+    @Slot(object, str)
+    def save_project(self, market, dir_path: str) -> bool:
+        """Save the current market project to ``dir_path``.
+
+        This writes the market data, PDF layout configuration and the project
+        configuration JSON into the given directory.
+        """
+        observer = self.get_observer(market)
+        if not observer:
+            self.status_info.emit("ERROR", "Kein Observer gefunden")
+            return False
+
+        try:
+            os.makedirs(dir_path, exist_ok=True)
+
+            market_file = os.path.join(
+                dir_path,
+                observer.market_config_handler.get_market_name() or "market.json",
+            )
+            pdf_file = os.path.join(
+                dir_path,
+                observer.market_config_handler.get_pdf_coordinates_config_name()
+                or "pdf_display_config.json",
+            )
+            project_file = os.path.join(
+                dir_path,
+                observer.market_config_handler.get_storage_file_name() or "project.json",
+            )
+
+            observer.data_manager.json_data = observer.data_manager.export_to_json()
+            observer.data_manager.save(market_file)
+
+            observer.pdf_display_config_loader.save(pdf_file)
+
+            observer.market_config_handler.set_full_market_path(market_file)
+            observer.market_config_handler.set_full_pdf_coordinates_config_path(pdf_file)
+            observer.market_config_handler.save_to(project_file)
+
+            self.status_info.emit("INFO", f"Projekt gespeichert: {project_file}")
+            return True
+        except Exception as err:  # pragma: no cover - runtime errors handled
+            self.status_info.emit("ERROR", f"Fehler beim Speichern: {err}")
+            return False
