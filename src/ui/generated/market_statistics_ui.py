@@ -16,7 +16,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFormLayout, QGroupBox, QLabel,
-    QSizePolicy, QVBoxLayout, QWidget)
+    QSizePolicy, QVBoxLayout, QWidget, QProgressBar, QHBoxLayout)
 from PySide6.QtCharts import QChartView
 
 class Ui_MarketStatistics(object):
@@ -156,18 +156,41 @@ class Ui_MarketStatistics(object):
 
         self.groupBoxUsers = QGroupBox(MarketStatistics)
         self.groupBoxUsers.setObjectName(u"groupBoxUsers")
-        self.formLayoutUsers = QFormLayout(self.groupBoxUsers)
+        self.horizontalLayoutUsers = QHBoxLayout(self.groupBoxUsers)
+        self.horizontalLayoutUsers.setObjectName(u"horizontalLayoutUsers")
+        self.progressUsers = QProgressBar(self.groupBoxUsers)
+        self.progressUsers.setObjectName(u"progressUsers")
+        self.progressUsers.setOrientation(Qt.Vertical)
+        self.progressUsers.setMinimum(0)
+        self.progressUsers.setMaximum(100)
+        self.progressUsers.setTextVisible(False)
+        self.progressUsers.setStyleSheet(u"QProgressBar::chunk {background: qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 #00c853, stop:1 #d50000);} QProgressBar {border: 1px solid #bbb;}")
+
+        self.horizontalLayoutUsers.addWidget(self.progressUsers)
+
+        self.formLayoutUsers = QFormLayout()
         self.formLayoutUsers.setObjectName(u"formLayoutUsers")
-        self.labelUserCount = QLabel(self.groupBoxUsers)
-        self.labelUserCount.setObjectName(u"labelUserCount")
+        self.labelUserCurrent = QLabel(self.groupBoxUsers)
+        self.labelUserCurrent.setObjectName(u"labelUserCurrent")
 
-        self.formLayoutUsers.setWidget(0, QFormLayout.LabelRole, self.labelUserCount)
+        self.formLayoutUsers.setWidget(0, QFormLayout.LabelRole, self.labelUserCurrent)
 
-        self.valueUserCount = QLabel(self.groupBoxUsers)
-        self.valueUserCount.setObjectName(u"valueUserCount")
+        self.valueUserCurrent = QLabel(self.groupBoxUsers)
+        self.valueUserCurrent.setObjectName(u"valueUserCurrent")
 
-        self.formLayoutUsers.setWidget(0, QFormLayout.FieldRole, self.valueUserCount)
+        self.formLayoutUsers.setWidget(0, QFormLayout.FieldRole, self.valueUserCurrent)
 
+        self.labelUserMax = QLabel(self.groupBoxUsers)
+        self.labelUserMax.setObjectName(u"labelUserMax")
+
+        self.formLayoutUsers.setWidget(1, QFormLayout.LabelRole, self.labelUserMax)
+
+        self.valueUserMax = QLabel(self.groupBoxUsers)
+        self.valueUserMax.setObjectName(u"valueUserMax")
+
+        self.formLayoutUsers.setWidget(1, QFormLayout.FieldRole, self.valueUserMax)
+
+        self.horizontalLayoutUsers.addLayout(self.formLayoutUsers)
 
         self.verticalLayout.addWidget(self.groupBoxUsers)
 
@@ -200,5 +223,6 @@ class Ui_MarketStatistics(object):
         self.labelPartial.setText(QCoreApplication.translate("MarketStatistics", u"Aktuell:", None))
         self.labelOpen.setText(QCoreApplication.translate("MarketStatistics", u"Offen:", None))
         self.groupBoxUsers.setTitle(QCoreApplication.translate("MarketStatistics", u"Benutzer", None))
-        self.labelUserCount.setText(QCoreApplication.translate("MarketStatistics", u"Anzahl:", None))
+        self.labelUserCurrent.setText(QCoreApplication.translate("MarketStatistics", u"Aktuell:", None))
+        self.labelUserMax.setText(QCoreApplication.translate("MarketStatistics", u"Maximal:", None))
     # retranslateUi

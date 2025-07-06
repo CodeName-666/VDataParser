@@ -33,12 +33,18 @@ class MarketStatistics(BaseUi):
         tables = dm.get_main_number_tables()
         settings = dm.get_settings()
         max_num = 0
+        max_users = 0
         if settings and getattr(settings, "data", None):
             raw = settings.data[0].max_stammnummern
             try:
                 max_num = int(str(raw))
             except (TypeError, ValueError):
                 max_num = 0
+            raw_user = settings.data[0].max_user_ids
+            try:
+                max_users = int(str(raw_user))
+            except (TypeError, ValueError):
+                max_users = 0
 
         # collect article counts and progress for each stammnummer
         complete = partial = open_cnt = 0
@@ -82,7 +88,10 @@ class MarketStatistics(BaseUi):
         self.ui.valueComplete.setText(str(complete))
         self.ui.valuePartial.setText(str(partial))
         self.ui.valueOpen.setText(str(open_cnt))
-        self.ui.valueUserCount.setText(str(user_count))
+        self.ui.valueUserCurrent.setText(str(user_count))
+        self.ui.valueUserMax.setText(str(max_users))
+        self.ui.progressUsers.setMaximum(max_users if max_users else 1)
+        self.ui.progressUsers.setValue(user_count)
 
         # update main number bar chart
         bar_set_main = QBarSet("Stammnummern")

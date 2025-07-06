@@ -175,16 +175,49 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      <property name="title">
       <string>Benutzer</string>
      </property>
-     <layout class="QFormLayout" name="formLayoutUsers">
-      <item row="0" column="0">
-       <widget class="QLabel" name="labelUserCount">
-        <property name="text">
-         <string>Anzahl:</string>
+     <layout class="QHBoxLayout" name="horizontalLayoutUsers">
+      <item>
+       <widget class="QProgressBar" name="progressUsers">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="textVisible">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string>QProgressBar::chunk {background: qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 #00c853, stop:1 #d50000);} QProgressBar {border: 1px solid #bbb;}</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="valueUserCount"/>
+      <item>
+       <layout class="QFormLayout" name="formLayoutUsers">
+        <item row="0" column="0">
+         <widget class="QLabel" name="labelUserCurrent">
+          <property name="text">
+           <string>Aktuell:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="valueUserCurrent"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="labelUserMax">
+          <property name="text">
+           <string>Maximal:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="valueUserMax"/>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
