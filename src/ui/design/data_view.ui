@@ -26,8 +26,8 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
-     <widget class="QWidget" name="">
-      <layout class="QVBoxLayout" name="verticalLayout">
+     <widget class="QWidget" name="layoutWidget">
+      <layout class="QVBoxLayout" name="verticalLayoutLeft">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>

@@ -14,7 +14,7 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string>QWidget { font-family: "Segoe UI", sans-serif; font-size: 10pt; background-color: #f0f0f0; }
+   <string>QWidget { font-family: &quot;Segoe UI&quot;, sans-serif; font-size: 10pt; background-color: #f0f0f0; }
 QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }
 QPushButton:hover { background-color: #005a9e; }
 QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }
@@ -24,8 +24,13 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
+     <widget class="QWidget" name="tab_statistics">
+      <attribute name="title">
+       <string>Statistik</string>
+      </attribute>
+     </widget>
      <widget class="QWidget" name="tab">
       <attribute name="title">
        <string>Markt Einstellungen</string>

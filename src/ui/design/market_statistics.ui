@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MarketStatistics</class>
+ <widget class="QWidget" name="MarketStatistics">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>976</width>
+    <height>982</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Statistik</string>
+  </property>
+  <property name="styleSheet">
+   <string>QWidget { font-family: &quot;Segoe UI&quot;, sans-serif; font-size: 10pt; background-color: #f0f0f0; }
+QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }
+QPushButton:hover { background-color: #005a9e; }
+QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }
+QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }
+</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <widget class="QGroupBox" name="groupBoxUsers">
+     <property name="title">
+      <string>Benutzer</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="labelUserCount">
+          <property name="text">
+           <string>Anzahl:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="valueUserCount"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelUserCurrent">
+          <property name="text">
+           <string>Aktuell:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="valueUserCurrent"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelUserMax">
+          <property name="text">
+           <string>Maximal:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="valueUserMax"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="progressBarUser">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBoxMainNumbers">
+     <property name="title">
+      <string>Stammnummern</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayoutMainNumbers">
+      <item>
+       <widget class="QChartView" name="chartMainNumbers" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>250</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QFormLayout" name="formLayoutMainNumbers">
+        <item row="0" column="0">
+         <widget class="QLabel" name="labelCompleteNums">
+          <property name="text">
+           <string>Vollständig:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="valueCompleteNums"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="labelAlmostNums">
+          <property name="text">
+           <string>Fast fertig:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="valueAlmostNums"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="labelHalfNums">
+          <property name="text">
+           <string>Halb fertig:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="valueHalfNums"/>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="labelInProgressNums">
+          <property name="text">
+           <string>In Arbeit:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="valueInProgressNums"/>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="labelStartedNums">
+          <property name="text">
+           <string>Angefangen:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLabel" name="valueStartedNums"/>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBoxArticles">
+     <property name="title">
+      <string>Artikel</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayoutArticles">
+      <item>
+       <widget class="QChartView" name="chartArticles" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>250</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QFormLayout" name="formLayoutArticles">
+        <item row="0" column="0">
+         <widget class="QLabel" name="labelTotal">
+          <property name="text">
+           <string>Gesamt:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="valueTotal"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="labelComplete">
+          <property name="text">
+           <string>Fertig:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="valueComplete"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="labelPartial">
+          <property name="text">
+           <string>Aktuell:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="valuePartial"/>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="labelOpen">
+          <property name="text">
+           <string>Offen:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="valueOpen"/>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QWidget</extends>
+   <header>PySide6.QtCharts</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
