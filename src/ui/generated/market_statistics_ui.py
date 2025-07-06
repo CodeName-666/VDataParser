@@ -16,16 +16,65 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFormLayout, QGroupBox, QLabel,
-    QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QFormLayout, QGroupBox, QHBoxLayout,
+    QLabel, QProgressBar, QSizePolicy, QVBoxLayout,
+    QWidget)
 
 class Ui_MarketStatistics(object):
     def setupUi(self, MarketStatistics):
         if not MarketStatistics.objectName():
             MarketStatistics.setObjectName(u"MarketStatistics")
-        MarketStatistics.resize(976, 836)
-        self.verticalLayout = QVBoxLayout(MarketStatistics)
+        MarketStatistics.resize(976, 982)
+        self.verticalLayout_2 = QVBoxLayout(MarketStatistics)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.groupBoxUsers = QGroupBox(MarketStatistics)
+        self.groupBoxUsers.setObjectName(u"groupBoxUsers")
+        self.verticalLayout = QVBoxLayout(self.groupBoxUsers)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.labelUserCount = QLabel(self.groupBoxUsers)
+        self.labelUserCount.setObjectName(u"labelUserCount")
+
+        self.horizontalLayout.addWidget(self.labelUserCount)
+
+        self.valueUserCount = QLabel(self.groupBoxUsers)
+        self.valueUserCount.setObjectName(u"valueUserCount")
+
+        self.horizontalLayout.addWidget(self.valueUserCount)
+
+        self.labelUserCurrent = QLabel(self.groupBoxUsers)
+        self.labelUserCurrent.setObjectName(u"labelUserCurrent")
+
+        self.horizontalLayout.addWidget(self.labelUserCurrent)
+
+        self.valueUserCurrent = QLabel(self.groupBoxUsers)
+        self.valueUserCurrent.setObjectName(u"valueUserCurrent")
+
+        self.horizontalLayout.addWidget(self.valueUserCurrent)
+
+        self.labelUserMax = QLabel(self.groupBoxUsers)
+        self.labelUserMax.setObjectName(u"labelUserMax")
+
+        self.horizontalLayout.addWidget(self.labelUserMax)
+
+        self.valueUserMax = QLabel(self.groupBoxUsers)
+        self.valueUserMax.setObjectName(u"valueUserMax")
+
+        self.horizontalLayout.addWidget(self.valueUserMax)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout)
+
+        self.progressBarUser = QProgressBar(self.groupBoxUsers)
+        self.progressBarUser.setObjectName(u"progressBarUser")
+        self.progressBarUser.setValue(24)
+
+        self.verticalLayout.addWidget(self.progressBarUser)
+
+
+        self.verticalLayout_2.addWidget(self.groupBoxUsers)
+
         self.groupBoxMainNumbers = QGroupBox(MarketStatistics)
         self.groupBoxMainNumbers.setObjectName(u"groupBoxMainNumbers")
         self.verticalLayoutMainNumbers = QVBoxLayout(self.groupBoxMainNumbers)
@@ -97,7 +146,7 @@ class Ui_MarketStatistics(object):
         self.verticalLayoutMainNumbers.addLayout(self.formLayoutMainNumbers)
 
 
-        self.verticalLayout.addWidget(self.groupBoxMainNumbers)
+        self.verticalLayout_2.addWidget(self.groupBoxMainNumbers)
 
         self.groupBoxArticles = QGroupBox(MarketStatistics)
         self.groupBoxArticles.setObjectName(u"groupBoxArticles")
@@ -157,24 +206,7 @@ class Ui_MarketStatistics(object):
         self.verticalLayoutArticles.addLayout(self.formLayoutArticles)
 
 
-        self.verticalLayout.addWidget(self.groupBoxArticles)
-
-        self.groupBoxUsers = QGroupBox(MarketStatistics)
-        self.groupBoxUsers.setObjectName(u"groupBoxUsers")
-        self.formLayoutUsers = QFormLayout(self.groupBoxUsers)
-        self.formLayoutUsers.setObjectName(u"formLayoutUsers")
-        self.labelUserCount = QLabel(self.groupBoxUsers)
-        self.labelUserCount.setObjectName(u"labelUserCount")
-
-        self.formLayoutUsers.setWidget(0, QFormLayout.LabelRole, self.labelUserCount)
-
-        self.valueUserCount = QLabel(self.groupBoxUsers)
-        self.valueUserCount.setObjectName(u"valueUserCount")
-
-        self.formLayoutUsers.setWidget(0, QFormLayout.FieldRole, self.valueUserCount)
-
-
-        self.verticalLayout.addWidget(self.groupBoxUsers)
+        self.verticalLayout_2.addWidget(self.groupBoxArticles)
 
 
         self.retranslateUi(MarketStatistics)
@@ -190,6 +222,10 @@ class Ui_MarketStatistics(object):
 "QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
 "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }\n"
 "", None))
+        self.groupBoxUsers.setTitle(QCoreApplication.translate("MarketStatistics", u"Benutzer", None))
+        self.labelUserCount.setText(QCoreApplication.translate("MarketStatistics", u"Anzahl:", None))
+        self.labelUserCurrent.setText(QCoreApplication.translate("MarketStatistics", u"Aktuell:", None))
+        self.labelUserMax.setText(QCoreApplication.translate("MarketStatistics", u"Maximal:", None))
         self.groupBoxMainNumbers.setTitle(QCoreApplication.translate("MarketStatistics", u"Stammnummern", None))
         self.labelCompleteNums.setText(QCoreApplication.translate("MarketStatistics", u"Vollst\u00e4ndig:", None))
         self.labelAlmostNums.setText(QCoreApplication.translate("MarketStatistics", u"Fast fertig:", None))
@@ -201,7 +237,5 @@ class Ui_MarketStatistics(object):
         self.labelComplete.setText(QCoreApplication.translate("MarketStatistics", u"Fertig:", None))
         self.labelPartial.setText(QCoreApplication.translate("MarketStatistics", u"Aktuell:", None))
         self.labelOpen.setText(QCoreApplication.translate("MarketStatistics", u"Offen:", None))
-        self.groupBoxUsers.setTitle(QCoreApplication.translate("MarketStatistics", u"Benutzer", None))
-        self.labelUserCount.setText(QCoreApplication.translate("MarketStatistics", u"Anzahl:", None))
     # retranslateUi
 

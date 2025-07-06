@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>976</width>
-    <height>836</height>
+    <height>982</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,20 +21,51 @@ QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }
 QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }
 </string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QGroupBox" name="groupBoxUsers">
      <property name="title">
       <string>Benutzer</string>
      </property>
-     <layout class="QFormLayout" name="formLayoutUsers">
-      <item row="0" column="1">
-       <widget class="QLabel" name="valueUserCount"/>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="labelUserCount">
+          <property name="text">
+           <string>Anzahl:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="valueUserCount"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelUserCurrent">
+          <property name="text">
+           <string>Aktuell:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="valueUserCurrent"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelUserMax">
+          <property name="text">
+           <string>Maximal:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="valueUserMax"/>
+        </item>
+       </layout>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="labelUserCount">
-        <property name="text">
-         <string>Anzahl:</string>
+      <item>
+       <widget class="QProgressBar" name="progressBarUser">
+        <property name="value">
+         <number>24</number>
         </property>
        </widget>
       </item>
