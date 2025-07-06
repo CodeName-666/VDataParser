@@ -7,6 +7,7 @@ from .market_settings import MarketSetting
 from .data_view import DataView
 from .user_info import UserInfo
 from .pdf_display import PdfDisplay
+from .market_statistics import MarketStatistics
 from data import DataManager, PdfDisplayConfig
 
 
@@ -46,6 +47,7 @@ class Market(BaseUi):
         self.market_setting.setup_views(self)
         self.data_view.setup_views(self)
         self.user_info.setup_views(self)
+        self.market_stats.setup_views(self)
 
     def connect_signals(self) -> None:
 
@@ -134,15 +136,18 @@ class Market(BaseUi):
         self.ui.tabWidget.setTabText(self.ui.tabWidget.indexOf(self.ui.tab_3), QCoreApplication.translate("Market", u"Benutzerinformationen", None))
         self.ui.tabWidget.setTabText(self.ui.tabWidget.indexOf(self.ui.tab_2), QCoreApplication.translate("Market", u"Verkaufslisten", None))
         self.ui.tabWidget.setTabText(self.ui.tabWidget.indexOf(self.ui.tab_4), QCoreApplication.translate("Market", u"Abholbest\u00e4tigung", None))
+        self.ui.tabWidget.setTabText(self.ui.tabWidget.indexOf(self.ui.tab_statistics), QCoreApplication.translate("Market", u"Statistik", None))
 
     def setup_ui(self) -> None:
         """Create and attach all sub widgets."""
         self.ui.setupUi(self)
         self.set_tab_names()
+        self.market_stats = self.add_widget(self.ui.tab_statistics, MarketStatistics)
         self.market_setting = self.add_widget(self.ui.tab, MarketSetting)
         self.data_view = self.add_widget(self.ui.tab_2, DataView)
         self.user_info = self.add_widget(self.ui.tab_3, UserInfo)
         self.pdf_display = self.add_widget(self.ui.tab_4, PdfDisplay)
+        
         
         self.pdf_tab_txt = self.ui.tabWidget.tabText(self.ui.tabWidget.indexOf(self.ui.tab_4))
         self.connect_signals()
