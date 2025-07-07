@@ -223,9 +223,9 @@ class Ui_MarketStatistics(object):
 "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }\n"
 "", None))
         self.groupBoxUsers.setTitle(QCoreApplication.translate("MarketStatistics", u"Benutzer", None))
-        self.labelUserCount.setText(QCoreApplication.translate("MarketStatistics", u"Anzahl:", None))
-        self.labelUserCurrent.setText(QCoreApplication.translate("MarketStatistics", u"Aktuell:", None))
-        self.labelUserMax.setText(QCoreApplication.translate("MarketStatistics", u"Maximal:", None))
+        self.labelUserCount.setText(QCoreApplication.translate("MarketStatistics", u"Max. m\u00f6gliche Anzahl an Stammnummern:", None))
+        self.labelUserCurrent.setText(QCoreApplication.translate("MarketStatistics", u"Aktuell verwendete Stammnummern:", None))
+        self.labelUserMax.setText(QCoreApplication.translate("MarketStatistics", u"Anzahl freie Stammnummern:", None))
         self.groupBoxMainNumbers.setTitle(QCoreApplication.translate("MarketStatistics", u"Stammnummern", None))
         self.labelCompleteNums.setText(QCoreApplication.translate("MarketStatistics", u"Vollst\u00e4ndig:", None))
         self.labelAlmostNums.setText(QCoreApplication.translate("MarketStatistics", u"Fast fertig:", None))

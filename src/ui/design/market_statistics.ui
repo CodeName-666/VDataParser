@@ -33,7 +33,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
         <item>
          <widget class="QLabel" name="labelUserCount">
           <property name="text">
-           <string>Anzahl:</string>
+           <string>Max. mögliche Anzahl an Stammnummern:</string>
           </property>
          </widget>
         </item>
@@ -43,7 +43,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
         <item>
          <widget class="QLabel" name="labelUserCurrent">
           <property name="text">
-           <string>Aktuell:</string>
+           <string>Aktuell verwendete Stammnummern:</string>
           </property>
          </widget>
         </item>
@@ -53,7 +53,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
         <item>
          <widget class="QLabel" name="labelUserMax">
           <property name="text">
-           <string>Maximal:</string>
+           <string>Anzahl freie Stammnummern:</string>
           </property>
          </widget>
         </item>
