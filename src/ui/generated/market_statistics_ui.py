@@ -66,11 +66,11 @@ class Ui_MarketStatistics(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.progressBarUser = QProgressBar(self.groupBoxUsers)
-        self.progressBarUser.setObjectName(u"progressBarUser")
-        self.progressBarUser.setValue(24)
+        self.progressUsers = QProgressBar(self.groupBoxUsers)
+        self.progressUsers.setObjectName(u"progressUsers")
+        self.progressUsers.setValue(24)
 
-        self.verticalLayout.addWidget(self.progressBarUser)
+        self.verticalLayout.addWidget(self.progressUsers)
 
 
         self.verticalLayout_2.addWidget(self.groupBoxUsers)
@@ -86,7 +86,7 @@ class Ui_MarketStatistics(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.chartMainNumbers.sizePolicy().hasHeightForWidth())
         self.chartMainNumbers.setSizePolicy(sizePolicy)
-        self.chartMainNumbers.setMinimumSize(QSize(0, 250))
+        self.chartMainNumbers.setMinimumSize(QSize(0, 100))
 
         self.verticalLayoutMainNumbers.addWidget(self.chartMainNumbers)
 
@@ -156,7 +156,7 @@ class Ui_MarketStatistics(object):
         self.chartArticles.setObjectName(u"chartArticles")
         sizePolicy.setHeightForWidth(self.chartArticles.sizePolicy().hasHeightForWidth())
         self.chartArticles.setSizePolicy(sizePolicy)
-        self.chartArticles.setMinimumSize(QSize(0, 250))
+        self.chartArticles.setMinimumSize(QSize(0, 100))
 
         self.verticalLayoutArticles.addWidget(self.chartArticles)
 
