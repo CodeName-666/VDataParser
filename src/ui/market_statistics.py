@@ -91,8 +91,11 @@ class MarketStatistics(BaseUi):
         self.ui.valueUserCount.setText(str(max_num))
         self.ui.valueUserMax.setText(str(free_count))
         self.ui.valueUserCurrent.setText(str(user_count))
-        self.ui.progressUsers.setMaximum(max_num if max_num else 1)
-        self.ui.progressUsers.setValue(user_count)
+
+        # progress bar shows percentage of used Stammnummern
+        used_percent = int(user_count / max_num * 100) if max_num else 0
+        self.ui.progressUsers.setMaximum(100)
+        self.ui.progressUsers.setValue(used_percent)
 
         # update main number bar chart
         bar_set_main = QBarSet("Stammnummern")
