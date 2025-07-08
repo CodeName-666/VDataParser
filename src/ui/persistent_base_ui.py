@@ -19,7 +19,10 @@ class PersistentBaseUi(BaseUi):
     status_info = Signal(str, str)
     data_changed = Signal(bool)
 
-    _config: JsonHandler
+    def __init__(self, parent = None):
+        super().__init__(parent)
+
+        self._config: Any = None
 
     # ------------------------------------------------------------------
     # Helpers
@@ -33,6 +36,13 @@ class PersistentBaseUi(BaseUi):
             self._config.json_data = asdict(state)
         else:
             self._config.json_data = state
+
+    def set_config(self, config: Any):
+        if config:
+            self._config = config
+
+    def get_config(self):
+        return self._config
 
     # ------------------------------------------------------------------
     # Expected to be provided by subclasses

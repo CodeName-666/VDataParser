@@ -2,11 +2,12 @@ import json
 from dataclasses import asdict
 from PySide6.QtCore import QDate, QDateTime, Slot
 from PySide6.QtWidgets import QFileDialog, QMessageBox
-from data.json_handler import JsonHandler
 from objects import SettingsContentDataClass
-
+from data import DataManager
 from .persistent_base_ui import PersistentBaseUi
 from .generated import MarketSettingUi
+
+
 
 
 class MarketSetting(PersistentBaseUi):
@@ -24,14 +25,13 @@ class MarketSetting(PersistentBaseUi):
         super().__init__(parent)
         self.ui = MarketSettingUi()
         self.market = None
-        self._config = JsonHandler()
         self.ui.setupUi(self)
         self.connect_signals()
 
     def connect_signals(self) -> None:
         """Hook up UI signal handlers."""
         self.ui.buttonSave.clicked.connect(self.save_state)
-        self.ui.buttonCancel.clicked.connect(self.restore_state)
+        self.ui.buttonRestore.clicked.connect(self.restore_state)
         self.ui.spinMaxStammnummer.valueChanged.connect(self._config_changed)
         self.ui.spinMaxArtikel.valueChanged.connect(self._config_changed)
         self.ui.dateTimeEditFlohmarktCountDown.dateTimeChanged.connect(self._config_changed)
@@ -41,6 +41,8 @@ class MarketSetting(PersistentBaseUi):
         self.ui.lineEditTabelleVerkaeufer.textChanged.connect(self._config_changed)
         self.ui.spinMaxIdPerUser.valueChanged.connect(self._config_changed)
         self.ui.dateTimeEditFlohmarkt.dateChanged.connect(self._config_changed)
+        self.ui.radioDisbaledFlohmarkt.clicked.connect(self._config_changed)
+        self.ui.radioActiveFlohmarkt.clicked.connect(self._config_changed)
 
     def setup_views(self, market_widget):
         """Initialise the view for the given ``market_widget``.
@@ -55,10 +57,10 @@ class MarketSetting(PersistentBaseUi):
 
     def load_settings(self) -> None:
         """Load settings from the market widget and update the UI."""
-        settings = self.market_widget().get_settings()
+        data_manager = self.market_widget().get_data_manager()
       
-        self._apply_state_dataclass(settings.data[0])
-        self._config.json_data = asdict(settings.data[0])
+        self._apply_state_dataclass(data_manager.settings.data[0])
+        self.set_config(data_manager)
         self._config_changed()
 
     # ------------------------------------------------------------------
@@ -71,8 +73,36 @@ class MarketSetting(PersistentBaseUi):
     def import_state(self, state: SettingsContentDataClass) -> None:
         """Apply the given state to the UI."""
         self._apply_state_dataclass(state)
-        self._config.json_data = asdict(state)
-        self._config_changed()
+        config = self.get_config()
+        if config:
+            config.settings.data[0] = state
+            self._config_changed()
+
+    def get_radio_button_status(self) -> str:
+        if self.ui.radioActiveFlohmarkt.isChecked():
+            return "ja"
+        elif self.ui.radioDisbaledFlohmarkt.isChecked():
+            return "nein"
+        else:
+            return "nein"
+
+    def set_radio_button_status(self, status: str):
+        if status == "ja":
+            self.ui.radioActiveFlohmarkt.setChecked(True)
+        else: 
+            self.ui.radioDisbaledFlohmarkt.setChecked(True)
+
+    def set_login_aktiv_status(self, status: str):
+        if status == "ja":
+            self.ui.checkBoxLoginDisable.setChecked(True)
+        else:
+            self.ui.checkBoxLoginDisable.setChecked(False)
+
+    def get_login_aktiv_status(self):
+        if self.ui.checkBoxLoginDisable.isChecked():
+            return "ja"
+        else:
+            return "nein"
 
     def _state_to_dataclass(self) -> SettingsContentDataClass:
         return SettingsContentDataClass(
@@ -85,26 +115,28 @@ class MarketSetting(PersistentBaseUi):
             verkaufer_liste=self.ui.lineEditTabelleVerkaeufer.text(),
             max_user_ids=str(self.ui.spinMaxIdPerUser.value()),
             datum_flohmarkt=self.ui.dateTimeEditFlohmarkt.date().toString("yyyy-MM-dd"),
+            flohmarkt_aktiv= str(self.get_radio_button_status()),
+            login_aktiv= str(self.get_login_aktiv_status())
         )
 
     def _apply_state_dataclass(self, state: SettingsContentDataClass) -> None:
         self.ui.spinMaxStammnummer.setValue(int(str(state.max_stammnummern)) if str(state.max_stammnummern).isdigit() else 0)
         self.ui.spinMaxArtikel.setValue(int(str(state.max_artikel)) if str(state.max_artikel).isdigit() else 0)
-        self.ui.dateTimeEditFlohmarktCountDown.setDateTime(
-            QDateTime.fromString(state.datum_counter, "yyyy-MM-dd HH:mm:ss")
-        )
+        self.ui.dateTimeEditFlohmarktCountDown.setDateTime(QDateTime.fromString(state.datum_counter, "yyyy-MM-dd HH:mm:ss")        )
         self.ui.spinFlohmarktNummer.setValue(int(str(state.flohmarkt_nr)) if str(state.flohmarkt_nr).isdigit() else 0)
         self.ui.spinMaxIdPerUser.setValue(int(str(state.max_user_ids)) if str(state.max_user_ids).isdigit() else 0)
         self.ui.spinPwLength.setValue(int(str(state.psw_laenge)) if str(state.psw_laenge).isdigit() else 0)
         self.ui.lineEditTabellePrefix.setText(state.tabellen_prefix)
         self.ui.lineEditTabelleVerkaeufer.setText(state.verkaufer_liste)
-        self.ui.dateTimeEditFlohmarkt.setDate(
-            QDate.fromString(state.datum_flohmarkt, "yyyy-MM-dd")
-        )
-
+        self.ui.dateTimeEditFlohmarkt.setDate(QDate.fromString(state.datum_flohmarkt, "yyyy-MM-dd"))
+        self.set_login_aktiv_status(str(state.login_aktiv))
+        self.set_radio_button_status(str(state.flohmarkt_aktiv))
+    
+    @Slot()
     def _config_changed(self) -> bool:
-        if self._config.get_data() is not None:
-            ret = asdict(self.export_state()) != self._config.get_data()
+        
+        if self._config is not None and self._config.get_data() is not None:
+            ret = (self.export_state() != self._config.settings.data[0])
             self.data_changed.emit(ret)
             return ret
         return False
@@ -140,10 +172,10 @@ class MarketSetting(PersistentBaseUi):
 
     @Slot()
     def restore_state(self) -> None:
-        data = self._config.get_data()
-        if data is not None:
-            state = SettingsContentDataClass(**data)
-            self.import_state(state)
+        config = self.get_config()
+        if config is not None:
+            settings = config.settings.data[0]
+            self.import_state(settings)
             self._config_changed()
 
     def market_widget(self):

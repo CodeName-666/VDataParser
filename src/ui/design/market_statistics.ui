@@ -77,7 +77,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      <property name="title">
       <string>Stammnummern</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutMainNumbers">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QChartView" name="chartMainNumbers" native="true">
         <property name="sizePolicy">
@@ -156,7 +156,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      <property name="title">
       <string>Artikel</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutArticles">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QChartView" name="chartArticles" native="true">
         <property name="sizePolicy">

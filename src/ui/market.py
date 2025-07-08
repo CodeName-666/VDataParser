@@ -188,3 +188,8 @@ class Market(BaseUi):
         if not self.data_manager_ref:
             return {}
         return self.data_manager_ref.get_settings()
+
+    def get_data_manager(self):
+        if not self.data_manager_ref:
+            return {}
+        return self.data_manager_ref

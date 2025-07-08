@@ -35,7 +35,7 @@ class BaseInfoDataClass:
 @dataclass
 class SettingsContentDataClass:
     max_stammnummern: str = ""
-    max_artikel: str = 0
+    max_artikel: str = ""
     datum_counter: str = ""
     flohmarkt_nr: str = ""
     psw_laenge: str = ""
@@ -43,6 +43,8 @@ class SettingsContentDataClass:
     verkaufer_liste: str = ""
     max_user_ids: str = ""
     datum_flohmarkt: str = ""   
+    flohmarkt_aktiv:str = ""
+    login_aktiv:str = ""
 
 @dataclass
 class SettingDataClass:
