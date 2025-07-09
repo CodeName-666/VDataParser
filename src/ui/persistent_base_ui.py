@@ -77,7 +77,8 @@ class PersistentBaseUi(BaseUi):
         path = self._config.get_storage_full_path()
         if path:
             try:
-                self._update_config_from_state(self.export_state())
+                export = self.export_state()
+                self._update_config_from_state(export)
                 self._config.save(path)
                 if not self._config_changed():
                     self.status_info.emit("INFO", "Konfiguration gespeichert")

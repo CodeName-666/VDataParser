@@ -445,7 +445,8 @@ class DataManager(QObject, BaseData):
         """
         json_data = [
             asdict(self.export_header),
-            asdict(self.base_info)
+            asdict(self.base_info),
+            asdict(self.settings)
         ]
         for table in self.main_numbers_list:
             json_data.append(asdict(table))
@@ -547,7 +548,10 @@ class DataManager(QObject, BaseData):
                     field_.name,
                     getattr(new_settings, field_.name)
                 )
-    
+
+        self.synchornize_data_class_change_to_json()
+            
+   
     def reset_all_changes(self) -> int:
         """Reset all logged changes and return the number of reverted entries."""
         # Wichtig: Um Konflikte zu vermeiden, rückwärts iterieren
@@ -558,3 +562,7 @@ class DataManager(QObject, BaseData):
         self._change_log.clear()
         self._unsaved_changes = True  # weil Änderungen am Zustand erfolgt sind
         return successful_resets
+
+
+    def synchornize_data_class_change_to_json(self):
+        self.json_data = self.export_to_json()

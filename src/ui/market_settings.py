@@ -44,6 +44,7 @@ class MarketSetting(PersistentBaseUi):
         self.ui.dateTimeEditFlohmarkt.dateChanged.connect(self._config_changed)
         self.ui.radioDisbaledFlohmarkt.clicked.connect(self._config_changed)
         self.ui.radioActiveFlohmarkt.clicked.connect(self._config_changed)
+        self.ui.checkBoxLoginDisable.clicked.connect(self._config_changed)
 
     def setup_views(self, market_widget):
         """Initialise the view for the given ``market_widget``.
@@ -69,9 +70,10 @@ class MarketSetting(PersistentBaseUi):
     # ------------------------------------------------------------------
     def export_state(self):
         """Return the current UI state as dataclass."""
-        data = self.get_config().json_data
+        data = self.get_config().export_to_json()
         config = DataManager(data)
-        config.set_new_settings(self._state_to_dataclass())
+        settings = self._state_to_dataclass()
+        config.set_new_settings(settings)
         return config
 
     def import_state(self, state: SettingsContentDataClass) -> None:
