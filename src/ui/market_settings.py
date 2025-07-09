@@ -69,9 +69,10 @@ class MarketSetting(PersistentBaseUi):
     # ------------------------------------------------------------------
     def export_state(self):
         """Return the current UI state as dataclass."""
-        data = copy.deepcopy(self.get_config())
-        data.settings.data[0] = self._state_to_dataclass()
-        return data
+        data = self.get_config().json_data
+        config = DataManager(data)
+        config.set_new_settings(self._state_to_dataclass())
+        return config
 
     def import_state(self, state: SettingsContentDataClass) -> None:
         """Apply the given state to the UI."""

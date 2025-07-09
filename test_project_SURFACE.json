@@ -23,6 +23,8 @@
     "tabellen_prefix": "str",
     "verkaufer_liste": "verkeaufer",
     "max_user_ids": "8",
-    "datum_flohmarkt": "2025-09-15"
+    "datum_flohmarkt": "2025-09-15",
+    "flohmarkt_aktiv": "nein",
+    "login_aktiv": "nein"
   }
 }
