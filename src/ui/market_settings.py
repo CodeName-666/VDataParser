@@ -139,7 +139,7 @@ class MarketSetting(PersistentBaseUi):
     def _config_changed(self) -> bool:
         
         if self._config is not None and self._config.get_data() is not None:
-            ret = (self.export_state() != self._config.settings.data[0])
+            ret = (self._state_to_dataclass() != self._config.settings.data[0])
             self.data_changed.emit(ret)
             return ret
         return False
