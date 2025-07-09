@@ -1,4 +1,5 @@
 import json
+import copy
 from dataclasses import asdict
 from PySide6.QtCore import QDate, QDateTime, Slot
 from PySide6.QtWidgets import QFileDialog, QMessageBox
@@ -66,9 +67,11 @@ class MarketSetting(PersistentBaseUi):
     # ------------------------------------------------------------------
     # Persistence helpers similar to PdfDisplay
     # ------------------------------------------------------------------
-    def export_state(self) -> SettingsContentDataClass:
+    def export_state(self):
         """Return the current UI state as dataclass."""
-        return self._state_to_dataclass()
+        data = copy.deepcopy(self.get_config())
+        data.settings.data[0] = self._state_to_dataclass()
+        return data
 
     def import_state(self, state: SettingsContentDataClass) -> None:
         """Apply the given state to the UI."""
@@ -151,24 +154,6 @@ class MarketSetting(PersistentBaseUi):
     def save_state(self) -> None:
         """Save settings using the current storage path."""
         super().save_state()
-
-    @Slot()
-    def load_state(self) -> None:
-        """Load settings from a JSON file."""
-        file_name, _ = QFileDialog.getOpenFileName(self, "Einstellungen laden", "", "JSON (*.json)")
-        if file_name:
-            try:
-                with open(file_name, "r", encoding="utf-8") as fh:
-                    data = json.load(fh)
-                state = SettingsContentDataClass(**data)
-                self.import_state(state)
-                self._config.json_data = data
-                self._config.set_path_or_url(file_name)
-                self.storage_path_changed.emit(file_name)
-                self.status_info.emit("INFO", f"Einstellungen geladen: {file_name}")
-                self._config_changed()
-            except (IOError, json.JSONDecodeError) as e:
-                QMessageBox.critical(self, "Fehler", f"Fehler beim Laden der Datei:\n{e}")
 
     @Slot()
     def restore_state(self) -> None:
