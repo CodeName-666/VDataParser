@@ -1,5 +1,6 @@
 import json
 import copy
+from typing import Any
 from dataclasses import asdict
 from PySide6.QtCore import QDate, QDateTime, Slot
 from PySide6.QtWidgets import QFileDialog, QMessageBox
@@ -70,11 +71,7 @@ class MarketSetting(PersistentBaseUi):
     # ------------------------------------------------------------------
     def export_state(self):
         """Return the current UI state as dataclass."""
-        data = self.get_config().export_to_json()
-        config = DataManager(data)
-        settings = self._state_to_dataclass()
-        config.set_new_settings(settings)
-        return config
+        return self._state_to_dataclass()
 
     def import_state(self, state: SettingsContentDataClass) -> None:
         """Apply the given state to the UI."""
@@ -169,3 +166,12 @@ class MarketSetting(PersistentBaseUi):
     def market_widget(self):
         """Return the associated market widget."""
         return self.market
+
+    
+    def update_config_from_state(self, state: Any) -> None:
+        if isinstance(state, SettingsContentDataClass):
+            config = self.get_config()
+            if config:
+                config.set_new_settings(state)
+        else:
+            super().update_config_from_state(state)

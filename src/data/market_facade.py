@@ -104,9 +104,11 @@ class MarketObserver(QObject):
                 else:
                     self.status_info.emit("ERROR", "Daten konnten nicht geladen werden")
                 # Load the PDF display configuration
-                ret = self.pdf_display_config_loader.load(pdf_display_config)
-                if ret:
+                pdf_ret = self.pdf_display_config_loader.load(pdf_display_config)
+                if pdf_ret:
                     self.pdf_display_config_loaded.emit(self.pdf_display_config_loader)
+                else:
+                    self.status_info.emit("ERROR", "Default pdf display config is not available now.")
 
             else:
                 self.status_info.emit("ERROR", "Projektkonfiguration konnte nicht geladen werden")
