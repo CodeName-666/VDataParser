@@ -80,20 +80,8 @@ class Ui_MainMenuView(object):
 "QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
 "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }", None))
         self.newButton.setText(QCoreApplication.translate("MainMenuView", u"    Neuer Markt    ", None))
-#if QT_CONFIG(tooltip)
-        self.newButton.setToolTip(QCoreApplication.translate("MainMenuView", u"Neuen Markt anlegen", None))
-#endif // QT_CONFIG(tooltip)
         self.loadButton.setText(QCoreApplication.translate("MainMenuView", u"Markt Laden", None))
-#if QT_CONFIG(tooltip)
-        self.loadButton.setToolTip(QCoreApplication.translate("MainMenuView", u"Markt laden", None))
-#endif // QT_CONFIG(tooltip)
         self.exportButton.setText(QCoreApplication.translate("MainMenuView", u"    Export Daten Laden    ", None))
-#if QT_CONFIG(tooltip)
-        self.exportButton.setToolTip(QCoreApplication.translate("MainMenuView", u"Exportdaten laden", None))
-#endif // QT_CONFIG(tooltip)
         self.exitButton.setText(QCoreApplication.translate("MainMenuView", u"Beenden", None))
-#if QT_CONFIG(tooltip)
-        self.exitButton.setToolTip(QCoreApplication.translate("MainMenuView", u"Anwendung beenden", None))
-#endif // QT_CONFIG(tooltip)
     # retranslateUi
 

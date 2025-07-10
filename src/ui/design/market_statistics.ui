@@ -33,7 +33,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
         <item>
          <widget class="QLabel" name="labelUserCount">
           <property name="text">
-           <string>Anzahl:</string>
+           <string>Max. mögliche Anzahl an Stammnummern:</string>
           </property>
          </widget>
         </item>
@@ -43,7 +43,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
         <item>
          <widget class="QLabel" name="labelUserCurrent">
           <property name="text">
-           <string>Aktuell:</string>
+           <string>Aktuell verwendete Stammnummern:</string>
           </property>
          </widget>
         </item>
@@ -53,7 +53,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
         <item>
          <widget class="QLabel" name="labelUserMax">
           <property name="text">
-           <string>Maximal:</string>
+           <string>Anzahl freie Stammnummern:</string>
           </property>
          </widget>
         </item>
@@ -77,7 +77,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      <property name="title">
       <string>Stammnummern</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutMainNumbers">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QChartView" name="chartMainNumbers" native="true">
         <property name="sizePolicy">
@@ -156,7 +156,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      <property name="title">
       <string>Artikel</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutArticles">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QChartView" name="chartArticles" native="true">
         <property name="sizePolicy">

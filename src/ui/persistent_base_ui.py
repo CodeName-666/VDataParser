@@ -19,12 +19,15 @@ class PersistentBaseUi(BaseUi):
     status_info = Signal(str, str)
     data_changed = Signal(bool)
 
-    _config: JsonHandler
+    def __init__(self, parent = None):
+        super().__init__(parent)
+
+        self._config: Any = None
 
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
-    def _update_config_from_state(self, state: Any) -> None:
+    def update_config_from_state(self, state: Any) -> None:
         """Update :attr:`_config` with *state* which may be dataclass, dict or
         :class:`~data.json_handler.JsonHandler`."""
         if isinstance(state, JsonHandler):
@@ -33,6 +36,13 @@ class PersistentBaseUi(BaseUi):
             self._config.json_data = asdict(state)
         else:
             self._config.json_data = state
+
+    def set_config(self, config: Any):
+        if config:
+            self._config = config
+
+    def get_config(self):
+        return self._config
 
     # ------------------------------------------------------------------
     # Expected to be provided by subclasses
@@ -54,7 +64,7 @@ class PersistentBaseUi(BaseUi):
         file_name, _ = QFileDialog.getSaveFileName(self, "Konfiguration speichern", "", "JSON (*.json)")
         if file_name:
             try:
-                self._update_config_from_state(self.export_state())
+                self.update_config_from_state(self.export_state())
                 self._config.save(file_name)
                 self.storage_path_changed.emit(file_name)
                 self.status_info.emit("INFO", f"Konfiguration gespeichert: {file_name}")
@@ -67,7 +77,8 @@ class PersistentBaseUi(BaseUi):
         path = self._config.get_storage_full_path()
         if path:
             try:
-                self._update_config_from_state(self.export_state())
+                export = self.export_state()
+                self.update_config_from_state(export)
                 self._config.save(path)
                 if not self._config_changed():
                     self.status_info.emit("INFO", "Konfiguration gespeichert")

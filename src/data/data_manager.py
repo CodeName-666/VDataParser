@@ -445,7 +445,8 @@ class DataManager(QObject, BaseData):
         """
         json_data = [
             asdict(self.export_header),
-            asdict(self.base_info)
+            asdict(self.base_info),
+            asdict(self.settings)
         ]
         for table in self.main_numbers_list:
             json_data.append(asdict(table))
@@ -532,22 +533,25 @@ class DataManager(QObject, BaseData):
         return not self.settings.is_all_empty()
 
    
-    def set_default_settings(self, default_settings: SettingsContentDataClass):
+    def set_new_settings(self, new_settings: SettingsContentDataClass):
         """
         Setzt die Default-Werte für die Settings (überschreibt alle Felder).
         """
         # Wenn noch keine Settings drin sind, einfach anhängen
         if not self.settings.data:
-            self.settings.data.append(default_settings)
+            self.settings.data.append(new_settings)
         else:
             # Ansonsten alle Felder der ersten Settings-Instanz überschreiben
-            for field_ in fields(default_settings):
+            for field_ in fields(new_settings):
                 setattr(
                     self.settings.data[0],                     # <- hier korrigiert
                     field_.name,
-                    getattr(default_settings, field_.name)
+                    getattr(new_settings, field_.name)
                 )
-    
+
+        self.synchornize_data_class_change_to_json()
+            
+   
     def reset_all_changes(self) -> int:
         """Reset all logged changes and return the number of reverted entries."""
         # Wichtig: Um Konflikte zu vermeiden, rückwärts iterieren
@@ -558,3 +562,7 @@ class DataManager(QObject, BaseData):
         self._change_log.clear()
         self._unsaved_changes = True  # weil Änderungen am Zustand erfolgt sind
         return successful_resets
+
+
+    def synchornize_data_class_change_to_json(self):
+        self.json_data = self.export_to_json()

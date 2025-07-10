@@ -77,8 +77,8 @@ class Ui_MarketStatistics(object):
 
         self.groupBoxMainNumbers = QGroupBox(MarketStatistics)
         self.groupBoxMainNumbers.setObjectName(u"groupBoxMainNumbers")
-        self.verticalLayoutMainNumbers = QVBoxLayout(self.groupBoxMainNumbers)
-        self.verticalLayoutMainNumbers.setObjectName(u"verticalLayoutMainNumbers")
+        self.horizontalLayout_2 = QHBoxLayout(self.groupBoxMainNumbers)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.chartMainNumbers = QChartView(self.groupBoxMainNumbers)
         self.chartMainNumbers.setObjectName(u"chartMainNumbers")
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -88,7 +88,7 @@ class Ui_MarketStatistics(object):
         self.chartMainNumbers.setSizePolicy(sizePolicy)
         self.chartMainNumbers.setMinimumSize(QSize(0, 100))
 
-        self.verticalLayoutMainNumbers.addWidget(self.chartMainNumbers)
+        self.horizontalLayout_2.addWidget(self.chartMainNumbers)
 
         self.formLayoutMainNumbers = QFormLayout()
         self.formLayoutMainNumbers.setObjectName(u"formLayoutMainNumbers")
@@ -143,22 +143,22 @@ class Ui_MarketStatistics(object):
         self.formLayoutMainNumbers.setWidget(4, QFormLayout.FieldRole, self.valueStartedNums)
 
 
-        self.verticalLayoutMainNumbers.addLayout(self.formLayoutMainNumbers)
+        self.horizontalLayout_2.addLayout(self.formLayoutMainNumbers)
 
 
         self.verticalLayout_2.addWidget(self.groupBoxMainNumbers)
 
         self.groupBoxArticles = QGroupBox(MarketStatistics)
         self.groupBoxArticles.setObjectName(u"groupBoxArticles")
-        self.verticalLayoutArticles = QVBoxLayout(self.groupBoxArticles)
-        self.verticalLayoutArticles.setObjectName(u"verticalLayoutArticles")
+        self.horizontalLayout_3 = QHBoxLayout(self.groupBoxArticles)
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.chartArticles = QChartView(self.groupBoxArticles)
         self.chartArticles.setObjectName(u"chartArticles")
         sizePolicy.setHeightForWidth(self.chartArticles.sizePolicy().hasHeightForWidth())
         self.chartArticles.setSizePolicy(sizePolicy)
         self.chartArticles.setMinimumSize(QSize(0, 100))
 
-        self.verticalLayoutArticles.addWidget(self.chartArticles)
+        self.horizontalLayout_3.addWidget(self.chartArticles)
 
         self.formLayoutArticles = QFormLayout()
         self.formLayoutArticles.setObjectName(u"formLayoutArticles")
@@ -203,7 +203,7 @@ class Ui_MarketStatistics(object):
         self.formLayoutArticles.setWidget(3, QFormLayout.FieldRole, self.valueOpen)
 
 
-        self.verticalLayoutArticles.addLayout(self.formLayoutArticles)
+        self.horizontalLayout_3.addLayout(self.formLayoutArticles)
 
 
         self.verticalLayout_2.addWidget(self.groupBoxArticles)
@@ -223,9 +223,9 @@ class Ui_MarketStatistics(object):
 "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }\n"
 "", None))
         self.groupBoxUsers.setTitle(QCoreApplication.translate("MarketStatistics", u"Benutzer", None))
-        self.labelUserCount.setText(QCoreApplication.translate("MarketStatistics", u"Anzahl:", None))
-        self.labelUserCurrent.setText(QCoreApplication.translate("MarketStatistics", u"Aktuell:", None))
-        self.labelUserMax.setText(QCoreApplication.translate("MarketStatistics", u"Maximal:", None))
+        self.labelUserCount.setText(QCoreApplication.translate("MarketStatistics", u"Max. m\u00f6gliche Anzahl an Stammnummern:", None))
+        self.labelUserCurrent.setText(QCoreApplication.translate("MarketStatistics", u"Aktuell verwendete Stammnummern:", None))
+        self.labelUserMax.setText(QCoreApplication.translate("MarketStatistics", u"Anzahl freie Stammnummern:", None))
         self.groupBoxMainNumbers.setTitle(QCoreApplication.translate("MarketStatistics", u"Stammnummern", None))
         self.labelCompleteNums.setText(QCoreApplication.translate("MarketStatistics", u"Vollst\u00e4ndig:", None))
         self.labelAlmostNums.setText(QCoreApplication.translate("MarketStatistics", u"Fast fertig:", None))

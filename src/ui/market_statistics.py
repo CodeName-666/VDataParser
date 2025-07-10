@@ -33,18 +33,12 @@ class MarketStatistics(BaseUi):
         tables = dm.get_main_number_tables()
         settings = dm.get_settings()
         max_num = 0
-        max_users = 0
         if settings and getattr(settings, "data", None):
             raw = settings.data[0].max_stammnummern
             try:
                 max_num = int(str(raw))
             except (TypeError, ValueError):
                 max_num = 0
-            raw_user = settings.data[0].max_user_ids
-            try:
-                max_users = int(str(raw_user))
-            except (TypeError, ValueError):
-                max_users = 0
 
         # collect article counts and progress for each stammnummer
         complete = partial = open_cnt = 0
@@ -76,7 +70,20 @@ class MarketStatistics(BaseUi):
             else:
                 progress_buckets["start"] += 1
         total_articles = complete + partial + open_cnt
-        user_count = len(dm.get_seller_as_list())
+        sellers = dm.get_seller_as_list()
+        user_count = sum(
+            1
+            for s in sellers
+            if all(getattr(s, attr, "").strip() for attr in ("vorname", "nachname", "email"))
+        )
+        
+        free_count = max(max_num - user_count, 0)
+        used_percent = int(user_count / max_num * 100) if max_num else 0   
+        used_percent = min(used_percent, 100)
+
+        
+
+
 
         self.ui.valueCompleteNums.setText(str(progress_buckets["voll"]))
         self.ui.valueAlmostNums.setText(str(progress_buckets["fast"]))
@@ -88,10 +95,13 @@ class MarketStatistics(BaseUi):
         self.ui.valueComplete.setText(str(complete))
         self.ui.valuePartial.setText(str(partial))
         self.ui.valueOpen.setText(str(open_cnt))
+        self.ui.valueUserCount.setText(str(max_num))
+        self.ui.valueUserMax.setText(str(free_count))
         self.ui.valueUserCurrent.setText(str(user_count))
-        self.ui.valueUserMax.setText(str(max_users))
-        self.ui.progressUsers.setMaximum(max_users if max_users else 1)
-        self.ui.progressUsers.setValue(user_count)
+
+        # progress bar shows percentage of used Stammnummern
+        self.ui.progressUsers.setMaximum(100)
+        self.ui.progressUsers.setValue(used_percent)
 
         # update main number bar chart
         bar_set_main = QBarSet("Stammnummern")

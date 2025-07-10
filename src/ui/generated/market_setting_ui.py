@@ -25,7 +25,7 @@ class Ui_MarketConfigDialog(object):
     def setupUi(self, MarketConfigDialog):
         if not MarketConfigDialog.objectName():
             MarketConfigDialog.setObjectName(u"MarketConfigDialog")
-        MarketConfigDialog.resize(666, 500)
+        MarketConfigDialog.resize(666, 504)
         self.verticalLayout = QVBoxLayout(MarketConfigDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.titleLabel = QLabel(MarketConfigDialog)
@@ -182,13 +182,17 @@ class Ui_MarketConfigDialog(object):
 
         self.buttonLayout.addWidget(self.buttonSave)
 
-        self.buttonCancel = QPushButton(MarketConfigDialog)
-        self.buttonCancel.setObjectName(u"buttonCancel")
+        self.buttonRestore = QPushButton(MarketConfigDialog)
+        self.buttonRestore.setObjectName(u"buttonRestore")
 
-        self.buttonLayout.addWidget(self.buttonCancel)
+        self.buttonLayout.addWidget(self.buttonRestore)
 
 
         self.verticalLayout.addLayout(self.buttonLayout)
+
+        self.verticalSpacer = QSpacerItem(20, 80, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.verticalLayout.addItem(self.verticalSpacer)
 
 
         self.retranslateUi(MarketConfigDialog)
@@ -221,6 +225,6 @@ class Ui_MarketConfigDialog(object):
         self.labelMaxIdPerUser.setText(QCoreApplication.translate("MarketConfigDialog", u"Max. ID pro User:", None))
         self.checkBoxLoginDisable.setText(QCoreApplication.translate("MarketConfigDialog", u"Login deaktivieren", None))
         self.buttonSave.setText(QCoreApplication.translate("MarketConfigDialog", u"Speichern", None))
-        self.buttonCancel.setText(QCoreApplication.translate("MarketConfigDialog", u"Abbrechen", None))
+        self.buttonRestore.setText(QCoreApplication.translate("MarketConfigDialog", u"Zur\u00fccksetzen", None))
     # retranslateUi
 

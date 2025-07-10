@@ -7,14 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>666</width>
-    <height>500</height>
+    <height>504</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Markt-Konfiguration</string>
   </property>
   <property name="styleSheet">
-   <string>QWidget { font-family: "Segoe UI", sans-serif; font-size: 10pt; background-color: #f0f0f0; }
+   <string>QWidget { font-family: &quot;Segoe UI&quot;, sans-serif; font-size: 10pt; background-color: #f0f0f0; }
 QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }
 QPushButton:hover { background-color: #005a9e; }
 QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }
@@ -263,13 +263,26 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonCancel">
+      <widget class="QPushButton" name="buttonRestore">
        <property name="text">
-        <string>Abbrechen</string>
+        <string>Zurücksetzen</string>
        </property>
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>80</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
