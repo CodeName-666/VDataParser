@@ -108,7 +108,10 @@ class MarketObserver(QObject):
                 if pdf_ret:
                     self.pdf_display_config_loaded.emit(self.pdf_display_config_loader)
                 else:
-                    self.status_info.emit("ERROR", "Default pdf display config is not available now.")
+                    if self._ask_for_default_pdf_config():
+                        self._load_default_pdf_config(json_path)
+                    else:
+                        self.status_info.emit("ERROR", "Default pdf display config is not available now.")
 
             else:
                 self.status_info.emit("ERROR", "Projektkonfiguration konnte nicht geladen werden")
@@ -153,6 +156,46 @@ class MarketObserver(QObject):
         if not self._project_dir:
             self._project_dir = os.path.dirname(path)
         MarketFacade().save_project(self._market, self._project_dir)
+
+    def _ask_for_default_pdf_config(self) -> bool:
+        """Prompt the user whether default PDF layout data should be loaded."""
+        from PySide6.QtWidgets import QMessageBox
+
+        msg_box = QMessageBox()
+        msg_box.setIcon(QMessageBox.Question)
+        msg_box.setWindowTitle("PDF Konfiguration")
+        msg_box.setText("Keine PDF Konfiguration gefunden. Default laden?")
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg_box.setDefaultButton(QMessageBox.Yes)
+        return msg_box.exec() == QMessageBox.Yes
+
+    def _load_default_pdf_config(self, project_path: str) -> None:
+        """Copy default PDF layout files into the project directory."""
+        import shutil
+        from pathlib import Path
+
+        project_dir = Path(project_path).parent
+        default_dir = Path(__file__).resolve().parents[1] / "resource" / "default_data"
+
+        cfg_src = default_dir / "pdf_display_config.json"
+        pdf_src = default_dir / "Abholung_Template.pdf"
+
+        cfg_dst = project_dir / "pdf_display_config.json"
+        pdf_dst = project_dir / "Abholung_Template.pdf"
+
+        shutil.copy(cfg_src, cfg_dst)
+        shutil.copy(pdf_src, pdf_dst)
+
+        # update project configuration
+        self.market_config_handler.set_full_pdf_coordinates_config_path(str(cfg_dst))
+        self.market_config_handler.save_to(project_path)
+
+        # update display config
+        self.pdf_display_config_loader.load(str(cfg_dst))
+        self.pdf_display_config_loader.set_full_pdf_path(str(pdf_dst))
+        self.pdf_display_config_loader.save(str(cfg_dst))
+
+        self.pdf_display_config_loaded.emit(self.pdf_display_config_loader)
 
     def get_data(self):
         return self.data_manager
