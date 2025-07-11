@@ -36,6 +36,8 @@ def test_save_project(tmp_path):
     assert (tmp_path / 'project.json').is_file()
     pdf = Path(__file__).resolve().parents[1] / 'src' / 'resource' / 'default_data' / 'Abholung_Template.pdf'
     assert (tmp_path / pdf.name).is_file()
+    assert obs.project_exists()
+    assert obs.get_project_dir() == str(tmp_path)
 
 
 def test_facade_save_project(tmp_path):
@@ -53,3 +55,5 @@ def test_facade_save_project(tmp_path):
     assert (tmp_path / 'project.json').is_file()
     pdf = Path(__file__).resolve().parents[1] / 'src' / 'resource' / 'default_data' / 'Abholung_Template.pdf'
     assert (tmp_path / pdf.name).is_file()
+    assert facade.is_project(market)
+    assert facade.get_project_dir(market) == str(tmp_path)

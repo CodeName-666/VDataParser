@@ -67,6 +67,14 @@ class MarketObserver(QObject):
         """
         self._project_exists = status
 
+    def set_project_dir(self, path: str) -> None:
+        """Remember the directory where the project is stored."""
+        self._project_dir = path
+
+    def get_project_dir(self) -> str:
+        """Return the directory of the current project."""
+        return self._project_dir
+
     def init_project(self, export_path: str) -> None:
         """Initialise a new project based on an exported market file."""
 
@@ -87,6 +95,7 @@ class MarketObserver(QObject):
             ret = self.market_config_handler.load(json_path)
             if ret:
                 self._project_exists = True
+                self._project_dir = os.path.dirname(json_path)
                 market_json_path = self.market_config_handler.get_full_market_path()
                 pdf_display_config = self.market_config_handler.get_full_pdf_coordinates_config_path()
                 # Initialize the DataManager with the market JSON path
@@ -248,6 +257,11 @@ class MarketObserver(QObject):
             pdf_path = self.pdf_display_config_loader.get_full_pdf_path()
             if pdf_path and os.path.isfile(pdf_path):
                 shutil.copy(pdf_path, os.path.join(dir_path, os.path.basename(pdf_path)))
+
+            # remember location and mark project as existing
+            self.set_project_dir(dir_path)
+            self.set_project_exists(True)
+
             self.status_info.emit("INFO", f"Projekt gespeichert: {dir_path}")
             return True
         except Exception as err:  # pragma: no cover - runtime errors handled
@@ -472,6 +486,11 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             return observer.project_exists()
         return False
 
+    def get_project_dir(self, market) -> str:
+        """Return the directory path of the current project."""
+        observer: MarketObserver = self.get_observer(market)
+        return observer.get_project_dir() if observer else ""
+
     @Slot(object, str)
     def save_project(self, market, dir_path: str) -> bool:
         """Save the current market project to ``dir_path``.
@@ -509,6 +528,10 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             observer.market_config_handler.set_full_market_path(market_file)
             observer.market_config_handler.set_full_pdf_coordinates_config_path(pdf_file)
             observer.market_config_handler.save_to(project_file)
+
+            # remember location and mark project as existing
+            observer.set_project_dir(dir_path)
+            observer.set_project_exists(True)
 
             self.status_info.emit("INFO", f"Projekt gespeichert: {project_file}")
             return True
