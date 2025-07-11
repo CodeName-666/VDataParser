@@ -1,0 +1,46 @@
+{
+  "type": "Project",
+  "data": [
+    {
+      "type": "Header",
+      "version": "1.0",
+      "comment": "Beispielprojekt"
+    },
+    {
+      "type": "BaseInfo",
+      "name": "Flohmarkt"
+    },
+    {
+      "type": "MainNumber",
+      "name": "001",
+      "database": "",
+      "data": [
+        {
+          "artikelnummer": "1",
+          "beschreibung": "Artikel 1",
+          "groesse": "M",
+          "preis": "1.00",
+          "created_at": "",
+          "updated_at": ""
+        }
+      ]
+    },
+    {
+      "type": "SellerList",
+      "name": "Sellers",
+      "database": "",
+      "data": [
+        {
+          "id": "1",
+          "vorname": "Max",
+          "nachname": "Mustermann",
+          "telefon": "",
+          "email": "",
+          "passwort": "",
+          "created_at": "",
+          "updated_at": ""
+        }
+      ]
+    }
+  ]
+}

@@ -1,8 +1,11 @@
 import argparse
+import sys
+import os
 from data import *
 from objects import FleatMarket
 from generator import FileGenerator
 from log import logger
+from ui import status_info, show_error
 import time
 __major__ = 0
 __minor__ = 4
@@ -43,7 +46,14 @@ if __name__ == '__main__':
        logger.info("Verbose Enabled")
 
 
-    base_data: BaseData = BaseData(args.file, logger)
+    try:
+        base_data: BaseData = BaseData(args.file, logger)
+    except ValueError:
+        filename = os.path.basename(args.file)
+        msg = f"Das ausgew\xe4hlte JSON File ist keine Projektdatei."
+        show_error(msg)
+        status_info.emit(f"{msg} {filename}", "Error")
+        sys.exit(1)
     base_data.verify_data()
     seller: List[SellerDataClass] = base_data.get_seller_list()
     main_numbers: List[MainNumberDataClass] = base_data.get_main_number_list()
