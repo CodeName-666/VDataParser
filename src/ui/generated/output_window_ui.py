@@ -41,6 +41,16 @@ class Ui_OutputWindow(object):
 
         self.verticalLayout.addWidget(self.progressBar)
 
+        self.progressBar_2 = QProgressBar(OutputWindow)
+        self.progressBar_2.setObjectName(u"progressBar_2")
+        self.progressBar_2.setValue(0)
+        self.progressBar_2.setMinimum(0)
+        self.progressBar_2.setMaximum(100)
+        self.progressBar_2.setTextVisible(True)
+        self.progressBar_2.setAlignment(Qt.AlignCenter)
+
+        self.verticalLayout.addWidget(self.progressBar_2)
+
 
         self.retranslateUi(OutputWindow)
 
@@ -60,6 +70,9 @@ class Ui_OutputWindow(object):
         self.logOutputTextEdit.setPlaceholderText(QCoreApplication.translate("OutputWindow", u"Warte auf Ausgabe...", None))
 #if QT_CONFIG(tooltip)
         self.progressBar.setToolTip(QCoreApplication.translate("OutputWindow", u"Zeigt den Fortschritt der Ausgabe an", None))
+#endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
+        self.progressBar_2.setToolTip(QCoreApplication.translate("OutputWindow", u"Zeigt den Fortschritt der Ausgabe an (zweite Leiste)", None))
 #endif // QT_CONFIG(tooltip)
     # retranslateUi
 

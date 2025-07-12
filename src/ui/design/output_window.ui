@@ -34,8 +34,8 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      </property>
     </widget>
    </item>
-   <item>
-    <widget class="QProgressBar" name="progressBar">
+    <item>
+     <widget class="QProgressBar" name="progressBar">
      <property name="toolTip">
       <string>Zeigt den Fortschritt der Ausgabe an</string>
      </property>
@@ -55,9 +55,31 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
-   </item>
-  </layout>
- </widget>
- <resources/>
- <connections/>
-</ui>
+    </item>
+    <item>
+     <widget class="QProgressBar" name="progressBar_2">
+      <property name="toolTip">
+       <string>Zeigt den Fortschritt der Ausgabe an (zweite Leiste)</string>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+      <property name="minimum">
+       <number>0</number>
+      </property>
+      <property name="maximum">
+       <number>100</number>
+      </property>
+      <property name="textVisible">
+       <bool>true</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <resources/>
+  <connections/>
+ </ui>
