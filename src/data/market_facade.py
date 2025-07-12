@@ -11,6 +11,7 @@ from objects import FleatMarket
 from typing import List, Dict, Any, Union
 from pathlib import Path
 import tempfile
+import shutil
 from backend import MySQLInterface
 from backend.advance_db_connector import AdvancedDBManager
 
@@ -526,6 +527,10 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             observer.market_config_handler.set_full_market_path(str(market_file))
             observer.market_config_handler.set_full_pdf_coordinates_config_path(str(pdf_file))
             observer.market_config_handler.save_to(str(project_file))
+
+            pdf_path = observer.pdf_display_config_loader.get_full_pdf_path()
+            if pdf_path and Path(pdf_path).is_file():
+                shutil.copy(pdf_path, target_dir / Path(pdf_path).name)
 
             # remember location and mark project as existing
             observer.set_project_dir(dir_path)

@@ -425,6 +425,7 @@ class JsonHandler():
             return False
         return self.json_data == other.get_data()
     
+    @staticmethod
     def split_path_and_filename(path_str: str) -> tuple[str, str]:
         """
         Teilt einen String (URL oder lokaler Pfad) in
