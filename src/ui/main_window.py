@@ -213,7 +213,7 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def save_project(self):
-        """Save current project."
+        """Save current project."""
         if self.market_facade.is_project(self.market_view):
             project_dir = self.market_facade.get_project_dir(self.market_view)
             if project_dir:
