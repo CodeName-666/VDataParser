@@ -9,8 +9,8 @@ from .pdf_display_config import PdfDisplayConfig
 from generator import FileGenerator
 from objects import FleatMarket
 from typing import List, Dict, Any, Union
+from pathlib import Path
 import tempfile
-import os
 from backend import MySQLInterface
 from backend.advance_db_connector import AdvancedDBManager
 
@@ -67,9 +67,9 @@ class MarketObserver(QObject):
         """
         self._project_exists = status
 
-    def set_project_dir(self, path: str) -> None:
+    def set_project_dir(self, path: str | Path) -> None:
         """Remember the directory where the project is stored."""
-        self._project_dir = path
+        self._project_dir = str(path)
 
     def get_project_dir(self) -> str:
         """Return the directory of the current project."""
@@ -95,7 +95,7 @@ class MarketObserver(QObject):
             ret = self.market_config_handler.load(json_path)
             if ret:
                 self._project_exists = True
-                self._project_dir = os.path.dirname(json_path)
+                self._project_dir = str(Path(json_path).parent)
                 market_json_path = self.market_config_handler.get_full_market_path()
                 pdf_display_config = self.market_config_handler.get_full_pdf_coordinates_config_path()
                 # Initialize the DataManager with the market JSON path
@@ -163,7 +163,7 @@ class MarketObserver(QObject):
     def storage_path_changed(self,path: str):
         self.market_config_handler.set_full_pdf_coordinates_config_path(path)
         if not self._project_dir:
-            self._project_dir = os.path.dirname(path)
+            self._project_dir = str(Path(path).parent)
         MarketFacade().save_project(self._market, self._project_dir)
 
     def _ask_for_default_pdf_config(self) -> bool:
@@ -245,18 +245,18 @@ class MarketObserver(QObject):
 
     def save_project(self, dir_path: str) -> bool:
         """Save the current project to ``dir_path``."""
-        import os
         import shutil
 
         try:
             market_file = self.market_config_handler.get_market_name()
-            os.makedirs(dir_path, exist_ok=True)
-            self.data_manager.save(os.path.join(dir_path, market_file))
-            self.pdf_display_config_loader.save(os.path.join(dir_path, "pdf_display_config.json"))
-            self.market_config_handler.save_to(os.path.join(dir_path, "project.json"))
+            target_dir = Path(dir_path)
+            target_dir.mkdir(parents=True, exist_ok=True)
+            self.data_manager.save(str(target_dir / market_file))
+            self.pdf_display_config_loader.save(str(target_dir / "pdf_display_config.json"))
+            self.market_config_handler.save_to(str(target_dir / "project.json"))
             pdf_path = self.pdf_display_config_loader.get_full_pdf_path()
-            if pdf_path and os.path.isfile(pdf_path):
-                shutil.copy(pdf_path, os.path.join(dir_path, os.path.basename(pdf_path)))
+            if pdf_path and Path(pdf_path).is_file():
+                shutil.copy(pdf_path, target_dir / Path(pdf_path).name)
 
             # remember location and mark project as existing
             self.set_project_dir(dir_path)
@@ -308,8 +308,8 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             mysql_if = MySQLInterface(host=host, user=user, password=password,
                                       database=database, port=port)
             with AdvancedDBManager(mysql_if) as db:
-                fd, tmp_path = tempfile.mkstemp(suffix=".json")
-                os.close(fd)
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
+                    tmp_path = tmp.name
                 db.export_to_custom_json(tmp_path)
 
             new_observer = self.create_observer(market)
@@ -327,9 +327,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             self.status_info.emit("ERROR", f"Fehler beim Laden der Datenbank: {e}")
             ret = False
         finally:
-            if tmp_path and os.path.exists(tmp_path):
+            if tmp_path and Path(tmp_path).exists():
                 try:
-                    os.remove(tmp_path)
+                    Path(tmp_path).unlink()
                 except OSError:
                     pass
         return ret
@@ -504,30 +504,28 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             return False
 
         try:
-            os.makedirs(dir_path, exist_ok=True)
+            target_dir = Path(dir_path)
+            target_dir.mkdir(parents=True, exist_ok=True)
 
-            market_file = os.path.join(
-                dir_path,
-                observer.market_config_handler.get_market_name() or "market.json",
+            market_file = target_dir / (
+                observer.market_config_handler.get_market_name() or "market.json"
             )
-            pdf_file = os.path.join(
-                dir_path,
+            pdf_file = target_dir / (
                 observer.market_config_handler.get_pdf_coordinates_config_name()
-                or "pdf_display_config.json",
+                or "pdf_display_config.json"
             )
-            project_file = os.path.join(
-                dir_path,
-                observer.market_config_handler.get_storage_file_name() or "project.json",
+            project_file = target_dir / (
+                observer.market_config_handler.get_storage_file_name() or "project.json"
             )
 
             observer.data_manager.json_data = observer.data_manager.export_to_json()
-            observer.data_manager.save(market_file)
+            observer.data_manager.save(str(market_file))
 
-            observer.pdf_display_config_loader.save(pdf_file)
+            observer.pdf_display_config_loader.save(str(pdf_file))
 
-            observer.market_config_handler.set_full_market_path(market_file)
-            observer.market_config_handler.set_full_pdf_coordinates_config_path(pdf_file)
-            observer.market_config_handler.save_to(project_file)
+            observer.market_config_handler.set_full_market_path(str(market_file))
+            observer.market_config_handler.set_full_pdf_coordinates_config_path(str(pdf_file))
+            observer.market_config_handler.save_to(str(project_file))
 
             # remember location and mark project as existing
             observer.set_project_dir(dir_path)
