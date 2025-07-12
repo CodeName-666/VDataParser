@@ -213,7 +213,12 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def save_project(self):
-        """Save current project to a selected directory."""
+        """Save current project."
+        if self.market_facade.is_project(self.market_view):
+            project_dir = self.market_facade.get_project_dir(self.market_view)
+            if project_dir:
+                self.market_facade.save_project(self.market_view, project_dir)
+                return
         chosen_dir = QFileDialog.getExistingDirectory(self, "Projekt speichern")
         if chosen_dir:
             self.market_facade.save_project(self.market_view, chosen_dir)
