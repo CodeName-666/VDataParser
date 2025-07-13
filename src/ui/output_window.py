@@ -44,20 +44,18 @@ class OutputWindow(BaseUi, OutputInterfaceAbstraction):
         if self._timer is None:
             self._timer = QTimer(self)
             self._timer.setInterval(100)
-            self._timer.timeout.connect(self._update_progress)
-        if not self._timer.isActive():
+            self._timer.timeout.connect(self._update_bars)
             self._timer.start()
 
-    @Slot()
-    def _update_progress(self) -> None:
-        """Update progress bars from the assigned trackers."""
+    def _update_bars(self) -> None:
+        """Update progress bars from assigned trackers."""
         if self._primary_tracker is not None:
             self.primary_bar.setValue(self._primary_tracker.percentage)
         if self._secondary_tracker is not None:
-            self.secondary_bar.setValue(self._secondary_tracker.percentage)
+            self._secondary_tracker.setValue(self._secondary_tracker.percentage)
         if (
-            self._primary_tracker is None
-            and self._secondary_tracker is None
+            (self._primary_tracker is None or self._primary_tracker.percentage >= 100)
+            and (self._secondary_tracker is None or self._secondary_tracker.percentage >= 100)
             and self._timer is not None
         ):
             self._timer.stop()
