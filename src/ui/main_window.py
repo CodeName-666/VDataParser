@@ -40,7 +40,6 @@ class MainWindow(QMainWindow):
         self.main_menu = MainMenu(self.stack)
         self.market_view = Market(self.stack)
         #self.pdf_display = PdfDisplay(self.stack)
-        self.output_window = OutputWindow()
         self.market_facade = MarketFacade()
         self.status_bar = StatusBar(self)
 
@@ -243,27 +242,34 @@ class MainWindow(QMainWindow):
     def start_data_generation(self):
         """
         Starts the data generation process.
-        This method is a placeholder for future implementation.
         """
-        QMessageBox.information(self, "Info", "Data generation started. This feature is not yet implemented.")
+        window = OutputWindow(self)
+        window.show()
+        ok = self.market_facade.create_seller_data(self.market_view, window)
+        if ok:
+            window.close()
 
     @Slot()
     def start_pdf_generation(self):
         """
         Starts the PDF generation process.
-        This method is a placeholder for future implementation.
         """
-        self.market_facade.create_pdf_data(self.market_view, self.output_window)
-        QMessageBox.information(self, "Info", "PDF generation started. This feature is not yet implemented.")
+        window = OutputWindow(self)
+        window.show()
+        ok = self.market_facade.create_pdf_data(self.market_view, window)
+        if ok:
+            window.close()
 
     @Slot()
     def start_all_generation(self):
         """
         Starts the generation of all data and PDF files.
-        This method is a placeholder for future implementation.
         """
-        self.market_facade.create_all_data(self.market_view, self.output_window)
-        QMessageBox.information(self, "Info", "All generation started. This feature is not yet implemented.")
+        window = OutputWindow(self)
+        window.show()
+        ok = self.market_facade.create_all_data(self.market_view, window)
+        if ok:
+            window.close()
 
     @Slot()
     def create_local_market_export(self):
