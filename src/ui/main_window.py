@@ -253,7 +253,7 @@ class MainWindow(QMainWindow):
         Starts the PDF generation process.
         This method is a placeholder for future implementation.
         """
-        self.market_facade.create_pdf_data(self.market_view)
+        self.market_facade.create_pdf_data(self.market_view, self.output_window)
         QMessageBox.information(self, "Info", "PDF generation started. This feature is not yet implemented.")
 
     @Slot()
@@ -262,7 +262,7 @@ class MainWindow(QMainWindow):
         Starts the generation of all data and PDF files.
         This method is a placeholder for future implementation.
         """
-        self.market_facade.create_all_data(self.market_view)
+        self.market_facade.create_all_data(self.market_view, self.output_window)
         QMessageBox.information(self, "Info", "All generation started. This feature is not yet implemented.")
 
     @Slot()

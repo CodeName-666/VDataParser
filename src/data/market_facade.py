@@ -8,6 +8,7 @@ from .singelton_meta import SingletonMeta
 from .pdf_display_config import PdfDisplayConfig
 from generator import FileGenerator
 from objects import FleatMarket
+from display import BasicProgressTracker
 from typing import List, Dict, Any, Union
 from pathlib import Path
 import tempfile
@@ -226,23 +227,78 @@ class MarketObserver(QObject):
         market.pdf_display_storage_path_changed.connect(self.storage_path_changed)
 
 
-    def generate_pdf_data(self) -> None:
-        """
-        Generate PDF data for the market.
-        This method should be implemented to create the necessary PDF data.
-        """
-        if self._data_ready:
-            self.file_generator.create_pdf_data(self.market_config_handler.get_pdf_generation_data())
+    def generate_pdf_data(self, window) -> bool:
+        """Generate PDF data using ``window`` for output and progress."""
+        if not self._data_ready:
+            return False
 
-    def generate_seller_data(self) -> None:
-        """Generate seller related data files (DAT, statistics, etc.)."""
-        if self._data_ready:
-            self.file_generator.create_seller_data()
+        tracker = BasicProgressTracker()
+        try:
+            window.set_primary_tracker(tracker)
+        except AttributeError:
+            pass
 
-    def generate_all(self) -> None:
-        """Generate all data and the PDF using stored settings."""
-        if self._data_ready:
-            self.file_generator.create_all(self.market_config_handler.get_pdf_generation_data())
+        self.file_generator = FileGenerator(
+            self.fm,
+            output_interface=window,
+            progress_tracker=tracker,
+        )
+        self.file_generator.create_pdf_data(
+            self.market_config_handler.get_pdf_generation_data()
+        )
+        self.status_info.emit(
+            "ERROR" if tracker.has_error else "INFO",
+            "PDF Daten generiert" if not tracker.has_error else "PDF Fehler"
+        )
+        return not tracker.has_error
+
+    def generate_seller_data(self, window) -> bool:
+        """Generate seller related data files using ``window`` for output."""
+        if not self._data_ready:
+            return False
+
+        tracker = BasicProgressTracker()
+        try:
+            window.set_primary_tracker(tracker)
+        except AttributeError:
+            pass
+
+        self.file_generator = FileGenerator(
+            self.fm,
+            output_interface=window,
+            progress_tracker=tracker,
+        )
+        self.file_generator.create_seller_data()
+        self.status_info.emit(
+            "ERROR" if tracker.has_error else "INFO",
+            "Verkäuferdaten generiert" if not tracker.has_error else "Fehler bei Verkäuferdaten"
+        )
+        return not tracker.has_error
+
+    def generate_all(self, window) -> bool:
+        """Generate all data and PDF using ``window`` for output."""
+        if not self._data_ready:
+            return False
+
+        tracker = BasicProgressTracker()
+        try:
+            window.set_primary_tracker(tracker)
+        except AttributeError:
+            pass
+
+        self.file_generator = FileGenerator(
+            self.fm,
+            output_interface=window,
+            progress_tracker=tracker,
+        )
+        self.file_generator.create_all(
+            self.market_config_handler.get_pdf_generation_data()
+        )
+        self.status_info.emit(
+            "ERROR" if tracker.has_error else "INFO",
+            "Alle Daten erstellt" if not tracker.has_error else "Fehler bei Erstellung"
+        )
+        return not tracker.has_error
 
     def save_project(self, dir_path: str) -> bool:
         """Save the current project to ``dir_path``."""
@@ -407,8 +463,8 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         observer.init_project(export_path)
         return True
 
-    @Slot(object)
-    def create_pdf_data(self, market) ->None:
+    @Slot(object, object)
+    def create_pdf_data(self, market, window) -> bool:
         """
         Create PDF data for the specified market.
 
@@ -417,25 +473,29 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         observer = self.get_observer(market)
         if not observer:
             self.status_info.emit("ERROR", "Kein Observer gefunden")
-            return
+            return False
         try:
-            observer.generate_pdf_data()
-            self.status_info.emit("INFO", "PDF Daten generiert")
+            ok = observer.generate_pdf_data(window)
+            self.status_info.emit("INFO" if ok else "ERROR", "PDF Daten generiert" if ok else "PDF Fehler")
+            return ok
         except Exception as err:  # pragma: no cover - runtime errors handled
             self.status_info.emit("ERROR", str(err))
+            return False
 
-    @Slot(object)
-    def create_seller_data(self, market) -> None:
+    @Slot(object, object)
+    def create_seller_data(self, market, window) -> bool:
         """Create seller related data files for the specified market."""
         observer = self.get_observer(market)
         if not observer:
             self.status_info.emit("ERROR", "Kein Observer gefunden")
-            return
+            return False
         try:
-            observer.generate_seller_data()
-            self.status_info.emit("INFO", "Verkäuferdaten generiert")
+            ok = observer.generate_seller_data(window)
+            self.status_info.emit("INFO" if ok else "ERROR", "Verkäuferdaten generiert" if ok else "Fehler bei Verkäuferdaten")
+            return ok
         except Exception as err:  # pragma: no cover - runtime errors handled
             self.status_info.emit("ERROR", str(err))
+            return False
     
     @Slot(object)
     def create_market_data(self, market) -> None:
@@ -455,8 +515,8 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             self.status_info.emit("ERROR", str(err))
         
 
-    @Slot(object)
-    def create_all_data(self, market) -> None:
+    @Slot(object, object)
+    def create_all_data(self, market, window) -> bool:
         """
         Create all data for the specified market.
 
@@ -465,15 +525,17 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         observer = self.get_observer(market)
         if not observer:
             self.status_info.emit("ERROR", "Kein Observer gefunden")
-            return
+            return False
         try:
             if observer.file_generator:
-                observer.generate_all()
-                self.status_info.emit("INFO", "Alle Daten erstellt")
+                ok = observer.generate_all(window)
+                self.status_info.emit("INFO" if ok else "ERROR", "Alle Daten erstellt" if ok else "Fehler bei Erstellung")
+                return ok
             else:
                 raise RuntimeError("FileGenerator nicht bereit")
         except Exception as err:  # pragma: no cover - runtime errors handled
             self.status_info.emit("ERROR", str(err))
+            return False
 
     def is_project(self, market) -> bool:
         """
