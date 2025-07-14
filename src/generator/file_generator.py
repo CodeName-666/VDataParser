@@ -20,6 +20,7 @@ from .price_list_generator import PriceListGenerator
 from .seller_data_generator import SellerDataGenerator
 from .statistic_data_generator import StatisticDataGenerator
 from .receive_info_pdf_generator import ReceiveInfoPdfGenerator
+from objects import CoordinatesConfig
 
 __all__ = ["FileGenerator"]
 
@@ -38,6 +39,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         statistic_file_name: str = "versand",
         pdf_template_path_input: str | Path = "template/template.pdf",
         pdf_output_file_name: str | Path = "Abholbestaetigungen.pdf",
+        pdf_coordinates: Optional[List[CoordinatesConfig]] = None,
         logger: Optional[CustomLogger] = None,
         output_interface: Optional[OutputInterfaceAbstraction] = None,
         progress_tracker: Optional[_TrackerBase] = None,
@@ -57,6 +59,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         self._statistic_file_name = statistic_file_name
         self._pdf_template_path_input = pdf_template_path_input
         self._pdf_output_file_name = pdf_output_file_name
+        self._pdf_coordinates = pdf_coordinates
 
         self._tasks: List[Tuple[str, object]] = []
 
@@ -78,6 +81,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
                     **common,
                     pdf_template=self._pdf_template_path_input,
                     output_name=self._pdf_output_file_name,
+                    coordinates=self._pdf_coordinates,
                 ),
             ),
         ]
@@ -172,6 +176,9 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         output = settings.get("pdf_output") or settings.get("pdf_output_file_name") or settings.get("pdf_name")
         if output:
             self._pdf_output_file_name = output
+        coords = settings.get("coordinates") or settings.get("pdf_coordinates")
+        if coords:
+            self._pdf_coordinates = coords
 
     def create_pdf_data(self, settings: Optional[dict] = None) -> None:
         """Generate only the PDF based on ``settings``."""
