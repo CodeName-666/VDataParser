@@ -204,6 +204,8 @@ class MarketObserver(QObject):
         # update display config
         self.pdf_display_config_loader.load(str(cfg_dst))
         self.pdf_display_config_loader.set_full_pdf_path(str(pdf_dst))
+        self.pdf_display_config_loader.set_output_path(str(project_dir))
+        self.pdf_display_config_loader.set_output_name("Abholbestätigung.pdf")
         self.pdf_display_config_loader.save(str(cfg_dst))
 
         self.pdf_display_config_loaded.emit(self.pdf_display_config_loader)

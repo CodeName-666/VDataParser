@@ -793,8 +793,10 @@ class PdfDisplay(PersistentBaseUi):
         
         config = PdfDisplayConfig()
         # Setze Metadaten via die setter-Methoden der Config
-        
+
         config.set_full_pdf_path(self.pdfPath)
+        config.set_output_path(self.ui.lineEditOutputPath.text())
+        config.set_output_name(self.ui.lineEditOutputName.text())
         
 
         # Box-Paare hinzufügen
@@ -821,7 +823,7 @@ class PdfDisplay(PersistentBaseUi):
         """Stellt den Zustand aus einem zuvor erzeugten PdfDisplayConfig wieder her,
         unter Nutzung der Methoden von PdfDisplayConfig."""
         
-        self._config = config 
+        self._config = config
 
         if not self._config.is_empty():
 
@@ -832,6 +834,9 @@ class PdfDisplay(PersistentBaseUi):
             # Set the config for later use
             if self._config.get_full_pdf_path():
                 self._load_pdf_from_path(self._config.get_full_pdf_path())
+
+            self.ui.lineEditOutputPath.setText(self._config.get_output_path())
+            self.ui.lineEditOutputName.setText(self._config.get_output_name())
 
             # ---------- Box-Paare ----------
             max_pair_id = 0

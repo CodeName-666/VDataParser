@@ -314,20 +314,44 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
               <attribute name="buttonGroup">
                <string notr="true">buttonGroup</string>
               </attribute>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="btnSaveAsConfig">
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnSaveAsConfig">
               <property name="text">
                <string>Speichern unter</string>
               </property>
               <attribute name="buttonGroup">
                <string notr="true">buttonGroup</string>
               </attribute>
-             </widget>
-            </item>
-           </layout>
-          </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QFormLayout" name="formLayoutOutput">
+           <item row="0" column="0">
+            <widget class="QLabel" name="labelOutputPath">
+             <property name="text">
+              <string>Output Pfad:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="lineEditOutputPath"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="labelOutputName">
+             <property name="text">
+              <string>Dateiname:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="lineEditOutputName"/>
+           </item>
+          </layout>
+         </item>
          </layout>
         </widget>
        </item>
