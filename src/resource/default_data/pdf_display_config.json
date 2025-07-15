@@ -1,6 +1,8 @@
 {
     "pdf_path": "D:\\Projekte\\Python\\FlohmarktManager",
     "pdf_name": "Abholung_Template.pdf",
+    "output_path": "",
+    "output_name": "Abholbestätigung.pdf",
     "boxPairs": [
         {
             "id": 1,

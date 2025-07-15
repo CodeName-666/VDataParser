@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'pdf_display.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.2
+## Created by: Qt User Interface Compiler version 6.9.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -124,7 +124,7 @@ class Ui_PdfDisplayView(object):
         self.label_name = QLabel(self.groupBox)
         self.label_name.setObjectName(u"label_name")
 
-        self.formLayout_1.setWidget(0, QFormLayout.LabelRole, self.label_name)
+        self.formLayout_1.setWidget(0, QFormLayout.ItemRole.LabelRole, self.label_name)
 
         self.lineEditName = QLineEdit(self.groupBox)
         self.lineEditName.setObjectName(u"lineEditName")
@@ -134,19 +134,19 @@ class Ui_PdfDisplayView(object):
         sizePolicy2.setHeightForWidth(self.lineEditName.sizePolicy().hasHeightForWidth())
         self.lineEditName.setSizePolicy(sizePolicy2)
 
-        self.formLayout_1.setWidget(0, QFormLayout.FieldRole, self.lineEditName)
+        self.formLayout_1.setWidget(0, QFormLayout.ItemRole.FieldRole, self.lineEditName)
 
         self.label_stammnummer = QLabel(self.groupBox)
         self.label_stammnummer.setObjectName(u"label_stammnummer")
 
-        self.formLayout_1.setWidget(1, QFormLayout.LabelRole, self.label_stammnummer)
+        self.formLayout_1.setWidget(1, QFormLayout.ItemRole.LabelRole, self.label_stammnummer)
 
         self.lineEditStammnummer = QLineEdit(self.groupBox)
         self.lineEditStammnummer.setObjectName(u"lineEditStammnummer")
         sizePolicy2.setHeightForWidth(self.lineEditStammnummer.sizePolicy().hasHeightForWidth())
         self.lineEditStammnummer.setSizePolicy(sizePolicy2)
 
-        self.formLayout_1.setWidget(1, QFormLayout.FieldRole, self.lineEditStammnummer)
+        self.formLayout_1.setWidget(1, QFormLayout.ItemRole.FieldRole, self.lineEditStammnummer)
 
 
         self.verticalLayout_sidebar.addWidget(self.groupBox)
@@ -159,50 +159,50 @@ class Ui_PdfDisplayView(object):
         self.labelX = QLabel(self.groupBoxProperties)
         self.labelX.setObjectName(u"labelX")
 
-        self.formLayoutProperties.setWidget(0, QFormLayout.LabelRole, self.labelX)
+        self.formLayoutProperties.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelX)
 
         self.lineEditX = QLineEdit(self.groupBoxProperties)
         self.lineEditX.setObjectName(u"lineEditX")
         sizePolicy2.setHeightForWidth(self.lineEditX.sizePolicy().hasHeightForWidth())
         self.lineEditX.setSizePolicy(sizePolicy2)
 
-        self.formLayoutProperties.setWidget(0, QFormLayout.FieldRole, self.lineEditX)
+        self.formLayoutProperties.setWidget(0, QFormLayout.ItemRole.FieldRole, self.lineEditX)
 
         self.labelY = QLabel(self.groupBoxProperties)
         self.labelY.setObjectName(u"labelY")
 
-        self.formLayoutProperties.setWidget(1, QFormLayout.LabelRole, self.labelY)
+        self.formLayoutProperties.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelY)
 
         self.lineEditY = QLineEdit(self.groupBoxProperties)
         self.lineEditY.setObjectName(u"lineEditY")
         sizePolicy2.setHeightForWidth(self.lineEditY.sizePolicy().hasHeightForWidth())
         self.lineEditY.setSizePolicy(sizePolicy2)
 
-        self.formLayoutProperties.setWidget(1, QFormLayout.FieldRole, self.lineEditY)
+        self.formLayoutProperties.setWidget(1, QFormLayout.ItemRole.FieldRole, self.lineEditY)
 
         self.labelWidth = QLabel(self.groupBoxProperties)
         self.labelWidth.setObjectName(u"labelWidth")
 
-        self.formLayoutProperties.setWidget(2, QFormLayout.LabelRole, self.labelWidth)
+        self.formLayoutProperties.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labelWidth)
 
         self.lineEditWidth = QLineEdit(self.groupBoxProperties)
         self.lineEditWidth.setObjectName(u"lineEditWidth")
         sizePolicy2.setHeightForWidth(self.lineEditWidth.sizePolicy().hasHeightForWidth())
         self.lineEditWidth.setSizePolicy(sizePolicy2)
 
-        self.formLayoutProperties.setWidget(2, QFormLayout.FieldRole, self.lineEditWidth)
+        self.formLayoutProperties.setWidget(2, QFormLayout.ItemRole.FieldRole, self.lineEditWidth)
 
         self.labelHeight = QLabel(self.groupBoxProperties)
         self.labelHeight.setObjectName(u"labelHeight")
 
-        self.formLayoutProperties.setWidget(3, QFormLayout.LabelRole, self.labelHeight)
+        self.formLayoutProperties.setWidget(3, QFormLayout.ItemRole.LabelRole, self.labelHeight)
 
         self.lineEditHeight = QLineEdit(self.groupBoxProperties)
         self.lineEditHeight.setObjectName(u"lineEditHeight")
         sizePolicy2.setHeightForWidth(self.lineEditHeight.sizePolicy().hasHeightForWidth())
         self.lineEditHeight.setSizePolicy(sizePolicy2)
 
-        self.formLayoutProperties.setWidget(3, QFormLayout.FieldRole, self.lineEditHeight)
+        self.formLayoutProperties.setWidget(3, QFormLayout.ItemRole.FieldRole, self.lineEditHeight)
 
 
         self.verticalLayout_sidebar.addWidget(self.groupBoxProperties)
@@ -235,6 +235,31 @@ class Ui_PdfDisplayView(object):
 
 
         self.verticalLayout_3.addLayout(self.horizontalLayout)
+
+        self.formLayoutOutput = QFormLayout()
+        self.formLayoutOutput.setObjectName(u"formLayoutOutput")
+        self.labelOutputPath = QLabel(self.groupBox_3)
+        self.labelOutputPath.setObjectName(u"labelOutputPath")
+
+        self.formLayoutOutput.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelOutputPath)
+
+        self.layoutOutput = QHBoxLayout()
+        self.layoutOutput.setObjectName(u"layoutOutput")
+        self.lineEditOutputPath = QLineEdit(self.groupBox_3)
+        self.lineEditOutputPath.setObjectName(u"lineEditOutputPath")
+
+        self.layoutOutput.addWidget(self.lineEditOutputPath)
+
+        self.btnSaveOutputPath = QPushButton(self.groupBox_3)
+        self.btnSaveOutputPath.setObjectName(u"btnSaveOutputPath")
+
+        self.layoutOutput.addWidget(self.btnSaveOutputPath)
+
+
+        self.formLayoutOutput.setLayout(0, QFormLayout.ItemRole.FieldRole, self.layoutOutput)
+
+
+        self.verticalLayout_3.addLayout(self.formLayoutOutput)
 
 
         self.verticalLayout_sidebar.addWidget(self.groupBox_3)
@@ -307,6 +332,8 @@ class Ui_PdfDisplayView(object):
         self.btnLoadConfig.setText(QCoreApplication.translate("PdfDisplayView", u"Laden", None))
         self.btnSaveConfig.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern", None))
         self.btnSaveAsConfig.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern unter", None))
+        self.labelOutputPath.setText(QCoreApplication.translate("PdfDisplayView", u"Output Datei:", None))
+        self.btnSaveOutputPath.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern", None))
         self.btnAddSingleBox.setText(QCoreApplication.translate("PdfDisplayView", u"Datum hinzuf\u00fcgen", None))
         self.btnAddBoxPair.setText(QCoreApplication.translate("PdfDisplayView", u"StNr. hinzuf\u00fcgen", None))
         self.btnRemoveBoxPair.setText(QCoreApplication.translate("PdfDisplayView", u"Entfernen", None))

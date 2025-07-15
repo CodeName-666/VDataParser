@@ -65,6 +65,8 @@ class PdfDisplayConfig(QObject, JsonHandler):
     _TEMPLATE: Dict[str, Any] = {
         "pdf_path": "",
         "pdf_name": "",
+        "output_path": "",
+        "output_name": "",
         "boxPairs": [],
         "singleBoxes": [],
     }
@@ -107,6 +109,33 @@ class PdfDisplayConfig(QObject, JsonHandler):
     def set_pdf_name(self, value: str) -> None:
         """Set the PDF file name."""
         self.set_key_value(["pdf_name"], str(value))
+
+    # ------------------------------------------------------------------
+    # Output path / output name
+    # ------------------------------------------------------------------
+    def get_output_path(self) -> str:
+        """Return the configured output directory path."""
+        return str(self.get_key_value(["output_path"]) or "")
+
+    def set_output_path(self, value: str) -> None:
+        self.set_key_value(["output_path"], str(value))
+
+    def get_output_name(self) -> str:
+        """Return the configured output file name."""
+        return str(self.get_key_value(["output_name"]) or "")
+
+    def set_output_name(self, value: str) -> None:
+        self.set_key_value(["output_name"], str(value))
+
+    def get_full_output_path(self) -> str:
+        """Return the absolute output path composed of directory and file name."""
+        path = self.get_output_path()
+        return self.ensure_trailing_sep(path) + self.get_output_name()
+
+    def set_full_output_path(self, value: str) -> None:
+        file = Path(value)
+        self.set_key_value(["output_path"], str(file.parent))
+        self.set_key_value(["output_name"], file.name)
 
     def get_full_pdf_path(self) -> str:
         """Return the absolute PDF path composed of directory and file name."""
@@ -242,6 +271,3 @@ class PdfDisplayConfig(QObject, JsonHandler):
             return True
         else:
             return False 
-    
-
-    
