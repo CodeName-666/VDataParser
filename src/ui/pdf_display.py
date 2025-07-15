@@ -362,6 +362,7 @@ class PdfDisplay(PersistentBaseUi):
         self.ui.btnSaveAsConfig.clicked.connect(self.save_as_state)
         self.ui.btnSaveConfig.clicked.connect(self.save_state)
         self.ui.btnLoadConfig.clicked.connect(self.load_state)
+        self.ui.btnSaveOutputPath.clicked.connect(self.save_output_path)
         
         self.scene.selectionChanged.connect(self.on_scene_selection_changed)
         self.ui.listBoxPairs.itemSelectionChanged.connect(self.on_list_selection_changed)
@@ -616,6 +617,21 @@ class PdfDisplay(PersistentBaseUi):
 
         super().save_as_state()
         QMessageBox.information(self, "Erfolg", f"Konfiguration erfolgreich gespeichert:\n{self._config.get_storage_full_path()}")
+
+    @Slot()
+    def save_output_path(self):
+        """Save the output file path from the LineEdit to the config file."""
+        if not self._config:
+            return
+        self._config.set_full_output_path(self.ui.lineEditOutputPath.text())
+        storage = self._config.get_storage_full_path()
+        if storage:
+            try:
+                self._config.save(storage)
+                self.status_info.emit("INFO", f"Output-Pfad gespeichert: {storage}")
+                self._config_changed()
+            except IOError as e:
+                QMessageBox.critical(self, "Fehler", f"Speichern fehlgeschlagen:\n{e}")
    
 
     # --- UI Update Slots ---
@@ -795,8 +811,7 @@ class PdfDisplay(PersistentBaseUi):
         # Setze Metadaten via die setter-Methoden der Config
 
         config.set_full_pdf_path(self.pdfPath)
-        config.set_output_path(self.ui.lineEditOutputPath.text())
-        config.set_output_name(self.ui.lineEditOutputName.text())
+        config.set_full_output_path(self.ui.lineEditOutputPath.text())
         
 
         # Box-Paare hinzufügen
@@ -835,8 +850,7 @@ class PdfDisplay(PersistentBaseUi):
             if self._config.get_full_pdf_path():
                 self._load_pdf_from_path(self._config.get_full_pdf_path())
 
-            self.ui.lineEditOutputPath.setText(self._config.get_output_path())
-            self.ui.lineEditOutputName.setText(self._config.get_output_name())
+            self.ui.lineEditOutputPath.setText(self._config.get_full_output_path())
 
             # ---------- Box-Paare ----------
             max_pair_id = 0

@@ -243,20 +243,20 @@ class Ui_PdfDisplayView(object):
 
         self.formLayoutOutput.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelOutputPath)
 
+        self.layoutOutput = QHBoxLayout()
+        self.layoutOutput.setObjectName(u"layoutOutput")
         self.lineEditOutputPath = QLineEdit(self.groupBox_3)
         self.lineEditOutputPath.setObjectName(u"lineEditOutputPath")
 
-        self.formLayoutOutput.setWidget(0, QFormLayout.ItemRole.FieldRole, self.lineEditOutputPath)
+        self.layoutOutput.addWidget(self.lineEditOutputPath)
 
-        self.labelOutputName = QLabel(self.groupBox_3)
-        self.labelOutputName.setObjectName(u"labelOutputName")
+        self.btnSaveOutputPath = QPushButton(self.groupBox_3)
+        self.btnSaveOutputPath.setObjectName(u"btnSaveOutputPath")
 
-        self.formLayoutOutput.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelOutputName)
+        self.layoutOutput.addWidget(self.btnSaveOutputPath)
 
-        self.lineEditOutputName = QLineEdit(self.groupBox_3)
-        self.lineEditOutputName.setObjectName(u"lineEditOutputName")
 
-        self.formLayoutOutput.setWidget(1, QFormLayout.ItemRole.FieldRole, self.lineEditOutputName)
+        self.formLayoutOutput.setLayout(0, QFormLayout.ItemRole.FieldRole, self.layoutOutput)
 
 
         self.verticalLayout_3.addLayout(self.formLayoutOutput)
@@ -332,8 +332,8 @@ class Ui_PdfDisplayView(object):
         self.btnLoadConfig.setText(QCoreApplication.translate("PdfDisplayView", u"Laden", None))
         self.btnSaveConfig.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern", None))
         self.btnSaveAsConfig.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern unter", None))
-        self.labelOutputPath.setText(QCoreApplication.translate("PdfDisplayView", u"Output Pfad:", None))
-        self.labelOutputName.setText(QCoreApplication.translate("PdfDisplayView", u"Dateiname:", None))
+        self.labelOutputPath.setText(QCoreApplication.translate("PdfDisplayView", u"Output Datei:", None))
+        self.btnSaveOutputPath.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern", None))
         self.btnAddSingleBox.setText(QCoreApplication.translate("PdfDisplayView", u"Datum hinzuf\u00fcgen", None))
         self.btnAddBoxPair.setText(QCoreApplication.translate("PdfDisplayView", u"StNr. hinzuf\u00fcgen", None))
         self.btnRemoveBoxPair.setText(QCoreApplication.translate("PdfDisplayView", u"Entfernen", None))

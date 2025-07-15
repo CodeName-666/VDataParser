@@ -333,22 +333,23 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
            <item row="0" column="0">
             <widget class="QLabel" name="labelOutputPath">
              <property name="text">
-              <string>Output Pfad:</string>
+              <string>Output Datei:</string>
              </property>
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEditOutputPath"/>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="labelOutputName">
-             <property name="text">
-              <string>Dateiname:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEditOutputName"/>
+            <layout class="QHBoxLayout" name="layoutOutput">
+             <item>
+              <widget class="QLineEdit" name="lineEditOutputPath"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnSaveOutputPath">
+               <property name="text">
+                <string>Speichern</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </item>
