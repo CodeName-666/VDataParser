@@ -1,13 +1,21 @@
 from PySide6.QtCore import QTimer, Slot
+from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import QDialog
 
 from display import OutputInterfaceAbstraction, BasicProgressTracker
 
 from .base_ui import BaseUi
 from .generated import OutputWindowUi
+from abc import ABCMeta
 
 
-class OutputWindow(BaseUi, OutputInterfaceAbstraction):
+class _WidgetABCMeta(type(QWidget), ABCMeta):
+    """Combine Qt's widget metaclass with :class:`ABCMeta`."""
+    pass
+
+
+
+class OutputWindow(BaseUi, OutputInterfaceAbstraction, metaclass=_WidgetABCMeta):
     """Simple dialog used to present generation results."""
 
     def __init__(self, parent: QDialog | None = None) -> None:
