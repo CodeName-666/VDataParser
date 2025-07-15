@@ -238,14 +238,23 @@ class MarketObserver(QObject):
         except AttributeError:
             pass
 
+        pdf_settings = self.market_config_handler.get_pdf_generation_data()
         self.file_generator = FileGenerator(
             self.fm,
             output_interface=window,
             progress_tracker=tracker,
+            output_path=pdf_settings.get("output_path", "output"),
+            pdf_template_path_input=pdf_settings.get(
+                "pdf_template",
+                pdf_settings.get("pdf_template_path_input", "template/template.pdf"),
+            ),
+            pdf_output_file_name=pdf_settings.get(
+                "pdf_output_file_name",
+                pdf_settings.get("pdf_name", "Abholbestaetigungen.pdf"),
+            ),
+            pdf_coordinates=pdf_settings.get("coordinates"),
         )
-        self.file_generator.create_pdf_data(
-            self.market_config_handler.get_pdf_generation_data()
-        )
+        self.file_generator.create_pdf_data()
         self.status_info.emit(
             "ERROR" if tracker.has_error else "INFO",
             "PDF Daten generiert" if not tracker.has_error else "PDF Fehler"
@@ -263,10 +272,12 @@ class MarketObserver(QObject):
         except AttributeError:
             pass
 
+        pdf_settings = self.market_config_handler.get_pdf_generation_data()
         self.file_generator = FileGenerator(
             self.fm,
             output_interface=window,
             progress_tracker=tracker,
+            output_path=pdf_settings.get("output_path", "output"),
         )
         self.file_generator.create_seller_data()
         self.status_info.emit(
@@ -286,14 +297,23 @@ class MarketObserver(QObject):
         except AttributeError:
             pass
 
+        pdf_settings = self.market_config_handler.get_pdf_generation_data()
         self.file_generator = FileGenerator(
             self.fm,
             output_interface=window,
             progress_tracker=tracker,
+            output_path=pdf_settings.get("output_path", "output"),
+            pdf_template_path_input=pdf_settings.get(
+                "pdf_template",
+                pdf_settings.get("pdf_template_path_input", "template/template.pdf"),
+            ),
+            pdf_output_file_name=pdf_settings.get(
+                "pdf_output_file_name",
+                pdf_settings.get("pdf_name", "Abholbestaetigungen.pdf"),
+            ),
+            pdf_coordinates=pdf_settings.get("coordinates"),
         )
-        self.file_generator.create_all(
-            self.market_config_handler.get_pdf_generation_data()
-        )
+        self.file_generator.create_all()
         self.status_info.emit(
             "ERROR" if tracker.has_error else "INFO",
             "Alle Daten erstellt" if not tracker.has_error else "Fehler bei Erstellung"

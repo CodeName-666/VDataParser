@@ -83,6 +83,41 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self._entries_per_page = len(self._coords)
         self._output_pdf = (self.path / opath).with_suffix(".pdf")
 
+        # --------------------------------------------------------------
+        # Expose constructor parameters via typed properties
+        # --------------------------------------------------------------
+
+    # ---------------------------- properties ----------------------------
+    @property
+    def template_path(self) -> Optional[Path]:
+        """Path to the template PDF or ``None`` if not set."""
+        return self._template_path
+
+    @template_path.setter
+    def template_path(self, value: str | Path | None) -> None:
+        self._template_path = Path(value) if value else None
+
+    @property
+    def coordinates(self) -> List[CoordinatesConfig]:
+        """List of coordinate configurations used for PDF generation."""
+        return self._coords
+
+    @coordinates.setter
+    def coordinates(self, value: List[CoordinatesConfig]) -> None:
+        if not value:
+            raise ValueError("coordinates list cannot be empty")
+        self._coords = value
+        self._entries_per_page = len(self._coords)
+
+    @property
+    def output_pdf(self) -> Path:
+        """Full path of the generated PDF file."""
+        return self._output_pdf
+
+    @output_pdf.setter
+    def output_pdf(self, value: str | Path) -> None:
+        self._output_pdf = Path(value)
+
     # ------------------------------------------------------------------
     # Data collection helpers
     # ------------------------------------------------------------------
