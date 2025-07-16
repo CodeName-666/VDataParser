@@ -213,13 +213,6 @@ class MarketObserver(QObject):
     def get_data(self):
         return self.data_manager
 
-    def get_pdf_data(self) -> Dict[str, Any]:
-        """
-        Retrieve data for PDF generation.
-
-        :return: A dictionary containing data for PDF generation.
-        """
-        return self.market_config_handler.get_pdf_generation_data()
 
     def connect_signals(self, market) -> None:
         self._market = market
