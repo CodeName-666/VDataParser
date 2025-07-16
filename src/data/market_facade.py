@@ -237,7 +237,7 @@ class MarketObserver(QObject):
         
         outputpath = self.pdf_display_config_loader.get_output_path()
         outputname = self.pdf_display_config_loader.get_output_name()
-        coordinates = self.pdf_display_config_loader.convert_json_to_coordinates()
+        coordinates = self.pdf_display_config_loader.convert_json_to_coordinate_list()
 
 
         self.file_generator = FileGenerator(
