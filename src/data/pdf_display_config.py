@@ -233,25 +233,26 @@ class PdfDisplayConfig(QObject, JsonHandler):
         return ret
     
     def convert_json_to_coordinates(self, box_id: int) -> CoordinatesConfig:
-        """Convert JSON box information for ``box_id`` into ``CoordinatesConfig``."""
+        """Return ``CoordinatesConfig`` for the given ``box_id``.
 
-        # Verarbeitung der PairBox mit der übergebenen box_id
-        pairboxes = self.get_box_pairs()
-        pairbox = next((box for box in pairboxes if box.get("id") == box_id), {})
-        first_point = pairbox.get("first", {})
-        second_point = pairbox.get("second", {})
-        x1 = float(first_point.get("x", 0.0))
-        y1 = float(first_point.get("y", 0.0))
-        x2 = float(second_point.get("x", 0.0))
-        y2 = float(second_point.get("y", 0.0))
-        
-        # Verarbeitung der SingleBox mit der übergebenen box_id
-        singleboxes = self.get_single_boxes()
-        singlebox = next((box for box in singleboxes if box.get("id") == box_id), {})
-        x3 = float(singlebox.get("x", 0.0))
-        y3 = float(singlebox.get("y", 0.0))
-        
-        # Rückgabe des konfigurierten CoordinatesConfig-Objekts
+        If either a ``BoxPair`` or ``SingleBox`` is missing for ``box_id`` the
+        corresponding coordinates will be ``0``.
+        """
+
+        pairboxes = {pair.id: pair for pair in self.get_box_pairs()}
+        singleboxes = {box.id: box for box in self.get_single_boxes() if box.id is not None}
+
+        pair = pairboxes.get(box_id)
+        single = singleboxes.get(box_id)
+
+        x1 = pair.box1.x if pair else 0.0
+        y1 = pair.box1.y if pair else 0.0
+        x2 = pair.box2.x if pair else 0.0
+        y2 = pair.box2.y if pair else 0.0
+
+        x3 = single.x if single else 0.0
+        y3 = single.y if single else 0.0
+
         return CoordinatesConfig(
             x1=x1,
             y1=y1,
@@ -259,8 +260,23 @@ class PdfDisplayConfig(QObject, JsonHandler):
             y2=y2,
             x3=x3,
             y3=y3,
-            font_size=12
-        )           
+            font_size=12,
+        )
+
+    def convert_json_to_coordinate_list(self) -> List[CoordinatesConfig]:
+        """Return list of ``CoordinatesConfig`` objects derived from the config.
+
+        The list is ordered by the ``id`` values appearing in ``boxPairs`` or
+        ``singleBoxes``.  Missing coordinate values for a pair or single box are
+        returned as ``0``.
+        """
+
+        pair_ids = {pair.id for pair in self.get_box_pairs()}
+        single_ids = {box.id for box in self.get_single_boxes() if box.id is not None}
+
+        all_ids = sorted(pair_ids | single_ids)
+
+        return [self.convert_json_to_coordinates(i) for i in all_ids]
         
     def is_empty(self):
         box_pairs_empty   = not self.get_box_pairs()      # True, wenn key fehlt oder Liste leer ist
