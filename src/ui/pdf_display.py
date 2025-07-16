@@ -620,10 +620,22 @@ class PdfDisplay(PersistentBaseUi):
 
     @Slot()
     def save_output_path(self):
-        """Save the output file path from the LineEdit to the config file."""
+        """Open a file dialog to choose the PDF output path and store it."""
         if not self._config:
             return
-        self._config.set_full_output_path(self.ui.lineEditOutputPath.text())
+
+        current = self.ui.lineEditOutputPath.text()
+        filename, _ = QFileDialog.getSaveFileName(
+            self,
+            "PDF speichern unter",
+            current,
+            "PDF Dateien (*.pdf)",
+        )
+        if not filename:
+            return
+
+        self.ui.lineEditOutputPath.setText(filename)
+        self._config.set_full_output_path(filename)
         storage = self._config.get_storage_full_path()
         if storage:
             try:
