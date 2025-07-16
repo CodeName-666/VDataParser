@@ -233,21 +233,21 @@ class MarketObserver(QObject):
         except AttributeError:
             pass
 
-        pdf_settings = self.market_config_handler.get_pdf_generation_data()
+        template_path = self.pdf_display_config_loader.get_full_pdf_path()
+        
+        outputpath = self.pdf_display_config_loader.get_output_path()
+        outputname = self.pdf_display_config_loader.get_output_name()
+        coordinates = self.pdf_display_config_loader.convert_json_to_coordinates()
+
+
         self.file_generator = FileGenerator(
             self.fm,
             output_interface=window,
             progress_tracker=tracker,
-            output_path=pdf_settings.get("output_path", "output"),
-            pdf_template_path_input=pdf_settings.get(
-                "pdf_template",
-                pdf_settings.get("pdf_template_path_input", "template/template.pdf"),
-            ),
-            pdf_output_file_name=pdf_settings.get(
-                "pdf_output_file_name",
-                pdf_settings.get("pdf_name", "Abholbestaetigungen.pdf"),
-            ),
-            pdf_coordinates=pdf_settings.get("coordinates"),
+            output_path = outputpath,
+            pdf_template_path_input= template_path, 
+            pdf_output_file_name= outputname,
+            pdf_coordinates= coordinates ,
         )
         self.file_generator.create_pdf_data()
         self.status_info.emit(
