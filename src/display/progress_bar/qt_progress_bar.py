@@ -4,65 +4,16 @@ import threading
 import time
 from typing import Optional, Callable, Dict, Any, Tuple
 
-try:
-    from PySide6.QtWidgets import (QApplication, QDialog, QProgressBar, QLabel,
-                                   QVBoxLayout, QWidget, QPushButton)
-    from PySide6.QtCore import Qt, Signal, Slot, QMetaObject, Q_ARG
-    PYSIDE_AVAILABLE = True
-except ImportError:
-    PYSIDE_AVAILABLE = False
-    # Define dummy classes/decorators if PySide6 is not installed
-    # This allows the rest of the code to be imported without errors,
-    # although functionality will be missing.
-    class QObject: pass
-    class QDialog(QWidget): pass
-    class QWidget: pass
-    class QProgressBar(QWidget): pass
-    class QLabel(QWidget): pass
-    class QVBoxLayout: pass
-    class QPushButton(QWidget): pass
-    def Signal(*args, **kwargs): return object()
-    def Slot(*args, **kwargs): return lambda func: func
-    class Qt: AlignmentFlag = None; WindowModality = None; AlignCenter = None; ApplicationModal = None
-    class QMetaObject:
-        @staticmethod
-        def invokeMethod(obj, method_name, conn_type, *args): pass # Dummy implementation
-    def Q_ARG(type, value): return value # Dummy implementation
 
-# Import the Abstraction
-try:
-    from .progress_bar_abstraction import ProgressBarAbstraction
-except ImportError:
-     try:
-        from progress_bar_abstraction import ProgressBarAbstraction
-     except ImportError:
-        print("Error: Cannot find ProgressBarAbstraction.", file=sys.stderr)
-        ProgressBarAbstraction = object # type: ignore
+from PySide6.QtWidgets import (QApplication, QDialog, QProgressBar, QLabel,
+                                QVBoxLayout, QWidget, QPushButton)
+from PySide6.QtCore import Qt, Signal, Slot, QMetaObject, Q_ARG
+from PySide6.QtCore import QThread
 
-# Import the INTERFACE
-try:
-    from ..tracker.progress_tracker_abstraction import ProgressTrackerAbstraction
-except ImportError:
-    ProgressTrackerInterface = None # type: ignore
+from .progress_bar_abstraction import ProgressBarAbstraction
+from ..tracker.progress_tracker_abstraction import ProgressTrackerAbstraction
+from log import CustomLogger
 
-# Conditional import of CustomLogger
-try:
-    from log import CustomLogger
-except ImportError:
-    CustomLogger = None
-
-# Need a way to ensure a QApplication instance exists
-_qt_app_instance = None
-
-def _get_qt_app():
-    """Ensures a QApplication instance exists."""
-    global _qt_app_instance
-    if not PYSIDE_AVAILABLE:
-        return None
-    _qt_app_instance = QApplication.instance()
-    if _qt_app_instance is None:
-        _qt_app_instance = QApplication(sys.argv or ['']) # Provide a dummy argv
-    return _qt_app_instance
 
 
 # --- Qt Progress Dialog Widget ---
@@ -75,8 +26,6 @@ class _ProgressDialog(QDialog):
     finished_signal = Signal(bool) # True for success, False for error
 
     def __init__(self, description: str, parent: Optional[QWidget] = None):
-        if not PYSIDE_AVAILABLE:
-            raise ImportError("PySide6 is not installed, cannot create QtProgressBar.")
         super().__init__(parent)
 
         self.description_text = description
@@ -191,12 +140,6 @@ class QtProgressBar(ProgressBarAbstraction):
             logger: Ein optionales CustomLogger-Objekt für die Protokollierung.
             parent_widget: Das übergeordnete Qt-Widget (optional).
         """
-        if not PYSIDE_AVAILABLE:
-            raise ImportError("PySide6 ist nicht installiert. QtProgressBar kann nicht verwendet werden.")
-
-        # Ensure QApplication exists (required for QDialog, signals/slots)
-        _get_qt_app()
-
         super().__init__(description=description, update_interval=update_interval, logger=logger)
 
         # Create the dialog instance (but don't show it yet)
@@ -331,7 +274,7 @@ class QtProgressBar(ProgressBarAbstraction):
         except Exception as e:
             self._task_exception = e
             # Ensure tracker knows about the error if it doesn't already
-            if ProgressTrackerInterface is not None and isinstance(tracker, ProgressTrackerInterface):
+            if ProgressTrackerAbstraction is not None and isinstance(tracker, ProgressTrackerAbstraction):
                 current_tracker_state = {}
                 try:
                     current_tracker_state = tracker.get_state()
@@ -370,13 +313,8 @@ class QtProgressBar(ProgressBarAbstraction):
             Optional[Exception]: Der Fehler, der im Tracker gesetzt wurde oder während
                                  der Ausführung von 'target' aufgetreten ist, oder None bei Erfolg.
         """
-        if not PYSIDE_AVAILABLE:
-             self._log("ERROR", "PySide6 nicht verfügbar. Kann QtProgressBar nicht ausführen.")
-             # Maybe run the target function without progress? Or raise error?
-             # For now, raise an error indicating the issue.
-             raise RuntimeError("QtProgressBar erfordert die Installation von PySide6.")
 
-        if not isinstance(tracker, ProgressTrackerInterface): # type: ignore
+        if not isinstance(tracker, ProgressTrackerAbstraction): # type: ignore
             raise ValueError("Ein gültiges ProgressTrackerInterface-Objekt muss übergeben werden.")
         if kwargs is None:
             kwargs = {}

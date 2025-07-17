@@ -182,7 +182,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
 
     def create_pdf_data(self, settings: Optional[dict] = None) -> None:
         """Generate only the PDF based on ``settings``."""
-        self._apply_pdf_settings(settings)
+        #self._apply_pdf_settings(settings)
         tasks = [self._build_tasks()[-1]]  # only PDF task
         self._run_tasks(tasks, "Starte PDF‑Generierung …")
 

@@ -2,13 +2,14 @@ import sys
 import time
 import threading
 from pathlib import Path
+from PySide6.QtWidgets import QApplication
 
 # Allow imports from repository root and src directory
 sys.path.insert(0, Path(__file__).parent.parent.__str__())
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from display import BasicProgressTracker
-from display.progress_bar.qt_progress_bar import _ProgressDialog, _get_qt_app
+from display.progress_bar.qt_progress_bar import _ProgressDialog
 
 
 def example_task(dialog: _ProgressDialog, tracker: BasicProgressTracker, steps: int = 20, delay: float = 0.1) -> None:
@@ -24,11 +25,13 @@ def example_task(dialog: _ProgressDialog, tracker: BasicProgressTracker, steps: 
 
 if __name__ == "__main__":
     steps = 20
+    app = QApplication(sys.argv)
     tracker = BasicProgressTracker(total=steps)
-    _get_qt_app()
+  
     dialog = _ProgressDialog("Qt Progress Dialog Example")
 
     task_thread = threading.Thread(target=example_task, args=(dialog, tracker, steps), daemon=True)
     task_thread.start()
 
     dialog.exec()
+    sys.exit(app.exec())
