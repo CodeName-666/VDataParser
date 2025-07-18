@@ -537,17 +537,30 @@ class DataManager(QObject, BaseData):
         """
         Setzt die Default-Werte für die Settings (überschreibt alle Felder).
         """
-        # Wenn noch keine Settings drin sind, einfach anhängen
+        # Wenn noch keine Settings vorhanden sind, neu anlegen und Änderungen protokollieren
         if not self.settings.data:
             self.settings.data.append(new_settings)
-        else:
-            # Ansonsten alle Felder der ersten Settings-Instanz überschreiben
             for field_ in fields(new_settings):
-                setattr(
-                    self.settings.data[0],                     # <- hier korrigiert
-                    field_.name,
-                    getattr(new_settings, field_.name)
+                value = getattr(new_settings, field_.name)
+                self._log_change(
+                    action="CREATE",
+                    target=f"settings:{field_.name}",
+                    description=f"Setting '{field_.name}' auf {value} gesetzt",
                 )
+        else:
+            # Ansonsten alle Felder der ersten Settings-Instanz überschreiben und Änderungen loggen
+            current_settings = self.settings.data[0]
+            for field_ in fields(new_settings):
+                old_value = getattr(current_settings, field_.name)
+                new_value = getattr(new_settings, field_.name)
+                if old_value != new_value:
+                    setattr(current_settings, field_.name, new_value)
+                    self._log_change(
+                        action="UPDATE",
+                        target=f"settings:{field_.name}",
+                        description=f"Setting '{field_.name}' geändert von {old_value} zu {new_value}",
+                        old_value={field_.name: old_value}
+                    )
 
         self.synchornize_data_class_change_to_json()
             
