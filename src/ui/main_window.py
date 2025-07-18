@@ -1,10 +1,8 @@
 #PySide6 imports
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (
-    QMainWindow, QMessageBox, QFileDialog, QDialog, QLabel, QLineEdit,
-    QToolBar, QAction
+    QMainWindow, QMessageBox, QFileDialog, QDialog, QLabel, QLineEdit
 )
-from PySide6.QtGui import QIcon
 from PySide6.QtCore import QTimer
 
 
@@ -61,15 +59,6 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.setStatusBar(self.status_bar)
 
-        # toolbar for seller list actions
-        self.tool_seller = QToolBar("SellerActions", self)
-        self.action_delete_dataset = QAction(QIcon(":/icons/database-x.svg"),
-                                             "Stammnummer löschen", self)
-        self.action_save_seller = QAction(QIcon(":/icons/file-database.svg"),
-                                          "Speichern", self)
-        self.tool_seller.addAction(self.action_delete_dataset)
-        self.tool_seller.addAction(self.action_save_seller)
-        self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tool_seller)
 
         self.stack.addWidget(self.main_menu)
         self.stack.addWidget(self.market_view)
@@ -98,9 +87,9 @@ class MainWindow(QMainWindow):
         self.ui.action_save_project.triggered.connect(self.save_project)
         self.ui.action_save_project_as.triggered.connect(self.save_project_as)
 
-        self.action_delete_dataset.triggered.connect(
+        self.ui.action_delete_dataset.triggered.connect(
             self.market_view.data_view.delete_selected_dataset)
-        self.action_save_seller.triggered.connect(
+        self.ui.action_save_seller.triggered.connect(
             self.market_view.data_view.save_project)
         
         self.market_facade.status_info.connect(self.status_bar.handle_status)
@@ -188,7 +177,7 @@ class MainWindow(QMainWindow):
         self.ui.tool_export.setVisible(False)
         self.ui.tool_project.setVisible(False)
         self.ui.toolBar.setVisible(False)
-        self.tool_seller.setVisible(False)
+        self.ui.tool_seller.setVisible(False)
 
     def show_toolbars(self, view_name: str):
         """
@@ -212,7 +201,7 @@ class MainWindow(QMainWindow):
                 self.ui.tool_project.setVisible(True)
                 self.ui.toolBar.setVisible(True)
                 if self.market_view.ui.tabWidget.currentWidget() == self.market_view.ui.tab_2:
-                    self.tool_seller.setVisible(True)
+                    self.ui.tool_seller.setVisible(True)
 
             case _:
                 pass

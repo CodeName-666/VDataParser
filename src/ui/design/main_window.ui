@@ -89,6 +89,19 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
     <bool>false</bool>
    </attribute>
   </widget>
+  <widget class="QToolBar" name="tool_seller">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>LeftToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_delete_dataset"/>
+   <addaction name="action_save_seller"/>
+  </widget>
   <action name="action_create_pdf">
    <property name="icon">
     <iconset resource="../../resource/ressources.qrc">
@@ -144,12 +157,36 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    </property>
    <property name="text">
     <string>&amp;Projekt speichern unter</string>
+  </property>
+  <property name="menuRole">
+   <enum>QAction::NoRole</enum>
+  </property>
+ </action>
+  <action name="action_delete_dataset">
+   <property name="icon">
+    <iconset resource="../../resource/ressources.qrc">
+     <normaloff>:/icons/database-x.svg</normaloff>:/icons/database-x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Stammnummer löschen</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
   </action>
- </widget>
+  <action name="action_save_seller">
+   <property name="icon">
+    <iconset resource="../../resource/ressources.qrc">
+     <normaloff>:/icons/file-database.svg</normaloff>:/icons/file-database.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Speichern</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+</widget>
  <resources>
   <include location="../../resource/ressources.qrc"/>
  </resources>
