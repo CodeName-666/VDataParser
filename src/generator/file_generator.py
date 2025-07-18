@@ -47,7 +47,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
     ) -> None:
         
         # Housekeeping -------------------------------------------------
-        Base.__init__(logger, output_interface)
+        Base.__init__(self, logger, output_interface)
         self._fm = fleat_market_data
         self._path = Path(output_path)
         self._tracker = progress_tracker

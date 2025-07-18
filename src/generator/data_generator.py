@@ -39,7 +39,7 @@ class DataGenerator(Base):
         output_interface : Optional[OutputInterfaceAbstraction], optional
             An interface for user-facing output.
         """
-        Base.__init__(logger, output_interface)  # Initialize Base class
+        Base.__init__(self, logger, output_interface)  # Initialize Base class
         self.__file_name: str = file_name
         self.__path: Path = Path(path) if path else Path('.')
        
