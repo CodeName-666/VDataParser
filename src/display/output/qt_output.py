@@ -6,6 +6,8 @@ from PySide6.QtWidgets import (
     QPlainTextEdit,
     QTableWidget,
     QTableWidgetItem,
+    QListWidget,
+    QListWidgetItem,
     QStyle,
 )
 from PySide6.QtCore import Slot
@@ -14,18 +16,45 @@ from PySide6.QtCore import Slot
 class QtOutput(OutputInterfaceAbstraction):
     """Send messages to a Qt text or table widget."""
 
-    def __init__(self, output_widget: QTextEdit | QPlainTextEdit | QTableWidget):
+    def __init__(
+        self,
+        output_widget: QTextEdit | QPlainTextEdit | QTableWidget | QListWidget,
+    ) -> None:
         """Store the widget that receives output."""
-        if not isinstance(output_widget, (QTextEdit, QPlainTextEdit, QTableWidget)):
+        if not isinstance(
+            output_widget,
+            (QTextEdit, QPlainTextEdit, QTableWidget, QListWidget),
+        ):
             raise TypeError(
-                "output_widget must be a QTextEdit, QPlainTextEdit or QTableWidget instance."
+                "output_widget must be a QTextEdit, QPlainTextEdit, QTableWidget or QListWidget instance."
             )
         self.output_widget = output_widget
 
     # @Slot(str)
     def write_message(self, message: str) -> None:
         """Append ``message`` to the underlying widget."""
-        if isinstance(self.output_widget, QTableWidget):
+        if isinstance(self.output_widget, QListWidget):
+            level = ""
+            text = message
+            parts = message.split(" ", 1)
+            if parts and parts[0] in {"INFO", "WARNING", "ERROR", "CRITICAL"}:
+                level = parts[0]
+                text = parts[1] if len(parts) > 1 else ""
+
+            icon = None
+            if level == "INFO":
+                icon = self.output_widget.style().standardIcon(QStyle.SP_MessageBoxInformation)
+            elif level == "WARNING":
+                icon = self.output_widget.style().standardIcon(QStyle.SP_MessageBoxWarning)
+            elif level in {"ERROR", "CRITICAL"}:
+                icon = self.output_widget.style().standardIcon(QStyle.SP_MessageBoxCritical)
+
+            item = QListWidgetItem(text)
+            if icon is not None:
+                item.setIcon(icon)
+            self.output_widget.addItem(item)
+            self.output_widget.scrollToBottom()
+        elif isinstance(self.output_widget, QTableWidget):
             level = ""
             text = message
             parts = message.split(" ", 1)

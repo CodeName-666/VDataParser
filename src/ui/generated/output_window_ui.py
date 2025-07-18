@@ -15,8 +15,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHeaderView, QProgressBar, QSizePolicy,
-    QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QHeaderView, QListWidget, QListWidgetItem,
+    QProgressBar, QSizePolicy, QWidget, QVBoxLayout)
 
 class Ui_OutputWindow(object):
     def setupUi(self, OutputWindow):
@@ -25,13 +25,10 @@ class Ui_OutputWindow(object):
         OutputWindow.resize(450, 350)
         self.verticalLayout = QVBoxLayout(OutputWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.logOutputTable = QTableWidget(OutputWindow)
-        if (self.logOutputTable.columnCount() < 2):
-            self.logOutputTable.setColumnCount(2)
-        self.logOutputTable.setObjectName(u"logOutputTable")
-        self.logOutputTable.setColumnCount(2)
+        self.logOutputList = QListWidget(OutputWindow)
+        self.logOutputList.setObjectName(u"logOutputList")
 
-        self.verticalLayout.addWidget(self.logOutputTable)
+        self.verticalLayout.addWidget(self.logOutputList)
 
         self.progressBar = QProgressBar(OutputWindow)
         self.progressBar.setObjectName(u"progressBar")
@@ -66,11 +63,8 @@ class Ui_OutputWindow(object):
 "QPushButton:hover { background-color: #005a9e; }\n"
 "QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
 "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }", None))
-        self.logOutputTable.setProperty(u"horizontalHeaderLabels", [
-            QCoreApplication.translate("OutputWindow", u"Typ", None),
-            QCoreApplication.translate("OutputWindow", u"Nachricht", None)])
 #if QT_CONFIG(tooltip)
-        self.logOutputTable.setToolTip(QCoreApplication.translate("OutputWindow", u"Zeigt die Ausgaben an", None))
+        self.logOutputList.setToolTip(QCoreApplication.translate("OutputWindow", u"Zeigt die Ausgaben an", None))
 #endif // QT_CONFIG(tooltip)
 #if QT_CONFIG(tooltip)
         self.progressBar.setToolTip(QCoreApplication.translate("OutputWindow", u"Zeigt den Fortschritt der Ausgabe an", None))

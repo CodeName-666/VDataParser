@@ -22,21 +22,10 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-   <widget class="QTableWidget" name="logOutputTable">
-    <property name="columnCount">
-     <number>2</number>
-    </property>
+   <widget class="QListWidget" name="logOutputList">
     <property name="editTriggers">
      <set>QAbstractItemView.NoEditTriggers</set>
     </property>
-    <property name="horizontalHeaderLabels" stdset="0">
-     <stringlist>
-      <string>Typ</string>
-      <string>Nachricht</string>
-     </stringlist>
-    </property>
-    <column/>
-    <column/>
     <property name="toolTip">
      <string>Zeigt die Ausgaben an</string>
     </property>
