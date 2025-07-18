@@ -2,7 +2,11 @@ from PySide6.QtCore import QTimer, Slot
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import QDialog
 
-from display import OutputInterfaceAbstraction, BasicProgressTracker
+from display import (
+    OutputInterfaceAbstraction,
+    BasicProgressTracker,
+    QtOutput,
+)
 
 from .base_ui import BaseUi
 from .generated import OutputWindowUi
@@ -30,7 +34,10 @@ class OutputWindow(BaseUi, OutputInterfaceAbstraction, metaclass=_WidgetABCMeta)
         self.ui = OutputWindowUi()
         self.ui.setupUi(self)
 
-        # References to progress bars
+        # Output interface implementation for the text widget
+        self._output = QtOutput(self.ui.logOutputTextEdit)
+
+        # References to progress bars from the UI
         self.primary_bar = self.ui.progressBar
         self.secondary_bar = self.ui.progressBar_2
 
@@ -43,8 +50,8 @@ class OutputWindow(BaseUi, OutputInterfaceAbstraction, metaclass=_WidgetABCMeta)
 
     # ------------------------------------------------------------------
     def write_message(self, message: str) -> None:
-        """Append ``message`` to the output text edit."""
-        self.ui.logOutputTextEdit.appendPlainText(message)
+        """Append ``message`` to the output text widget via :class:`QtOutput`."""
+        self._output.write_message(message)
 
     # ------------------------------------------------------------------
     def _ensure_timer(self) -> None:
@@ -60,7 +67,7 @@ class OutputWindow(BaseUi, OutputInterfaceAbstraction, metaclass=_WidgetABCMeta)
         if self._primary_tracker is not None:
             self.primary_bar.setValue(self._primary_tracker.percentage)
         if self._secondary_tracker is not None:
-            self._secondary_tracker.setValue(self._secondary_tracker.percentage)
+            self.secondary_bar.setValue(self._secondary_tracker.percentage)
         if (
             (self._primary_tracker is None or self._primary_tracker.percentage >= 100)
             and (self._secondary_tracker is None or self._secondary_tracker.percentage >= 100)
