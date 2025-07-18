@@ -77,6 +77,9 @@ class Market(BaseUi):
             self.prevoius_tab_index = index
         else:
             self.prevoius_tab_index = index
+        main_window = self.window()
+        if hasattr(main_window, "show_toolbars"):
+            main_window.show_toolbars("Market")
         
     def ask_to_save(self, widget):
         """Fragt den Nutzer, ob Änderungen gespeichert werden sollen und ruft Save oder restore auf."""

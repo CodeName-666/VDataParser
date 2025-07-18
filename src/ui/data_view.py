@@ -5,10 +5,9 @@ from typing import Dict
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal, Slot
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QApplication, QTreeWidgetItem, QTableWidgetItem, QListWidget, QListWidgetItem,
-    QToolBar, QAction, QMenu
+    QMenu
 )
 from .generated import DataViewUi  # Annahme: In __init__.py wurde der UI-Code als DataViewUi bereitgestellt.
 from .base_ui import BaseUi
@@ -35,19 +34,8 @@ class DataView(BaseUi):
         self.market = None  # reference to the Market widget
         self.ui.setupUi(self)
 
-        # toolbar for delete/save actions
-        self.toolbar = QToolBar(self)
-        self.action_delete = QAction(QIcon(":/icons/database-x.svg"),
-                                     "Stammnummer löschen", self)
-        self.action_save = QAction(QIcon(":/icons/file-database.svg"),
-                                   "Speichern", self)
-        self.toolbar.addAction(self.action_delete)
-        self.toolbar.addAction(self.action_save)
-        self.ui.verticalLayoutLeft.insertWidget(0, self.toolbar)
 
-        self.action_delete.triggered.connect(self.delete_selected_dataset)
-        self.action_save.triggered.connect(self.save_project)
-
+        # context menu for deletion
         self.ui.treeUsers.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.treeUsers.customContextMenuRequested.connect(
             self._tree_context_menu)
