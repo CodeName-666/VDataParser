@@ -239,6 +239,8 @@ class DataView(BaseUi):
         self.populate_user_tree()
         if self.listUsers.isVisible():
             self.populate_user_list()
+        if hasattr(self.market_widget(), "user_info"):
+            self.market_widget().user_info.update_data()
         self.data_changed.emit(True)
 
     def _tree_context_menu(self, pos):
@@ -268,6 +270,8 @@ class DataView(BaseUi):
         self.populate_user_tree()
         if self.listUsers.isVisible():
             self.populate_user_list()
+        if hasattr(self.market_widget(), "user_info"):
+            self.market_widget().user_info.update_data()
         self.data_changed.emit(False)
 
 if __name__ == '__main__':

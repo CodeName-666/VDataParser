@@ -36,6 +36,12 @@ class UserInfo(BaseUi):
         self.ui.checkboxUnique.toggled.connect(self.refresh_user_list)
         self.ui.listWidgetUsers.currentRowChanged.connect(self.display_user_details)
 
+    def update_data(self):
+        """Reload user information from the Market widget and refresh the list."""
+        self.users_data = self.market_widget().get_user_data()
+        self.aggregated_users_data = self.market_widget().get_aggregated_user_data()
+        self.refresh_user_list()
+
     def refresh_user_list(self):
         """Aktualisiert die ListWidget-Anzeige basierend auf dem Status der Checkbox."""
         self.ui.listWidgetUsers.clear()
