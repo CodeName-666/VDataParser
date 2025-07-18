@@ -1,6 +1,6 @@
 from PySide6.QtCore import QTimer, Slot
 from PySide6.QtWidgets import QWidget
-from PySide6.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog, QAbstractItemView
 
 from display import (
     OutputInterfaceAbstraction,
@@ -34,8 +34,9 @@ class OutputWindow(BaseUi, OutputInterfaceAbstraction, metaclass=_WidgetABCMeta)
         self.ui = OutputWindowUi()
         self.ui.setupUi(self)
 
-        # Output interface implementation for the text widget
-        self._output = QtOutput(self.ui.logOutputTextEdit)
+        # Output interface implementation for the log list widget
+        self._output = QtOutput(self.ui.logOutputList)
+        self.ui.logOutputList.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         # References to progress bars from the UI
         self.primary_bar = self.ui.progressBar
@@ -50,7 +51,7 @@ class OutputWindow(BaseUi, OutputInterfaceAbstraction, metaclass=_WidgetABCMeta)
 
     # ------------------------------------------------------------------
     def write_message(self, message: str) -> None:
-        """Append ``message`` to the output text widget via :class:`QtOutput`."""
+        """Append ``message`` to the output list via :class:`QtOutput`."""
         self._output.write_message(message)
 
     # ------------------------------------------------------------------

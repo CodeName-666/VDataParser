@@ -22,17 +22,14 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QPlainTextEdit" name="logOutputTextEdit">
-     <property name="toolTip">
-      <string>Zeigt die Ausgaben an</string>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-     <property name="placeholderText">
-      <string>Warte auf Ausgabe...</string>
-     </property>
-    </widget>
+   <widget class="QListWidget" name="logOutputList">
+    <property name="editTriggers">
+     <set>QAbstractItemView.NoEditTriggers</set>
+    </property>
+    <property name="toolTip">
+     <string>Zeigt die Ausgaben an</string>
+    </property>
+   </widget>
    </item>
     <item>
      <widget class="QProgressBar" name="progressBar">
