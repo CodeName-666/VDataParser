@@ -65,6 +65,12 @@ class Ui_MainWindow(object):
         self.action_save_seller.setObjectName(u"action_save_seller")
         self.action_save_seller.setIcon(icon3)
         self.action_save_seller.setMenuRole(QAction.NoRole)
+        self.action_restore_seller = QAction(MainWindow)
+        self.action_restore_seller.setObjectName(u"action_restore_seller")
+        icon6 = QIcon()
+        icon6.addFile(u":/icons/database-import.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.action_restore_seller.setIcon(icon6)
+        self.action_restore_seller.setMenuRole(QAction.NoRole)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.horizontalLayout = QHBoxLayout(self.centralwidget)
@@ -104,6 +110,7 @@ class Ui_MainWindow(object):
         self.tool_project.addAction(self.action_save_project_as)
         self.tool_seller.addAction(self.action_delete_dataset)
         self.tool_seller.addAction(self.action_save_seller)
+        self.tool_seller.addAction(self.action_restore_seller)
 
         self.retranslateUi(MainWindow)
 
@@ -124,6 +131,7 @@ class Ui_MainWindow(object):
         self.action_save_project_as.setText(QCoreApplication.translate("MainWindow", u"&Projekt speichern unter", None))
         self.action_delete_dataset.setText(QCoreApplication.translate("MainWindow", u"Stammnummer l\u00f6schen", None))
         self.action_save_seller.setText(QCoreApplication.translate("MainWindow", u"Speichern", None))
+        self.action_restore_seller.setText(QCoreApplication.translate("MainWindow", u"Wiederherstellen", None))
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menu_help.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
         self.tool_export.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))

@@ -260,6 +260,16 @@ class DataView(BaseUi):
             facade.save_project(self.market_widget(), project_dir)
             self.data_changed.emit(False)
 
+    @Slot()
+    def restore_changes(self):
+        dm = self.market_widget().get_data_manager()
+        dm.reset_all_changes()
+        dm.synchornize_data_class_change_to_json()
+        self.populate_user_tree()
+        if self.listUsers.isVisible():
+            self.populate_user_list()
+        self.data_changed.emit(False)
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = DataView()

@@ -101,6 +101,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    </attribute>
    <addaction name="action_delete_dataset"/>
    <addaction name="action_save_seller"/>
+   <addaction name="action_restore_seller"/>
   </widget>
   <action name="action_create_pdf">
    <property name="icon">
@@ -181,6 +182,18 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    </property>
    <property name="text">
     <string>Speichern</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_restore_seller">
+   <property name="icon">
+    <iconset resource="../../resource/ressources.qrc">
+     <normaloff>:/icons/database-import.svg</normaloff>:/icons/database-import.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Wiederherstellen</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

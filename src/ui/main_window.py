@@ -91,6 +91,8 @@ class MainWindow(QMainWindow):
             self.market_view.data_view.delete_selected_dataset)
         self.ui.action_save_seller.triggered.connect(
             self.market_view.data_view.save_project)
+        self.ui.action_restore_seller.triggered.connect(
+            self.market_view.data_view.restore_changes)
         
         self.market_facade.status_info.connect(self.status_bar.handle_status)
         self.market_view.status_info.connect(self.status_bar.handle_status)
