@@ -4,19 +4,23 @@ import sys
 from typing import Dict
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
-    QApplication, QTreeWidgetItem, QTableWidgetItem, QListWidget, QListWidgetItem
+    QApplication, QTreeWidgetItem, QTableWidgetItem, QListWidget, QListWidgetItem,
+    QToolBar, QAction, QMenu
 )
 from .generated import DataViewUi  # Annahme: In __init__.py wurde der UI-Code als DataViewUi bereitgestellt.
 from .base_ui import BaseUi
 
 sys.path.insert(0, Path(__file__).parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
-from src.data import DataManager
+from src.data import DataManager, MarketFacade
 
 
 class DataView(BaseUi):
     """Widget used to browse seller and article information."""
+
+    data_changed = Signal(bool)
 
     def __init__(self, parent=None):
         """Create UI elements and initialise state.
@@ -30,6 +34,23 @@ class DataView(BaseUi):
         self.ui = DataViewUi()
         self.market = None  # reference to the Market widget
         self.ui.setupUi(self)
+
+        # toolbar for delete/save actions
+        self.toolbar = QToolBar(self)
+        self.action_delete = QAction(QIcon(":/icons/database-x.svg"),
+                                     "Stammnummer löschen", self)
+        self.action_save = QAction(QIcon(":/icons/file-database.svg"),
+                                   "Speichern", self)
+        self.toolbar.addAction(self.action_delete)
+        self.toolbar.addAction(self.action_save)
+        self.ui.verticalLayoutLeft.insertWidget(0, self.toolbar)
+
+        self.action_delete.triggered.connect(self.delete_selected_dataset)
+        self.action_save.triggered.connect(self.save_project)
+
+        self.ui.treeUsers.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.treeUsers.customContextMenuRequested.connect(
+            self._tree_context_menu)
         
         
       
@@ -197,6 +218,59 @@ class DataView(BaseUi):
             self.ui.tableEntries.setItem(row, 1, QTableWidgetItem(getattr(entry, "groesse", "")))
             self.ui.tableEntries.setItem(row, 2, QTableWidgetItem(getattr(entry, "preis", "")))
             self.ui.tableEntries.setItem(row, 3, QTableWidgetItem(getattr(entry, "created_at", "")))
+
+    # ------------------------------------------------------------------
+    # Delete/Save helpers
+    # ------------------------------------------------------------------
+
+    def _current_stammnummer(self):
+        """Return the currently selected stammnummer if available."""
+        if self.ui.treeUsers.isVisible():
+            item = self.ui.treeUsers.currentItem()
+            if item and item.parent() is not None:
+                text = item.text(0)
+                return text[4:] if text.startswith("stnr") else text
+        else:
+            item = self.listUsers.currentItem()
+            if item:
+                seller = item.data(Qt.UserRole)
+                return seller.id
+        return None
+
+    @Slot()
+    def delete_selected_dataset(self):
+        stamm = self._current_stammnummer()
+        if not stamm:
+            return
+        dm = self.market_widget().get_data_manager()
+        try:
+            dm.delete_dataset(stamm)
+            dm.synchornize_data_class_change_to_json()
+        except Exception:
+            return
+        self.populate_user_tree()
+        if self.listUsers.isVisible():
+            self.populate_user_list()
+        self.data_changed.emit(True)
+
+    def _tree_context_menu(self, pos):
+        item = self.ui.treeUsers.itemAt(pos)
+        if not item or item.parent() is None:
+            return
+        menu = QMenu(self)
+        delete_action = menu.addAction("Stammnummer löschen")
+        action = menu.exec(self.ui.treeUsers.viewport().mapToGlobal(pos))
+        if action == delete_action:
+            self.ui.treeUsers.setCurrentItem(item)
+            self.delete_selected_dataset()
+
+    @Slot()
+    def save_project(self):
+        facade = MarketFacade()
+        project_dir = facade.get_project_dir(self.market_widget())
+        if project_dir:
+            facade.save_project(self.market_widget(), project_dir)
+            self.data_changed.emit(False)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

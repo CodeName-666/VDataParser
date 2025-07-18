@@ -60,6 +60,7 @@ class Market(BaseUi):
         self.pdf_display.data_changed.connect(self.data_changed)
 
         self.market_setting.data_changed.connect(self.data_changed)
+        self.data_view.data_changed.connect(self.data_changed)
 
 
         
