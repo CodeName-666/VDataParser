@@ -363,7 +363,8 @@ class PdfDisplay(PersistentBaseUi):
         self.ui.btnSaveConfig.clicked.connect(self.save_state)
         self.ui.btnLoadConfig.clicked.connect(self.load_state)
         self.ui.btnSaveOutputPath.clicked.connect(self.save_output_path)
-        
+        self.ui.btnRestore.clicked.connect(self.restore_state)
+
         self.scene.selectionChanged.connect(self.on_scene_selection_changed)
         self.ui.listBoxPairs.itemSelectionChanged.connect(self.on_list_selection_changed)
 
