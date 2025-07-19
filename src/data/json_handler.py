@@ -7,6 +7,7 @@ import sys # For stderr fallback
 from typing import Union, Dict, List, Optional, Any # Added Optional, Any
 from pathlib import Path
 import os
+import shutil
 
 from log import CustomLogger, LogType # Import LogType if used
 import requests
@@ -396,6 +397,9 @@ class JsonHandler():
 
         try:
             p = Path(json_file_path)
+            # create a backup if the file already exists
+            if p.is_file():
+                self._create_backup(p)
             # Ensure the parent directory exists
             p.parent.mkdir(parents=True, exist_ok=True)
             with open(p, 'w', encoding='utf-8') as json_file:
@@ -405,6 +409,19 @@ class JsonHandler():
             self._log_error("save_to_local", f"Could not write to file: {json_file_path}", e)
         except Exception as e: # Catch other unexpected errors
             self._log_error("save_to_local", f"Unexpected error saving local file: {json_file_path}", e)
+
+    def _create_backup(self, file_path: Path) -> None:
+        """Create numbered backup of ``file_path``."""
+        counter = 1
+        while True:
+            backup = file_path.with_name(f"{file_path.name}_{counter}.backup")
+            if not backup.exists():
+                try:
+                    shutil.copy2(file_path, backup)
+                except IOError as e:
+                    self._log_error("_create_backup", f"Could not create backup {backup}", e)
+                break
+            counter += 1
 
     def get_data(self) -> Optional[Union[Dict, List]]:
         """ Returns the loaded JSON data. """

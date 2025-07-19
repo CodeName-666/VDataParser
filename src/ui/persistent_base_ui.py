@@ -3,6 +3,8 @@
 from dataclasses import asdict, is_dataclass
 import json
 from typing import Any
+from pathlib import Path
+import shutil
 
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QFileDialog, QMessageBox
@@ -45,6 +47,23 @@ class PersistentBaseUi(BaseUi):
         return self._config
 
     # ------------------------------------------------------------------
+    # Backup helper
+    # ------------------------------------------------------------------
+    def _backup_config(self, path: str) -> None:
+        p = Path(path)
+        if p.is_file():
+            counter = 1
+            while True:
+                backup = p.with_name(f"{p.name}_{counter}.backup")
+                if not backup.exists():
+                    try:
+                        shutil.copy2(p, backup)
+                    except IOError:
+                        pass
+                    break
+                counter += 1
+
+    # ------------------------------------------------------------------
     # Expected to be provided by subclasses
     # ------------------------------------------------------------------
     def export_state(self) -> Any:
@@ -65,6 +84,7 @@ class PersistentBaseUi(BaseUi):
         if file_name:
             try:
                 self.update_config_from_state(self.export_state())
+                self._backup_config(file_name)
                 self._config.save(file_name)
                 self.storage_path_changed.emit(file_name)
                 self.status_info.emit("INFO", f"Konfiguration gespeichert: {file_name}")
@@ -79,6 +99,7 @@ class PersistentBaseUi(BaseUi):
             try:
                 export = self.export_state()
                 self.update_config_from_state(export)
+                self._backup_config(path)
                 self._config.save(path)
                 if not self._config_changed():
                     self.status_info.emit("INFO", "Konfiguration gespeichert")
