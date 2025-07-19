@@ -42,33 +42,64 @@ class _NoOpTracker:  # noqa: D101
 # Main class
 # ---------------------------------------------------------------------------
 class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docstring
-   # DEFAULT_COORDS = [
-   #    CoordinatesConfig(20 * mm , 130 * mm, 80 * mm , 130 * mm, 140 * mm, 130 * mm),
-   #    CoordinatesConfig(160 * mm, 130 * mm, 220 * mm, 130 * mm, 280 * mm, 130 * mm),
-   #    CoordinatesConfig(20 * mm , 30 * mm , 80 * mm , 30 * mm , 140 * mm, 30 * mm),
-   #    CoordinatesConfig(160 * mm, 30 * mm , 220 * mm, 30 * mm , 280 * mm, 30 * mm),
-   #
-   #
-   # ] if mm else []  # empty if reportlab absent
+    # DEFAULT_COORDS = [
+    #    CoordinatesConfig(20 * mm , 130 * mm, 80 * mm , 130 * mm, 140 * mm, 130 * mm),
+    #    CoordinatesConfig(160 * mm, 130 * mm, 220 * mm, 130 * mm, 280 * mm, 130 * mm),
+    #    CoordinatesConfig(20 * mm , 30 * mm , 80 * mm , 30 * mm , 140 * mm, 30 * mm),
+    #    CoordinatesConfig(160 * mm, 30 * mm , 220 * mm, 30 * mm , 280 * mm, 30 * mm),
+    #
+    #
+    # ] if mm else []  # empty if reportlab absent
 
-    DEFAULT_COORDS = [
-        CoordinatesConfig(35 * mm, 173 * mm, 115 * mm,
-                          173 * mm, 30 * mm, 150 * mm),
-        CoordinatesConfig(178 * mm, 173 * mm, 258 * mm,
-                          173 * mm, 173 * mm, 150 * mm),
-        CoordinatesConfig(35 * mm, 83 * mm, 115 * mm,
-                          83 * mm, 30 * mm, 60 * mm),
-        CoordinatesConfig(178 * mm, 83 * mm, 258 * mm,
-                          83 * mm, 173 * mm, 60 * mm),
+    DEFAULT_COORDS = (
+        [
+            CoordinatesConfig(35 * mm, 173 * mm, 115 * mm, 173 * mm, 30 * mm, 150 * mm),
+            CoordinatesConfig(
+                178 * mm, 173 * mm, 258 * mm, 173 * mm, 173 * mm, 150 * mm
+            ),
+            CoordinatesConfig(35 * mm, 83 * mm, 115 * mm, 83 * mm, 30 * mm, 60 * mm),
+            CoordinatesConfig(178 * mm, 83 * mm, 258 * mm, 83 * mm, 173 * mm, 60 * mm),
+        ]
+        if mm
+        else []
+    )  # empty if reportlab absent
 
+    DEFAULT_DISPLAY_DPI = 150  # DPI used in PdfDisplay when coordinates were captured
 
-    ] if mm else []  # empty if reportlab absent
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _from_display_coords(
+        cfg: CoordinatesConfig,
+        page_h: float,
+        *,
+        dpi: int = DEFAULT_DISPLAY_DPI,
+    ) -> CoordinatesConfig:
+        """Convert GUI coordinates (origin top-left, in ``dpi``) to PDF points."""
+
+        scale = 72 / dpi
+        return CoordinatesConfig(
+            x1=cfg.x1 * scale,
+            y1=page_h - cfg.y1 * scale,
+            x2=cfg.x2 * scale,
+            y2=page_h - cfg.y2 * scale,
+            x3=cfg.x3 * scale,
+            y3=page_h - cfg.y3 * scale,
+            font_size=cfg.font_size,
+        )
 
     # ------------------------------------------------------------------
     def __init__(
-            self, fleat_market_data, *, path: str | Path = "", pdf_template: str | Path = "",
-            output_name: str | Path = "abholbestaetigung.pdf", coordinates: Optional[List[CoordinatesConfig]] = None,
-            logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None):
+        self,
+        fleat_market_data,
+        *,
+        path: str | Path = "",
+        pdf_template: str | Path = "",
+        output_name: str | Path = "abholbestaetigung.pdf",
+        coordinates: Optional[List[CoordinatesConfig]] = None,
+        display_dpi: int = DEFAULT_DISPLAY_DPI,
+        logger: Optional[CustomLogger] = None,
+        output_interface: Optional[OutputInterfaceAbstraction] = None,
+    ):
 
         opath = Path(output_name)
         super().__init__(path, opath.stem, logger, output_interface)
@@ -76,9 +107,11 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self._fleat_market_data = fleat_market_data
         self._template_path = Path(pdf_template) if pdf_template else None
         self._coords: List[CoordinatesConfig] = coordinates or self.DEFAULT_COORDS
+        self._display_dpi = display_dpi
         if not self._coords:
             raise ValueError(
-                "Es wurden keine Koordinaten definiert und ReportLab ist nicht verfügbar.")
+                "Es wurden keine Koordinaten definiert und ReportLab ist nicht verfügbar."
+            )
 
         self._entries_per_page = len(self._coords)
         self._output_pdf = (self.path / opath).with_suffix(".pdf")
@@ -108,6 +141,17 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             raise ValueError("coordinates list cannot be empty")
         self._coords = value
         self._entries_per_page = len(self._coords)
+
+    @property
+    def display_dpi(self) -> int:
+        """DPI at which coordinates were captured."""
+        return self._display_dpi
+
+    @display_dpi.setter
+    def display_dpi(self, value: int) -> None:
+        if value <= 0:
+            raise ValueError("display_dpi must be positive")
+        self._display_dpi = value
 
     @property
     def output_pdf(self) -> Path:
@@ -148,8 +192,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         try:
             return self._template_path.read_bytes()
         except Exception as err:  # pragma: no cover
-            self._output_and_log(
-                "ERROR", f"Fehler beim Lesen des Templates: {err}")
+            self._output_and_log("ERROR", f"Fehler beim Lesen des Templates: {err}")
             return None
 
     def _overlay_page(self, rows: Sequence[Tuple[str, str, str]]):  # noqa: D401
@@ -162,7 +205,8 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         # can.rotate(90)
         can.setFillColor(colors.black)  # type: ignore[arg-type]
         for idx, (f1, f2, f3) in enumerate(rows):
-            cfg = self._coords[idx]
+            raw_cfg = self._coords[idx]
+            cfg = self._from_display_coords(raw_cfg, page_h, dpi=self._display_dpi)
             can.setFont("Helvetica-Bold", cfg.font_size)
             can.drawString(cfg.x1, cfg.y1, f1)
             can.drawString(cfg.x2, cfg.y2, f2)
@@ -181,17 +225,19 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             with self._output_pdf.open("wb") as fh:
                 writer.write(fh)
             self._output_and_log(
-                "INFO", f"PDF geschrieben: {self._output_pdf.relative_to(Path.cwd())}")
+                "INFO", f"PDF geschrieben: {self._output_pdf.relative_to(Path.cwd())}"
+            )
             return True
         except Exception as err:  # pragma: no cover
-            self._output_and_log(
-                "ERROR", f"Fehler beim Schreiben der PDF: {err}")
+            self._output_and_log("ERROR", f"Fehler beim Schreiben der PDF: {err}")
             return False
 
     # ------------------------------------------------------------------
     # Public orchestration
     # ------------------------------------------------------------------
-    def generate(self, overall_tracker: Optional[_TrackerBase] = None) -> None:  # noqa: D401
+    def generate(
+        self, overall_tracker: Optional[_TrackerBase] = None
+    ) -> None:  # noqa: D401
         # 0. Dependency check ------------------------------------------------
         if PdfReader is object or canvas is None:
             self._output_and_log("ERROR", "PDF‑Libraries fehlen – Abbruch.")
@@ -204,8 +250,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self._output_and_log("INFO", "Starte PDF‑Generierung …")
         rows = self._seller_rows()
         if not rows:
-            self._output_and_log(
-                "INFO", "Keine gültigen Daten – nichts zu tun.")
+            self._output_and_log("INFO", "Keine gültigen Daten – nichts zu tun.")
             if overall_tracker:
                 overall_tracker.increment()  # type: ignore[attr-defined]
             return
@@ -221,18 +266,16 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         # 1. Progress helper -------------------------------------------------
         # tracker = _NoOpTracker() if _TrackerBase is None else _TrackerBase()
         tracker = ProgressTracker()
-        total_pages = (len(rows) + self._entries_per_page -
-                       1) // self._entries_per_page
+        total_pages = (len(rows) + self._entries_per_page - 1) // self._entries_per_page
         if hasattr(tracker, "reset"):
             tracker.reset(total=total_pages)  # type: ignore[misc]
 
-        bar = _ConsoleBar(
-            length=50, description="PDF") if _ConsoleBar else None
+        bar = _ConsoleBar(length=50, description="PDF") if _ConsoleBar else None
 
         def _task():
             writer = PdfWriter()
             for i in range(0, len(rows), self._entries_per_page):
-                grp = rows[i: i + self._entries_per_page]
+                grp = rows[i : i + self._entries_per_page]
                 try:
                     base = PdfReader(io.BytesIO(template)).pages[0]
                     ovl = self._overlay_page(grp)
@@ -256,8 +299,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
 
         # 3. Final state -----------------------------------------------------
         if tracker.has_error:
-            self._output_and_log(
-                "ERROR", "PDF‑Erstellung fehlgeschlagen – siehe Log.")
+            self._output_and_log("ERROR", "PDF‑Erstellung fehlgeschlagen – siehe Log.")
             if overall_tracker:
                 # type: ignore[attr-defined]
                 overall_tracker.set_error(RuntimeError("PDF error"))

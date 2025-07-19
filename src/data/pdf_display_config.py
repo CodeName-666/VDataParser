@@ -67,6 +67,7 @@ class PdfDisplayConfig(QObject, JsonHandler):
         "pdf_name": "",
         "output_path": "",
         "output_name": "",
+        "dpi": 150,
         "boxPairs": [],
         "singleBoxes": [],
     }
@@ -136,6 +137,16 @@ class PdfDisplayConfig(QObject, JsonHandler):
         file = Path(value)
         self.set_key_value(["output_path"], str(file.parent))
         self.set_key_value(["output_name"], file.name)
+
+    # ------------------------------------------------------------------
+    # DPI handling
+    # ------------------------------------------------------------------
+    def get_dpi(self) -> int:
+        """Return the DPI used when capturing coordinates."""
+        return int(self.get_key_value(["dpi"]) or 150)
+
+    def set_dpi(self, value: int) -> None:
+        self.set_key_value(["dpi"], int(value))
 
     def get_full_pdf_path(self) -> str:
         """Return the absolute PDF path composed of directory and file name."""
