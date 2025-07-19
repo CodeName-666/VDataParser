@@ -314,7 +314,14 @@ class DataManager(QObject, BaseData):
                 self._log_change(
                     action="UPDATE",
                     target=f"stnr{stnr_id}:{artikelnummer}",
-                    description=f"Artikel geändert von {old_values} zu ({beschreibung}, {groesse}, {preis})"
+                    description=(
+                        f"Artikel geändert von {old_values} zu ({beschreibung}, {groesse}, {preis})"
+                    ),
+                    old_value={
+                        "beschreibung": old_values[0],
+                        "groesse": old_values[1],
+                        "preis": old_values[2],
+                    },
                 )
                 return article
         raise ValueError(
@@ -358,7 +365,8 @@ class DataManager(QObject, BaseData):
                 self._log_change(
                     action="DELETE",
                     target=f"verkaeufer:{seller_id}",
-                    description=f"Verkäuferdaten gelöscht: {old_data}"
+                    description=f"Verkäuferdaten gelöscht: {old_data}",
+                    old_value=asdict(old_data)
                 )
                 return seller
         raise ValueError(f"Verkäufer mit ID {seller_id} nicht gefunden.")
@@ -379,6 +387,7 @@ class DataManager(QObject, BaseData):
         table = self.get_main_number_tables().get(f"stnr{stnr_id}")
         if not table:
             raise ValueError(f"Keine Artikelliste für stnr{stnr_id} gefunden.")
+        old_articles = [asdict(article) for article in table.data]
         for article in table.data:
             article.beschreibung = ""
             article.groesse = "0"
@@ -387,7 +396,8 @@ class DataManager(QObject, BaseData):
         self._log_change(
             action="DELETE",
             target=f"stnr{stnr_id}",
-            description="Alle Artikelinhalte gelöscht."
+            description="Alle Artikelinhalte gelöscht.",
+            old_value={"articles": old_articles}
         )
         return table
 
@@ -398,12 +408,22 @@ class DataManager(QObject, BaseData):
         Args:
             seller_id (str): The ID of the seller whose dataset should be deleted.
         """
+        old_seller = next(
+            (deepcopy(s) for s in self.get_seller_as_list() if s.id == seller_id),
+            None,
+        )
+        table = self.get_main_number_tables().get(f"stnr{seller_id}")
+        old_articles = [asdict(a) for a in table.data] if table else []
         self.delete_seller(seller_id)
         self.delete_article_list(seller_id)
         self._log_change(
             action="DELETE",
             target=f"dataset:{seller_id}",
-            description="Kompletter Datensatz (Verkäufer + Artikelliste) gelöscht."
+            description="Kompletter Datensatz (Verkäufer + Artikelliste) gelöscht.",
+            old_value={
+                "seller": asdict(old_seller) if old_seller else None,
+                "articles": old_articles,
+            }
         )
 
     def validate_structure(self) -> bool:
