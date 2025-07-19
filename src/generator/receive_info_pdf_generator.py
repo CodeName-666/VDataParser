@@ -64,12 +64,15 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         else []
     )  # empty if reportlab absent
 
-    DISPLAY_DPI = 150  # DPI used in PdfDisplay when coordinates were captured
+    DEFAULT_DISPLAY_DPI = 150  # DPI used in PdfDisplay when coordinates were captured
 
     # ------------------------------------------------------------------
     @staticmethod
     def _from_display_coords(
-        cfg: CoordinatesConfig, page_h: float, *, dpi: int = DISPLAY_DPI
+        cfg: CoordinatesConfig,
+        page_h: float,
+        *,
+        dpi: int = DEFAULT_DISPLAY_DPI,
     ) -> CoordinatesConfig:
         """Convert GUI coordinates (origin top-left, in ``dpi``) to PDF points."""
 
@@ -93,6 +96,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         pdf_template: str | Path = "",
         output_name: str | Path = "abholbestaetigung.pdf",
         coordinates: Optional[List[CoordinatesConfig]] = None,
+        display_dpi: int = DEFAULT_DISPLAY_DPI,
         logger: Optional[CustomLogger] = None,
         output_interface: Optional[OutputInterfaceAbstraction] = None,
     ):
@@ -103,6 +107,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self._fleat_market_data = fleat_market_data
         self._template_path = Path(pdf_template) if pdf_template else None
         self._coords: List[CoordinatesConfig] = coordinates or self.DEFAULT_COORDS
+        self._display_dpi = display_dpi
         if not self._coords:
             raise ValueError(
                 "Es wurden keine Koordinaten definiert und ReportLab ist nicht verfügbar."
@@ -136,6 +141,17 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             raise ValueError("coordinates list cannot be empty")
         self._coords = value
         self._entries_per_page = len(self._coords)
+
+    @property
+    def display_dpi(self) -> int:
+        """DPI at which coordinates were captured."""
+        return self._display_dpi
+
+    @display_dpi.setter
+    def display_dpi(self, value: int) -> None:
+        if value <= 0:
+            raise ValueError("display_dpi must be positive")
+        self._display_dpi = value
 
     @property
     def output_pdf(self) -> Path:
@@ -190,7 +206,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         can.setFillColor(colors.black)  # type: ignore[arg-type]
         for idx, (f1, f2, f3) in enumerate(rows):
             raw_cfg = self._coords[idx]
-            cfg = self._from_display_coords(raw_cfg, page_h)
+            cfg = self._from_display_coords(raw_cfg, page_h, dpi=self._display_dpi)
             can.setFont("Helvetica-Bold", cfg.font_size)
             can.drawString(cfg.x1, cfg.y1, f1)
             can.drawString(cfg.x2, cfg.y2, f2)
