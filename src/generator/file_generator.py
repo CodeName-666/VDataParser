@@ -40,6 +40,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         pdf_template_path_input: str | Path = "template/template.pdf",
         pdf_output_file_name: str | Path = "Abholbestaetigungen.pdf",
         pdf_coordinates: Optional[List[CoordinatesConfig]] = None,
+        pdf_display_dpi: int = ReceiveInfoPdfGenerator.DEFAULT_DISPLAY_DPI,
         logger: Optional[CustomLogger] = None,
         output_interface: Optional[OutputInterfaceAbstraction] = None,
         progress_tracker: Optional[_TrackerBase] = None,
@@ -60,6 +61,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         self._pdf_template_path_input = pdf_template_path_input
         self._pdf_output_file_name = pdf_output_file_name
         self._pdf_coordinates = pdf_coordinates
+        self._pdf_display_dpi = pdf_display_dpi
 
         self._tasks: List[Tuple[str, object]] = []
 
@@ -82,6 +84,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
                     pdf_template=self._pdf_template_path_input,
                     output_name=self._pdf_output_file_name,
                     coordinates=self._pdf_coordinates,
+                    display_dpi=self._pdf_display_dpi,
                 ),
             ),
         ]
@@ -179,6 +182,9 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         coords = settings.get("coordinates") or settings.get("pdf_coordinates")
         if coords:
             self._pdf_coordinates = coords
+        dpi = settings.get("display_dpi") or settings.get("dpi")
+        if dpi:
+            self._pdf_display_dpi = dpi
 
     def create_pdf_data(self, settings: Optional[dict] = None) -> None:
         """Generate only the PDF based on ``settings``."""

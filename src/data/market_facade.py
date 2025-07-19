@@ -238,6 +238,7 @@ class MarketObserver(QObject):
         outputpath = self.pdf_display_config_loader.get_output_path()
         outputname = self.pdf_display_config_loader.get_output_name()
         coordinates = self.pdf_display_config_loader.convert_json_to_coordinate_list()
+        dpi = self.pdf_display_config_loader.get_dpi()
 
 
         self.file_generator = FileGenerator(
@@ -245,9 +246,10 @@ class MarketObserver(QObject):
             output_interface=window,
             progress_tracker=tracker,
             output_path = outputpath,
-            pdf_template_path_input= template_path, 
+            pdf_template_path_input= template_path,
             pdf_output_file_name= outputname,
             pdf_coordinates= coordinates ,
+            pdf_display_dpi=dpi,
         )
         self.file_generator.create_pdf_data()
         self.status_info.emit(
@@ -268,6 +270,7 @@ class MarketObserver(QObject):
             pass
 
         pdf_settings = self.market_config_handler.get_pdf_generation_data()
+        dpi = self.pdf_display_config_loader.get_dpi()
         self.file_generator = FileGenerator(
             self.fm,
             output_interface=window,
@@ -307,6 +310,7 @@ class MarketObserver(QObject):
                 pdf_settings.get("pdf_name", "Abholbestaetigungen.pdf"),
             ),
             pdf_coordinates=pdf_settings.get("coordinates"),
+            pdf_display_dpi=dpi,
         )
         self.file_generator.create_all()
         self.status_info.emit(

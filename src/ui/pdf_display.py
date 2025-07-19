@@ -25,6 +25,7 @@ BOX_PAIR_COLOR_2 = QColor("blue")
 SINGLE_BOX_COLOR = QColor("green")
 DEFAULT_BOX_WIDTH = 100
 DEFAULT_BOX_HEIGHT = 50
+DEFAULT_DISPLAY_DPI = 150
 BOX_PAIR_LABEL_1_PREFIX = "USR"
 BOX_PAIR_LABEL_2_PREFIX = "NR"
 SINGLE_BOX_LABEL_PREFIX = "DATE"
@@ -332,6 +333,7 @@ class PdfDisplay(PersistentBaseUi):
         self.currentBox = None # Currently selected DraggableBox
         self._block_property_updates = False # Flag to prevent signal loops
         self._config: PdfDisplayConfig = None
+        self._display_dpi = DEFAULT_DISPLAY_DPI
         # --- UI Element Access (using self.ui) ---
         # No need to redefine self.graphicsView etc. if BaseUi is QWidget/QMainWindow
         # Access them directly via self.ui.graphicsView, self.ui.btnLoadPDF, etc.
@@ -350,6 +352,18 @@ class PdfDisplay(PersistentBaseUi):
             self.import_state(state)
         elif json_path:
             self.import_state(PdfDisplayConfig(json_path))
+
+    # ---------------------------- properties ----------------------------
+    @property
+    def display_dpi(self) -> int:
+        """DPI used to render the PDF and capture coordinates."""
+        return self._display_dpi
+
+    @display_dpi.setter
+    def display_dpi(self, value: int) -> None:
+        if value <= 0:
+            raise ValueError("display_dpi must be positive")
+        self._display_dpi = value
             
     def setup_connections(self):
         """Connects UI signals to slots."""
@@ -404,9 +418,12 @@ class PdfDisplay(PersistentBaseUi):
         if pageSizeF.isEmpty():
              print(f"Could not get page size for page {page_index}")
              return
-        # Render at a reasonable resolution, e.g., 150 DPI
-        dpi = 150
-        renderSize = QSize(int(pageSizeF.width() * dpi / 72), int(pageSizeF.height() * dpi / 72))
+        # Render at the configured DPI
+        dpi = self._display_dpi
+        renderSize = QSize(
+            int(pageSizeF.width() * dpi / 72),
+            int(pageSizeF.height() * dpi / 72),
+        )
 
         image = self.pdfDocument.render(page_index, renderSize)
         if image.isNull():
@@ -825,6 +842,7 @@ class PdfDisplay(PersistentBaseUi):
 
         config.set_full_pdf_path(self.pdfPath)
         config.set_full_output_path(self.ui.lineEditOutputPath.text())
+        config.set_dpi(self._display_dpi)
         
 
         # Box-Paare hinzufügen
@@ -854,6 +872,7 @@ class PdfDisplay(PersistentBaseUi):
         self._config = config
 
         if not self._config.is_empty():
+            self._display_dpi = self._config.get_dpi()
 
             if clear_existing:
                 self._clear_all_boxes()

@@ -3,6 +3,7 @@
     "pdf_name": "Abholung_Template.pdf",
     "output_path": "",
     "output_name": "Abholbestätigung.pdf",
+    "dpi": 150,
     "boxPairs": [
         {
             "id": 1,
