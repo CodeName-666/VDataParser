@@ -7,7 +7,7 @@ from .market_config_handler import MarketConfigHandler
 from .singelton_meta import SingletonMeta
 from .pdf_display_config import PdfDisplayConfig
 from generator import FileGenerator
-from objects import FleatMarket
+from objects import FleatMarket, SettingsContentDataClass
 from display import BasicProgressTracker
 from typing import List, Dict, Any, Union
 from pathlib import Path
@@ -39,6 +39,14 @@ class MarketObserver(QObject):
         self._project_exists = False
         self._market = market
         self._project_dir = ""
+
+    def apply_default_settings(self, default_settings: SettingsContentDataClass) -> None:
+        """Set ``default_settings`` and inform the user."""
+        self.data_manager.set_new_settings(default_settings)
+        self.status_info.emit(
+            "WARNING",
+            "Keine Settings gefunden. Default Einstellungen wurden geladen."
+        )
 
 
     def set_data_ready_satus(self, status: bool) -> None:
@@ -105,8 +113,7 @@ class MarketObserver(QObject):
                 if ret:
                     if not self.data_manager.settings_available():
                         default_settings = self.market_config_handler.get_default_settings()
-                        self.data_manager.set_new_settings(default_settings)
-                        self.status_info.emit("WARNING", f"Keine Settings gefunden. Default Einstellungen wurden geladen.")
+                        self.apply_default_settings(default_settings)
                     # Setup the FleatMarket with the loaded data
                     self.data_manager_loaded.emit(self.data_manager)
                     self.setup_data_generation()
@@ -141,7 +148,7 @@ class MarketObserver(QObject):
             if ret:
                 # Setup the FleatMarket with the loaded data
                 self.data_manager_loaded.emit(self.data_manager)
-                self.pdf_display_config_loaded.emit(self.pdf_display_config_loader) # Send empty config
+                self.pdf_display_config_loaded.emit(self.pdf_display_config_loader)  # Send empty config
                 self.setup_data_generation()
                 self.status_info.emit("INFO", f"Export geladen: {json_path}")
             else:
@@ -176,6 +183,21 @@ class MarketObserver(QObject):
         msg_box.setIcon(QMessageBox.Question)
         msg_box.setWindowTitle("PDF Konfiguration")
         msg_box.setText("Keine PDF Konfiguration gefunden. Default laden?")
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg_box.setDefaultButton(QMessageBox.Yes)
+        return msg_box.exec() == QMessageBox.Yes
+
+    def _ask_for_project_creation(self) -> bool:
+        """Prompt the user whether a project should be created."""
+        from PySide6.QtWidgets import QApplication, QMessageBox
+
+        if QApplication.instance() is None:
+            return True
+
+        msg_box = QMessageBox()
+        msg_box.setIcon(QMessageBox.Question)
+        msg_box.setWindowTitle("Projekt erstellen")
+        msg_box.setText("Es wurden keine Einstellungen gefunden. Projekt erstellen?")
         msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         msg_box.setDefaultButton(QMessageBox.Yes)
         return msg_box.exec() == QMessageBox.Yes
@@ -433,7 +455,16 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         new_observer.connect_signals(market)
         ret = new_observer.load_local_market_export(json_path)
         if ret:
-            self.create_project_from_export(market, json_path, "")
+            if not new_observer.data_manager.settings_available():
+                if self._ask_for_project_creation():
+                    self.create_project_from_export(market, json_path, "")
+                    default_settings = new_observer.market_config_handler.get_default_settings()
+                else:
+                    from .default_settings import DEFAULT_SETTINGS
+                    default_settings = DEFAULT_SETTINGS
+                new_observer.apply_default_settings(default_settings)
+            else:
+                self.create_project_from_export(market, json_path, "")
         return ret
 
     def market_already_exists(self, market) -> bool:
