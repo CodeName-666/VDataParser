@@ -2,12 +2,13 @@
 """High level facade combining various market related components."""
 
 from PySide6.QtCore import QObject, Slot, Signal
+from PySide6.QtWidgets import QMessageBox
 from .data_manager import DataManager
 from .market_config_handler import MarketConfigHandler
 from .singelton_meta import SingletonMeta
 from .pdf_display_config import PdfDisplayConfig
 from generator import FileGenerator
-from objects import FleatMarket
+from objects import FleatMarket, SettingsContentDataClass
 from display import BasicProgressTracker
 from typing import List, Dict, Any, Union
 from pathlib import Path
@@ -39,6 +40,16 @@ class MarketObserver(QObject):
         self._project_exists = False
         self._market = market
         self._project_dir = ""
+
+    def apply_settings(self) -> None:
+        """Set ``default_settings`` and inform the user."""
+        if not self.data_manager.settings_available():
+            default_settings = self.market_config_handler.get_default_settings()
+            self.data_manager.set_new_settings(default_settings)
+            self.status_info.emit(
+            "WARNING",
+            "Keine Settings gefunden. Default Einstellungen wurden geladen."
+        )
 
 
     def set_data_ready_satus(self, status: bool) -> None:
@@ -103,10 +114,7 @@ class MarketObserver(QObject):
                 # Initialize the DataManager with the market JSON path
                 ret = self.data_manager.load(market_json_path)
                 if ret:
-                    if not self.data_manager.settings_available():
-                        default_settings = self.market_config_handler.get_default_settings()
-                        self.data_manager.set_new_settings(default_settings)
-                        self.status_info.emit("WARNING", f"Keine Settings gefunden. Default Einstellungen wurden geladen.")
+                    self.apply_settings()
                     # Setup the FleatMarket with the loaded data
                     self.data_manager_loaded.emit(self.data_manager)
                     self.setup_data_generation()
@@ -140,8 +148,9 @@ class MarketObserver(QObject):
             ret = self.data_manager.load(json_path)
             if ret:
                 # Setup the FleatMarket with the loaded data
+                self.apply_settings()
                 self.data_manager_loaded.emit(self.data_manager)
-                self.pdf_display_config_loaded.emit(self.pdf_display_config_loader) # Send empty config
+                self.pdf_display_config_loaded.emit(self.pdf_display_config_loader)  # Send empty config
                 self.setup_data_generation()
                 self.status_info.emit("INFO", f"Export geladen: {json_path}")
             else:
@@ -182,8 +191,6 @@ class MarketObserver(QObject):
 
     def _load_default_pdf_config(self, project_path: str) -> None:
         """Copy default PDF layout files into the project directory."""
-        import shutil
-        from pathlib import Path
 
         project_dir = Path(project_path).parent
         default_dir = Path(__file__).resolve().parents[1] / "resource" / "default_data"
@@ -433,7 +440,8 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         new_observer.connect_signals(market)
         ret = new_observer.load_local_market_export(json_path)
         if ret:
-            self.create_project_from_export(market, json_path, "")
+            if self._ask_for_project_creation():
+                self.create_project_from_export(market, json_path, "")
         return ret
 
     def market_already_exists(self, market) -> bool:
@@ -622,3 +630,13 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         except Exception as err:  # pragma: no cover - runtime errors handled
             self.status_info.emit("ERROR", f"Fehler beim Speichern: {err}")
             return False
+
+    def _ask_for_project_creation(self) -> bool:
+        """Prompt the user whether a project should be created."""
+        msg_box = QMessageBox()
+        msg_box.setIcon(QMessageBox.Question)
+        msg_box.setWindowTitle("Projekt erstellen")
+        msg_box.setText("Es wurden keine Einstellungen gefunden. Projekt erstellen?")
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg_box.setDefaultButton(QMessageBox.Yes)
+        return msg_box.exec() == QMessageBox.Yes
