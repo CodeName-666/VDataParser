@@ -16,7 +16,6 @@ import tempfile
 import shutil
 from backend import MySQLInterface
 from backend.advance_db_connector import AdvancedDBManager
-from .default_settings import DEFAULT_SETTINGS
 
 
 class MarketObserver(QObject):
@@ -186,16 +185,6 @@ class MarketObserver(QObject):
         msg_box.setIcon(QMessageBox.Question)
         msg_box.setWindowTitle("PDF Konfiguration")
         msg_box.setText("Keine PDF Konfiguration gefunden. Default laden?")
-        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        msg_box.setDefaultButton(QMessageBox.Yes)
-        return msg_box.exec() == QMessageBox.Yes
-
-    def _ask_for_project_creation(self) -> bool:
-        """Prompt the user whether a project should be created."""
-        msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.Question)
-        msg_box.setWindowTitle("Projekt erstellen")
-        msg_box.setText("Es wurden keine Einstellungen gefunden. Projekt erstellen?")
         msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         msg_box.setDefaultButton(QMessageBox.Yes)
         return msg_box.exec() == QMessageBox.Yes
@@ -641,3 +630,13 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         except Exception as err:  # pragma: no cover - runtime errors handled
             self.status_info.emit("ERROR", f"Fehler beim Speichern: {err}")
             return False
+
+    def _ask_for_project_creation(self) -> bool:
+        """Prompt the user whether a project should be created."""
+        msg_box = QMessageBox()
+        msg_box.setIcon(QMessageBox.Question)
+        msg_box.setWindowTitle("Projekt erstellen")
+        msg_box.setText("Es wurden keine Einstellungen gefunden. Projekt erstellen?")
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg_box.setDefaultButton(QMessageBox.Yes)
+        return msg_box.exec() == QMessageBox.Yes
