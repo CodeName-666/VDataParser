@@ -23,13 +23,13 @@ class ChangeLogEntry:
 
 @dataclass
 class HeaderDataClass:
-    type: str = ""
-    version: str = ""
-    comment: str = ""
+    type: str = "header"
+    version: str = "5.2.1"
+    comment: str = "Export to JSON plugin for PHPMyAdmin"
 
 @dataclass
 class BaseInfoDataClass:
-    type: str = ""
+    type: str = "database"
     name: str = ""
 
 @dataclass
@@ -48,8 +48,8 @@ class SettingsContentDataClass:
 
 @dataclass
 class SettingDataClass:
-    type: str = ""
-    name: str = ""
+    type: str = "table"
+    name: str = "einstellungen"
     database: str = ""
     data: List[SettingsContentDataClass] = field(default_factory=list)
 
@@ -86,7 +86,7 @@ class ArticleDataClass:
 
 @dataclass
 class MainNumberDataClass:
-    type: str = ""
+    type: str = "table"
     name: str = ""
     database: str = ""
     data: List[ArticleDataClass] = field(default_factory=list)
@@ -121,8 +121,8 @@ class SellerDataClass:
 
 @dataclass
 class SellerListDataClass:
-    type: str = ""
-    name: str = ""
+    type: str = "table"
+    name: str = "verkaeufer"
     database: str = ""
     data: List[SellerDataClass] = field(default_factory=list)
 
