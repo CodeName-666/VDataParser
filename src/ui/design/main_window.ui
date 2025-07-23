@@ -105,8 +105,8 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
   </widget>
   <action name="action_create_pdf">
    <property name="icon">
-    <iconset resource="../../resource/ressources.qrc">
-     <normaloff>:/icons/file-type-pdf.svg</normaloff>:/icons/file-type-pdf.svg</iconset>
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/file-type-pdf.svg</normaloff>:/icons/icons/black/file-type-pdf.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Create PDF</string>
@@ -117,8 +117,8 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
   </action>
   <action name="action_generate_data">
    <property name="icon">
-    <iconset resource="../../resource/ressources.qrc">
-     <normaloff>:/icons/radioactive.svg</normaloff>:/icons/radioactive.svg</iconset>
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/radioactive.svg</normaloff>:/icons/icons/black/radioactive.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Daten Generieren</string>
@@ -129,8 +129,8 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
   </action>
   <action name="action_generate_add">
    <property name="icon">
-    <iconset resource="../../resource/ressources.qrc">
-     <normaloff>:/icons/radioactive_filled.svg</normaloff>:/icons/radioactive_filled.svg</iconset>
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/radioactive_filled.svg</normaloff>:/icons/icons/black/radioactive_filled.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Alles generieren</string>
@@ -141,8 +141,8 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
   </action>
   <action name="action_save_project">
    <property name="icon">
-    <iconset resource="../../resource/ressources.qrc">
-     <normaloff>:/icons/file-database.svg</normaloff>:/icons/file-database.svg</iconset>
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/file-database.svg</normaloff>:/icons/icons/black/file-database.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Projekt speichern</string>
@@ -153,8 +153,8 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
   </action>
   <action name="action_save_project_as">
    <property name="icon">
-    <iconset resource="../../resource/ressources.qrc">
-     <normaloff>:/icons/database-export.svg</normaloff>:/icons/database-export.svg</iconset>
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/database-export.svg</normaloff>:/icons/icons/black/database-export.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Projekt speichern unter</string>
@@ -165,8 +165,8 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
  </action>
   <action name="action_delete_dataset">
    <property name="icon">
-    <iconset resource="../../resource/ressources.qrc">
-     <normaloff>:/icons/database-x.svg</normaloff>:/icons/database-x.svg</iconset>
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/database-x.svg</normaloff>:/icons/icons/black/database-x.svg</iconset>
    </property>
    <property name="text">
     <string>Stammnummer löschen</string>
@@ -177,8 +177,8 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
   </action>
   <action name="action_save_seller">
    <property name="icon">
-    <iconset resource="../../resource/ressources.qrc">
-     <normaloff>:/icons/file-database.svg</normaloff>:/icons/file-database.svg</iconset>
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/file-database.svg</normaloff>:/icons/icons/black/file-database.svg</iconset>
    </property>
    <property name="text">
     <string>Speichern</string>
@@ -189,8 +189,8 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
   </action>
   <action name="action_restore_seller">
    <property name="icon">
-    <iconset resource="../../resource/ressources.qrc">
-     <normaloff>:/icons/database-import.svg</normaloff>:/icons/database-import.svg</iconset>
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/database-import.svg</normaloff>:/icons/icons/black/database-import.svg</iconset>
    </property>
    <property name="text">
     <string>Wiederherstellen</string>
@@ -201,7 +201,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
   </action>
 </widget>
  <resources>
-  <include location="../../resource/ressources.qrc"/>
+  <include location="../../resource/resources.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -15,8 +15,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHeaderView, QListWidget, QListWidgetItem,
-    QProgressBar, QSizePolicy, QWidget, QVBoxLayout)
+from PySide6.QtWidgets import (QApplication, QListWidget, QListWidgetItem, QProgressBar,
+    QSizePolicy, QVBoxLayout, QWidget)
 
 class Ui_OutputWindow(object):
     def setupUi(self, OutputWindow):

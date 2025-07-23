@@ -223,7 +223,7 @@ class MainWindow(QMainWindow):
         if file_name:
             return file_name
         else:
-            QMessageBox.critical(self, "Error", "Failed to load JSON file.")
+           #QMessageBox.critical(self, "Error", "Failed to load JSON file.")
             return None
 
     @Slot()

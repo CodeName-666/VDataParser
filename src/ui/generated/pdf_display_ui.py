@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (QApplication, QButtonGroup, QFormLayout, QGraphic
     QGroupBox, QHBoxLayout, QLabel, QLineEdit,
     QListWidget, QListWidgetItem, QPushButton, QSizePolicy,
     QSpacerItem, QSplitter, QVBoxLayout, QWidget)
+import resources_rc
 
 class Ui_PdfDisplayView(object):
     def setupUi(self, PdfDisplayView):
@@ -30,20 +31,20 @@ class Ui_PdfDisplayView(object):
         self.splitter = QSplitter(PdfDisplayView)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Orientation.Horizontal)
-        self.widget = QWidget(self.splitter)
-        self.widget.setObjectName(u"widget")
-        self.verticalLayout_4 = QVBoxLayout(self.widget)
+        self.layoutWidget = QWidget(self.splitter)
+        self.layoutWidget.setObjectName(u"layoutWidget")
+        self.verticalLayout_4 = QVBoxLayout(self.layoutWidget)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_toolbar = QHBoxLayout()
         self.horizontalLayout_toolbar.setSpacing(6)
         self.horizontalLayout_toolbar.setObjectName(u"horizontalLayout_toolbar")
-        self.btnLoadPDF = QPushButton(self.widget)
+        self.btnLoadPDF = QPushButton(self.layoutWidget)
         self.btnLoadPDF.setObjectName(u"btnLoadPDF")
 
         self.horizontalLayout_toolbar.addWidget(self.btnLoadPDF)
 
-        self.btnGeneratePDF = QPushButton(self.widget)
+        self.btnGeneratePDF = QPushButton(self.layoutWidget)
         self.btnGeneratePDF.setObjectName(u"btnGeneratePDF")
 
         self.horizontalLayout_toolbar.addWidget(self.btnGeneratePDF)
@@ -52,12 +53,21 @@ class Ui_PdfDisplayView(object):
 
         self.horizontalLayout_toolbar.addItem(self.horizontalSpacer)
 
+        self.btnMenuOpenClose = QPushButton(self.layoutWidget)
+        self.btnMenuOpenClose.setObjectName(u"btnMenuOpenClose")
+        icon = QIcon()
+        icon.addFile(u":/icons/icons/white/menu.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.btnMenuOpenClose.setIcon(icon)
+        self.btnMenuOpenClose.setIconSize(QSize(24, 24))
+
+        self.horizontalLayout_toolbar.addWidget(self.btnMenuOpenClose)
+
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_toolbar)
 
         self.verticalLayout_pdf = QVBoxLayout()
         self.verticalLayout_pdf.setObjectName(u"verticalLayout_pdf")
-        self.graphicsView = QGraphicsView(self.widget)
+        self.graphicsView = QGraphicsView(self.layoutWidget)
         self.graphicsView.setObjectName(u"graphicsView")
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(2)
@@ -74,12 +84,12 @@ class Ui_PdfDisplayView(object):
 
         self.horizontalLayout_zoom.addItem(self.zoomLeftSpacer)
 
-        self.btnZoomIn = QPushButton(self.widget)
+        self.btnZoomIn = QPushButton(self.layoutWidget)
         self.btnZoomIn.setObjectName(u"btnZoomIn")
 
         self.horizontalLayout_zoom.addWidget(self.btnZoomIn)
 
-        self.btnZoomOut = QPushButton(self.widget)
+        self.btnZoomOut = QPushButton(self.layoutWidget)
         self.btnZoomOut.setObjectName(u"btnZoomOut")
 
         self.horizontalLayout_zoom.addWidget(self.btnZoomOut)
@@ -96,17 +106,17 @@ class Ui_PdfDisplayView(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.btnAddSingleBox = QPushButton(self.widget)
+        self.btnAddSingleBox = QPushButton(self.layoutWidget)
         self.btnAddSingleBox.setObjectName(u"btnAddSingleBox")
 
         self.horizontalLayout_3.addWidget(self.btnAddSingleBox)
 
-        self.btnAddBoxPair = QPushButton(self.widget)
+        self.btnAddBoxPair = QPushButton(self.layoutWidget)
         self.btnAddBoxPair.setObjectName(u"btnAddBoxPair")
 
         self.horizontalLayout_3.addWidget(self.btnAddBoxPair)
 
-        self.btnRemoveBoxPair = QPushButton(self.widget)
+        self.btnRemoveBoxPair = QPushButton(self.layoutWidget)
         self.btnRemoveBoxPair.setObjectName(u"btnRemoveBoxPair")
 
         self.horizontalLayout_3.addWidget(self.btnRemoveBoxPair)
@@ -115,7 +125,7 @@ class Ui_PdfDisplayView(object):
 
         self.horizontalLayout_3.addItem(self.actionSpacer)
 
-        self.btnRestore = QPushButton(self.widget)
+        self.btnRestore = QPushButton(self.layoutWidget)
         self.btnRestore.setObjectName(u"btnRestore")
 
         self.horizontalLayout_3.addWidget(self.btnRestore)
@@ -123,13 +133,13 @@ class Ui_PdfDisplayView(object):
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_3)
 
-        self.splitter.addWidget(self.widget)
-        self.widget1 = QWidget(self.splitter)
-        self.widget1.setObjectName(u"widget1")
-        self.verticalLayout = QVBoxLayout(self.widget1)
+        self.splitter.addWidget(self.layoutWidget)
+        self.layoutWidget1 = QWidget(self.splitter)
+        self.layoutWidget1.setObjectName(u"layoutWidget1")
+        self.verticalLayout = QVBoxLayout(self.layoutWidget1)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.groupBox_3 = QGroupBox(self.widget1)
+        self.groupBox_3 = QGroupBox(self.layoutWidget1)
         self.groupBox_3.setObjectName(u"groupBox_3")
         self.verticalLayout_3 = QVBoxLayout(self.groupBox_3)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
@@ -161,7 +171,7 @@ class Ui_PdfDisplayView(object):
 
         self.verticalLayout.addWidget(self.groupBox_3)
 
-        self.groupBox_2 = QGroupBox(self.widget1)
+        self.groupBox_2 = QGroupBox(self.layoutWidget1)
         self.groupBox_2.setObjectName(u"groupBox_2")
         self.verticalLayout_2 = QVBoxLayout(self.groupBox_2)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
@@ -179,7 +189,7 @@ class Ui_PdfDisplayView(object):
 
         self.verticalLayout.addWidget(self.groupBox_2)
 
-        self.groupBoxProperties = QGroupBox(self.widget1)
+        self.groupBoxProperties = QGroupBox(self.layoutWidget1)
         self.groupBoxProperties.setObjectName(u"groupBoxProperties")
         self.formLayoutProperties = QFormLayout(self.groupBoxProperties)
         self.formLayoutProperties.setObjectName(u"formLayoutProperties")
@@ -238,7 +248,7 @@ class Ui_PdfDisplayView(object):
 
         self.verticalLayout.addWidget(self.groupBoxProperties)
 
-        self.groupBox = QGroupBox(self.widget1)
+        self.groupBox = QGroupBox(self.layoutWidget1)
         self.groupBox.setObjectName(u"groupBox")
         self.horizontalLayout_2 = QHBoxLayout(self.groupBox)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
@@ -265,7 +275,7 @@ class Ui_PdfDisplayView(object):
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
-        self.splitter.addWidget(self.widget1)
+        self.splitter.addWidget(self.layoutWidget1)
 
         self.verticalLayout_5.addWidget(self.splitter)
 
@@ -284,6 +294,7 @@ class Ui_PdfDisplayView(object):
 "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }", None))
         self.btnLoadPDF.setText(QCoreApplication.translate("PdfDisplayView", u"PDF Laden", None))
         self.btnGeneratePDF.setText(QCoreApplication.translate("PdfDisplayView", u"Exportieren", None))
+        self.btnMenuOpenClose.setText("")
         self.btnZoomIn.setText(QCoreApplication.translate("PdfDisplayView", u"+", None))
         self.btnZoomOut.setText(QCoreApplication.translate("PdfDisplayView", u"\u2212", None))
         self.btnAddSingleBox.setText(QCoreApplication.translate("PdfDisplayView", u"Datum hinzuf\u00fcgen", None))

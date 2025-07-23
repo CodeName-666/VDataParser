@@ -39,7 +39,7 @@ PROJECT_ROOT: Path = SCRIPT_DIR.parent  # Annahme: Skript liegt in util/
 DEFAULT_UI_INPUT_DIR: Path = PROJECT_ROOT / "src" / "ui" / "design"
 DEFAULT_UI_OUTPUT_DIR: Path = PROJECT_ROOT / "src" / "ui" / "generated"
 
-RESOURCE_QRC_FILE_REL: Path = Path("resource") / "resources.qrc"
+RESOURCE_QRC_FILE_REL: Path = Path("src/resource") / "resources.qrc"
 RESOURCE_QRC_FILE: Path = PROJECT_ROOT / RESOURCE_QRC_FILE_REL
 RESOURCE_OUTPUT_FILENAME: str = "resources_rc.py"
 
