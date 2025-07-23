@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from dataclasses import dataclass
-from typing import List, Optional, Sequence, Tuple, Protocol
+from typing import List, Optional, Sequence, Tuple
 import io
 
 from log import CustomLogger
@@ -15,7 +14,7 @@ from display import (
 
 from pypdf import PdfReader, PdfWriter, PageObject
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter, landscape
+
 from reportlab.lib.units import mm
 from reportlab.lib import colors
 from .data_generator import DataGenerator
@@ -198,8 +197,16 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     def _overlay_page(self, rows: Sequence[Tuple[str, str, str]]):  # noqa: D401
         if canvas is None:
             return None  # reportlab missing
+
+        template_bytes = self._template_bytes()
+        if template_bytes is None:
+            return None
+
+        page = PdfReader(io.BytesIO(template_bytes)).pages[0]
+        page_w = float(page.mediabox.width)
+        page_h = float(page.mediabox.height)
+
         packet = io.BytesIO()
-        page_w, page_h = landscape(letter)
         can = canvas.Canvas(packet, pagesize=(page_w, page_h))
 
         # can.rotate(90)
