@@ -15,7 +15,7 @@ from .generated import MarketLoaderUi
 class MarketLoaderDialog(QDialog):
     """Dialog, der zwei Lade‑Varianten bietet:
 
-    * **JSON‑Projektdatei** (Pfad auswählen)
+    * **Projektdatei** (Pfad auswählen)
     * **Direkte MySQL‑Verbindung** (Host / Port / DB / User / Passwort)
     """
 
@@ -28,7 +28,7 @@ class MarketLoaderDialog(QDialog):
 
         # ────────────────────────── Signale verbinden ─────────────────────
         self.ui.jsonRadio.toggled.connect(self._update_mode)
-        self.ui.browseJsonBtn.clicked.connect(self._browse_json)
+        self.ui.browseJsonBtn.clicked.connect(self._browse_project)
         self.ui.okBtn.clicked.connect(self.accept)
         self.ui.cancelBtn.clicked.connect(self.reject)
 
@@ -36,7 +36,7 @@ class MarketLoaderDialog(QDialog):
         self._update_mode()
 
     # ────────────────────────── Helferfunktionen ─────────────────────────
-    def _browse_json(self) -> None:
+    def _browse_project(self) -> None:
         """Dateiauswahl‑Dialog für Projektdateien."""
         path, _ = QFileDialog.getOpenFileName(
             self, "Projektdatei wählen", "", "Projektdateien (*.project)"
@@ -48,7 +48,7 @@ class MarketLoaderDialog(QDialog):
         """Aktiviert/Deaktiviert Eingabefelder je nach gewählter Option."""
         json_active = self.ui.jsonRadio.isChecked()
 
-        # JSON‑Felder
+        # Projekt-Datei Felder
         self.ui.jsonPathEdit.setEnabled(json_active)
         self.ui.browseJsonBtn.setEnabled(json_active)
 
@@ -67,7 +67,7 @@ class MarketLoaderDialog(QDialog):
         """Liest die aktuell eingegebenen Daten aus und liefert sie strukturiert."""
         if self.ui.jsonRadio.isChecked():
             return {
-                "mode": "json",
+                "mode": "project",
                 "path": self.ui.jsonPathEdit.text().strip(),
             }
         return {
