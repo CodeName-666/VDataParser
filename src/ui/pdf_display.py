@@ -334,6 +334,7 @@ class PdfDisplay(PersistentBaseUi):
         self._block_property_updates = False # Flag to prevent signal loops
         self._config: PdfDisplayConfig = None
         self._display_dpi = DEFAULT_DISPLAY_DPI
+        self.ui.spinBoxDisplayDpi.setValue(self._display_dpi)
         # --- UI Element Access (using self.ui) ---
         # No need to redefine self.graphicsView etc. if BaseUi is QWidget/QMainWindow
         # Access them directly via self.ui.graphicsView, self.ui.btnLoadPDF, etc.
@@ -383,6 +384,7 @@ class PdfDisplay(PersistentBaseUi):
         self.ui.btnSaveOutputPath.clicked.connect(self.save_output_path)
         self.ui.btnRestore.clicked.connect(self.restore_state)
         self.ui.btnMenuOpenClose.clicked.connect(self.toggle_pdf_view)
+        self.ui.spinBoxDisplayDpi.valueChanged.connect(self.on_dpi_changed)
 
         self.scene.selectionChanged.connect(self.on_scene_selection_changed)
         self.ui.listBoxPairs.itemSelectionChanged.connect(self.on_list_selection_changed)
@@ -615,6 +617,17 @@ class PdfDisplay(PersistentBaseUi):
     @Slot()
     def zoom_out(self):
         self.ui.graphicsView.scale(1 / 1.2, 1 / 1.2)
+
+    @Slot(int)
+    def on_dpi_changed(self, value: int) -> None:
+        """Handle changes of the DPI spin box."""
+        try:
+            self.display_dpi = int(value)
+        except ValueError:
+            return
+        if self.pdfPath:
+            self.load_page(0)
+        self._config_changed()
 
     @Slot()
     def toggle_pdf_view(self) -> None:
@@ -889,6 +902,7 @@ class PdfDisplay(PersistentBaseUi):
 
         if not self._config.is_empty():
             self._display_dpi = self._config.get_dpi()
+            self.ui.spinBoxDisplayDpi.setValue(self._display_dpi)
 
             if clear_existing:
                 self._clear_all_boxes()
