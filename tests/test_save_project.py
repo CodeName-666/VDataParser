@@ -33,7 +33,7 @@ def test_save_project(tmp_path):
     assert obs.save_project(str(tmp_path))
     assert (tmp_path / 'market.json').is_file()
     assert (tmp_path / 'pdf_display_config.json').is_file()
-    assert (tmp_path / 'project.json').is_file()
+    assert (tmp_path / 'project.project').is_file()
     pdf = Path(__file__).resolve().parents[1] / 'src' / 'resource' / 'default_data' / 'Abholung_Template.pdf'
     assert (tmp_path / pdf.name).is_file()
     assert obs.project_exists()
@@ -52,7 +52,7 @@ def test_facade_save_project(tmp_path):
     assert facade.save_project(market, str(tmp_path))
     assert (tmp_path / 'market.json').is_file()
     assert (tmp_path / 'pdf_display_config.json').is_file()
-    assert (tmp_path / 'project.json').is_file()
+    assert (tmp_path / 'project.project').is_file()
     pdf = Path(__file__).resolve().parents[1] / 'src' / 'resource' / 'default_data' / 'Abholung_Template.pdf'
     assert (tmp_path / pdf.name).is_file()
     assert facade.is_project(market)

@@ -336,7 +336,7 @@ class MarketObserver(QObject):
             target_dir.mkdir(parents=True, exist_ok=True)
             self.data_manager.save(str(target_dir / market_file))
             self.pdf_display_config_loader.save(str(target_dir / "pdf_display_config.json"))
-            self.market_config_handler.save_to(str(target_dir / "project.json"))
+            self.market_config_handler.save_to(str(target_dir / "project.project"))
             pdf_path = self.pdf_display_config_loader.get_full_pdf_path()
             if pdf_path and Path(pdf_path).is_file():
                 shutil.copy(pdf_path, target_dir / Path(pdf_path).name)
@@ -642,7 +642,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                 or "pdf_display_config.json"
             )
             project_file = target_dir / (
-                observer.market_config_handler.get_storage_file_name() or "project.json"
+                observer.market_config_handler.get_storage_file_name() or "project.project"
             )
 
             observer.data_manager.json_data = observer.data_manager.export_to_json()

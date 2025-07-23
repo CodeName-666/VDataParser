@@ -37,9 +37,9 @@ class MarketLoaderDialog(QDialog):
 
     # ────────────────────────── Helferfunktionen ─────────────────────────
     def _browse_json(self) -> None:
-        """Dateiauswahl‑Dialog für JSON‑Projektdateien."""
+        """Dateiauswahl‑Dialog für Projektdateien."""
         path, _ = QFileDialog.getOpenFileName(
-            self, "JSON‑Projektdatei wählen", "", "JSON‑Dateien (*.json)"
+            self, "Projektdatei wählen", "", "Projektdateien (*.project)"
         )
         if path:
             self.ui.jsonPathEdit.setText(path)
