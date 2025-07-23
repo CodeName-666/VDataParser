@@ -438,10 +438,18 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         """
         new_observer = self.create_observer(market)
         new_observer.connect_signals(market)
-        ret = new_observer.load_local_market_export(json_path)
-        if ret:
-            if self._ask_for_project_creation():
-                self.create_project_from_export(market, json_path, "")
+    
+        if self._ask_for_project_creation():
+            ret, target = self.create_project_from_export(market, json_path, "")
+            if ret:
+                json_file = Path(json_path)
+                json_path = str(target / json_file.name)
+            else:
+                self.status_info.emit("ERROR", "Projekt konnte nicht erstellt werden")
+            
+            ret = new_observer.load_local_market_export(json_path)
+                
+        
         return ret
 
     def market_already_exists(self, market) -> bool:
@@ -482,16 +490,16 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
     def create_project_from_export(self, market, export_path: str, target_dir: str) -> bool:
         """Create a project configuration from a loaded export."""
 
-        observer = self.get_observer(market)
+        observer: MarketObserver = self.get_observer(market)
         if not observer:
             self.status_info.emit("ERROR", "Kein Observer gefunden")
-            return False
+            return False, None
 
         chosen_dir = target_dir
         if not chosen_dir:
             chosen_dir = QFileDialog.getExistingDirectory(market, "Projektordner wählen")
             if not chosen_dir:
-                return False
+                return False, None
 
         try:
             target = Path(chosen_dir)
@@ -501,7 +509,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             shutil.move(str(export_file), new_export)
         except Exception as err:
             self.status_info.emit("ERROR", f"Export konnte nicht verschoben werden: {err}")
-            return False
+            return False, None
 
         observer.init_project(str(new_export))
         project_file = target / "project.project"
@@ -509,7 +517,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             observer.market_config_handler.save_to(str(project_file))
         except Exception as err:
             self.status_info.emit("ERROR", f"Projekt konnte nicht erstellt werden: {err}")
-            return False
+            return False, None
 
         observer.set_project_dir(str(target))
         observer.set_project_exists(True)
@@ -517,7 +525,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         if observer._ask_for_default_pdf_config():
             observer._load_default_pdf_config(str(project_file))
 
-        return True
+        return True, target
 
     @Slot(object, object)
     def create_pdf_data(self, market, window) -> bool:
