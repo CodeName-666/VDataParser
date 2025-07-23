@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'pdf_display.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.9.1
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -34,9 +34,9 @@ class Ui_PdfDisplayView(object):
         self.splitter.setOrientation(Qt.Orientation.Horizontal)
         self.layoutWidget = QWidget(self.splitter)
         self.layoutWidget.setObjectName(u"layoutWidget")
-        self.verticalLayout_4 = QVBoxLayout(self.layoutWidget)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.user_interface_layout = QVBoxLayout(self.layoutWidget)
+        self.user_interface_layout.setObjectName(u"user_interface_layout")
+        self.user_interface_layout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_toolbar = QHBoxLayout()
         self.horizontalLayout_toolbar.setSpacing(6)
         self.horizontalLayout_toolbar.setObjectName(u"horizontalLayout_toolbar")
@@ -64,7 +64,7 @@ class Ui_PdfDisplayView(object):
         self.horizontalLayout_toolbar.addWidget(self.btnMenuOpenClose)
 
 
-        self.verticalLayout_4.addLayout(self.horizontalLayout_toolbar)
+        self.user_interface_layout.addLayout(self.horizontalLayout_toolbar)
 
         self.verticalLayout_pdf = QVBoxLayout()
         self.verticalLayout_pdf.setObjectName(u"verticalLayout_pdf")
@@ -103,7 +103,7 @@ class Ui_PdfDisplayView(object):
         self.verticalLayout_pdf.addLayout(self.horizontalLayout_zoom)
 
 
-        self.verticalLayout_4.addLayout(self.verticalLayout_pdf)
+        self.user_interface_layout.addLayout(self.verticalLayout_pdf)
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
@@ -132,14 +132,14 @@ class Ui_PdfDisplayView(object):
         self.horizontalLayout_3.addWidget(self.btnRestore)
 
 
-        self.verticalLayout_4.addLayout(self.horizontalLayout_3)
+        self.user_interface_layout.addLayout(self.horizontalLayout_3)
 
         self.splitter.addWidget(self.layoutWidget)
         self.layoutWidget1 = QWidget(self.splitter)
         self.layoutWidget1.setObjectName(u"layoutWidget1")
-        self.verticalLayout = QVBoxLayout(self.layoutWidget1)
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.pdf_display_layout = QVBoxLayout(self.layoutWidget1)
+        self.pdf_display_layout.setObjectName(u"pdf_display_layout")
+        self.pdf_display_layout.setContentsMargins(0, 0, 0, 0)
         self.groupBox_3 = QGroupBox(self.layoutWidget1)
         self.groupBox_3.setObjectName(u"groupBox_3")
         self.verticalLayout_3 = QVBoxLayout(self.groupBox_3)
@@ -170,7 +170,7 @@ class Ui_PdfDisplayView(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout)
 
 
-        self.verticalLayout.addWidget(self.groupBox_3)
+        self.pdf_display_layout.addWidget(self.groupBox_3)
 
         self.groupBoxDisplayDpi = QGroupBox(self.layoutWidget1)
         self.groupBoxDisplayDpi.setObjectName(u"groupBoxDisplayDpi")
@@ -185,7 +185,7 @@ class Ui_PdfDisplayView(object):
         self.horizontalLayout_display_dpi.addWidget(self.spinBoxDisplayDpi)
 
 
-        self.verticalLayout.addWidget(self.groupBoxDisplayDpi)
+        self.pdf_display_layout.addWidget(self.groupBoxDisplayDpi)
 
         self.groupBox_2 = QGroupBox(self.layoutWidget1)
         self.groupBox_2.setObjectName(u"groupBox_2")
@@ -203,7 +203,7 @@ class Ui_PdfDisplayView(object):
         self.verticalLayout_2.addWidget(self.listBoxPairs)
 
 
-        self.verticalLayout.addWidget(self.groupBox_2)
+        self.pdf_display_layout.addWidget(self.groupBox_2)
 
         self.groupBoxProperties = QGroupBox(self.layoutWidget1)
         self.groupBoxProperties.setObjectName(u"groupBoxProperties")
@@ -213,7 +213,7 @@ class Ui_PdfDisplayView(object):
         self.labelX = QLabel(self.groupBoxProperties)
         self.labelX.setObjectName(u"labelX")
 
-        self.formLayoutProperties.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelX)
+        self.formLayoutProperties.setWidget(0, QFormLayout.LabelRole, self.labelX)
 
         self.lineEditX = QLineEdit(self.groupBoxProperties)
         self.lineEditX.setObjectName(u"lineEditX")
@@ -223,46 +223,46 @@ class Ui_PdfDisplayView(object):
         sizePolicy2.setHeightForWidth(self.lineEditX.sizePolicy().hasHeightForWidth())
         self.lineEditX.setSizePolicy(sizePolicy2)
 
-        self.formLayoutProperties.setWidget(0, QFormLayout.ItemRole.FieldRole, self.lineEditX)
+        self.formLayoutProperties.setWidget(0, QFormLayout.FieldRole, self.lineEditX)
 
         self.labelY = QLabel(self.groupBoxProperties)
         self.labelY.setObjectName(u"labelY")
 
-        self.formLayoutProperties.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelY)
+        self.formLayoutProperties.setWidget(1, QFormLayout.LabelRole, self.labelY)
 
         self.lineEditY = QLineEdit(self.groupBoxProperties)
         self.lineEditY.setObjectName(u"lineEditY")
         sizePolicy2.setHeightForWidth(self.lineEditY.sizePolicy().hasHeightForWidth())
         self.lineEditY.setSizePolicy(sizePolicy2)
 
-        self.formLayoutProperties.setWidget(1, QFormLayout.ItemRole.FieldRole, self.lineEditY)
+        self.formLayoutProperties.setWidget(1, QFormLayout.FieldRole, self.lineEditY)
 
         self.labelWidth = QLabel(self.groupBoxProperties)
         self.labelWidth.setObjectName(u"labelWidth")
 
-        self.formLayoutProperties.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labelWidth)
+        self.formLayoutProperties.setWidget(2, QFormLayout.LabelRole, self.labelWidth)
 
         self.lineEditWidth = QLineEdit(self.groupBoxProperties)
         self.lineEditWidth.setObjectName(u"lineEditWidth")
         sizePolicy2.setHeightForWidth(self.lineEditWidth.sizePolicy().hasHeightForWidth())
         self.lineEditWidth.setSizePolicy(sizePolicy2)
 
-        self.formLayoutProperties.setWidget(2, QFormLayout.ItemRole.FieldRole, self.lineEditWidth)
+        self.formLayoutProperties.setWidget(2, QFormLayout.FieldRole, self.lineEditWidth)
 
         self.labelHeight = QLabel(self.groupBoxProperties)
         self.labelHeight.setObjectName(u"labelHeight")
 
-        self.formLayoutProperties.setWidget(3, QFormLayout.ItemRole.LabelRole, self.labelHeight)
+        self.formLayoutProperties.setWidget(3, QFormLayout.LabelRole, self.labelHeight)
 
         self.lineEditHeight = QLineEdit(self.groupBoxProperties)
         self.lineEditHeight.setObjectName(u"lineEditHeight")
         sizePolicy2.setHeightForWidth(self.lineEditHeight.sizePolicy().hasHeightForWidth())
         self.lineEditHeight.setSizePolicy(sizePolicy2)
 
-        self.formLayoutProperties.setWidget(3, QFormLayout.ItemRole.FieldRole, self.lineEditHeight)
+        self.formLayoutProperties.setWidget(3, QFormLayout.FieldRole, self.lineEditHeight)
 
 
-        self.verticalLayout.addWidget(self.groupBoxProperties)
+        self.pdf_display_layout.addWidget(self.groupBoxProperties)
 
         self.groupBox = QGroupBox(self.layoutWidget1)
         self.groupBox.setObjectName(u"groupBox")
@@ -285,11 +285,11 @@ class Ui_PdfDisplayView(object):
         self.horizontalLayout_2.addLayout(self.layoutOutput)
 
 
-        self.verticalLayout.addWidget(self.groupBox)
+        self.pdf_display_layout.addWidget(self.groupBox)
 
         self.verticalSpacer = QSpacerItem(20, 17, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout.addItem(self.verticalSpacer)
+        self.pdf_display_layout.addItem(self.verticalSpacer)
 
         self.splitter.addWidget(self.layoutWidget1)
 

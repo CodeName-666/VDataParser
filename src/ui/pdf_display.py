@@ -346,8 +346,8 @@ class PdfDisplay(PersistentBaseUi):
         self.ui.graphicsView.setDragMode(QGraphicsView.ScrollHandDrag) # Allow panning
 
         # Start with the configuration panel visible and hide the PDF view
-        self.ui.layoutWidget.hide()
-        self.ui.splitter.setSizes([0, 1])
+        self.ui.layoutWidget1.hide()
+        self.ui.splitter.setSizes([1, 0])
 
         # --- Connect Signals ---
         self.setup_connections()
@@ -632,10 +632,10 @@ class PdfDisplay(PersistentBaseUi):
     @Slot()
     def toggle_pdf_view(self) -> None:
         """Show or hide the PDF view panel."""
-        widget = self.ui.layoutWidget
+        widget = self.ui.layoutWidget1
         if widget.isVisible():
             widget.hide()
-            self.ui.splitter.setSizes([0, 1])
+            self.ui.splitter.setSizes([1, 0])
         else:
             widget.show()
             self.ui.splitter.setSizes([1, 1])

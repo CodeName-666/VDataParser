@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'login.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.9.1
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -31,53 +31,53 @@ class Ui_LoginDialog(object):
         self.labelHost = QLabel(LoginDialog)
         self.labelHost.setObjectName(u"labelHost")
 
-        self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelHost)
+        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.labelHost)
 
         self.lineEditHost = QLineEdit(LoginDialog)
         self.lineEditHost.setObjectName(u"lineEditHost")
 
-        self.formLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.lineEditHost)
+        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.lineEditHost)
 
         self.labelPort = QLabel(LoginDialog)
         self.labelPort.setObjectName(u"labelPort")
 
-        self.formLayout.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelPort)
+        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.labelPort)
 
         self.lineEditPort = QLineEdit(LoginDialog)
         self.lineEditPort.setObjectName(u"lineEditPort")
 
-        self.formLayout.setWidget(1, QFormLayout.ItemRole.FieldRole, self.lineEditPort)
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.lineEditPort)
 
         self.labelUser = QLabel(LoginDialog)
         self.labelUser.setObjectName(u"labelUser")
 
-        self.formLayout.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labelUser)
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.labelUser)
 
         self.lineEditUser = QLineEdit(LoginDialog)
         self.lineEditUser.setObjectName(u"lineEditUser")
 
-        self.formLayout.setWidget(2, QFormLayout.ItemRole.FieldRole, self.lineEditUser)
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.lineEditUser)
 
         self.labelPassword = QLabel(LoginDialog)
         self.labelPassword.setObjectName(u"labelPassword")
 
-        self.formLayout.setWidget(3, QFormLayout.ItemRole.LabelRole, self.labelPassword)
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.labelPassword)
 
         self.lineEditPassword = QLineEdit(LoginDialog)
         self.lineEditPassword.setObjectName(u"lineEditPassword")
         self.lineEditPassword.setEchoMode(QLineEdit.EchoMode.Password)
 
-        self.formLayout.setWidget(3, QFormLayout.ItemRole.FieldRole, self.lineEditPassword)
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.lineEditPassword)
 
         self.labelDatabase = QLabel(LoginDialog)
         self.labelDatabase.setObjectName(u"labelDatabase")
 
-        self.formLayout.setWidget(4, QFormLayout.ItemRole.LabelRole, self.labelDatabase)
+        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.labelDatabase)
 
         self.lineEditDatabase = QLineEdit(LoginDialog)
         self.lineEditDatabase.setObjectName(u"lineEditDatabase")
 
-        self.formLayout.setWidget(4, QFormLayout.ItemRole.FieldRole, self.lineEditDatabase)
+        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.lineEditDatabase)
 
 
         self.verticalLayout.addLayout(self.formLayout)
