@@ -345,6 +345,10 @@ class PdfDisplay(PersistentBaseUi):
         self.ui.graphicsView.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
         self.ui.graphicsView.setDragMode(QGraphicsView.ScrollHandDrag) # Allow panning
 
+        # Start with the configuration panel visible and hide the PDF view
+        self.ui.layoutWidget.hide()
+        self.ui.splitter.setSizes([0, 1])
+
         # --- Connect Signals ---
         self.setup_connections()
 
@@ -379,6 +383,7 @@ class PdfDisplay(PersistentBaseUi):
         self.ui.btnLoadConfig.clicked.connect(self.load_state)
         self.ui.btnSaveOutputPath.clicked.connect(self.save_output_path)
         self.ui.btnRestore.clicked.connect(self.restore_state)
+        self.ui.btnMenuOpenClose.clicked.connect(self.toggle_pdf_view)
         self.ui.spinBoxDisplayDpi.valueChanged.connect(self.on_dpi_changed)
 
         self.scene.selectionChanged.connect(self.on_scene_selection_changed)
@@ -623,6 +628,17 @@ class PdfDisplay(PersistentBaseUi):
         if self.pdfPath:
             self.load_page(0)
         self._config_changed()
+
+    @Slot()
+    def toggle_pdf_view(self) -> None:
+        """Show or hide the PDF view panel."""
+        widget = self.ui.layoutWidget
+        if widget.isVisible():
+            widget.hide()
+            self.ui.splitter.setSizes([0, 1])
+        else:
+            widget.show()
+            self.ui.splitter.setSizes([1, 1])
 
 
     # --- State Persistence ---
