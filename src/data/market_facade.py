@@ -512,7 +512,8 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             return False, None
 
         observer.init_project(str(new_export))
-        project_file = target / "project.project"
+        project_name = Path(new_export).stem + ".project"
+        project_file = target / project_name
         try:
             observer.market_config_handler.save_to(str(project_file))
         except Exception as err:
