@@ -148,7 +148,7 @@ class Ui_MarketLoaderDialog(object):
 "QPushButton:hover { background-color: #005a9e; }\n"
 "QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
 "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }", None))
-        self.jsonRadio.setText(QCoreApplication.translate("MarketLoaderDialog", u"JSON-Projektdatei verwenden", None))
+        self.jsonRadio.setText(QCoreApplication.translate("MarketLoaderDialog", u"Projektdatei verwenden", None))
         self.labelJson.setText(QCoreApplication.translate("MarketLoaderDialog", u"Projektdatei:", None))
         self.browseJsonBtn.setText(QCoreApplication.translate("MarketLoaderDialog", u"Durchsuchen \u2026", None))
         self.mysqlRadio.setText(QCoreApplication.translate("MarketLoaderDialog", u"Direkte MySQL-Verbindung", None))

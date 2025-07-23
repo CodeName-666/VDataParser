@@ -149,7 +149,7 @@ class MainWindow(QMainWindow):
         dialog = MarketLoaderDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             market_loader_info = dialog.get_result()
-            if market_loader_info["mode"] == "json":
+            if market_loader_info["mode"] == "project":
                 ret = self.market_facade.load_local_market_porject(self.market_view,market_loader_info["path"])
             elif market_loader_info["mode"] == "mysql":
                 ret = self.market_facade.load_online_market(self.market_view, market_loader_info)

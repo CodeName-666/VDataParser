@@ -24,7 +24,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    <item>
     <widget class="QRadioButton" name="jsonRadio">
      <property name="text">
-      <string>JSON-Projektdatei verwenden</string>
+      <string>Projektdatei verwenden</string>
      </property>
      <property name="checked">
       <bool>true</bool>
