@@ -89,8 +89,17 @@ class Market(BaseUi):
         msg_box.setIcon(QMessageBox.Question)
         msg_box.setWindowTitle("Änderungen speichern?")
         msg_box.setText("Möchten Sie die Änderungen speichern?")
-        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
         msg_box.setDefaultButton(QMessageBox.Yes)
+
+        yes_button = msg_box.button(QMessageBox.Yes)
+        discard_button = msg_box.button(QMessageBox.No)
+        cancel_button = msg_box.button(QMessageBox.Cancel)
+
+        yes_button.setText("Speichern")
+        discard_button.setText("Verwerfen")
+        cancel_button.setText("Abbrechen")
+
         result = msg_box.exec()
 
         if result == QMessageBox.Yes:
@@ -99,6 +108,7 @@ class Market(BaseUi):
         elif result == QMessageBox.No:
             if hasattr(widget, "restore_state"):
                 widget.restore_state()
+        # Bei Cancel oder Schließen passiert nichts
         
         # Bei Cancel oder Schließen passiert nichts_to_save(self, widget):
 
