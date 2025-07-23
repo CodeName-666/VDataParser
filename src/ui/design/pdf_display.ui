@@ -27,7 +27,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout_4">
+      <layout class="QVBoxLayout" name="user_interface_layout">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_toolbar">
          <property name="spacing">
@@ -200,7 +200,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
       </layout>
      </widget>
      <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <layout class="QVBoxLayout" name="pdf_display_layout">
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
