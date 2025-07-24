@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
     QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem # Other items might be here
 )
 from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor
-from PySide6.QtCore import Qt, QRectF, QPointF, Signal, Slot, QSize, QObject
+from PySide6.QtCore import Qt, QRectF, QPointF, Signal, Slot, QSize, QObject, QDate
 from PySide6.QtPdf import QPdfDocument
 from pathlib import Path
 
@@ -335,6 +335,7 @@ class PdfDisplay(PersistentBaseUi):
         self._config: PdfDisplayConfig = None
         self._display_dpi = DEFAULT_DISPLAY_DPI
         self.ui.spinBoxDisplayDpi.setValue(self._display_dpi)
+        self.ui.dateEditPickup.setDate(QDate.currentDate())
         # --- UI Element Access (using self.ui) ---
         # No need to redefine self.graphicsView etc. if BaseUi is QWidget/QMainWindow
         # Access them directly via self.ui.graphicsView, self.ui.btnLoadPDF, etc.
@@ -872,6 +873,7 @@ class PdfDisplay(PersistentBaseUi):
         config.set_full_pdf_path(self.pdfPath)
         config.set_full_output_path(self.ui.lineEditOutputPath.text())
         config.set_dpi(self._display_dpi)
+        config.set_pickup_date(self.ui.dateEditPickup.date().toString("yyyy-MM-dd"))
         
 
         # Box-Paare hinzufügen
@@ -903,6 +905,14 @@ class PdfDisplay(PersistentBaseUi):
         if not self._config.is_empty():
             self._display_dpi = self._config.get_dpi()
             self.ui.spinBoxDisplayDpi.setValue(self._display_dpi)
+
+            pickup = self._config.get_pickup_date()
+            if pickup:
+                date = QDate.fromString(pickup, "yyyy-MM-dd")
+                if date.isValid():
+                    self.ui.dateEditPickup.setDate(date)
+            else:
+                self.ui.dateEditPickup.setDate(QDate.currentDate())
 
             if clear_existing:
                 self._clear_all_boxes()

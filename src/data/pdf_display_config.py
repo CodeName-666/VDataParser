@@ -68,6 +68,7 @@ class PdfDisplayConfig(QObject, JsonHandler):
         "output_path": "",
         "output_name": "",
         "dpi": 150,
+        "pickup_date": "",
         "boxPairs": [],
         "singleBoxes": [],
     }
@@ -147,6 +148,16 @@ class PdfDisplayConfig(QObject, JsonHandler):
 
     def set_dpi(self, value: int) -> None:
         self.set_key_value(["dpi"], int(value))
+
+    # ------------------------------------------------------------------
+    # Pickup date handling
+    # ------------------------------------------------------------------
+    def get_pickup_date(self) -> str:
+        """Return the configured pickup date string."""
+        return str(self.get_key_value(["pickup_date"]) or "")
+
+    def set_pickup_date(self, value: str) -> None:
+        self.set_key_value(["pickup_date"], str(value))
 
     def get_full_pdf_path(self) -> str:
         """Return the absolute PDF path composed of directory and file name."""

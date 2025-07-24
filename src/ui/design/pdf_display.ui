@@ -245,10 +245,10 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBoxDisplayDpi">
-         <property name="title">
-          <string>PDF DPI</string>
-         </property>
+       <widget class="QGroupBox" name="groupBoxDisplayDpi">
+        <property name="title">
+         <string>PDF DPI</string>
+        </property>
          <layout class="QHBoxLayout" name="horizontalLayout_display_dpi">
           <item>
            <widget class="QSpinBox" name="spinBoxDisplayDpi">
@@ -264,10 +264,29 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
            </widget>
           </item>
          </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_2">
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBoxPickupDate">
+        <property name="title">
+         <string>Abholdatum</string>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_pickup_date">
+         <item>
+          <widget class="QDateEdit" name="dateEditPickup">
+           <property name="calendarPopup">
+            <bool>true</bool>
+           </property>
+           <property name="displayFormat">
+            <string>dd.MM.yyyy</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
           <string>Name und Stammnummer</string>
          </property>

@@ -246,6 +246,7 @@ class MarketObserver(QObject):
         outputname = self.pdf_display_config_loader.get_output_name()
         coordinates = self.pdf_display_config_loader.convert_json_to_coordinate_list()
         dpi = self.pdf_display_config_loader.get_dpi()
+        pickup_date = self.pdf_display_config_loader.get_pickup_date()
 
 
         self.file_generator = FileGenerator(
@@ -257,6 +258,7 @@ class MarketObserver(QObject):
             pdf_output_file_name= outputname,
             pdf_coordinates= coordinates ,
             pdf_display_dpi=dpi,
+            pickup_date=pickup_date,
         )
         self.file_generator.create_pdf_data()
         self.status_info.emit(
@@ -303,6 +305,7 @@ class MarketObserver(QObject):
             pass
 
         pdf_settings = self.market_config_handler.get_pdf_generation_data()
+        pickup_date = self.pdf_display_config_loader.get_pickup_date()
         self.file_generator = FileGenerator(
             self.fm,
             output_interface=window,
@@ -318,6 +321,7 @@ class MarketObserver(QObject):
             ),
             pdf_coordinates=pdf_settings.get("coordinates"),
             pdf_display_dpi=dpi,
+            pickup_date=pickup_date,
         )
         self.file_generator.create_all()
         self.status_info.emit(

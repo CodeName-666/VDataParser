@@ -91,6 +91,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         output_name: str | Path = "abholbestaetigung.pdf",
         coordinates: Optional[List[CoordinatesConfig]] = None,
         display_dpi: int = DEFAULT_DISPLAY_DPI,
+        pickup_date: str = "",
         logger: Optional[CustomLogger] = None,
         output_interface: Optional[OutputInterfaceAbstraction] = None,
     ):
@@ -103,6 +104,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self._template_path = Path(pdf_template) if pdf_template else None
         self._coords: List[CoordinatesConfig] = coordinates or self.DEFAULT_COORDS
         self._display_dpi = display_dpi
+        self._pickup_date = pickup_date
         if not self._coords:
             raise ValueError(
                 "Es wurden keine Koordinaten definiert und ReportLab ist nicht verfügbar."
@@ -157,6 +159,15 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     def output_pdf(self, value: str | Path) -> None:
         self._output_pdf = Path(value)
 
+    @property
+    def pickup_date(self) -> str:
+        """Date string inserted into the PDF."""
+        return self._pickup_date
+
+    @pickup_date.setter
+    def pickup_date(self, value: str) -> None:
+        self._pickup_date = value
+
     # ------------------------------------------------------------------
     # Data collection helpers
     # ------------------------------------------------------------------
@@ -174,7 +185,8 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
                 name = f"{getattr(seller, 'nachname', 'Unbekannt')}, {getattr(seller, 'vorname', 'Unbekannt')}"
             except Exception:
                 name = "Unbekannt, Unbekannt"
-            rows.append((name, number, "TEST DATUM"))
+            date = self._pickup_date or "TEST DATUM"
+            rows.append((name, number, date))
         return rows
 
     # ------------------------------------------------------------------

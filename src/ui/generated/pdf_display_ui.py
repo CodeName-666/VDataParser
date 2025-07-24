@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'pdf_display.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.2
+## Created by: Qt User Interface Compiler version 6.9.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -15,11 +15,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QButtonGroup, QFormLayout, QGraphicsView,
-    QGroupBox, QHBoxLayout, QLabel, QLineEdit,
-    QListWidget, QListWidgetItem, QPushButton, QSizePolicy,
-    QSpacerItem, QSpinBox, QSplitter, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QButtonGroup, QDateEdit, QFormLayout,
+    QGraphicsView, QGroupBox, QHBoxLayout, QLabel,
+    QLineEdit, QListWidget, QListWidgetItem, QPushButton,
+    QSizePolicy, QSpacerItem, QSpinBox, QSplitter,
+    QVBoxLayout, QWidget)
 import resources_rc
 
 class Ui_PdfDisplayView(object):
@@ -187,6 +187,19 @@ class Ui_PdfDisplayView(object):
 
         self.pdf_display_layout.addWidget(self.groupBoxDisplayDpi)
 
+        self.groupBoxPickupDate = QGroupBox(self.layoutWidget1)
+        self.groupBoxPickupDate.setObjectName(u"groupBoxPickupDate")
+        self.horizontalLayout_pickup_date = QHBoxLayout(self.groupBoxPickupDate)
+        self.horizontalLayout_pickup_date.setObjectName(u"horizontalLayout_pickup_date")
+        self.dateEditPickup = QDateEdit(self.groupBoxPickupDate)
+        self.dateEditPickup.setObjectName(u"dateEditPickup")
+        self.dateEditPickup.setCalendarPopup(True)
+
+        self.horizontalLayout_pickup_date.addWidget(self.dateEditPickup)
+
+
+        self.pdf_display_layout.addWidget(self.groupBoxPickupDate)
+
         self.groupBox_2 = QGroupBox(self.layoutWidget1)
         self.groupBox_2.setObjectName(u"groupBox_2")
         self.verticalLayout_2 = QVBoxLayout(self.groupBox_2)
@@ -213,7 +226,7 @@ class Ui_PdfDisplayView(object):
         self.labelX = QLabel(self.groupBoxProperties)
         self.labelX.setObjectName(u"labelX")
 
-        self.formLayoutProperties.setWidget(0, QFormLayout.LabelRole, self.labelX)
+        self.formLayoutProperties.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelX)
 
         self.lineEditX = QLineEdit(self.groupBoxProperties)
         self.lineEditX.setObjectName(u"lineEditX")
@@ -223,43 +236,43 @@ class Ui_PdfDisplayView(object):
         sizePolicy2.setHeightForWidth(self.lineEditX.sizePolicy().hasHeightForWidth())
         self.lineEditX.setSizePolicy(sizePolicy2)
 
-        self.formLayoutProperties.setWidget(0, QFormLayout.FieldRole, self.lineEditX)
+        self.formLayoutProperties.setWidget(0, QFormLayout.ItemRole.FieldRole, self.lineEditX)
 
         self.labelY = QLabel(self.groupBoxProperties)
         self.labelY.setObjectName(u"labelY")
 
-        self.formLayoutProperties.setWidget(1, QFormLayout.LabelRole, self.labelY)
+        self.formLayoutProperties.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelY)
 
         self.lineEditY = QLineEdit(self.groupBoxProperties)
         self.lineEditY.setObjectName(u"lineEditY")
         sizePolicy2.setHeightForWidth(self.lineEditY.sizePolicy().hasHeightForWidth())
         self.lineEditY.setSizePolicy(sizePolicy2)
 
-        self.formLayoutProperties.setWidget(1, QFormLayout.FieldRole, self.lineEditY)
+        self.formLayoutProperties.setWidget(1, QFormLayout.ItemRole.FieldRole, self.lineEditY)
 
         self.labelWidth = QLabel(self.groupBoxProperties)
         self.labelWidth.setObjectName(u"labelWidth")
 
-        self.formLayoutProperties.setWidget(2, QFormLayout.LabelRole, self.labelWidth)
+        self.formLayoutProperties.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labelWidth)
 
         self.lineEditWidth = QLineEdit(self.groupBoxProperties)
         self.lineEditWidth.setObjectName(u"lineEditWidth")
         sizePolicy2.setHeightForWidth(self.lineEditWidth.sizePolicy().hasHeightForWidth())
         self.lineEditWidth.setSizePolicy(sizePolicy2)
 
-        self.formLayoutProperties.setWidget(2, QFormLayout.FieldRole, self.lineEditWidth)
+        self.formLayoutProperties.setWidget(2, QFormLayout.ItemRole.FieldRole, self.lineEditWidth)
 
         self.labelHeight = QLabel(self.groupBoxProperties)
         self.labelHeight.setObjectName(u"labelHeight")
 
-        self.formLayoutProperties.setWidget(3, QFormLayout.LabelRole, self.labelHeight)
+        self.formLayoutProperties.setWidget(3, QFormLayout.ItemRole.LabelRole, self.labelHeight)
 
         self.lineEditHeight = QLineEdit(self.groupBoxProperties)
         self.lineEditHeight.setObjectName(u"lineEditHeight")
         sizePolicy2.setHeightForWidth(self.lineEditHeight.sizePolicy().hasHeightForWidth())
         self.lineEditHeight.setSizePolicy(sizePolicy2)
 
-        self.formLayoutProperties.setWidget(3, QFormLayout.FieldRole, self.lineEditHeight)
+        self.formLayoutProperties.setWidget(3, QFormLayout.ItemRole.FieldRole, self.lineEditHeight)
 
 
         self.pdf_display_layout.addWidget(self.groupBoxProperties)
@@ -322,6 +335,8 @@ class Ui_PdfDisplayView(object):
         self.btnSaveConfig.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern", None))
         self.btnSaveAsConfig.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern unter", None))
         self.groupBoxDisplayDpi.setTitle(QCoreApplication.translate("PdfDisplayView", u"PDF DPI", None))
+        self.groupBoxPickupDate.setTitle(QCoreApplication.translate("PdfDisplayView", u"Abholdatum", None))
+        self.dateEditPickup.setDisplayFormat(QCoreApplication.translate("PdfDisplayView", u"dd.MM.yyyy", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("PdfDisplayView", u"Name und Stammnummer", None))
         self.groupBoxProperties.setTitle(QCoreApplication.translate("PdfDisplayView", u"Box Eigenschaften", None))
         self.labelX.setText(QCoreApplication.translate("PdfDisplayView", u"X:", None))
