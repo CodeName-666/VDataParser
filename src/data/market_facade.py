@@ -7,7 +7,7 @@ from .data_manager import DataManager
 from .market_config_handler import MarketConfigHandler
 from .singelton_meta import SingletonMeta
 from .pdf_display_config import PdfDisplayConfig
-from generator import FileGenerator
+from generator.file_generator import FileGenerator
 from objects import FleatMarket, SettingsContentDataClass
 from display import BasicProgressTracker
 from typing import List, Dict, Any, Union
