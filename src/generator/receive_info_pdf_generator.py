@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""PDF generator for receive confirmations."""
+
 from pathlib import Path
 from typing import List, Optional, Sequence, Tuple
 import io
@@ -41,14 +43,7 @@ class _NoOpTracker:  # noqa: D101
 # Main class
 # ---------------------------------------------------------------------------
 class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docstring
-    # DEFAULT_COORDS = [
-    #    CoordinatesConfig(20 * mm , 130 * mm, 80 * mm , 130 * mm, 140 * mm, 130 * mm),
-    #    CoordinatesConfig(160 * mm, 130 * mm, 220 * mm, 130 * mm, 280 * mm, 130 * mm),
-    #    CoordinatesConfig(20 * mm , 30 * mm , 80 * mm , 30 * mm , 140 * mm, 30 * mm),
-    #    CoordinatesConfig(160 * mm, 30 * mm , 220 * mm, 30 * mm , 280 * mm, 30 * mm),
-    #
-    #
-    # ] if mm else []  # empty if reportlab absent
+    """Generate PDFs with seller receive confirmations."""
 
     DEFAULT_COORDS = (
         [
@@ -99,6 +94,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         logger: Optional[CustomLogger] = None,
         output_interface: Optional[OutputInterfaceAbstraction] = None,
     ):
+        """Initialize the PDF generator."""
 
         opath = Path(output_name)
         super().__init__(path, opath.stem, logger, output_interface)
@@ -239,12 +235,49 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             self._output_and_log("ERROR", f"Fehler beim Schreiben der PDF: {err}")
             return False
 
+    def _create_writer(
+        self,
+        rows: Sequence[Tuple[str, str, str]],
+        template: bytes,
+        tracker: _TrackerBase,
+    ) -> PdfWriter:
+        """Build a ``PdfWriter`` with all pages."""
+
+        writer = PdfWriter()
+        for i in range(0, len(rows), self._entries_per_page):
+            grp = rows[i : i + self._entries_per_page]
+            try:
+                base = PdfReader(io.BytesIO(template)).pages[0]
+                ovl = self._overlay_page(grp)
+                if ovl:
+                    base.merge_page(ovl)
+                writer.add_page(base)
+                if hasattr(tracker, "increment"):
+                    tracker.increment()  # type: ignore[misc]
+            except Exception as err:  # pragma: no cover
+                tracker.set_error(err)
+                break
+        return writer
+
+    def _task(
+        self,
+        rows: Sequence[Tuple[str, str, str]],
+        template: bytes,
+        tracker: _TrackerBase,
+    ) -> None:
+        """Generate pages and write them to disk."""
+
+        writer = self._create_writer(rows, template, tracker)
+        if not tracker.has_error:
+            self._write_pdf(writer)
+
     # ------------------------------------------------------------------
     # Public orchestration
     # ------------------------------------------------------------------
     def generate(
         self, overall_tracker: Optional[_TrackerBase] = None
     ) -> None:  # noqa: D401
+        """Generate the PDF file."""
         # 0. Dependency check ------------------------------------------------
         if PdfReader is object or canvas is None:
             self._output_and_log("ERROR", "PDF‑Libraries fehlen – Abbruch.")
@@ -279,30 +312,16 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
 
         bar = _ConsoleBar(length=50, description="PDF") if _ConsoleBar else None
 
-        def _task():
-            writer = PdfWriter()
-            for i in range(0, len(rows), self._entries_per_page):
-                grp = rows[i : i + self._entries_per_page]
-                try:
-                    base = PdfReader(io.BytesIO(template)).pages[0]
-                    ovl = self._overlay_page(grp)
-                    if ovl:
-                        base.merge_page(ovl)
-                    writer.add_page(base)
-                    if hasattr(tracker, "increment"):
-                        tracker.increment()  # type: ignore[misc]
-                except Exception as err:  # pragma: no cover
-                    tracker.set_error(err)
-                    break
-            if not tracker.has_error:
-                self._write_pdf(writer)
-
         # 2. Run with optional console bar ----------------------------------
         if bar:
             # type: ignore[arg-type]
-            bar.run_with_progress(target=_task, args=(), tracker=tracker)
+            bar.run_with_progress(
+                target=self._task,
+                args=(rows, template, tracker),
+                tracker=tracker,
+            )
         else:
-            _task()
+            self._task(rows, template, tracker)
 
         # 3. Final state -----------------------------------------------------
         if tracker.has_error:
