@@ -246,6 +246,9 @@ class PdfDisplayConfig(QObject, JsonHandler):
     def convert_json_to_coordinates(self, box_id: int) -> CoordinatesConfig:
         """Return ``CoordinatesConfig`` for the given ``box_id``.
 
+        The ``y`` positions are converted to the bottom edge of each box so that
+        text drawn at these coordinates appears inside the boxes.
+
         If either a ``BoxPair`` or ``SingleBox`` is missing for ``box_id`` the
         corresponding coordinates will be ``0``.
         """
@@ -257,12 +260,12 @@ class PdfDisplayConfig(QObject, JsonHandler):
         single = singleboxes.get(box_id)
 
         x1 = pair.box1.x if pair else 0.0
-        y1 = pair.box1.y if pair else 0.0
+        y1 = (pair.box1.y + pair.box1.height) if pair else 0.0
         x2 = pair.box2.x if pair else 0.0
-        y2 = pair.box2.y if pair else 0.0
+        y2 = (pair.box2.y + pair.box2.height) if pair else 0.0
 
         x3 = single.x if single else 0.0
-        y3 = single.y if single else 0.0
+        y3 = (single.y + single.height) if single else 0.0
 
         return CoordinatesConfig(
             x1=x1,
