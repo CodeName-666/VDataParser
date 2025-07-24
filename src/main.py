@@ -16,7 +16,7 @@ from objects import MainNumberDataClass
 from objects import FleatMarket
 
 
-from generator import FileGenerator
+from generator.file_generator import FileGenerator
 from display import BasicProgressTracker as ProgressTracker
 from display import ConsoleProgressBar as ConsoleBar
 from display import ConsoleOutput as OutputIface

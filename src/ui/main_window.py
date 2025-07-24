@@ -270,6 +270,7 @@ class MainWindow(QMainWindow):
         """
         Starts the PDF generation process.
         """
+        self.market_view.pdf_display.save_state()
         window = OutputWindow(self)
         window.show()
         ok = self.market_facade.create_pdf_data(self.market_view, window)
@@ -281,6 +282,7 @@ class MainWindow(QMainWindow):
         """
         Starts the generation of all data and PDF files.
         """
+        self.market_view.pdf_display.save_state()
         window = OutputWindow(self)
         window.show()
         ok = self.market_facade.create_all_data(self.market_view, window)
