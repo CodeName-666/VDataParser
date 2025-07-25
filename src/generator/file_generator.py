@@ -10,9 +10,10 @@ from display import (
     OutputInterfaceAbstraction,                      # type: ignore
     ProgressTrackerAbstraction as _TrackerBase,      # type: ignore
 )
-from display.progress_bar.progress_bar_abstraction import (
-    ProgressBarAbstraction as _BarBase,              # type: ignore
-)
+try:
+    from display import ProgressBarAbstraction as _BarBase
+except Exception:  # pragma: no cover - optional dependency
+    _BarBase = None  # type: ignore
 
 # Sub‑generators -----------------------------------------------------------
 from data import Base
