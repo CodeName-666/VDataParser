@@ -1,58 +1,8 @@
 
 """High level facade combining various market related components."""
 
-try:
-    from PySide6.QtCore import QObject, Slot, Signal
-    from PySide6.QtWidgets import QMessageBox, QFileDialog
-except Exception:  # pragma: no cover - optional PySide6
-    class QObject:  # type: ignore
-        pass
-
-    def Slot(*_args, **_kwargs):  # type: ignore
-        def decorator(func):
-            return func
-
-        return decorator
-
-    class Signal:  # type: ignore
-        def __init__(self, *args, **kwargs) -> None:
-            pass
-
-        def emit(self, *args, **kwargs) -> None:
-            pass
-
-        def connect(self, *_a, **_k) -> None:
-            pass
-
-    class QMessageBox:  # type: ignore
-        Question = Yes = No = 0
-
-        def setIcon(self, *_a, **_k) -> None:
-            pass
-
-        def setWindowTitle(self, *_a, **_k) -> None:
-            pass
-
-        def setText(self, *_a, **_k) -> None:
-            pass
-
-        def setStandardButtons(self, *_a, **_k) -> None:
-            pass
-
-        def setDefaultButton(self, *_a, **_k) -> None:
-            pass
-
-        def exec(self) -> int:
-            return 0
-
-    class QFileDialog:  # type: ignore
-        @staticmethod
-        def getExistingDirectory(*_a, **_k) -> str:
-            return ""
-
-        @staticmethod
-        def getSaveFileName(*_a, **_k) -> tuple[str, str]:
-            return "", ""
+from PySide6.QtCore import QObject, Slot, Signal
+from PySide6.QtWidgets import QMessageBox, QFileDialog
 from .data_manager import DataManager
 from .market_config_handler import MarketConfigHandler
 from .singelton_meta import SingletonMeta
