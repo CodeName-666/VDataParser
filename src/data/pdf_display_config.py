@@ -9,7 +9,7 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from objects import CoordinatesConfig  # Typ für Koordinaten
-        
+
 from .json_handler import JsonHandler  # Basisklasse mit get_key_value / set_key_value
 
 __all__ = ["Box", "BoxPair", "PdfDisplayConfig"]
@@ -59,15 +59,16 @@ class BoxPair:
 class PdfDisplayConfig(QObject, JsonHandler):
     """Convenient access wrapper around ``pdf_display_config.json``."""
 
-
     data_loaded = Signal(object)  # Signal to notify when data is loaded
-    
+
     _TEMPLATE: Dict[str, Any] = {
         "pdf_path": "",
         "pdf_name": "",
         "output_path": "",
         "output_name": "",
         "dpi": 150,
+        "pickup_date": "",
+        "pickup_time": "",
         "boxPairs": [],
         "singleBoxes": [],
     }
@@ -75,11 +76,13 @@ class PdfDisplayConfig(QObject, JsonHandler):
     # ------------------------------------------------------------------
     # Konstruktor
     # ------------------------------------------------------------------
-    def __init__(self, json_path_or_data: Optional[Union[str, Dict]] = None,logger=None) -> None:
+    def __init__(
+        self, json_path_or_data: Optional[Union[str, Dict]] = None, logger=None
+    ) -> None:
         """Initialise and optionally load from ``json_path_or_data``."""
 
         QObject.__init__(self)
-        JsonHandler.__init__(self,json_path_or_data, logger)
+        JsonHandler.__init__(self, json_path_or_data, logger)
         # Create default template when constructed empty
         if self.json_data is None:
             self.json_data = self._clone_template()
@@ -91,7 +94,6 @@ class PdfDisplayConfig(QObject, JsonHandler):
         """Return the configured PDF directory path."""
         return str(self.get_key_value(["pdf_path"]) or "")
 
-    
     def set_full_pdf_path(self, value: str) -> None:
         """Set the PDF directory path and update ``pdf_name`` if empty."""
         file = Path(value)
@@ -101,12 +103,11 @@ class PdfDisplayConfig(QObject, JsonHandler):
 
     def set_pdf_path(self, value: str) -> None:
         self.set_key_value(["pdf_path"], str(value))
-    
+
     def get_pdf_name(self) -> str:
         """Return the configured PDF file name."""
         return str(self.get_key_value(["pdf_name"]) or "")
 
-    
     def set_pdf_name(self, value: str) -> None:
         """Set the PDF file name."""
         self.set_key_value(["pdf_name"], str(value))
@@ -147,6 +148,23 @@ class PdfDisplayConfig(QObject, JsonHandler):
 
     def set_dpi(self, value: int) -> None:
         self.set_key_value(["dpi"], int(value))
+
+    # ------------------------------------------------------------------
+    # Pickup date handling
+    # ------------------------------------------------------------------
+    def get_pickup_date(self) -> str:
+        """Return the configured pickup date string."""
+        return str(self.get_key_value(["pickup_date"]) or "")
+
+    def set_pickup_date(self, value: str) -> None:
+        self.set_key_value(["pickup_date"], str(value))
+
+    def get_pickup_time(self) -> str:
+        """Return the configured pickup time string."""
+        return str(self.get_key_value(["pickup_time"]) or "")
+
+    def set_pickup_time(self, value: str) -> None:
+        self.set_key_value(["pickup_time"], str(value))
 
     def get_full_pdf_path(self) -> str:
         """Return the absolute PDF path composed of directory and file name."""
@@ -242,7 +260,7 @@ class PdfDisplayConfig(QObject, JsonHandler):
         if ret:
             self.data_loaded.emit(self)
         return ret
-    
+
     def convert_json_to_coordinates(self, box_id: int) -> CoordinatesConfig:
         """Return ``CoordinatesConfig`` for the given ``box_id``.
 
@@ -254,7 +272,9 @@ class PdfDisplayConfig(QObject, JsonHandler):
         """
 
         pairboxes = {pair.id: pair for pair in self.get_box_pairs()}
-        singleboxes = {box.id: box for box in self.get_single_boxes() if box.id is not None}
+        singleboxes = {
+            box.id: box for box in self.get_single_boxes() if box.id is not None
+        }
 
         pair = pairboxes.get(box_id)
         single = singleboxes.get(box_id)
@@ -291,13 +311,15 @@ class PdfDisplayConfig(QObject, JsonHandler):
         all_ids = sorted(pair_ids | single_ids)
 
         return [self.convert_json_to_coordinates(i) for i in all_ids]
-        
+
     def is_empty(self):
-        box_pairs_empty   = not self.get_box_pairs()      # True, wenn key fehlt oder Liste leer ist
+        box_pairs_empty = (
+            not self.get_box_pairs()
+        )  # True, wenn key fehlt oder Liste leer ist
         single_boxes_empty = not self.get_single_boxes()
         path_empty = not self.get_full_pdf_path()
 
         if box_pairs_empty and single_boxes_empty and path_empty:
             return True
         else:
-            return False 
+            return False
