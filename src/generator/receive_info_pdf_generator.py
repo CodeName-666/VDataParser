@@ -10,9 +10,18 @@ from log import CustomLogger
 
 from display import (
     ProgressTrackerAbstraction as _TrackerBase,
-    ConsoleProgressBar as _ConsoleBar,
     OutputInterfaceAbstraction,
 )
+
+try:
+    from display import ProgressBarAbstraction as _BarBase
+except Exception:  # pragma: no cover - optional dependency
+    _BarBase = None  # type: ignore
+
+try:
+    from display import ConsoleProgressBar as _ConsoleBar
+except Exception:  # pragma: no cover - optional dependency
+    _ConsoleBar = None  # type: ignore
 
 from pypdf import PdfReader, PdfWriter, PageObject
 from reportlab.pdfgen import canvas
@@ -109,7 +118,12 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             )
 
         self._entries_per_page = len(self._coords)
-        self._output_pdf = (self.path / opath).with_suffix(".pdf")
+        base_path = Path(path) if path else Path(".")
+        try:
+            self.path = path  # type: ignore[attr-defined]
+        except Exception:
+            self.path = base_path  # pragma: no cover - for stubbed base
+        self._output_pdf = (base_path / opath).with_suffix(".pdf")
 
         # --------------------------------------------------------------
         # Expose constructor parameters via typed properties
@@ -275,7 +289,10 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     # Public orchestration
     # ------------------------------------------------------------------
     def generate(
-        self, overall_tracker: Optional[_TrackerBase] = None
+        self,
+        overall_tracker: Optional[_TrackerBase] = None,
+        *,
+        bar: Optional[_BarBase] = None,
     ) -> None:  # noqa: D401
         """Generate the PDF file."""
         # 0. Dependency check ------------------------------------------------
@@ -310,12 +327,18 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         if hasattr(tracker, "reset"):
             tracker.reset(total=total_pages)  # type: ignore[misc]
 
-        bar = _ConsoleBar(length=50, description="PDF") if _ConsoleBar else None
+        if hasattr(self.output_interface, "set_secondary_tracker"):
+            try:
+                self.output_interface.set_secondary_tracker(tracker)
+            except Exception:
+                pass
+
+        use_bar = bar or (_ConsoleBar(length=50, description="PDF") if _ConsoleBar else None)
 
         # 2. Run with optional console bar ----------------------------------
-        if bar:
+        if use_bar:
             # type: ignore[arg-type]
-            bar.run_with_progress(
+            use_bar.run_with_progress(
                 target=self._task,
                 args=(rows, template, tracker),
                 tracker=tracker,
