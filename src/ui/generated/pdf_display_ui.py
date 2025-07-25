@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (QApplication, QButtonGroup, QDateEdit, QFormLayou
     QGraphicsView, QGroupBox, QHBoxLayout, QLabel,
     QLineEdit, QListWidget, QListWidgetItem, QPushButton,
     QSizePolicy, QSpacerItem, QSpinBox, QSplitter,
-    QVBoxLayout, QWidget)
+    QTimeEdit, QVBoxLayout, QWidget)
 import resources_rc
 
 class Ui_PdfDisplayView(object):
@@ -197,6 +197,11 @@ class Ui_PdfDisplayView(object):
 
         self.horizontalLayout_pickup_date.addWidget(self.dateEditPickup)
 
+        self.timeEditPickup = QTimeEdit(self.groupBoxPickupDate)
+        self.timeEditPickup.setObjectName(u"timeEditPickup")
+
+        self.horizontalLayout_pickup_date.addWidget(self.timeEditPickup)
+
 
         self.pdf_display_layout.addWidget(self.groupBoxPickupDate)
 
@@ -337,6 +342,7 @@ class Ui_PdfDisplayView(object):
         self.groupBoxDisplayDpi.setTitle(QCoreApplication.translate("PdfDisplayView", u"PDF DPI", None))
         self.groupBoxPickupDate.setTitle(QCoreApplication.translate("PdfDisplayView", u"Abholdatum", None))
         self.dateEditPickup.setDisplayFormat(QCoreApplication.translate("PdfDisplayView", u"dd.MM.yyyy", None))
+        self.timeEditPickup.setDisplayFormat(QCoreApplication.translate("PdfDisplayView", u"HH:mm", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("PdfDisplayView", u"Name und Stammnummer", None))
         self.groupBoxProperties.setTitle(QCoreApplication.translate("PdfDisplayView", u"Box Eigenschaften", None))
         self.labelX.setText(QCoreApplication.translate("PdfDisplayView", u"X:", None))

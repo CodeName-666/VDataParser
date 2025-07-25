@@ -1,12 +1,29 @@
-
 import json
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QGraphicsScene, QGraphicsPixmapItem,
-    QFileDialog, QListWidgetItem, QMessageBox, QGraphicsView, # <--- Added here
-    QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem # Other items might be here
+    QApplication,
+    QWidget,
+    QGraphicsScene,
+    QGraphicsPixmapItem,
+    QFileDialog,
+    QListWidgetItem,
+    QMessageBox,
+    QGraphicsView,  # <--- Added here
+    QGraphicsItem,
+    QGraphicsTextItem,
+    QGraphicsRectItem,  # Other items might be here
 )
 from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor
-from PySide6.QtCore import Qt, QRectF, QPointF, Signal, Slot, QSize, QObject, QDate
+from PySide6.QtCore import (
+    Qt,
+    QRectF,
+    QPointF,
+    Signal,
+    Slot,
+    QSize,
+    QObject,
+    QDate,
+    QTime,
+)
 from PySide6.QtPdf import QPdfDocument
 from pathlib import Path
 
@@ -36,10 +53,11 @@ LIST_ITEM_DATA_ROLE = Qt.UserRole
 # --- ID Management (Helper Class) ---
 class ItemIdManager(QObject):
     """Manages unique IDs for items, allowing reuse."""
+
     def __init__(self):
         super().__init__()
         self._next_id = 1
-        self._free_ids = set() # Use set for faster removal checks
+        self._free_ids = set()  # Use set for faster removal checks
 
     def get_new_id(self):
         if self._free_ids:
@@ -52,32 +70,33 @@ class ItemIdManager(QObject):
 
     def release_id(self, item_id):
         if item_id < self._next_id and item_id not in self._free_ids:
-             self._free_ids.add(item_id)
+            self._free_ids.add(item_id)
 
     def reset(self, max_known_id=0):
         self._next_id = max_known_id + 1
         self._free_ids.clear()
 
     def get_highest_known_id(self):
-        return self._next_id -1
+        return self._next_id - 1
 
 
 # --- Graphics Items ---
 class DraggableBox(QGraphicsRectItem, QObject):
-    """ A draggable and resizable rectangle item for the graphics scene. """
+    """A draggable and resizable rectangle item for the graphics scene."""
+
     geometryChangedByUser: Signal = Signal()
-   
+
     def __init__(self, rect: QRectF, label="", parent=None):
         QGraphicsRectItem.__init__(self, rect, parent)
         QObject.__init__(self)
-        
+
         self.setFlags(
-            QGraphicsItem.ItemIsMovable |
-            QGraphicsItem.ItemIsSelectable |
-            QGraphicsItem.ItemSendsGeometryChanges | # Needed for itemChange
-            QGraphicsItem.ItemIsFocusable
+            QGraphicsItem.ItemIsMovable
+            | QGraphicsItem.ItemIsSelectable
+            | QGraphicsItem.ItemSendsGeometryChanges  # Needed for itemChange
+            | QGraphicsItem.ItemIsFocusable
         )
-         # Signal emitted when the geometry (pos or size) is changed by user interaction
+        # Signal emitted when the geometry (pos or size) is changed by user interaction
 
         self.setAcceptHoverEvents(True)
         self.setPen(BOX_BORDER_PEN)
@@ -85,11 +104,16 @@ class DraggableBox(QGraphicsRectItem, QObject):
 
         self.label = label
         self.posText = QGraphicsTextItem(self)
-        self.updatePosText() # Initial text setup
+        self.updatePosText()  # Initial text setup
 
         # Resizing state
         self._resizeMargins = RESIZE_MARGIN
-        self._resizeEdges = {'left': False, 'right': False, 'top': False, 'bottom': False}
+        self._resizeEdges = {
+            "left": False,
+            "right": False,
+            "top": False,
+            "bottom": False,
+        }
         self._resizing = False
         self._dragStartPos = None
         self._initialRect = self.rect()
@@ -109,18 +133,20 @@ class DraggableBox(QGraphicsRectItem, QObject):
             display_text = f"X: {int(pos.x())} | Y: {int(pos.y())}"
         self.posText.setPlainText(display_text)
         # Adjust text position relative to box top-left
-        self.posText.setPos(0, -self.posText.boundingRect().height() - 2) # Place above the box
+        self.posText.setPos(
+            0, -self.posText.boundingRect().height() - 2
+        )  # Place above the box
 
     def _updateCursorShape(self, pos: QPointF):
         """Sets the cursor shape based on the hover position."""
         rect = self.rect()
         margin = self._resizeMargins
-        left   = abs(pos.x() - rect.left()) < margin
-        right  = abs(pos.x() - rect.right()) < margin
-        top    = abs(pos.y() - rect.top()) < margin
+        left = abs(pos.x() - rect.left()) < margin
+        right = abs(pos.x() - rect.right()) < margin
+        top = abs(pos.y() - rect.top()) < margin
         bottom = abs(pos.y() - rect.bottom()) < margin
 
-        self._resizeEdges = {'left': left, 'right': right, 'top': top, 'bottom': bottom}
+        self._resizeEdges = {"left": left, "right": right, "top": top, "bottom": bottom}
 
         if (left and top) or (right and bottom):
             self.setCursor(Qt.SizeFDiagCursor)
@@ -131,36 +157,38 @@ class DraggableBox(QGraphicsRectItem, QObject):
         elif top or bottom:
             self.setCursor(Qt.SizeVerCursor)
         else:
-            self.setCursor(Qt.OpenHandCursor) # Default move cursor
+            self.setCursor(Qt.OpenHandCursor)  # Default move cursor
 
     def hoverEnterEvent(self, event):
         self._updateCursorShape(event.pos())
         super().hoverEnterEvent(event)
 
     def hoverMoveEvent(self, event):
-        if not self._resizing: # Don't change cursor while resizing
+        if not self._resizing:  # Don't change cursor while resizing
             self._updateCursorShape(event.pos())
         super().hoverMoveEvent(event)
 
     def hoverLeaveEvent(self, event):
-        self.setCursor(Qt.ArrowCursor) # Reset cursor when leaving
+        self.setCursor(Qt.ArrowCursor)  # Reset cursor when leaving
         super().hoverLeaveEvent(event)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             if any(self._resizeEdges.values()):
                 self._resizing = True
-                self._dragStartPos = event.pos() # Position within item coordinates
-                self._initialRect = QRectF(self.rect()) # Copy current rect
-                self._initialScenePos = QPointF(self.scenePos()) # Copy current scene pos
-                self.setCursor(self.cursor()) # Keep resize cursor during drag
+                self._dragStartPos = event.pos()  # Position within item coordinates
+                self._initialRect = QRectF(self.rect())  # Copy current rect
+                self._initialScenePos = QPointF(
+                    self.scenePos()
+                )  # Copy current scene pos
+                self.setCursor(self.cursor())  # Keep resize cursor during drag
                 event.accept()
             else:
                 # Start standard move drag
                 self.setCursor(Qt.ClosedHandCursor)
-                super().mousePressEvent(event) # Allow base class to handle move start
+                super().mousePressEvent(event)  # Allow base class to handle move start
         else:
-             super().mousePressEvent(event)
+            super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
         if self._resizing:
@@ -173,18 +201,18 @@ class DraggableBox(QGraphicsRectItem, QObject):
 
             # Calculate potential new dimensions and positions based on edge(s) dragged
             # Adjust left edge
-            if self._resizeEdges['left']:
+            if self._resizeEdges["left"]:
                 dx = delta.x()
                 newWidth = newRect.width() - dx
                 if newWidth < MIN_BOX_WIDTH:
-                    dx = newRect.width() - MIN_BOX_WIDTH # Limit delta
+                    dx = newRect.width() - MIN_BOX_WIDTH  # Limit delta
                     newWidth = MIN_BOX_WIDTH
-                newPos.setX(self._initialScenePos.x() + dx) # Move origin right
+                newPos.setX(self._initialScenePos.x() + dx)  # Move origin right
                 newRect.setWidth(newWidth)
-                newRect.setLeft(0) # Keep local origin at 0
+                newRect.setLeft(0)  # Keep local origin at 0
 
             # Adjust right edge
-            if self._resizeEdges['right']:
+            if self._resizeEdges["right"]:
                 dx = delta.x()
                 newWidth = self._initialRect.width() + dx
                 if newWidth < MIN_BOX_WIDTH:
@@ -192,18 +220,18 @@ class DraggableBox(QGraphicsRectItem, QObject):
                 newRect.setWidth(newWidth)
 
             # Adjust top edge
-            if self._resizeEdges['top']:
+            if self._resizeEdges["top"]:
                 dy = delta.y()
                 newHeight = newRect.height() - dy
                 if newHeight < MIN_BOX_HEIGHT:
-                    dy = newRect.height() - MIN_BOX_HEIGHT # Limit delta
+                    dy = newRect.height() - MIN_BOX_HEIGHT  # Limit delta
                     newHeight = MIN_BOX_HEIGHT
-                newPos.setY(self._initialScenePos.y() + dy) # Move origin down
+                newPos.setY(self._initialScenePos.y() + dy)  # Move origin down
                 newRect.setHeight(newHeight)
-                newRect.setTop(0) # Keep local origin at 0
+                newRect.setTop(0)  # Keep local origin at 0
 
             # Adjust bottom edge
-            if self._resizeEdges['bottom']:
+            if self._resizeEdges["bottom"]:
                 dy = delta.y()
                 newHeight = self._initialRect.height() + dy
                 if newHeight < MIN_BOX_HEIGHT:
@@ -215,10 +243,10 @@ class DraggableBox(QGraphicsRectItem, QObject):
             # if ItemSendsGeometryChanges flag is set.
             self.prepareGeometryChange()
             self.setPos(newPos)
-            self.setRect(newRect) # Rect is always (0,0, w, h)
+            self.setRect(newRect)  # Rect is always (0,0, w, h)
             # self.updatePosText() # updatePosText called by itemChange signal
 
-            self.geometryChangedByUser.emit() # Notify listeners
+            self.geometryChangedByUser.emit()  # Notify listeners
             event.accept()
         else:
             # Standard move handling
@@ -234,10 +262,12 @@ class DraggableBox(QGraphicsRectItem, QObject):
                 event.accept()
             else:
                 # Reset cursor after move
-                self.setCursor(Qt.OpenHandCursor if self.isUnderMouse() else Qt.ArrowCursor)
+                self.setCursor(
+                    Qt.OpenHandCursor if self.isUnderMouse() else Qt.ArrowCursor
+                )
                 super().mouseReleaseEvent(event)
         else:
-             super().mouseReleaseEvent(event)
+            super().mouseReleaseEvent(event)
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionHasChanged and self.scene():
@@ -248,14 +278,14 @@ class DraggableBox(QGraphicsRectItem, QObject):
         # da ItemRectHasChanged in PySide6 nicht verfügbar ist:
         # elif change == QGraphicsItem.ItemRectHasChanged and self.scene():
         #     self.updatePosText()
-        
+
         return super().itemChange(change, value)
 
 
-
 class BoxPair(QObject):
-    """ Represents a pair of linked DraggableBox items. """
-    manager = ItemIdManager() # Class-level ID manager
+    """Represents a pair of linked DraggableBox items."""
+
+    manager = ItemIdManager()  # Class-level ID manager
 
     def __init__(self, scene: QGraphicsScene, startPos=QPointF(50, 50)):
         super().__init__()
@@ -268,7 +298,9 @@ class BoxPair(QObject):
         self.box1.setPos(startPos)
         self.box1.setPen(QPen(BOX_PAIR_COLOR_1, 2))
 
-        offset = QPointF(DEFAULT_BOX_WIDTH + 20, 0) # Place second box right of the first
+        offset = QPointF(
+            DEFAULT_BOX_WIDTH + 20, 0
+        )  # Place second box right of the first
         self.box2 = DraggableBox(rect, label=f"{BOX_PAIR_LABEL_2_PREFIX}{self.id}")
         self.box2.setPos(startPos + offset)
         self.box2.setPen(QPen(BOX_PAIR_COLOR_2, 2))
@@ -288,12 +320,13 @@ class BoxPair(QObject):
         return self.box1, self.box2
 
     def __str__(self):
-        return f"BoxPair {self.id} ({self.label})" # More descriptive
+        return f"BoxPair {self.id} ({self.label})"  # More descriptive
 
 
 class SingleBox(DraggableBox):
-    """ Represents a single DraggableBox with its own ID management. """
-    manager = ItemIdManager() # Class-level ID manager
+    """Represents a single DraggableBox with its own ID management."""
+
+    manager = ItemIdManager()  # Class-level ID manager
 
     def __init__(self, rect: QRectF, parent=None):
         self.id = SingleBox.manager.get_new_id()
@@ -308,7 +341,7 @@ class SingleBox(DraggableBox):
         SingleBox.manager.release_id(self.id)
 
     def __str__(self):
-         return f"SingleBox {self.id} ({self.label})" # More descriptive
+        return f"SingleBox {self.id} ({self.label})"  # More descriptive
 
 
 # --- Main Application Widget ---
@@ -317,25 +350,32 @@ class PdfDisplay(PersistentBaseUi):
     # Define a signal for the exit button if needed externally
     exit_requested = Signal()
 
-    def __init__(self, parent=None, *, state: PdfDisplayConfig | None = None, json_path: str | None = None):
+    def __init__(
+        self,
+        parent=None,
+        *,
+        state: PdfDisplayConfig | None = None,
+        json_path: str | None = None,
+    ):
         super().__init__(parent)
-     
+
         self.ui = PdfDisplayUi()
         self.ui.setupUi(self)
 
         # --- Member Variables ---
         self.pdfDocument = QPdfDocument(self)
-        
+
         self.boxPairs = []
         self.singleBoxes = []
         self.pdfPath = ""
-        self.pdf_item = None # Keep track of the PDF background item
-        self.currentBox = None # Currently selected DraggableBox
-        self._block_property_updates = False # Flag to prevent signal loops
+        self.pdf_item = None  # Keep track of the PDF background item
+        self.currentBox = None  # Currently selected DraggableBox
+        self._block_property_updates = False  # Flag to prevent signal loops
         self._config: PdfDisplayConfig = None
         self._display_dpi = DEFAULT_DISPLAY_DPI
         self.ui.spinBoxDisplayDpi.setValue(self._display_dpi)
         self.ui.dateEditPickup.setDate(QDate.currentDate())
+        self.ui.timeEditPickup.setTime(QTime.currentTime())
         # --- UI Element Access (using self.ui) ---
         # No need to redefine self.graphicsView etc. if BaseUi is QWidget/QMainWindow
         # Access them directly via self.ui.graphicsView, self.ui.btnLoadPDF, etc.
@@ -343,8 +383,10 @@ class PdfDisplay(PersistentBaseUi):
         # --- Scene Setup ---
         self.scene = QGraphicsScene(self)
         self.ui.graphicsView.setScene(self.scene)
-        self.ui.graphicsView.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
-        self.ui.graphicsView.setDragMode(QGraphicsView.ScrollHandDrag) # Allow panning
+        self.ui.graphicsView.setRenderHints(
+            QPainter.Antialiasing | QPainter.SmoothPixmapTransform
+        )
+        self.ui.graphicsView.setDragMode(QGraphicsView.ScrollHandDrag)  # Allow panning
 
         # Start with the configuration panel visible and hide the PDF view
         self.ui.layoutWidget1.hide()
@@ -370,13 +412,15 @@ class PdfDisplay(PersistentBaseUi):
         if value <= 0:
             raise ValueError("display_dpi must be positive")
         self._display_dpi = value
-            
+
     def setup_connections(self):
         """Connects UI signals to slots."""
         self.ui.btnLoadPDF.clicked.connect(self.load_pdf)
         self.ui.btnAddBoxPair.clicked.connect(self.add_box_pair)
         self.ui.btnAddSingleBox.clicked.connect(self.add_single_box)
-        self.ui.btnRemoveBoxPair.clicked.connect(self.remove_selected_list_item) # Renamed for clarity
+        self.ui.btnRemoveBoxPair.clicked.connect(
+            self.remove_selected_list_item
+        )  # Renamed for clarity
         self.ui.btnZoomIn.clicked.connect(self.zoom_in)
         self.ui.btnZoomOut.clicked.connect(self.zoom_out)
         self.ui.btnSaveAsConfig.clicked.connect(self.save_as_state)
@@ -386,33 +430,53 @@ class PdfDisplay(PersistentBaseUi):
         self.ui.btnRestore.clicked.connect(self.restore_state)
         self.ui.btnMenuOpenClose.clicked.connect(self.toggle_pdf_view)
         self.ui.spinBoxDisplayDpi.valueChanged.connect(self.on_dpi_changed)
+        self.ui.dateEditPickup.dateChanged.connect(self.on_pickup_changed)
+        self.ui.timeEditPickup.timeChanged.connect(self.on_pickup_changed)
 
         self.scene.selectionChanged.connect(self.on_scene_selection_changed)
-        self.ui.listBoxPairs.itemSelectionChanged.connect(self.on_list_selection_changed)
+        self.ui.listBoxPairs.itemSelectionChanged.connect(
+            self.on_list_selection_changed
+        )
 
-        self.ui.lineEditX.editingFinished.connect(self.on_box_properties_changed) # Renamed
-        self.ui.lineEditY.editingFinished.connect(self.on_box_properties_changed) # Renamed
-        self.ui.lineEditWidth.editingFinished.connect(self.on_box_properties_changed) # Renamed
-        self.ui.lineEditHeight.editingFinished.connect(self.on_box_properties_changed) # Renamed       
+        self.ui.lineEditX.editingFinished.connect(
+            self.on_box_properties_changed
+        )  # Renamed
+        self.ui.lineEditY.editingFinished.connect(
+            self.on_box_properties_changed
+        )  # Renamed
+        self.ui.lineEditWidth.editingFinished.connect(
+            self.on_box_properties_changed
+        )  # Renamed
+        self.ui.lineEditHeight.editingFinished.connect(
+            self.on_box_properties_changed
+        )  # Renamed
 
     # --- PDF Handling ---
     @Slot()
     def load_pdf(self):
         """Opens a file dialog to load a PDF document."""
-        fileName, _ = QFileDialog.getOpenFileName(self, "PDF Datei öffnen", "", "PDF Dateien (*.pdf)")
+        fileName, _ = QFileDialog.getOpenFileName(
+            self, "PDF Datei öffnen", "", "PDF Dateien (*.pdf)"
+        )
         if fileName:
             status = self.pdfDocument.load(fileName)
             if status == QPdfDocument.Error.None_:
                 self.pdfPath = fileName
-                self.setWindowTitle(f"PDF Editor - {Path(fileName).name}") # Update title
-                self.load_page(0) # Load the first page
-                
+                self.setWindowTitle(
+                    f"PDF Editor - {Path(fileName).name}"
+                )  # Update title
+                self.load_page(0)  # Load the first page
+
                 self._config_changed()
 
                 # Optionally clear existing boxes when loading a *new* PDF
                 # self._clear_all_boxes()
             else:
-                QMessageBox.critical(self, "Fehler", f"Fehler beim Laden der PDF:\n{self.pdfDocument.errorString()}")
+                QMessageBox.critical(
+                    self,
+                    "Fehler",
+                    f"Fehler beim Laden der PDF:\n{self.pdfDocument.errorString()}",
+                )
                 self.pdfPath = ""
                 self.setWindowTitle("PDF Editor")
 
@@ -424,8 +488,8 @@ class PdfDisplay(PersistentBaseUi):
 
         pageSizeF = self.pdfDocument.pagePointSize(page_index)
         if pageSizeF.isEmpty():
-             print(f"Could not get page size for page {page_index}")
-             return
+            print(f"Could not get page size for page {page_index}")
+            return
         # Render at the configured DPI
         dpi = self._display_dpi
         renderSize = QSize(
@@ -435,7 +499,9 @@ class PdfDisplay(PersistentBaseUi):
 
         image = self.pdfDocument.render(page_index, renderSize)
         if image.isNull():
-            QMessageBox.warning(self, "Fehler", f"Fehler beim Rendern der Seite {page_index}.")
+            QMessageBox.warning(
+                self, "Fehler", f"Fehler beim Rendern der Seite {page_index}."
+            )
             return
 
         pixmap = QPixmap.fromImage(image)
@@ -446,7 +512,7 @@ class PdfDisplay(PersistentBaseUi):
 
         self.pdf_item = QGraphicsPixmapItem(pixmap)
         self.pdf_item.setFlag(QGraphicsItem.ItemIsSelectable, False)
-        self.pdf_item.setZValue(-1) # Ensure PDF is behind boxes
+        self.pdf_item.setZValue(-1)  # Ensure PDF is behind boxes
 
         # Add new PDF item and set scene size
         self.scene.addItem(self.pdf_item)
@@ -455,9 +521,8 @@ class PdfDisplay(PersistentBaseUi):
 
         # Ensure existing boxes are visible (add them back if removed, or just ensure they are top)
         for item in self.scene.items():
-             if isinstance(item, DraggableBox):
-                  item.setZValue(0) # Bring boxes to front
-
+            if isinstance(item, DraggableBox):
+                item.setZValue(0)  # Bring boxes to front
 
     # --- Box Handling ---
     def _add_list_item(self, text: str, data_object):
@@ -470,34 +535,41 @@ class PdfDisplay(PersistentBaseUi):
     def _connect_box_signals(self, box: DraggableBox):
         """Connect signals from a DraggableBox to update UI."""
         # Connect the box's signal to the update slot
-        box.geometryChangedByUser.connect(self.on_box_geometry_changed_by_user) # Renamed
+        box.geometryChangedByUser.connect(
+            self.on_box_geometry_changed_by_user
+        )  # Renamed
         # Disconnect when the box is destroyed (important!)
         # box.destroyed.connect(lambda: self.on_box_destroyed(box)) # Requires QObject inheritance or tracking
 
     # Slot to handle geometry changes from any connected box
     @Slot()
     def on_box_geometry_changed_by_user(self):
-        sender_box = self.sender() # Get the box that emitted the signal
+        sender_box = self.sender()  # Get the box that emitted the signal
         if sender_box and sender_box == self.currentBox:
             self.update_box_properties_from_item(sender_box)
 
         self._config_changed()
 
-
     @Slot()
     def add_box_pair(self):
         """Adds a new pair of linked boxes to the scene and list."""
         if not self.pdf_item:
-            QMessageBox.warning(self, "Aktion nicht möglich", "Bitte laden Sie zuerst eine PDF-Datei.")
+            QMessageBox.warning(
+                self, "Aktion nicht möglich", "Bitte laden Sie zuerst eine PDF-Datei."
+            )
             return
         # Calculate a reasonable start position (e.g., center of the current view)
-        view_rect = self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect()).boundingRect()
-        startPos = view_rect.center() - QPointF(DEFAULT_BOX_WIDTH / 2, DEFAULT_BOX_HEIGHT / 2) # Adjust for box size
+        view_rect = self.ui.graphicsView.mapToScene(
+            self.ui.graphicsView.viewport().rect()
+        ).boundingRect()
+        startPos = view_rect.center() - QPointF(
+            DEFAULT_BOX_WIDTH / 2, DEFAULT_BOX_HEIGHT / 2
+        )  # Adjust for box size
 
         newPair = BoxPair(self.scene, startPos)
         self.boxPairs.append(newPair)
         list_item = self._add_list_item(str(newPair), newPair)
-        self.ui.listBoxPairs.setCurrentItem(list_item) # Select the new item
+        self.ui.listBoxPairs.setCurrentItem(list_item)  # Select the new item
         # Connect signals for the new boxes
         self._connect_box_signals(newPair.box1)
         self._connect_box_signals(newPair.box2)
@@ -508,22 +580,27 @@ class PdfDisplay(PersistentBaseUi):
         """Adds a new single box to the scene and list."""
         if not self.pdf_item:
             self.status_info.emit("WARNING", "Bitte laden Sie zuerst eine PDF-Datei.")
-            QMessageBox.warning(self, "Aktion nicht möglich", "Bitte laden Sie zuerst eine PDF-Datei.")
+            QMessageBox.warning(
+                self, "Aktion nicht möglich", "Bitte laden Sie zuerst eine PDF-Datei."
+            )
             return
-        view_rect = self.ui.graphicsView.mapToScene(self.ui.graphicsView.viewport().rect()).boundingRect()
-        startPos = view_rect.center() - QPointF(DEFAULT_BOX_WIDTH / 2, DEFAULT_BOX_HEIGHT / 2)
+        view_rect = self.ui.graphicsView.mapToScene(
+            self.ui.graphicsView.viewport().rect()
+        ).boundingRect()
+        startPos = view_rect.center() - QPointF(
+            DEFAULT_BOX_WIDTH / 2, DEFAULT_BOX_HEIGHT / 2
+        )
 
         rect = QRectF(0, 0, DEFAULT_BOX_WIDTH, DEFAULT_BOX_HEIGHT)
-        newSingle = SingleBox(rect) # Parent is None initially
+        newSingle = SingleBox(rect)  # Parent is None initially
         newSingle.setPos(startPos)
-        self.scene.addItem(newSingle) # Add to scene first
+        self.scene.addItem(newSingle)  # Add to scene first
         self.singleBoxes.append(newSingle)
         list_item = self._add_list_item(str(newSingle), newSingle)
         self.ui.listBoxPairs.setCurrentItem(list_item)
         # Connect signal
         self._connect_box_signals(newSingle)
         self._config_changed()
-
 
     def _clear_all_boxes(self):
         """Removes all boxes from scene, lists, and list widget."""
@@ -548,54 +625,66 @@ class PdfDisplay(PersistentBaseUi):
         """Removes a BoxPair or SingleBox object completely."""
         if isinstance(obj, BoxPair):
             # Disconnect signals before removing
-            obj.box1.geometryChangedByUser.disconnect(self.on_box_geometry_changed_by_user)
-            obj.box2.geometryChangedByUser.disconnect(self.on_box_geometry_changed_by_user)
+            obj.box1.geometryChangedByUser.disconnect(
+                self.on_box_geometry_changed_by_user
+            )
+            obj.box2.geometryChangedByUser.disconnect(
+                self.on_box_geometry_changed_by_user
+            )
             obj.remove_from_scene()
-            if obj in self.boxPairs: self.boxPairs.remove(obj)
+            if obj in self.boxPairs:
+                self.boxPairs.remove(obj)
         elif isinstance(obj, SingleBox):
             obj.geometryChangedByUser.disconnect(self.on_box_geometry_changed_by_user)
             obj.remove_from_scene()
-            if obj in self.singleBoxes: self.singleBoxes.remove(obj)
-
+            if obj in self.singleBoxes:
+                self.singleBoxes.remove(obj)
 
     @Slot()
     def remove_selected_list_item(self):
         """Removes the selected item(s) from the list widget and scene."""
         selectedItems = self.ui.listBoxPairs.selectedItems()
         if not selectedItems:
-             # If nothing selected in list, try scene selection
-             selected_scene_items = self.scene.selectedItems()
-             if selected_scene_items and isinstance(selected_scene_items[0], DraggableBox):
-                  # Find corresponding list item
-                  box_to_remove = selected_scene_items[0]
-                  obj_to_remove = None
-                  list_item_to_remove = None
+            # If nothing selected in list, try scene selection
+            selected_scene_items = self.scene.selectedItems()
+            if selected_scene_items and isinstance(
+                selected_scene_items[0], DraggableBox
+            ):
+                # Find corresponding list item
+                box_to_remove = selected_scene_items[0]
+                obj_to_remove = None
+                list_item_to_remove = None
 
-                  # Check if it's a SingleBox
-                  if isinstance(box_to_remove, SingleBox):
-                       obj_to_remove = box_to_remove
-                  else: # Check if it belongs to a BoxPair
-                       for pair in self.boxPairs:
-                            if box_to_remove in pair.get_boxes():
-                                 obj_to_remove = pair
-                                 break
+                # Check if it's a SingleBox
+                if isinstance(box_to_remove, SingleBox):
+                    obj_to_remove = box_to_remove
+                else:  # Check if it belongs to a BoxPair
+                    for pair in self.boxPairs:
+                        if box_to_remove in pair.get_boxes():
+                            obj_to_remove = pair
+                            break
 
-                  if obj_to_remove:
-                       for i in range(self.ui.listBoxPairs.count()):
-                            item = self.ui.listBoxPairs.item(i)
-                            if item.data(LIST_ITEM_DATA_ROLE) == obj_to_remove:
-                                 list_item_to_remove = item
-                                 break
-                       if list_item_to_remove:
-                           selectedItems = [list_item_to_remove] # Process this item
+                if obj_to_remove:
+                    for i in range(self.ui.listBoxPairs.count()):
+                        item = self.ui.listBoxPairs.item(i)
+                        if item.data(LIST_ITEM_DATA_ROLE) == obj_to_remove:
+                            list_item_to_remove = item
+                            break
+                    if list_item_to_remove:
+                        selectedItems = [list_item_to_remove]  # Process this item
 
         # Proceed with removal if items are found either from list or scene
-        if not selectedItems: return
+        if not selectedItems:
+            return
 
         # Ask for confirmation
-        reply = QMessageBox.question(self, "Löschen bestätigen",
-                                     f"Möchten Sie die ausgewählten {len(selectedItems)} Elemente wirklich löschen?",
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        reply = QMessageBox.question(
+            self,
+            "Löschen bestätigen",
+            f"Möchten Sie die ausgewählten {len(selectedItems)} Elemente wirklich löschen?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
 
         if reply == QMessageBox.Yes:
             for item in selectedItems:
@@ -603,11 +692,13 @@ class PdfDisplay(PersistentBaseUi):
                 self._remove_box_object(obj)
                 # Remove from list widget
                 row = self.ui.listBoxPairs.row(item)
-                self.ui.listBoxPairs.takeItem(row) # takeItem deletes the QListWidgetItem
+                self.ui.listBoxPairs.takeItem(
+                    row
+                )  # takeItem deletes the QListWidgetItem
 
             self.currentBox = None
             self.clear_box_properties_ui()
-        
+
         self._config_changed()
 
     # --- View Control ---
@@ -631,6 +722,11 @@ class PdfDisplay(PersistentBaseUi):
         self._config_changed()
 
     @Slot()
+    def on_pickup_changed(self) -> None:
+        """Handle changes of the pickup date or time."""
+        self._config_changed()
+
+    @Slot()
     def toggle_pdf_view(self) -> None:
         """Show or hide the PDF view panel."""
         widget = self.ui.layoutWidget1
@@ -641,19 +737,18 @@ class PdfDisplay(PersistentBaseUi):
             widget.show()
             self.ui.splitter.setSizes([1, 1])
 
-
     # --- State Persistence ---
     def _box_to_dict(self, box: DraggableBox):
-         """Serializes a DraggableBox to a dictionary."""
-         pos = box.scenePos()
-         rect = box.rect()
-         return {
-             "label": box.label,
-             "x": pos.x(),
-             "y": pos.y(),
-             "width": rect.width(),
-             "height": rect.height()
-         }
+        """Serializes a DraggableBox to a dictionary."""
+        pos = box.scenePos()
+        rect = box.rect()
+        return {
+            "label": box.label,
+            "x": pos.x(),
+            "y": pos.y(),
+            "width": rect.width(),
+            "height": rect.height(),
+        }
 
     @Slot()
     def save_as_state(self):
@@ -664,7 +759,11 @@ class PdfDisplay(PersistentBaseUi):
             return
 
         super().save_as_state()
-        QMessageBox.information(self, "Erfolg", f"Konfiguration erfolgreich gespeichert:\n{self._config.get_storage_full_path()}")
+        QMessageBox.information(
+            self,
+            "Erfolg",
+            f"Konfiguration erfolgreich gespeichert:\n{self._config.get_storage_full_path()}",
+        )
 
     @Slot()
     def save_output_path(self):
@@ -692,7 +791,6 @@ class PdfDisplay(PersistentBaseUi):
                 self._config_changed()
             except IOError as e:
                 QMessageBox.critical(self, "Fehler", f"Speichern fehlgeschlagen:\n{e}")
-   
 
     # --- UI Update Slots ---
     @Slot()
@@ -706,18 +804,20 @@ class PdfDisplay(PersistentBaseUi):
                 new_selection = item
 
         if self.currentBox != new_selection:
-             # Selection changed
+            # Selection changed
             self.currentBox = new_selection
             if self.currentBox:
-                 self.update_box_properties_from_item(self.currentBox)
-                 # Also select corresponding item in list widget
-                 list_item = self.find_list_item_for_box(self.currentBox)
-                 if list_item and not list_item.isSelected():
-                      self.ui.listBoxPairs.setCurrentItem(list_item, QItemSelectionModel.ClearAndSelect)
+                self.update_box_properties_from_item(self.currentBox)
+                # Also select corresponding item in list widget
+                list_item = self.find_list_item_for_box(self.currentBox)
+                if list_item and not list_item.isSelected():
+                    self.ui.listBoxPairs.setCurrentItem(
+                        list_item, QItemSelectionModel.ClearAndSelect
+                    )
             else:
-                 self.clear_box_properties_ui()
-                 # Optionally clear list selection if scene deselected
-                 # self.ui.listBoxPairs.clearSelection()
+                self.clear_box_properties_ui()
+                # Optionally clear list selection if scene deselected
+                # self.ui.listBoxPairs.clearSelection()
 
     @Slot()
     def on_list_selection_changed(self):
@@ -737,39 +837,37 @@ class PdfDisplay(PersistentBaseUi):
         self.scene.selectionChanged.disconnect(self.on_scene_selection_changed)
         self.scene.clearSelection()
         if box_to_select:
-             box_to_select.setSelected(True)
-             self.currentBox = box_to_select
-             self.update_box_properties_from_item(self.currentBox)
-             self.ui.graphicsView.ensureVisible(box_to_select) # Scroll to selected box
+            box_to_select.setSelected(True)
+            self.currentBox = box_to_select
+            self.update_box_properties_from_item(self.currentBox)
+            self.ui.graphicsView.ensureVisible(box_to_select)  # Scroll to selected box
         else:
-             self.currentBox = None
-             self.clear_box_properties_ui()
+            self.currentBox = None
+            self.clear_box_properties_ui()
         # Reconnect scene signals
         self.scene.selectionChanged.connect(self.on_scene_selection_changed)
-
 
     def find_list_item_for_box(self, box: DraggableBox):
         """Finds the QListWidgetItem corresponding to a DraggableBox."""
         target_obj = None
         if isinstance(box, SingleBox):
             target_obj = box
-        else: # Could be part of a BoxPair
+        else:  # Could be part of a BoxPair
             for pair in self.boxPairs:
-                 if box in pair.get_boxes():
-                      target_obj = pair
-                      break
+                if box in pair.get_boxes():
+                    target_obj = pair
+                    break
         if target_obj:
             for i in range(self.ui.listBoxPairs.count()):
-                 item = self.ui.listBoxPairs.item(i)
-                 if item.data(LIST_ITEM_DATA_ROLE) == target_obj:
-                      return item
+                item = self.ui.listBoxPairs.item(i)
+                if item.data(LIST_ITEM_DATA_ROLE) == target_obj:
+                    return item
         return None
-
 
     def update_box_properties_from_item(self, item: DraggableBox):
         """Updates the LineEdits based on the selected item's geometry."""
         if not item or self._block_property_updates:
-             return
+            return
 
         pos = item.scenePos()
         rect = item.rect()
@@ -790,16 +888,14 @@ class PdfDisplay(PersistentBaseUi):
         self.ui.lineEditWidth.blockSignals(False)
         self.ui.lineEditHeight.blockSignals(False)
 
-
     def clear_box_properties_ui(self):
         """Clears the property LineEdits."""
-        self._block_property_updates = True # Prevent potential signals
+        self._block_property_updates = True  # Prevent potential signals
         self.ui.lineEditX.setText("")
         self.ui.lineEditY.setText("")
         self.ui.lineEditWidth.setText("")
         self.ui.lineEditHeight.setText("")
         self._block_property_updates = False
-
 
     @Slot()
     def on_box_properties_changed(self):
@@ -812,17 +908,23 @@ class PdfDisplay(PersistentBaseUi):
                 h = float(self.ui.lineEditHeight.text())
 
                 if w < MIN_BOX_WIDTH or h < MIN_BOX_HEIGHT:
-                     raise ValueError(f"Width/Height must be >= {MIN_BOX_WIDTH}/{MIN_BOX_HEIGHT}")
+                    raise ValueError(
+                        f"Width/Height must be >= {MIN_BOX_WIDTH}/{MIN_BOX_HEIGHT}"
+                    )
 
             except ValueError as e:
-                QMessageBox.warning(self, "Ungültige Eingabe", f"Bitte geben Sie gültige Zahlen ein.\nFehler: {e}")
-                 # Restore previous values
+                QMessageBox.warning(
+                    self,
+                    "Ungültige Eingabe",
+                    f"Bitte geben Sie gültige Zahlen ein.\nFehler: {e}",
+                )
+                # Restore previous values
                 self.update_box_properties_from_item(self.currentBox)
                 return
 
             # Prevent signals while programmatically changing box
             self.currentBox.blockSignals(True)
-            self.currentBox.prepareGeometryChange() # Important before changing pos/rect
+            self.currentBox.prepareGeometryChange()  # Important before changing pos/rect
             self.currentBox.setPos(x, y)
             # Ensure rect is always relative to the item's origin (0,0)
             self.currentBox.setRect(0, 0, w, h)
@@ -831,21 +933,20 @@ class PdfDisplay(PersistentBaseUi):
             # Manually update text as itemChange might not be sufficient now
             self.currentBox.updatePosText()
 
-
     # --- Event Handling ---
     def keyPressEvent(self, event):
         """Handles key presses, e.g., Delete key."""
         if event.key() == Qt.Key_Delete:
             # Check focus - delete from list if list has focus, otherwise from scene
             if self.ui.listBoxPairs.hasFocus():
-                 self.remove_selected_list_item()
+                self.remove_selected_list_item()
             else:
-                 # Attempt removal based on scene selection first
-                 selected_scene_items = self.scene.selectedItems()
-                 if selected_scene_items:
-                      self.remove_selected_list_item() # This func now handles scene sel.
-                 else: # Fallback to list selection if nothing in scene selected
-                      self.remove_selected_list_item()
+                # Attempt removal based on scene selection first
+                selected_scene_items = self.scene.selectedItems()
+                if selected_scene_items:
+                    self.remove_selected_list_item()  # This func now handles scene sel.
+                else:  # Fallback to list selection if nothing in scene selected
+                    self.remove_selected_list_item()
             event.accept()
         else:
             # Allow base class or parent to handle other keys
@@ -860,30 +961,31 @@ class PdfDisplay(PersistentBaseUi):
         """Öffentliche Methode, die den GUI-Zustand setzt."""
         self._apply_state_dict(config)
 
-
     # --- State helpers ----------------------------------------------------
     def _state_to_dict(self) -> PdfDisplayConfig:
         """Sammelt den kompletten GUI-Zustand als PdfDisplayConfig mittels der Config-Methoden."""
         if not self.pdfPath:
             raise RuntimeError("Es ist noch keine PDF geladen")
-        
+
         config = PdfDisplayConfig()
         # Setze Metadaten via die setter-Methoden der Config
 
         config.set_full_pdf_path(self.pdfPath)
         config.set_full_output_path(self.ui.lineEditOutputPath.text())
         config.set_dpi(self._display_dpi)
-        config.set_pickup_date(self.ui.dateEditPickup.date().toString("yyyy-MM-dd"))
-        
+        config.set_pickup_date(self.ui.dateEditPickup.date().toString("dd.MM.yyyy"))
+        config.set_pickup_time(self.ui.timeEditPickup.time().toString("HH:mm"))
 
         # Box-Paare hinzufügen
         box_pairs = []
         for pair in self.boxPairs:
-            box_pairs.append({
-                "id": pair.id,
-                "box1": self._box_to_dict(pair.box1),
-                "box2": self._box_to_dict(pair.box2),
-            })
+            box_pairs.append(
+                {
+                    "id": pair.id,
+                    "box1": self._box_to_dict(pair.box1),
+                    "box2": self._box_to_dict(pair.box2),
+                }
+            )
         config.set_key_value(["boxPairs"], box_pairs)
 
         # Einzelboxen hinzufügen
@@ -899,7 +1001,7 @@ class PdfDisplay(PersistentBaseUi):
     def _apply_state_dict(self, config: PdfDisplayConfig, clear_existing: bool = True):
         """Stellt den Zustand aus einem zuvor erzeugten PdfDisplayConfig wieder her,
         unter Nutzung der Methoden von PdfDisplayConfig."""
-        
+
         self._config = config
 
         if not self._config.is_empty():
@@ -908,11 +1010,19 @@ class PdfDisplay(PersistentBaseUi):
 
             pickup = self._config.get_pickup_date()
             if pickup:
-                date = QDate.fromString(pickup, "yyyy-MM-dd")
+                date = QDate.fromString(pickup, "dd.MM.yyyy")
                 if date.isValid():
                     self.ui.dateEditPickup.setDate(date)
             else:
                 self.ui.dateEditPickup.setDate(QDate.currentDate())
+
+            ptime = self._config.get_pickup_time()
+            if ptime:
+                t = QTime.fromString(ptime, "HH:mm")
+                if t.isValid():
+                    self.ui.timeEditPickup.setTime(t)
+            else:
+                self.ui.timeEditPickup.setTime(QTime.currentTime())
 
             if clear_existing:
                 self._clear_all_boxes()
@@ -952,8 +1062,6 @@ class PdfDisplay(PersistentBaseUi):
             BoxPair.manager.reset(max_pair_id)
             SingleBox.manager.reset(max_single_id)
 
-  
-
     def _restore_box(self, box: DraggableBox, d: dict):
         box.setLabel(d["label"])
         box.setPos(QPointF(d["x"], d["y"]))
@@ -970,7 +1078,6 @@ class PdfDisplay(PersistentBaseUi):
             self.load_page(0)
         else:
             raise IOError(self.pdfDocument.errorString())
-        
 
     def _config_changed(self) -> bool:
         if self.pdfPath:
@@ -979,5 +1086,3 @@ class PdfDisplay(PersistentBaseUi):
             return ret
         else:
             return False
-    
-

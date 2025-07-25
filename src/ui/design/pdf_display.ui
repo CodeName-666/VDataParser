@@ -282,6 +282,13 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QTimeEdit" name="timeEditPickup">
+           <property name="displayFormat">
+            <string>HH:mm</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
