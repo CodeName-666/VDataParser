@@ -9,10 +9,15 @@ import io
 from log import CustomLogger
 
 from display import (
-    ProgressTrackerAbstraction as _TrackerBase,
-    ConsoleProgressBar as _ConsoleBar,
+    ProgressTrackerAbstraction,
     OutputInterfaceAbstraction,
+    ConsoleProgressBar,
 )
+
+try:
+    from display import ProgressBarAbstraction
+except Exception:  # pragma: no cover - optional dependency
+    ProgressBarAbstraction = None  # type: ignore
 
 from pypdf import PdfReader, PdfWriter, PageObject
 from reportlab.pdfgen import canvas
@@ -22,21 +27,6 @@ from reportlab.lib import colors
 from .data_generator import DataGenerator
 from objects import CoordinatesConfig
 from display import BasicProgressTracker as ProgressTracker
-
-
-# ---------------------------------------------------------------------------
-# Progress stub (if toolkit missing) ----------------------------------------
-# ---------------------------------------------------------------------------
-class _NoOpTracker:  # noqa: D101
-    def __init__(self):
-        self.has_error = False
-
-    # noqa: D401 – tiny helper class
-    def reset(self, total: int): ...  # pragma: no cover
-    def increment(self): ...  # pragma: no cover
-
-    def set_error(self, exc: Exception):
-        self.has_error = True
 
 
 # ---------------------------------------------------------------------------
@@ -109,7 +99,12 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             )
 
         self._entries_per_page = len(self._coords)
-        self._output_pdf = (self.path / opath).with_suffix(".pdf")
+        base_path = Path(path) if path else Path(".")
+        try:
+            self.path = path  # type: ignore[attr-defined]
+        except Exception:
+            self.path = base_path  # pragma: no cover - for stubbed base
+        self._output_pdf = (base_path / opath).with_suffix(".pdf")
 
         # --------------------------------------------------------------
         # Expose constructor parameters via typed properties
@@ -239,7 +234,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self,
         rows: Sequence[Tuple[str, str, str]],
         template: bytes,
-        tracker: _TrackerBase,
+        tracker: ProgressTrackerAbstraction,
     ) -> PdfWriter:
         """Build a ``PdfWriter`` with all pages."""
 
@@ -263,7 +258,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self,
         rows: Sequence[Tuple[str, str, str]],
         template: bytes,
-        tracker: _TrackerBase,
+        tracker: ProgressTrackerAbstraction,
     ) -> None:
         """Generate pages and write them to disk."""
 
@@ -275,7 +270,10 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     # Public orchestration
     # ------------------------------------------------------------------
     def generate(
-        self, overall_tracker: Optional[_TrackerBase] = None
+        self,
+        overall_tracker: Optional[ProgressTrackerAbstraction] = None,
+        *,
+        bar: Optional[ProgressBarAbstraction] = None,
     ) -> None:  # noqa: D401
         """Generate the PDF file."""
         # 0. Dependency check ------------------------------------------------
@@ -304,18 +302,23 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             return
 
         # 1. Progress helper -------------------------------------------------
-        # tracker = _NoOpTracker() if _TrackerBase is None else _TrackerBase()
         tracker = ProgressTracker()
         total_pages = (len(rows) + self._entries_per_page - 1) // self._entries_per_page
         if hasattr(tracker, "reset"):
             tracker.reset(total=total_pages)  # type: ignore[misc]
 
-        bar = _ConsoleBar(length=50, description="PDF") if _ConsoleBar else None
+        if hasattr(self.output_interface, "set_secondary_tracker"):
+            try:
+                self.output_interface.set_secondary_tracker(tracker)
+            except Exception:
+                pass
+
+        use_bar = bar or ConsoleProgressBar(length=50, description="PDF")
 
         # 2. Run with optional console bar ----------------------------------
-        if bar:
+        if use_bar:
             # type: ignore[arg-type]
-            bar.run_with_progress(
+            use_bar.run_with_progress(
                 target=self._task,
                 args=(rows, template, tracker),
                 tracker=tracker,
