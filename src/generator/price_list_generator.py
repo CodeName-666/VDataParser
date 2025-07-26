@@ -5,8 +5,17 @@ from typing import List, Optional, Sequence, Protocol
 from log import CustomLogger  # type: ignore
 from display import (
     ProgressTrackerAbstraction as _TrackerBase,  # type: ignore
-    OutputInterfaceAbstraction,                  # type: ignore
+    OutputInterfaceAbstraction,  # type: ignore
 )
+try:
+    from display import ProgressBarAbstraction as _BarBase
+except Exception:  # pragma: no cover - optional dependency
+    _BarBase = None  # type: ignore
+try:
+    from display import ConsoleProgressBar as _ConsoleBar
+except Exception:  # pragma: no cover - optional dependency
+    _ConsoleBar = None  # type: ignore
+from display import BasicProgressTracker as ProgressTracker
 
 from .data_generator import DataGenerator
 from objects import FleatMarket  # type: ignore
@@ -37,7 +46,8 @@ class PriceListGenerator(DataGenerator):  # noqa: D101 – detailed docs above
         price_fmt = price.strip().replace(",", ".")
         return f"{main_number.strip()}{article_format},{price_fmt}\n"
 
-    def _collect_lines(self) -> List[str]:  # noqa: D401
+    def _collect_lines(self, tracker: Optional[_TrackerBase] = None) -> List[str]:
+        """Collect formatted price list lines."""
         lines: list[str] = []
         skipped = 0
         for main_number in self._fleat_market.main_numbers():
@@ -55,6 +65,8 @@ class PriceListGenerator(DataGenerator):  # noqa: D101 – detailed docs above
                     lines.append(line)
                 except Exception:  # pragma: no cover – lenient parsing
                     skipped += 1
+            if tracker is not None:
+                tracker.increment()
         self._log("debug", f"PriceList lines collected: {len(lines)}, skipped: {skipped}.")
         return lines
 
@@ -75,9 +87,46 @@ class PriceListGenerator(DataGenerator):  # noqa: D101 – detailed docs above
     # ------------------------------------------------------------------
     # Public entry point
     # ------------------------------------------------------------------
-    def generate(self, overall_tracker: Optional[_TrackerBase] = None) -> None:  # noqa: D401
+    def generate(
+        self,
+        overall_tracker: Optional[_TrackerBase] = None,
+        *,
+        bar: Optional[_BarBase] = None,
+    ) -> None:  # noqa: D401
+        """Generate the price list file."""
+
         self._output_and_log("INFO", "Starte Preislisten‑Generierung …")
-        lines = self._collect_lines()
-        self._write(lines)
+        total = len(self._fleat_market.main_numbers()) + 1
+        tracker = ProgressTracker()
+        if hasattr(tracker, "reset"):
+            tracker.reset(total=total)  # type: ignore[misc]
+
+        if hasattr(self.output_interface, "set_secondary_tracker"):
+            try:
+                self.output_interface.set_secondary_tracker(tracker)  # type: ignore[attr-defined]
+            except Exception:
+                pass
+
+        use_bar = bar or (_ConsoleBar(length=50, description="Preisliste") if _ConsoleBar else None)
+
+        def _task() -> None:
+            lines = self._collect_lines(tracker)
+            ok = self._write(lines)
+            if not ok:
+                tracker.set_error(RuntimeError("write failed"))
+            tracker.increment()
+
+        if use_bar:
+            use_bar.run_with_progress(target=_task, tracker=tracker)  # type: ignore[arg-type]
+        else:
+            _task()
+
+        if tracker.has_error:
+            self._output_and_log("ERROR", "Preislistenerstellung fehlgeschlagen – siehe Log.")
+            if overall_tracker:
+                overall_tracker.set_error(RuntimeError("price list error"))  # type: ignore[attr-defined]
+        else:
+            self._output_and_log("INFO", "Preislistenerstellung abgeschlossen.")
+
         if overall_tracker:
             overall_tracker.increment()  # type: ignore[attr-defined]
