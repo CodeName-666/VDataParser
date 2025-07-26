@@ -9,19 +9,15 @@ import io
 from log import CustomLogger
 
 from display import (
-    ProgressTrackerAbstraction as _TrackerBase,
+    ProgressTrackerAbstraction,
     OutputInterfaceAbstraction,
+    ConsoleProgressBar,
 )
 
 try:
-    from display import ProgressBarAbstraction as _BarBase
+    from display import ProgressBarAbstraction
 except Exception:  # pragma: no cover - optional dependency
-    _BarBase = None  # type: ignore
-
-try:
-    from display import ConsoleProgressBar as _ConsoleBar
-except Exception:  # pragma: no cover - optional dependency
-    _ConsoleBar = None  # type: ignore
+    ProgressBarAbstraction = None  # type: ignore
 
 from pypdf import PdfReader, PdfWriter, PageObject
 from reportlab.pdfgen import canvas
@@ -31,21 +27,6 @@ from reportlab.lib import colors
 from .data_generator import DataGenerator
 from objects import CoordinatesConfig
 from display import BasicProgressTracker as ProgressTracker
-
-
-# ---------------------------------------------------------------------------
-# Progress stub (if toolkit missing) ----------------------------------------
-# ---------------------------------------------------------------------------
-class _NoOpTracker:  # noqa: D101
-    def __init__(self):
-        self.has_error = False
-
-    # noqa: D401 – tiny helper class
-    def reset(self, total: int): ...  # pragma: no cover
-    def increment(self): ...  # pragma: no cover
-
-    def set_error(self, exc: Exception):
-        self.has_error = True
 
 
 # ---------------------------------------------------------------------------
@@ -265,7 +246,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self,
         rows: Sequence[Tuple[str, str, str]],
         template: bytes,
-        tracker: _TrackerBase,
+        tracker: ProgressTrackerAbstraction,
     ) -> PdfWriter:
         """Build a ``PdfWriter`` with all pages."""
 
@@ -289,7 +270,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self,
         rows: Sequence[Tuple[str, str, str]],
         template: bytes,
-        tracker: _TrackerBase,
+        tracker: ProgressTrackerAbstraction,
     ) -> None:
         """Generate pages and write them to disk."""
 
@@ -302,9 +283,9 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     # ------------------------------------------------------------------
     def generate(
         self,
-        overall_tracker: Optional[_TrackerBase] = None,
+        overall_tracker: Optional[ProgressTrackerAbstraction] = None,
         *,
-        bar: Optional[_BarBase] = None,
+        bar: Optional[ProgressBarAbstraction] = None,
     ) -> None:  # noqa: D401
         """Generate the PDF file."""
         # 0. Dependency check ------------------------------------------------
@@ -333,7 +314,6 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             return
 
         # 1. Progress helper -------------------------------------------------
-        # tracker = _NoOpTracker() if _TrackerBase is None else _TrackerBase()
         tracker = ProgressTracker()
         total_pages = (len(rows) + self._entries_per_page - 1) // self._entries_per_page
         if hasattr(tracker, "reset"):
@@ -345,7 +325,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
             except Exception:
                 pass
 
-        use_bar = bar or (_ConsoleBar(length=50, description="PDF") if _ConsoleBar else None)
+        use_bar = bar or ConsoleProgressBar(length=50, description="PDF")
 
         # 2. Run with optional console bar ----------------------------------
         if use_bar:
