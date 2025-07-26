@@ -1,8 +1,57 @@
-
 """High level facade combining various market related components."""
 
-from PySide6.QtCore import QObject, Slot, Signal
-from PySide6.QtWidgets import QMessageBox, QFileDialog
+try:
+    from PySide6.QtCore import QObject, Slot, Signal
+    from PySide6.QtWidgets import QMessageBox, QFileDialog
+except Exception:  # pragma: no cover - optional PySide6
+    class QObject:  # type: ignore
+        pass
+
+    def Slot(*_args, **_kwargs):  # type: ignore
+        def decorator(func):
+            return func
+
+        return decorator
+
+    class Signal:  # type: ignore
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def emit(self, *args, **kwargs) -> None:
+            pass
+
+        def connect(self, *_a, **_k) -> None:
+            pass
+
+    class QMessageBox:  # type: ignore
+        Question = Yes = No = 0
+
+        def setIcon(self, *_a, **_k) -> None:
+            pass
+
+        def setWindowTitle(self, *_a, **_k) -> None:
+            pass
+
+        def setText(self, *_a, **_k) -> None:
+            pass
+
+        def setStandardButtons(self, *_a, **_k) -> None:
+            pass
+
+        def setDefaultButton(self, *_a, **_k) -> None:
+            pass
+
+        def exec(self) -> int:
+            return 0
+
+    class QFileDialog:  # type: ignore
+        @staticmethod
+        def getExistingDirectory(*_a, **_k) -> str:
+            return ""
+
+        @staticmethod
+        def getSaveFileName(*_a, **_k) -> tuple[str, str]:
+            return "", ""
 from .data_manager import DataManager
 from .market_config_handler import MarketConfigHandler
 from .singelton_meta import SingletonMeta
@@ -24,7 +73,7 @@ class MarketObserver(QObject):
     data_manager_loaded = Signal(object)
     pdf_display_config_loaded = Signal(object)
 
-    def __init__(self, market = None, json_path: str = ""):
+    def __init__(self, market=None, json_path: str = ""):
         """
 
         Initialize the MarketObserver with a JSON path.
@@ -47,10 +96,9 @@ class MarketObserver(QObject):
             default_settings = self.market_config_handler.get_default_settings()
             self.data_manager.set_new_settings(default_settings)
             self.status_info.emit(
-            "WARNING",
-            "Keine Settings gefunden. Default Einstellungen wurden geladen."
-        )
-
+                "WARNING",
+                "Keine Settings gefunden. Default Einstellungen wurden geladen.",
+            )
 
     def set_data_ready_satus(self, status: bool) -> None:
         """
@@ -58,7 +106,7 @@ class MarketObserver(QObject):
         :param status: Boolean indicating if the data is ready.
         """
         self._data_ready = status
-    
+
     def is_data_ready(self) -> bool:
         """
         Check if the data is ready.
@@ -72,7 +120,7 @@ class MarketObserver(QObject):
         :return: True if a project exists, False otherwise.
         """
         return self._project_exists
-    
+
     def set_project_exists(self, status: bool) -> None:
         """
         Set the project exists status.
@@ -110,7 +158,9 @@ class MarketObserver(QObject):
                 self._project_exists = True
                 self._project_dir = str(Path(json_path).parent)
                 market_json_path = self.market_config_handler.get_full_market_path()
-                pdf_display_config = self.market_config_handler.get_full_pdf_coordinates_config_path()
+                pdf_display_config = (
+                    self.market_config_handler.get_full_pdf_coordinates_config_path()
+                )
                 # Initialize the DataManager with the market JSON path
                 ret = self.data_manager.load(market_json_path)
                 if ret:
@@ -130,10 +180,14 @@ class MarketObserver(QObject):
                     if self._ask_for_default_pdf_config():
                         self._load_default_pdf_config(json_path)
                     else:
-                        self.status_info.emit("ERROR", "Default pdf display config is not available now.")
+                        self.status_info.emit(
+                            "ERROR", "Default pdf display config is not available now."
+                        )
 
             else:
-                self.status_info.emit("ERROR", "Projektkonfiguration konnte nicht geladen werden")
+                self.status_info.emit(
+                    "ERROR", "Projektkonfiguration konnte nicht geladen werden"
+                )
 
         return ret
 
@@ -150,7 +204,9 @@ class MarketObserver(QObject):
                 # Setup the FleatMarket with the loaded data
                 self.apply_settings()
                 self.data_manager_loaded.emit(self.data_manager)
-                self.pdf_display_config_loaded.emit(self.pdf_display_config_loader)  # Send empty config
+                self.pdf_display_config_loaded.emit(
+                    self.pdf_display_config_loader
+                )  # Send empty config
                 self.setup_data_generation()
                 self.status_info.emit("INFO", f"Export geladen: {json_path}")
             else:
@@ -158,12 +214,12 @@ class MarketObserver(QObject):
 
             self.market_config_handler.set_full_market_path(json_path)
 
-            #self.file_generator = FileGenerator(self.data_manager)
+            # self.file_generator = FileGenerator(self.data_manager)
         return ret
 
     @Slot()
     def setup_data_generation(self) -> None:
-        
+
         self._data_ready = True
         self.fm: FleatMarket = FleatMarket()
         self.fm.load_sellers(self.data_manager.get_seller_as_list())
@@ -171,7 +227,7 @@ class MarketObserver(QObject):
         self.file_generator = FileGenerator(self.fm)
 
     @Slot(str)
-    def storage_path_changed(self,path: str):
+    def storage_path_changed(self, path: str):
         self.market_config_handler.set_full_pdf_coordinates_config_path(path)
         if not self._project_dir:
             self._project_dir = str(Path(path).parent)
@@ -220,14 +276,12 @@ class MarketObserver(QObject):
     def get_data(self):
         return self.data_manager
 
-
     def connect_signals(self, market) -> None:
         self._market = market
         self.data_manager_loaded.connect(market.set_market_data)
         self.pdf_display_config_loaded.connect(market.set_pdf_config)
 
         market.pdf_display_storage_path_changed.connect(self.storage_path_changed)
-
 
     def generate_pdf_data(self, window) -> bool:
         """Generate PDF data using ``window`` for output and progress."""
@@ -241,27 +295,30 @@ class MarketObserver(QObject):
             pass
 
         template_path = self.pdf_display_config_loader.get_full_pdf_path()
-        
+
         outputpath = self.pdf_display_config_loader.get_output_path()
         outputname = self.pdf_display_config_loader.get_output_name()
         coordinates = self.pdf_display_config_loader.convert_json_to_coordinate_list()
         dpi = self.pdf_display_config_loader.get_dpi()
-
+        pickup_date = self.pdf_display_config_loader.get_pickup_date()
+        pickup_time = self.pdf_display_config_loader.get_pickup_time()
+        pickup = f"{pickup_date} {pickup_time}".strip()
 
         self.file_generator = FileGenerator(
             self.fm,
             output_interface=window,
             progress_tracker=tracker,
-            output_path = outputpath,
-            pdf_template_path_input= template_path,
-            pdf_output_file_name= outputname,
-            pdf_coordinates= coordinates ,
+            output_path=outputpath,
+            pdf_template_path_input=template_path,
+            pdf_output_file_name=outputname,
+            pdf_coordinates=coordinates,
             pdf_display_dpi=dpi,
+            pickup_date=pickup,
         )
         self.file_generator.create_pdf_data()
         self.status_info.emit(
             "ERROR" if tracker.has_error else "INFO",
-            "PDF Daten generiert" if not tracker.has_error else "PDF Fehler"
+            "PDF Daten generiert" if not tracker.has_error else "PDF Fehler",
         )
         return not tracker.has_error
 
@@ -287,7 +344,11 @@ class MarketObserver(QObject):
         self.file_generator.create_seller_data()
         self.status_info.emit(
             "ERROR" if tracker.has_error else "INFO",
-            "Verkäuferdaten generiert" if not tracker.has_error else "Fehler bei Verkäuferdaten"
+            (
+                "Verkäuferdaten generiert"
+                if not tracker.has_error
+                else "Fehler bei Verkäuferdaten"
+            ),
         )
         return not tracker.has_error
 
@@ -303,6 +364,9 @@ class MarketObserver(QObject):
             pass
 
         pdf_settings = self.market_config_handler.get_pdf_generation_data()
+        pickup_date = self.pdf_display_config_loader.get_pickup_date()
+        pickup_time = self.pdf_display_config_loader.get_pickup_time()
+        pickup = f"{pickup_date} {pickup_time}".strip()
         self.file_generator = FileGenerator(
             self.fm,
             output_interface=window,
@@ -318,11 +382,12 @@ class MarketObserver(QObject):
             ),
             pdf_coordinates=pdf_settings.get("coordinates"),
             pdf_display_dpi=dpi,
+            pickup_date=pickup,
         )
         self.file_generator.create_all()
         self.status_info.emit(
             "ERROR" if tracker.has_error else "INFO",
-            "Alle Daten erstellt" if not tracker.has_error else "Fehler bei Erstellung"
+            "Alle Daten erstellt" if not tracker.has_error else "Fehler bei Erstellung",
         )
         return not tracker.has_error
 
@@ -335,7 +400,9 @@ class MarketObserver(QObject):
             target_dir = Path(dir_path)
             target_dir.mkdir(parents=True, exist_ok=True)
             self.data_manager.save(str(target_dir / market_file))
-            self.pdf_display_config_loader.save(str(target_dir / "pdf_display_config.json"))
+            self.pdf_display_config_loader.save(
+                str(target_dir / "pdf_display_config.json")
+            )
             self.market_config_handler.save_to(str(target_dir / "project.project"))
             pdf_path = self.pdf_display_config_loader.get_full_pdf_path()
             if pdf_path and Path(pdf_path).is_file():
@@ -350,8 +417,7 @@ class MarketObserver(QObject):
         except Exception as err:  # pragma: no cover - runtime errors handled
             self.status_info.emit("ERROR", str(err))
             return False
-        
-        
+
 
 class MarketFacade(QObject, metaclass=SingletonMeta):
     """
@@ -363,7 +429,6 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
     def __init__(self):
 
         QObject.__init__(self)
-
 
         self._market_list: List = []
 
@@ -388,8 +453,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         tmp_path = None
         ret = False
         try:
-            mysql_if = MySQLInterface(host=host, user=user, password=password,
-                                      database=database, port=port)
+            mysql_if = MySQLInterface(
+                host=host, user=user, password=password, database=database, port=port
+            )
             with AdvancedDBManager(mysql_if) as db:
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
                     tmp_path = tmp.name
@@ -401,8 +467,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
             if ret:
                 self.status_info.emit(
-                    "INFO",
-                    f"Online-Datenbank geladen: {database}@{host}:{port}"
+                    "INFO", f"Online-Datenbank geladen: {database}@{host}:{port}"
                 )
             else:
                 self.status_info.emit("ERROR", "Daten konnten nicht geladen werden")
@@ -427,7 +492,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         new_observer = self.create_observer(market, json_path)
         new_observer.connect_signals(market)
         ret = new_observer.load_local_market_project(json_path)
-    
+
         return ret
 
     def load_local_market_export(self, market, json_path: str) -> bool:
@@ -438,7 +503,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         """
         new_observer = self.create_observer(market)
         new_observer.connect_signals(market)
-    
+
         if self._ask_for_project_creation():
             ret, target = self.create_project_from_export(market, json_path, "")
             if ret:
@@ -446,15 +511,15 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                 json_path = str(target / json_file.name)
             else:
                 self.status_info.emit("ERROR", "Projekt konnte nicht erstellt werden")
-            
+
             ret = new_observer.load_local_market_export(json_path)
-                
-        
+
         return ret
 
     def market_already_exists(self, market) -> bool:
         market = next(
-            ((mk, obs)[0] for mk, obs in self._market_list if mk == market), None)
+            ((mk, obs)[0] for mk, obs in self._market_list if mk == market), None
+        )
         if market is not None:
             return True
         return False
@@ -471,7 +536,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                 return observer
         return None
 
-    def create_observer(self, market, json_path ="") -> MarketObserver:
+    def create_observer(self, market, json_path="") -> MarketObserver:
         """
         Create an observer for the specified market.
 
@@ -487,7 +552,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             observer = self.get_observer(market)
         return observer
 
-    def create_project_from_export(self, market, export_path: str, target_dir: str) -> bool:
+    def create_project_from_export(
+        self, market, export_path: str, target_dir: str
+    ) -> bool:
         """Create a project configuration from a loaded export."""
 
         observer: MarketObserver = self.get_observer(market)
@@ -497,7 +564,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
         chosen_dir = target_dir
         if not chosen_dir:
-            chosen_dir = QFileDialog.getExistingDirectory(market, "Projektordner wählen")
+            chosen_dir = QFileDialog.getExistingDirectory(
+                market, "Projektordner wählen"
+            )
             if not chosen_dir:
                 return False, None
 
@@ -508,7 +577,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             new_export = target / export_file.name
             shutil.move(str(export_file), new_export)
         except Exception as err:
-            self.status_info.emit("ERROR", f"Export konnte nicht verschoben werden: {err}")
+            self.status_info.emit(
+                "ERROR", f"Export konnte nicht verschoben werden: {err}"
+            )
             return False, None
 
         observer.init_project(str(new_export))
@@ -517,7 +588,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         try:
             observer.market_config_handler.save_to(str(project_file))
         except Exception as err:
-            self.status_info.emit("ERROR", f"Projekt konnte nicht erstellt werden: {err}")
+            self.status_info.emit(
+                "ERROR", f"Projekt konnte nicht erstellt werden: {err}"
+            )
             return False, None
 
         observer.set_project_dir(str(target))
@@ -541,7 +614,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             return False
         try:
             ok = observer.generate_pdf_data(window)
-            self.status_info.emit("INFO" if ok else "ERROR", "PDF Daten generiert" if ok else "PDF Fehler")
+            self.status_info.emit(
+                "INFO" if ok else "ERROR", "PDF Daten generiert" if ok else "PDF Fehler"
+            )
             return ok
         except Exception as err:  # pragma: no cover - runtime errors handled
             self.status_info.emit("ERROR", str(err))
@@ -556,12 +631,15 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             return False
         try:
             ok = observer.generate_seller_data(window)
-            self.status_info.emit("INFO" if ok else "ERROR", "Verkäuferdaten generiert" if ok else "Fehler bei Verkäuferdaten")
+            self.status_info.emit(
+                "INFO" if ok else "ERROR",
+                "Verkäuferdaten generiert" if ok else "Fehler bei Verkäuferdaten",
+            )
             return ok
         except Exception as err:  # pragma: no cover - runtime errors handled
             self.status_info.emit("ERROR", str(err))
             return False
-    
+
     @Slot(object)
     def create_market_data(self, market) -> None:
         """
@@ -578,7 +656,6 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             self.status_info.emit("INFO", "Marktdaten generiert")
         except Exception as err:  # pragma: no cover - runtime errors handled
             self.status_info.emit("ERROR", str(err))
-        
 
     @Slot(object, object)
     def create_all_data(self, market, window) -> bool:
@@ -594,7 +671,10 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         try:
             if observer.file_generator:
                 ok = observer.generate_all(window)
-                self.status_info.emit("INFO" if ok else "ERROR", "Alle Daten erstellt" if ok else "Fehler bei Erstellung")
+                self.status_info.emit(
+                    "INFO" if ok else "ERROR",
+                    "Alle Daten erstellt" if ok else "Fehler bei Erstellung",
+                )
                 return ok
             else:
                 raise RuntimeError("FileGenerator nicht bereit")
@@ -643,7 +723,8 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                 or "pdf_display_config.json"
             )
             project_file = target_dir / (
-                observer.market_config_handler.get_storage_file_name() or "project.project"
+                observer.market_config_handler.get_storage_file_name()
+                or "project.project"
             )
 
             observer.data_manager.json_data = observer.data_manager.export_to_json()
@@ -652,7 +733,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             observer.pdf_display_config_loader.save(str(pdf_file))
 
             observer.market_config_handler.set_full_market_path(str(market_file))
-            observer.market_config_handler.set_full_pdf_coordinates_config_path(str(pdf_file))
+            observer.market_config_handler.set_full_pdf_coordinates_config_path(
+                str(pdf_file)
+            )
             observer.market_config_handler.save_to(str(project_file))
 
             pdf_path = observer.pdf_display_config_loader.get_full_pdf_path()

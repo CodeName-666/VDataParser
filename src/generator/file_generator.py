@@ -10,9 +10,10 @@ from display import (
     OutputInterfaceAbstraction,                      # type: ignore
     ProgressTrackerAbstraction as _TrackerBase,      # type: ignore
 )
-from display.progress_bar.progress_bar_abstraction import (
-    ProgressBarAbstraction as _BarBase,              # type: ignore
-)
+try:
+    from display import ProgressBarAbstraction as _BarBase
+except Exception:  # pragma: no cover - optional dependency
+    _BarBase = None  # type: ignore
 
 # Sub‑generators -----------------------------------------------------------
 from data import Base
@@ -41,6 +42,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         pdf_output_file_name: str | Path = "Abholbestaetigungen.pdf",
         pdf_coordinates: Optional[List[CoordinatesConfig]] = None,
         pdf_display_dpi: int = ReceiveInfoPdfGenerator.DEFAULT_DISPLAY_DPI,
+        pickup_date: str = "",
         logger: Optional[CustomLogger] = None,
         output_interface: Optional[OutputInterfaceAbstraction] = None,
         progress_tracker: Optional[_TrackerBase] = None,
@@ -62,6 +64,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         self._pdf_output_file_name = pdf_output_file_name
         self._pdf_coordinates = pdf_coordinates
         self._pdf_display_dpi = pdf_display_dpi
+        self._pickup_date = pickup_date
 
         self._tasks: List[Tuple[str, object]] = []
 
@@ -85,6 +88,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
                     output_name=self._pdf_output_file_name,
                     coordinates=self._pdf_coordinates,
                     display_dpi=self._pdf_display_dpi,
+                    pickup_date=self._pickup_date,
                 ),
             ),
         ]
@@ -185,6 +189,9 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         dpi = settings.get("display_dpi") or settings.get("dpi")
         if dpi:
             self._pdf_display_dpi = dpi
+        pickup = settings.get("pickup_date")
+        if pickup is not None:
+            self._pickup_date = pickup
 
     def create_pdf_data(self, settings: Optional[dict] = None) -> None:
         """Generate only the PDF based on ``settings``."""

@@ -4,6 +4,8 @@
     "output_path": "",
     "output_name": "Abholbestätigung.pdf",
     "dpi": 150,
+    "pickup_date": "",
+    "pickup_time": "",
     "boxPairs": [
         {
             "id": 1,

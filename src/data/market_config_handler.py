@@ -1,6 +1,20 @@
 import copy
 import os
-from PySide6.QtCore import QObject, Signal
+try:
+    from PySide6.QtCore import QObject, Signal
+except Exception:  # pragma: no cover - optional PySide6
+    class QObject:  # type: ignore
+        pass
+
+    class Signal:  # type: ignore
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def emit(self, *args, **kwargs) -> None:
+            pass
+
+        def connect(self, *_a, **_k) -> None:
+            pass
 
 from pathlib import Path
 from typing import Any, Dict, TYPE_CHECKING, Union
