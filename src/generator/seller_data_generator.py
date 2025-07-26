@@ -6,7 +6,16 @@ import time
 from log import CustomLogger
 from objects import FleatMarket, Seller
 from display import ProgressTrackerAbstraction
-from display import OutputInterfaceAbstraction  # Added
+from display import OutputInterfaceAbstraction
+try:
+    from display import ProgressBarAbstraction as _BarBase
+except Exception:  # pragma: no cover - optional dependency
+    _BarBase = None  # type: ignore
+try:
+    from display import ConsoleProgressBar as _ConsoleBar
+except Exception:  # pragma: no cover - optional dependency
+    _ConsoleBar = None  # type: ignore
+from display import BasicProgressTracker as ProgressTracker
 from .data_generator import DataGenerator
 
 
@@ -27,12 +36,17 @@ class SellerDataGenerator(DataGenerator):
         """ Creates a formatted entry: "main_number","B",quantity,total_value """
         return f'"{main_number}","B",{article_quantity},{article_total_value:.2f}\n'.replace('.', ',')
 
-    def write(self, output_data: List[str]):
-        """ Writes the generated seller data entries to the file. """
+    def write(
+        self,
+        output_data: List[str],
+        tracker: Optional[ProgressTrackerAbstraction] = None,
+    ) -> bool:
+        """Write ``output_data`` to disk."""
         if not output_data:
-            # Inform user and log
             self._output_and_log("INFO", "Keine Verkäuferdaten zum Schreiben vorhanden.")
-            return
+            if tracker is not None:
+                tracker.set_error(RuntimeError("no data"))
+            return False
         full_path = self.get_full_path()  # Handles its own errors
         try:
             full_path.parent.mkdir(parents=True, exist_ok=True)
@@ -40,14 +54,26 @@ class SellerDataGenerator(DataGenerator):
                 file.writelines(output_data)
             # Success message for user
             self._output_and_log("INFO", f"Verkäuferdaten erfolgreich geschrieben: {full_path}")
+            return True
         except IOError as e:
             # Critical errors for user
             self._output_and_log("ERROR", f"Fehler beim Schreiben der Verkäuferdaten nach {full_path}: {e}")
+            if tracker is not None:
+                tracker.set_error(e)
+            return False
         except Exception as e:
             self._output_and_log("ERROR", f"Unerwarteter Fehler beim Schreiben der Verkäuferdaten: {e}")
+            if tracker is not None:
+                tracker.set_error(e)
+            return False
 
-    def generate(self, overall_tracker: Optional[ProgressTrackerAbstraction] = None):
-        """ Generates seller data, logs, writes, and updates tracker. """
+    def generate(
+        self,
+        overall_tracker: Optional[ProgressTrackerAbstraction] = None,
+        *,
+        bar: Optional[_BarBase] = None,
+    ) -> None:
+        """Generate seller data and update ``overall_tracker``."""
         # Start message for user
         self._output_and_log("INFO", f"Starte Erstellung der Verkäuferliste ({self.file_name}.{self.FILE_SUFFIX}):\n" +
                                       "=================================================")
@@ -59,6 +85,13 @@ class SellerDataGenerator(DataGenerator):
         try:
             all_main_numbers_data = self.__fleat_market_data.main_numbers()
             total_items = len(all_main_numbers_data)
+            tracker = ProgressTracker()
+            tracker.reset(total=total_items + 1)
+            if hasattr(self.output_interface, "set_secondary_tracker"):
+                try:
+                    self.output_interface.set_secondary_tracker(tracker)  # type: ignore[attr-defined]
+                except Exception:
+                    pass
         except AttributeError:
             # Critical error
             err_msg = "FleatMarket Objekt hat keine Methode 'number_list'. Breche ab."
@@ -154,17 +187,23 @@ class SellerDataGenerator(DataGenerator):
                 self._output_and_log(
                     "WARNING", f">> Verkäufer-Eintrag (UNGÜLTIG): {first_name} {second_name}, MNr: {m_n_str}, Artikel: {a_q_str}, Wert: {a_t_str}. Übersprungen.")
 
-        self.write(output_data)  # write handles its own messages
+            if tracker is not None:
+                tracker.increment()
+        success = self.write(output_data, tracker)
+        if success:
+            tracker.increment()
         # Final summary for user
         self._output_and_log("INFO", f"Verkäuferliste abgeschlossen: \n" +
                              "      ========================\n" +
                              f"          --> Gültige Einträge: {valid_cnt}\n" +
                              f"          --> Ungültige/Übersprungene Einträge: {invalid_cnt}\n")
+        if tracker.has_error:
+            self._output_and_log("ERROR", "Verkäuferdatei konnte nicht erstellt werden – siehe Log.")
+            if overall_tracker:
+                overall_tracker.set_error(RuntimeError("seller data error"))  # type: ignore[attr-defined]
 
-        # Update tracker - internal log
         if overall_tracker and isinstance(overall_tracker, ProgressTrackerAbstraction):
             overall_tracker.increment()
             self._log("DEBUG", "Overall tracker incremented for SellerDataGenerator.")
         elif overall_tracker:
-            # Warning about tracker type
             self._output_and_log("WARNING", "overall_tracker wurde übergeben, ist aber kein ProgressTrackerInterface.")
