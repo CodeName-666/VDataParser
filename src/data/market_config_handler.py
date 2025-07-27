@@ -17,7 +17,7 @@ except Exception:  # pragma: no cover - optional PySide6
             pass
 
 from pathlib import Path
-from typing import Any, Dict, TYPE_CHECKING, Union
+from typing import Any, Dict, Union
 
 from util.path_utils import ensure_trailing_sep
 

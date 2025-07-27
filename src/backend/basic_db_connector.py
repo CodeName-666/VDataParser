@@ -56,7 +56,7 @@ class BasicDBConnector:
              self.connect() # connect() raises error on failure
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, *_exc):
         """Leave the context manager and close the connection."""
         self.disconnect()
         return False # Propagate exceptions from the with block

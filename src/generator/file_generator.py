@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import time
-from typing import List, Optional, Sequence, Tuple, Protocol
+from typing import List, Optional, Sequence, Tuple
 from log import CustomLogger  # type: ignore
 from display import (
     OutputInterfaceAbstraction,                      # type: ignore
