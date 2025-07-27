@@ -283,10 +283,12 @@ class MarketObserver(QObject):
 
         market.pdf_display_storage_path_changed.connect(self.storage_path_changed)
 
-    def generate_pdf_data(self, window) -> bool:
-        """Generate PDF data using ``window`` for output and progress."""
+    def prepare_pdf_generator(
+        self, window
+    ) -> tuple[FileGenerator | None, BasicProgressTracker | None]:
+        """Return a configured ``FileGenerator`` for PDF generation."""
         if not self._data_ready:
-            return False
+            return None, None
 
         tracker = BasicProgressTracker()
         try:
@@ -315,7 +317,73 @@ class MarketObserver(QObject):
             pdf_display_dpi=dpi,
             pickup_date=pickup,
         )
-        self.file_generator.create_pdf_data()
+        return self.file_generator, tracker
+
+    def prepare_seller_generator(
+        self, window
+    ) -> tuple[FileGenerator | None, BasicProgressTracker | None]:
+        """Return a configured ``FileGenerator`` for seller data generation."""
+        if not self._data_ready:
+            return None, None
+
+        tracker = BasicProgressTracker()
+        try:
+            window.set_primary_tracker(tracker)
+        except AttributeError:
+            pass
+
+        output_path = self.pdf_display_config_loader.get_output_path()
+
+        self.file_generator = FileGenerator(
+            self.fm,
+            output_interface=window,
+            progress_tracker=tracker,
+            output_path=output_path,
+        )
+        return self.file_generator, tracker
+
+    def prepare_all_generator(
+        self, window
+    ) -> tuple[FileGenerator | None, BasicProgressTracker | None]:
+        """Return a configured ``FileGenerator`` for full generation."""
+        if not self._data_ready:
+            return None, None
+
+        tracker = BasicProgressTracker()
+        try:
+            window.set_primary_tracker(tracker)
+        except AttributeError:
+            pass
+
+        template_path = self.pdf_display_config_loader.get_full_pdf_path()
+        output_path = self.pdf_display_config_loader.get_output_path()
+        output_name = self.pdf_display_config_loader.get_output_name()
+        coordinates = self.pdf_display_config_loader.convert_json_to_coordinate_list()
+        pickup_date = self.pdf_display_config_loader.get_pickup_date()
+        pickup_time = self.pdf_display_config_loader.get_pickup_time()
+        pickup = f"{pickup_date} {pickup_time}".strip()
+        dpi = self.pdf_display_config_loader.get_dpi()
+
+        self.file_generator = FileGenerator(
+            self.fm,
+            output_interface=window,
+            progress_tracker=tracker,
+            output_path=output_path,
+            pdf_template_path_input=template_path,
+            pdf_output_file_name=output_name,
+            pdf_coordinates=coordinates,
+            pdf_display_dpi=dpi,
+            pickup_date=pickup,
+        )
+        return self.file_generator, tracker
+
+    def generate_pdf_data(self, window) -> bool:
+        """Generate PDF data using ``window`` for output and progress."""
+        generator, tracker = self.prepare_pdf_generator(window)
+        if generator is None or tracker is None:
+            return False
+
+        generator.create_pdf_data()
         self.status_info.emit(
             "ERROR" if tracker.has_error else "INFO",
             "PDF Daten generiert" if not tracker.has_error else "PDF Fehler",
@@ -324,24 +392,11 @@ class MarketObserver(QObject):
 
     def generate_seller_data(self, window) -> bool:
         """Generate seller related data files using ``window`` for output."""
-        if not self._data_ready:
+        generator, tracker = self.prepare_seller_generator(window)
+        if generator is None or tracker is None:
             return False
 
-        tracker = BasicProgressTracker()
-        try:
-            window.set_primary_tracker(tracker)
-        except AttributeError:
-            pass
-
-        pdf_settings = self.market_config_handler.get_pdf_generation_data()
-        dpi = self.pdf_display_config_loader.get_dpi()
-        self.file_generator = FileGenerator(
-            self.fm,
-            output_interface=window,
-            progress_tracker=tracker,
-            output_path=pdf_settings.get("output_path", "output"),
-        )
-        self.file_generator.create_seller_data()
+        generator.create_seller_data()
         self.status_info.emit(
             "ERROR" if tracker.has_error else "INFO",
             (
@@ -354,37 +409,11 @@ class MarketObserver(QObject):
 
     def generate_all(self, window) -> bool:
         """Generate all data and PDF using ``window`` for output."""
-        if not self._data_ready:
+        generator, tracker = self.prepare_all_generator(window)
+        if generator is None or tracker is None:
             return False
 
-        tracker = BasicProgressTracker()
-        try:
-            window.set_primary_tracker(tracker)
-        except AttributeError:
-            pass
-
-        pdf_settings = self.market_config_handler.get_pdf_generation_data()
-        pickup_date = self.pdf_display_config_loader.get_pickup_date()
-        pickup_time = self.pdf_display_config_loader.get_pickup_time()
-        pickup = f"{pickup_date} {pickup_time}".strip()
-        self.file_generator = FileGenerator(
-            self.fm,
-            output_interface=window,
-            progress_tracker=tracker,
-            output_path=pdf_settings.get("output_path", "output"),
-            pdf_template_path_input=pdf_settings.get(
-                "pdf_template",
-                pdf_settings.get("pdf_template_path_input", "template/template.pdf"),
-            ),
-            pdf_output_file_name=pdf_settings.get(
-                "pdf_output_file_name",
-                pdf_settings.get("pdf_name", "Abholbestaetigungen.pdf"),
-            ),
-            pdf_coordinates=pdf_settings.get("coordinates"),
-            pdf_display_dpi=dpi,
-            pickup_date=pickup,
-        )
-        self.file_generator.create_all()
+        generator.create_all()
         self.status_info.emit(
             "ERROR" if tracker.has_error else "INFO",
             "Alle Daten erstellt" if not tracker.has_error else "Fehler bei Erstellung",
@@ -600,6 +629,30 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             observer._load_default_pdf_config(str(project_file))
 
         return True, target
+
+    def prepare_pdf_generator(self, market, window):
+        """Return a generator for PDF creation."""
+        observer = self.get_observer(market)
+        if not observer:
+            self.status_info.emit("ERROR", "Kein Observer gefunden")
+            return None, None
+        return observer.prepare_pdf_generator(window)
+
+    def prepare_seller_generator(self, market, window):
+        """Return a generator for seller data creation."""
+        observer = self.get_observer(market)
+        if not observer:
+            self.status_info.emit("ERROR", "Kein Observer gefunden")
+            return None, None
+        return observer.prepare_seller_generator(window)
+
+    def prepare_all_generator(self, market, window):
+        """Return a generator for full data creation."""
+        observer = self.get_observer(market)
+        if not observer:
+            self.status_info.emit("ERROR", "Kein Observer gefunden")
+            return None, None
+        return observer.prepare_all_generator(window)
 
     @Slot(object, object)
     def create_pdf_data(self, market, window) -> bool:

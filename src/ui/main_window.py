@@ -18,6 +18,7 @@ from .market import Market
 from .pdf_display import PdfDisplay
 from .market_loader_dialog import MarketLoaderDialog
 from .output_window import OutputWindow
+from .generator_worker import GeneratorWorker
 from data import MarketFacade
 from .status_bar import StatusBar
 
@@ -44,6 +45,7 @@ class MainWindow(QMainWindow):
         #self.pdf_display = PdfDisplay(self.stack)
         self.market_facade = MarketFacade()
         self.status_bar = StatusBar(self)
+        self._workers: list[GeneratorWorker] = []
 
         
     def setup_ui(self):
@@ -260,10 +262,17 @@ class MainWindow(QMainWindow):
         Starts the data generation process.
         """
         window = OutputWindow(self)
+        generator, _ = self.market_facade.prepare_seller_generator(
+            self.market_view, window
+        )
+        if generator is None:
+            return
+
+        worker = GeneratorWorker(generator, "create_seller_data")
+        worker.finished.connect(window.close)
+        self._workers.append(worker)
         window.show()
-        ok = self.market_facade.create_seller_data(self.market_view, window)
-        if ok:
-            window.close()
+        worker.start()
 
     @Slot()
     def start_pdf_generation(self):
@@ -272,10 +281,17 @@ class MainWindow(QMainWindow):
         """
         self.market_view.pdf_display.save_state()
         window = OutputWindow(self)
+        generator, _ = self.market_facade.prepare_pdf_generator(
+            self.market_view, window
+        )
+        if generator is None:
+            return
+
+        worker = GeneratorWorker(generator, "create_pdf_data")
+        worker.finished.connect(window.close)
+        self._workers.append(worker)
         window.show()
-        ok = self.market_facade.create_pdf_data(self.market_view, window)
-        if ok:
-            window.close()
+        worker.start()
 
     @Slot()
     def start_all_generation(self):
@@ -284,10 +300,17 @@ class MainWindow(QMainWindow):
         """
         self.market_view.pdf_display.save_state()
         window = OutputWindow(self)
+        generator, _ = self.market_facade.prepare_all_generator(
+            self.market_view, window
+        )
+        if generator is None:
+            return
+
+        worker = GeneratorWorker(generator, "create_all")
+        worker.finished.connect(window.close)
+        self._workers.append(worker)
         window.show()
-        ok = self.market_facade.create_all_data(self.market_view, window)
-        if ok:
-            window.close()
+        worker.start()
 
     @Slot()
     def create_local_market_export(self):
