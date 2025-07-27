@@ -8,6 +8,11 @@ Follow the rules below when modifying files.
 - Keep line length under **120 characters**.
 - Provide docstrings for all public functions and classes.
 - Prefer `from x import y` over importing the entire module when only few members are required.
+- Implement functions and methods with a **single return statement** when possible to reduce complexity.
+- Add comprehensive docstrings to every function and method:
+  - Include a detailed description of the behavior.
+  - Document all parameters with their data types and purpose.
+  - Document all return values with data types and descriptions.
 
 ## Testing
 - Run `pytest` before committing. Some tests require the optional dependency **PySide6**.
