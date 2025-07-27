@@ -1,6 +1,6 @@
 
 from .output.output_interface_abstraction import OutputInterfaceAbstraction
-from .output.cosole_output import ConsoleOutput
+from .output.console_output import ConsoleOutput
 
 try:
     from .output.qt_output import QtOutput
