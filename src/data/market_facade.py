@@ -332,13 +332,13 @@ class MarketObserver(QObject):
         except AttributeError:
             pass
 
-        pdf_settings = self.market_config_handler.get_pdf_generation_data()
+        output_path = self.pdf_display_config_loader.get_output_path()
 
         self.file_generator = FileGenerator(
             self.fm,
             output_interface=window,
             progress_tracker=tracker,
-            output_path=pdf_settings.get("output_path", "output"),
+            output_path=output_path,
         )
         return self.file_generator, tracker
 
@@ -355,25 +355,23 @@ class MarketObserver(QObject):
         except AttributeError:
             pass
 
-        pdf_settings = self.market_config_handler.get_pdf_generation_data()
+        template_path = self.pdf_display_config_loader.get_full_pdf_path()
+        output_path = self.pdf_display_config_loader.get_output_path()
+        output_name = self.pdf_display_config_loader.get_output_name()
+        coordinates = self.pdf_display_config_loader.convert_json_to_coordinate_list()
         pickup_date = self.pdf_display_config_loader.get_pickup_date()
         pickup_time = self.pdf_display_config_loader.get_pickup_time()
         pickup = f"{pickup_date} {pickup_time}".strip()
         dpi = self.pdf_display_config_loader.get_dpi()
+
         self.file_generator = FileGenerator(
             self.fm,
             output_interface=window,
             progress_tracker=tracker,
-            output_path=pdf_settings.get("output_path", "output"),
-            pdf_template_path_input=pdf_settings.get(
-                "pdf_template",
-                pdf_settings.get("pdf_template_path_input", "template/template.pdf"),
-            ),
-            pdf_output_file_name=pdf_settings.get(
-                "pdf_output_file_name",
-                pdf_settings.get("pdf_name", "Abholbestaetigungen.pdf"),
-            ),
-            pdf_coordinates=pdf_settings.get("coordinates"),
+            output_path=output_path,
+            pdf_template_path_input=template_path,
+            pdf_output_file_name=output_name,
+            pdf_coordinates=coordinates,
             pdf_display_dpi=dpi,
             pickup_date=pickup,
         )
