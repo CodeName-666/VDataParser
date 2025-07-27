@@ -24,6 +24,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from objects import CoordinatesConfig  # Typ für Koordinaten
 
+from util.path_utils import ensure_trailing_sep
+
 from .json_handler import JsonHandler  # Basisklasse mit get_key_value / set_key_value
 
 __all__ = ["Box", "BoxPair", "PdfDisplayConfig"]
@@ -146,7 +148,7 @@ class PdfDisplayConfig(QObject, JsonHandler):
     def get_full_output_path(self) -> str:
         """Return the absolute output path composed of directory and file name."""
         path = self.get_output_path()
-        return self.ensure_trailing_sep(path) + self.get_output_name()
+        return ensure_trailing_sep(path) + self.get_output_name()
 
     def set_full_output_path(self, value: str) -> None:
         file = Path(value)
@@ -183,35 +185,8 @@ class PdfDisplayConfig(QObject, JsonHandler):
     def get_full_pdf_path(self) -> str:
         """Return the absolute PDF path composed of directory and file name."""
         path = self.get_pdf_path()
-        return self.ensure_trailing_sep(path) + self.get_pdf_name()
+        return ensure_trailing_sep(path) + self.get_pdf_name()
 
-    @staticmethod
-    def ensure_trailing_sep(path: str) -> str:  # noqa: D401
-        """Ensure *path* ends with the host‑OS separator (``os.sep``).
-
-        * If the string is empty → returned unchanged.
-        * If it already ends with *any* separator, the trailing component is
-          normalised to ``os.sep`` so that callers always get a consistent
-          result, independent of the separator style they passed in.
-
-        Examples
-        --------
-        >>> ProjectManager.ensure_trailing_sep("/var/data")
-        '/var/data/'  # on POSIX
-        >>> ProjectManager.ensure_trailing_sep(r"C:\\logs")
-        'C:\\logs\\'  # on Windows
-        """
-        if not path:
-            return path
-
-        # already ends with a separator – replace if necessary
-        if path.endswith(("/", "\\")):
-            if path.endswith(os.sep):
-                return path
-            return path[:-1] + os.sep  # swap the last char
-
-        # append the host‑separator
-        return path + os.sep
 
     # ------------------------------------------------------------------
     # BoxPairs ---------------------------------------------------------

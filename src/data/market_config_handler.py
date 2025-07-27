@@ -19,6 +19,8 @@ except Exception:  # pragma: no cover - optional PySide6
 from pathlib import Path
 from typing import Any, Dict, TYPE_CHECKING, Union
 
+from util.path_utils import ensure_trailing_sep
+
 from .json_handler import JsonHandler
 from .data_manager import DataManager
 from log import CustomLogger  # noqa: F401
@@ -106,7 +108,7 @@ class MarketConfigHandler(QObject, JsonHandler):
 
     def get_full_market_path(self):
         path = self.get_market_path()
-        return self.ensure_trailing_sep(path) + self.get_market_name()
+        return ensure_trailing_sep(path) + self.get_market_name()
 
     def set_market(self, market_path: str, market_name: str) -> None:
         """Set the *market* subsection."""
@@ -129,7 +131,7 @@ class MarketConfigHandler(QObject, JsonHandler):
         and a market name (market_name) using the host's OS conventions.
         """
         market_path = os.path.dirname(full_path)
-        market_path = self.ensure_trailing_sep(market_path)
+        market_path = ensure_trailing_sep(market_path)
         market_name = os.path.basename(full_path)
         self.set_market(market_path, market_name)
 
@@ -153,7 +155,7 @@ class MarketConfigHandler(QObject, JsonHandler):
         """
         path = self.get_pdf_coordinates_config_path()
         name = self.get_pdf_coordinates_config_name()
-        return self.ensure_trailing_sep(path) + name
+        return ensure_trailing_sep(path) + name
 
     def set_pdf_coordinates_config(self, coordinates_config_path: str, coordinates_config_name: str) -> None:
         """Set the entire pfd_coordiantes_config section."""
@@ -177,7 +179,7 @@ class MarketConfigHandler(QObject, JsonHandler):
         """
         import os
         config_path = os.path.dirname(full_path)
-        config_path = self.ensure_trailing_sep(config_path)
+        config_path = ensure_trailing_sep(config_path)
         config_name = os.path.basename(full_path)
         self.set_pdf_coordinates_config(config_path, config_name)
 
@@ -191,33 +193,6 @@ class MarketConfigHandler(QObject, JsonHandler):
         """Persist current config to *destination*."""
         self.save(str(destination))
     
-    @staticmethod
-    def ensure_trailing_sep(path: str) -> str:  # noqa: D401
-        """Ensure *path* ends with the host‑OS separator (``os.sep``).
-
-        * If the string is empty → returned unchanged.
-        * If it already ends with *any* separator, the trailing component is
-          normalised to ``os.sep`` so that callers always get a consistent
-          result, independent of the separator style they passed in.
-
-        Examples
-        --------
-        >>> ProjectManager.ensure_trailing_sep("/var/data")
-        '/var/data/'  # on POSIX
-        >>> ProjectManager.ensure_trailing_sep(r"C:\\logs")
-        'C:\\logs\\'  # on Windows
-        """
-        if not path:
-            return path
-
-        # already ends with a separator – replace if necessary
-        if path.endswith(("/", "\\")):
-            if path.endswith(os.sep):
-                return path
-            return path[:-1] + os.sep  # swap the last char
-
-        # append the host‑separator
-        return path + os.sep
     
     def load_project(self, json_path: Union[str, Path]) -> None:
         """Load project configuration from a JSON file."""
