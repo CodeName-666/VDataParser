@@ -17,7 +17,7 @@ except Exception:  # pragma: no cover - optional PySide6
             pass
 
 from pathlib import Path
-from typing import Any, Dict, TYPE_CHECKING, Union
+from typing import Any, Dict, Union
 
 from .json_handler import JsonHandler
 from .data_manager import DataManager

@@ -19,7 +19,7 @@ try:
 except Exception:  # pragma: no cover - optional dependency
     ProgressBarAbstraction = None  # type: ignore
 
-from pypdf import PdfReader, PdfWriter, PageObject
+from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 
 from reportlab.lib.units import mm

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional, Sequence, Protocol
+from typing import List, Optional, Sequence
 from log import CustomLogger  # type: ignore
 from display import (
     ProgressTrackerAbstraction as _TrackerBase,  # type: ignore
