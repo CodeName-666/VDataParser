@@ -1,6 +1,5 @@
-from PySide6.QtCore import QTimer, Slot
-from PySide6.QtWidgets import QWidget
-from PySide6.QtWidgets import QDialog, QAbstractItemView
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QDialog, QAbstractItemView, QPushButton
 
 from display import (
     OutputInterfaceAbstraction,
@@ -8,18 +7,16 @@ from display import (
     QtOutput,
 )
 
-from .base_ui import BaseUi
 from .generated import OutputWindowUi
 from abc import ABCMeta
 
 
-class _WidgetABCMeta(type(QWidget), ABCMeta):
-    """Combine Qt's widget metaclass with :class:`ABCMeta`."""
+class _DialogABCMeta(type(QDialog), ABCMeta):
+    """Combine Qt's dialog metaclass with :class:`ABCMeta`."""
     pass
 
 
-
-class OutputWindow(BaseUi, OutputInterfaceAbstraction, metaclass=_WidgetABCMeta):
+class OutputWindow(QDialog, OutputInterfaceAbstraction, metaclass=_DialogABCMeta):
     """Simple dialog used to present generation results."""
 
     def __init__(self, parent: QDialog | None = None) -> None:
@@ -33,6 +30,10 @@ class OutputWindow(BaseUi, OutputInterfaceAbstraction, metaclass=_WidgetABCMeta)
         super().__init__(parent)
         self.ui = OutputWindowUi()
         self.ui.setupUi(self)
+
+        self.close_button = QPushButton("Close", self)
+        self.close_button.clicked.connect(self.close)
+        self.ui.verticalLayout.addWidget(self.close_button)
 
         # Output interface implementation for the log list widget
         self._output = QtOutput(self.ui.logOutputList)
