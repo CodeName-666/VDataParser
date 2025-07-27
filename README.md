@@ -82,7 +82,7 @@ src/
 │   ├── market_config_handler.py   # Projektkonfigurationen
 │   ├── market_facade.py       # Fassade für Marktvorgänge
 │   ├── pdf_display_config.py  # Konfiguration für PDF-Layout
-│   └── singelton_meta.py      # Implementierung des Singleton-Metaclasses
+│   └── singleton_meta.py      # Implementierung des Singleton-Metaclasses
 ├── generator/                 # Klassen zum Erzeugen der Ausgabedateien
 │   ├── file_generator.py      # Orchestriert alle Generatoren
 │   ├── price_list_generator.py

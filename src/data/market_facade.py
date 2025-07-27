@@ -54,7 +54,7 @@ except Exception:  # pragma: no cover - optional PySide6
             return "", ""
 from .data_manager import DataManager
 from .market_config_handler import MarketConfigHandler
-from .singelton_meta import SingletonMeta
+from .singleton_meta import SingletonMeta
 from .pdf_display_config import PdfDisplayConfig
 from generator.file_generator import FileGenerator
 from objects import FleatMarket, SettingsContentDataClass
