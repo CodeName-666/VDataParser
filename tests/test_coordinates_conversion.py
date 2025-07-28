@@ -9,17 +9,21 @@ def test_coordinate_list_generation():
     # Inject src directory
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
-    # ----- provide minimal stubs -----
     pyside6 = types.ModuleType('PySide6')
     qtcore = types.ModuleType('PySide6.QtCore')
-    class QObject: pass
-    class Signal:
+
+    class QObject:  # pragma: no cover - simple stub
+        pass
+
+    class Signal:  # pragma: no cover - simple stub
         def __init__(self, *a, **kw):
             pass
+
     qtcore.QObject = QObject
     qtcore.Signal = Signal
-    sys.modules.setdefault('PySide6', pyside6)
+    sys.modules['PySide6'] = pyside6
     sys.modules['PySide6.QtCore'] = qtcore
+    restore_pyside = True
 
     objects_mod = types.ModuleType('objects')
     @dataclasses.dataclass
@@ -94,3 +98,13 @@ def test_coordinate_list_generation():
     assert (c1.x1, c1.y1, c1.x2, c1.y2, c1.x3, c1.y3) == (1, 2, 3, 4, 10, 11)
     assert (c2.x1, c2.y1, c2.x2, c2.y2, c2.x3, c2.y3) == (5, 6, 7, 8, 0, 0)
     assert (c3.x1, c3.y1, c3.x2, c3.y2, c3.x3, c3.y3) == (0, 0, 0, 0, 12, 13)
+
+    if restore_pyside:
+        sys.modules.pop('PySide6.QtCore', None)
+        sys.modules.pop('PySide6', None)
+
+    sys.modules.pop('data.pdf_display_config', None)
+    sys.modules.pop('data.json_handler', None)
+    sys.modules.pop('data', None)
+    sys.modules.pop('objects', None)
+    sys.modules.pop('requests', None)

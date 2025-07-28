@@ -7,17 +7,21 @@ from pathlib import Path
 def test_dpi_getter_setter():
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
-    # minimal PySide6 stubs
     pyside6 = types.ModuleType('PySide6')
     qtcore = types.ModuleType('PySide6.QtCore')
-    class QObject: pass
-    class Signal:
+
+    class QObject:  # pragma: no cover - simple stub
+        pass
+
+    class Signal:  # pragma: no cover - simple stub
         def __init__(self, *a, **kw):
             pass
+
     qtcore.QObject = QObject
     qtcore.Signal = Signal
-    sys.modules.setdefault('PySide6', pyside6)
+    sys.modules['PySide6'] = pyside6
     sys.modules['PySide6.QtCore'] = qtcore
+    restore_pyside = True
 
     # stubs for dependencies used by PdfDisplayConfig
     requests_stub = types.ModuleType('requests')
@@ -65,3 +69,13 @@ def test_dpi_getter_setter():
     assert cfg.get_dpi() == 150
     cfg.set_dpi(200)
     assert cfg.get_dpi() == 200
+
+    if restore_pyside:
+        sys.modules.pop('PySide6.QtCore', None)
+        sys.modules.pop('PySide6', None)
+
+    sys.modules.pop('data.pdf_display_config', None)
+    sys.modules.pop('data.json_handler', None)
+    sys.modules.pop('data', None)
+    sys.modules.pop('objects', None)
+    sys.modules.pop('requests', None)
