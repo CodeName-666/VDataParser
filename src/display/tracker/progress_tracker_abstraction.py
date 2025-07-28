@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
 
+
 class ProgressTrackerAbstraction(ABC):
     """Interface for objects tracking progress state."""
 

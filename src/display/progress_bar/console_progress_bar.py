@@ -7,7 +7,7 @@ from typing import Optional, Callable, Dict, Any, Tuple
 
 from display import ProgressBarAbstraction
 from display import ProgressTrackerAbstraction
-from log import CustomLogger 
+from log import CustomLogger
 
 
 # Inherit from the Abstraction
@@ -32,10 +32,10 @@ class ConsoleProgressBar(ProgressBarAbstraction):
         # self._progress_thread: Optional[threading.Thread] = None
         # self._current_state: Dict[str, Any] = {'percentage': 0, 'current': 0, 'total': 100, 'error': None}
 
-
     # _log method is inherited from base class
 
     # Implement the abstract update method
+
     def update(
         self,
         percentage: int,
@@ -44,19 +44,19 @@ class ConsoleProgressBar(ProgressBarAbstraction):
         error: Optional[Exception] = None,
     ) -> None:
         """Render the progress line with optional ``current`` and ``error``."""
-        perc = max(0, min(100, percentage)) # Clamp percentage
+        perc = max(0, min(100, percentage))  # Clamp percentage
         filled_length = int(self.length * perc / 100)
         bar = self.FILL_CHAR * filled_length + self.EMPTY_CHAR * (self.length - filled_length)
 
         # Build status string
         status_str = f"{perc}%"
         if current is not None and total is not None:
-             status_str += f" ({current}/{total})"
+            status_str += f" ({current}/{total})"
         if error:
             # Truncate long error messages for display
             error_str = str(error).replace('\n', ' ')[:self.length]
             status_str = f" FEHLER: {error_str}"
-            bar = '!' * self.length # Indicate error visually in the bar
+            bar = '!' * self.length  # Indicate error visually in the bar
 
         # Use carriage return to overwrite the line
         # Ensure output is encoded correctly, especially on Windows
@@ -65,24 +65,25 @@ class ConsoleProgressBar(ProgressBarAbstraction):
             sys.stdout.write(output)
             sys.stdout.flush()
         except UnicodeEncodeError:
-             # Fallback for environments with limited console encoding support
-             output = f'\r{self.description}: [{perc}%] {status_str} '
-             # Try simplified bar
-             simple_bar = '#' * filled_length + '.' * (self.length - filled_length)
-             output_with_bar = f'\r{self.description}: |{simple_bar}| {status_str} '
-             try:
-                 sys.stdout.write(output_with_bar.encode(sys.stdout.encoding or 'utf-8', errors='replace').decode(sys.stdout.encoding or 'utf-8'))
-             except: # Final fallback
-                 sys.stdout.write(output) # Attempt original simplified output
-             sys.stdout.flush()
-
+            # Fallback for environments with limited console encoding support
+            output = f'\r{self.description}: [{perc}%] {status_str} '
+            # Try simplified bar
+            simple_bar = '#' * filled_length + '.' * (self.length - filled_length)
+            output_with_bar = f'\r{self.description}: |{simple_bar}| {status_str} '
+            try:
+                sys.stdout.write(output_with_bar.encode(sys.stdout.encoding or 'utf-8',
+                                 errors='replace').decode(sys.stdout.encoding or 'utf-8'))
+            except:  # Final fallback
+                sys.stdout.write(output)  # Attempt original simplified output
+            sys.stdout.flush()
 
     # Implement the abstract _monitor_progress method
+
     def _monitor_progress(self, tracker: ProgressTrackerAbstraction) -> None:
         """Background thread polling the tracker and calling :meth:`update`."""
         if tracker is None:
-             self._log("ERROR", "Kein Tracker zum Überwachen übergeben.")
-             return
+            self._log("ERROR", "Kein Tracker zum Überwachen übergeben.")
+            return
 
         last_state = None
         while not self._stop_event.is_set():
@@ -92,8 +93,8 @@ class ConsoleProgressBar(ProgressBarAbstraction):
                 # Nur aktualisieren, wenn sich etwas geändert hat (oder Fehler neu ist)
                 # Update _current_state in the base class
                 if current_state != last_state:
-                    self._current_state = current_state # Store latest state
-                    self.update(current_state.get('percentage', 0), # Use .get for safety
+                    self._current_state = current_state  # Store latest state
+                    self.update(current_state.get('percentage', 0),  # Use .get for safety
                                 current_state.get('current'),
                                 current_state.get('total'),
                                 current_state.get('error'))
@@ -101,20 +102,20 @@ class ConsoleProgressBar(ProgressBarAbstraction):
 
                     # Bei Fehler anhalten? Oder weiterlaufen lassen? Aktuell: Weiterlaufen
                     if current_state.get('error'):
-                        pass # Bleibt aktiv, zeigt Fehler an
+                        pass  # Bleibt aktiv, zeigt Fehler an
 
             except Exception as e:
-                 # Fehler beim Abrufen des Tracker-Status
-                 self._log("ERROR", f"Fehler beim Abrufen des Tracker-Status: {e}")
-                 # Optional: Anzeige aktualisieren, um diesen Fehler anzuzeigen?
-                 # Use the last known good state's percentage if available
-                 self.update(self._current_state.get('percentage', 0), error=e)
-                 self._stop_event.set() # Stop monitoring if tracker fails
+                # Fehler beim Abrufen des Tracker-Status
+                self._log("ERROR", f"Fehler beim Abrufen des Tracker-Status: {e}")
+                # Optional: Anzeige aktualisieren, um diesen Fehler anzuzeigen?
+                # Use the last known good state's percentage if available
+                self.update(self._current_state.get('percentage', 0), error=e)
+                self._stop_event.set()  # Stop monitoring if tracker fails
 
             # Wartezeit, um CPU zu schonen
             stopped = self._stop_event.wait(self.update_interval)
             if stopped:
-                break # Exit loop if stop event is set externally or internally
+                break  # Exit loop if stop event is set externally or internally
 
         # Letzte Aktualisierung nach Beendigung des Threads, um sicherzustellen,
         # dass der Endzustand (100% oder Fehler) angezeigt wird.
@@ -132,19 +133,19 @@ class ConsoleProgressBar(ProgressBarAbstraction):
             self.update(self._current_state.get('percentage', 0),
                         self._current_state.get('current'),
                         self._current_state.get('total'),
-                        e) # Show the error about fetching final state
-
+                        e)  # Show the error about fetching final state
 
     # Implement the abstract run_with_progress method
+
     def run_with_progress(self, target: Callable[..., Any], args: Tuple = (), kwargs: Optional[Dict[str, Any]] = None, tracker: ProgressTrackerAbstraction = None) -> Optional[Exception]:
         """Execute ``target`` while the bar listens to ``tracker``."""
-        if not isinstance(tracker, ProgressTrackerAbstraction): # type: ignore # Check if it's a valid tracker
+        if not isinstance(tracker, ProgressTrackerAbstraction):  # type: ignore # Check if it's a valid tracker
             raise ValueError("Ein gültiges ProgressTrackerInterface-Objekt muss übergeben werden.")
         if kwargs is None:
             kwargs = {}
 
         self._stop_event.clear()
-        self._current_state = {'percentage': 0, 'current': 0, 'total': 100, 'error': None} # Reset state
+        self._current_state = {'percentage': 0, 'current': 0, 'total': 100, 'error': None}  # Reset state
         # Display initial state immediately
         self.update(self._current_state['percentage'])
 
@@ -165,7 +166,7 @@ class ConsoleProgressBar(ProgressBarAbstraction):
                 if not current_tracker_state.get('error'):
                     try:
                         tracker.set_error(e)
-                        self._current_state = tracker.get_state() # Update local state cache
+                        self._current_state = tracker.get_state()  # Update local state cache
                     except Exception as tracker_err:
                         self._log("ERROR", f"Fehler beim Setzen des Fehlers im Tracker: {tracker_err}")
 
@@ -174,11 +175,11 @@ class ConsoleProgressBar(ProgressBarAbstraction):
         # Signalisiere dem Überwachungs-Thread, dass er anhalten soll
         self._stop_event.set()
         if self._progress_thread and self._progress_thread.is_alive():
-             # Wait briefly, but not indefinitely, for the monitor thread to make its final update
+            # Wait briefly, but not indefinitely, for the monitor thread to make its final update
             self._progress_thread.join(timeout=self.update_interval * 3)
 
         # Hole den finalen Zustand vom Tracker (oder verwende den zuletzt bekannten)
-        final_error = self._current_state.get('error') # Use cached state which monitor should have updated
+        final_error = self._current_state.get('error')  # Use cached state which monitor should have updated
 
         # Schreibe die Abschlusszeile (Erfolg oder Fehler)
         final_tracked_error = final_error
@@ -189,8 +190,8 @@ class ConsoleProgressBar(ProgressBarAbstraction):
 
         return combined_error
 
-
     # Implement the abstract complete method
+
     def complete(self, success: bool = True, final_message: Optional[str] = None) -> None:
         """Terminate the display and print ``final_message`` if given."""
         # The final update should have been done by _monitor_progress finishing
@@ -201,11 +202,11 @@ class ConsoleProgressBar(ProgressBarAbstraction):
         sys.stdout.flush()
 
         if final_message:
-             # Print final message clearly
-             log_level = "INFO" if success else "ERROR"
-             message = f"{self.description}: {final_message}"
-             print(message)
-             self._log(log_level, final_message) # Log the core message
+            # Print final message clearly
+            log_level = "INFO" if success else "ERROR"
+            message = f"{self.description}: {final_message}"
+            print(message)
+            self._log(log_level, final_message)  # Log the core message
 
 
 # --- END OF FILE console_progress_bar.py ---

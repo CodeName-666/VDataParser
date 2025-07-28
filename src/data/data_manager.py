@@ -142,7 +142,7 @@ class DataManager(QObject, BaseData):
                 if seller.id not in users[key]["ids"]:
                     users[key]["ids"].append(seller.id)
         users = self.__move_empty_to_end(users)
-        
+
         return users
 
     def _assign_main_numbers_to_sellers(self) -> Dict[str, Dict]:
@@ -528,7 +528,7 @@ class DataManager(QObject, BaseData):
                 return True
 
         return False
-    
+
     def __move_empty_to_end(self, data_list):
         empty_key = "<LEER>"
         if empty_key in data_list:
@@ -549,11 +549,10 @@ class DataManager(QObject, BaseData):
             )
             return True
         return False
-    
+
     def settings_available(self) -> bool:
         return not self.settings.is_all_empty()
 
-   
     def set_new_settings(self, new_settings: SettingsContentDataClass):
         """
         Setzt die Default-Werte für die Settings (überschreibt alle Felder).
@@ -584,8 +583,7 @@ class DataManager(QObject, BaseData):
                     )
 
         self.synchornize_data_class_change_to_json()
-            
-   
+
     def reset_all_changes(self) -> int:
         """Reset all logged changes and return the number of reverted entries."""
         # Wichtig: Um Konflikte zu vermeiden, rückwärts iterieren
@@ -596,7 +594,6 @@ class DataManager(QObject, BaseData):
         self._change_log.clear()
         self._unsaved_changes = True  # weil Änderungen am Zustand erfolgt sind
         return successful_resets
-
 
     def synchornize_data_class_change_to_json(self):
         self.json_data = self.export_to_json()
