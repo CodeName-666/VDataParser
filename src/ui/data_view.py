@@ -34,14 +34,11 @@ class DataView(BaseUi):
         self.market = None  # reference to the Market widget
         self.ui.setupUi(self)
 
-
         # context menu for deletion
         self.ui.treeUsers.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.treeUsers.customContextMenuRequested.connect(
             self._tree_context_menu)
-        
-        
-      
+
     def setup_views(self, market_widget):
         """Initialise tree and list views.
 
@@ -67,7 +64,7 @@ class DataView(BaseUi):
         """Fill the tree view with aggregated sellers and their tables."""
         if not self.market_widget().get_aggregated_user():
             return
-        
+
         self.ui.treeUsers.clear()
         users_list = self.market_widget().get_aggregated_user()
         for email, user in users_list.items():
@@ -94,10 +91,10 @@ class DataView(BaseUi):
         seller is formatted as ``"{index}. {first} {last}"`` and attached to a
         :class:`QListWidgetItem` via :data:`Qt.UserRole` for later retrieval.
         """
-        
+
         if not self.market_widget().get_seller():
             return
-        
+
         self.listUsers.clear()
         flat_users = self.market_widget().get_seller()
         for index, seller in enumerate(flat_users, start=1):
@@ -172,7 +169,7 @@ class DataView(BaseUi):
         """
         if not self.market_widget().get_main_numbers():
             return
-        
+
         seller = item.data(Qt.UserRole)
         target_stnr = "stnr" + seller.id
         strnr_tables = self.market_widget().get_main_numbers()
@@ -189,19 +186,19 @@ class DataView(BaseUi):
             Iterable of objects providing ``beschreibung``, ``groesse``,
             ``preis`` and ``created_at`` attributes.
         """
-        #headers = ["artikelnummer", "beschreibung", "groesse", "preis", "created_at"]
+        # headers = ["artikelnummer", "beschreibung", "groesse", "preis", "created_at"]
         headers = ["Beschreibung", "Groesse", "Preis", "Created_At"]
         self.ui.tableEntries.clearContents()
         self.ui.tableEntries.setColumnCount(len(headers))
         self.ui.tableEntries.setHorizontalHeaderLabels(headers)
-        
+
         if not entries:
             self.ui.tableEntries.setRowCount(0)
             return
         self.ui.tableEntries.setRowCount(len(entries))
-        
+
         for row, entry in enumerate(entries):
-            #self.ui.tableEntries.setItem(row, 0, QTableWidgetItem(getattr(entry, "artikelnummer", "")))
+            # self.ui.tableEntries.setItem(row, 0, QTableWidgetItem(getattr(entry, "artikelnummer", "")))
             self.ui.tableEntries.setItem(row, 0, QTableWidgetItem(getattr(entry, "beschreibung", "")))
             self.ui.tableEntries.setItem(row, 1, QTableWidgetItem(getattr(entry, "groesse", "")))
             self.ui.tableEntries.setItem(row, 2, QTableWidgetItem(getattr(entry, "preis", "")))
@@ -273,6 +270,7 @@ class DataView(BaseUi):
         if hasattr(self.market_widget(), "user_info"):
             self.market_widget().user_info.update_data()
         self.data_changed.emit(False)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

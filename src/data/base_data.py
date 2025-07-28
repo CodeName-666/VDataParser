@@ -1,14 +1,13 @@
 # --- START OF FILE base_data.py ---
 
-from typing import Optional, Callable, Dict, List, Any # Added Any
+from typing import Optional, Callable, Dict, List, Any  # Added Any
 import sys
 import time
-from pathlib import Path # Import Path from pathlib
+from pathlib import Path  # Import Path from pathlib
 
 from .json_handler import JsonHandler
 from log import CustomLogger, LogType
-from objects.data_class_definition import * 
-
+from objects.data_class_definition import *
 
 
 class BaseData(JsonHandler, JSONData):
@@ -29,18 +28,16 @@ class BaseData(JsonHandler, JSONData):
         # The logger passed here will be available as self.logger
         super().__init__(json_path_or_data=json_file_path, logger=logger)
 
-
         # Check if data loading was successful in JsonHandler's __init__
         if self.json_data is None:
             self._log("ERROR", f"BaseData initialization failed: Could not load JSON data from {json_file_path}.")
             # Initialize JSONData with defaults even if loading failed, to prevent AttributeErrors later
             JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
                               settings=SettingDataClass(), main_numbers_list=[], sellers=SellerListDataClass())
-            return # Stop further processing if data loading failed
-        
+            return  # Stop further processing if data loading failed
+
         # Proceed with parsing if data loaded successfully
         self._parse_json_data()
-
 
     def _log(self, level: str, message: str, on_verbose: bool = False) -> None:
         """ Helper method for conditional logging within BaseData. """
@@ -48,29 +45,29 @@ class BaseData(JsonHandler, JSONData):
         if self.logger and CustomLogger:
             log_method = getattr(self.logger, level.lower(), None)
             if log_method and callable(log_method):
-                 try:
-                     if level.lower() in ["debug", "info", "warning", "error"]:
-                          log_method(message, verbose=on_verbose)
-                     else:
-                          log_method(message)
-                 except Exception as e:
-                      print(f"BASE_DATA LOGGING FAILED ({level}): {message} | Error: {e}", file=sys.stderr)
-
+                try:
+                    if level.lower() in ["debug", "info", "warning", "error"]:
+                        log_method(message, verbose=on_verbose)
+                    else:
+                        log_method(message)
+                except Exception as e:
+                    print(f"BASE_DATA LOGGING FAILED ({level}): {message} | Error: {e}", file=sys.stderr)
 
     def _parse_json_data(self) -> bool:
         """ Parses the loaded self.json_data into the data class structure. """
-        
+
         ret: bool = False
         self._log("INFO", "Parsing loaded JSON data into data classes...")
-        json_data = self.get_data() # Already loaded by JsonHandler.__init__
+        json_data = self.get_data()  # Already loaded by JsonHandler.__init__
 
         # Ensure json_data is a list as expected by the original logic
         if not isinstance(json_data, list):
-             self._log("ERROR", f"JSON data structure error: Expected a List, got {type(json_data).__name__}. Cannot parse.")
-             # Initialize JSONData with defaults
-             JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
+            self._log(
+                "ERROR", f"JSON data structure error: Expected a List, got {type(json_data).__name__}. Cannot parse.")
+            # Initialize JSONData with defaults
+            JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
                               settings=SettingDataClass(), main_numbers_list=[], sellers=SellerListDataClass())
-             return ret
+            return ret
 
         try:
             header_dict = {}
@@ -95,17 +92,17 @@ class BaseData(JsonHandler, JSONData):
                 else:
                     pass
                     # Suche anhand des "type" Schlüssels
-        
+
             _export_header = HeaderDataClass(**header_dict)
             _base_info = BaseInfoDataClass(**base_info_dict)
             _settings = SettingDataClass(**settings_dict)
 
             _main_numbers = [MainNumberDataClass(**table) for table in main_number_dicts]
             _sellers = SellerListDataClass(**sellers_dict)
-            
+
             # Initialisierung des JSONData-Teils der Klasse
             JSONData.__init__(self, export_header=_export_header, base_info=_base_info, settings=_settings,
-                            main_numbers_list=_main_numbers, sellers=_sellers)
+                              main_numbers_list=_main_numbers, sellers=_sellers)
 
             self._log("INFO", "JSON data parsed successfully.")
             ret = True
@@ -113,7 +110,7 @@ class BaseData(JsonHandler, JSONData):
             # Catch errors often related to unexpected data types in **kwargs
             self._log("ERROR", f"Data structure error during parsing (likely unexpected data type): {e}")
             JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(),
-                              settings=SettingDataClass(), main_numbers_list=[], sellers=SellerListDataClass()) # Reset to defaults
+                              settings=SettingDataClass(), main_numbers_list=[], sellers=SellerListDataClass())  # Reset to defaults
             ret = False
         except Exception as e:
             self._log("ERROR", f"Unexpected error during JSON parsing: {e}")
@@ -130,12 +127,12 @@ class BaseData(JsonHandler, JSONData):
         # Use the load method from JsonHandler (which also updates self.json_data)
         self.load(json_file_path)
         if self.json_data is not None:
-            return self._parse_json_data() # Reparse the newly loaded data
+            return self._parse_json_data()  # Reparse the newly loaded data
         else:
             self._log("ERROR", "Reload failed: Could not load new JSON data.")
             # Keep the old parsed data or reset? Resetting might be safer.
             JSONData.__init__(self, export_header=HeaderDataClass(), base_info=BaseInfoDataClass(), settings=SettingDataClass(),
-                               main_numbers_list=[], sellers=SellerListDataClass())
+                              main_numbers_list=[], sellers=SellerListDataClass())
             return False
 
     def get_seller_as_list(self) -> List[SellerDataClass]:
@@ -158,24 +155,24 @@ class BaseData(JsonHandler, JSONData):
 
         # Handle potential AttributeError if initialization failed badly
         try:
-             seller_quantity = len(self.get_seller_as_list())
-             article_list_quantity = len(self.get_main_number_as_list())
-             status = ">> Datenbank OK" if seller_quantity == article_list_quantity else ">> Datenbank FEHLER: Anzahl Verkäufer und Artikellisten stimmt nicht überein!"
-             mismatch = "" if seller_quantity == article_list_quantity else f" (Differenz: {abs(seller_quantity - article_list_quantity)})"
+            seller_quantity = len(self.get_seller_as_list())
+            article_list_quantity = len(self.get_main_number_as_list())
+            status = ">> Datenbank OK" if seller_quantity == article_list_quantity else ">> Datenbank FEHLER: Anzahl Verkäufer und Artikellisten stimmt nicht überein!"
+            mismatch = "" if seller_quantity == article_list_quantity else f" (Differenz: {abs(seller_quantity - article_list_quantity)})"
 
-             log_message = ("========================\n" +
+            log_message = ("========================\n" +
                            f"         >> Anzahl Verkäufer: {seller_quantity}\n" +
-                           f"         >> Anzahl Artikel Listen: {article_list_quantity}{mismatch}\n"+
-                           f"         {status}\n"+
+                           f"         >> Anzahl Artikel Listen: {article_list_quantity}{mismatch}\n" +
+                           f"         {status}\n" +
                            "      ========================")
-             # Log INFO if OK, WARNING if mismatch
-             log_level = "INFO" if seller_quantity == article_list_quantity else "WARNING"
-             self._log(log_level, log_message)
+            # Log INFO if OK, WARNING if mismatch
+            log_level = "INFO" if seller_quantity == article_list_quantity else "WARNING"
+            self._log(log_level, log_message)
 
         except AttributeError as e:
-             self._log("ERROR", f"Fehler bei Datenüberprüfung: Attribute nicht initialisiert. {e}")
+            self._log("ERROR", f"Fehler bei Datenüberprüfung: Attribute nicht initialisiert. {e}")
         except Exception as e:
-             self._log("ERROR", f"Unerwarteter Fehler bei Datenüberprüfung: {e}")
+            self._log("ERROR", f"Unerwarteter Fehler bei Datenüberprüfung: {e}")
 
         # time.sleep(1) # Reduced sleep time
 
@@ -190,7 +187,7 @@ class BaseData(JsonHandler, JSONData):
         self._log("INFO", f"Loading JSON data from {path_or_url}...")
         ret = super().load(path_or_url)
         if ret:
-           ret = self._parse_json_data()
+            ret = self._parse_json_data()
         return ret
 
 

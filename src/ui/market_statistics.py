@@ -9,6 +9,7 @@ from PySide6.QtCharts import (
 from .base_ui import BaseUi
 from .generated import MarketStatisticsUi
 
+
 class MarketStatistics(BaseUi):
     """Widget displaying aggregated market statistics."""
 
@@ -76,14 +77,10 @@ class MarketStatistics(BaseUi):
             for s in sellers
             if all(getattr(s, attr, "").strip() for attr in ("vorname", "nachname", "email"))
         )
-        
+
         free_count = max(max_num - user_count, 0)
-        used_percent = int(user_count / max_num * 100) if max_num else 0   
+        used_percent = int(user_count / max_num * 100) if max_num else 0
         used_percent = min(used_percent, 100)
-
-        
-
-
 
         self.ui.valueCompleteNums.setText(str(progress_buckets["voll"]))
         self.ui.valueAlmostNums.setText(str(progress_buckets["fast"]))

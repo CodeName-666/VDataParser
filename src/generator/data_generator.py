@@ -24,7 +24,7 @@ class DataGenerator(Base):
 
     FILE_SUFFIX = ''  # Subclasses should define this
 
-    def __init__(self,path: str,file_name: str,logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None) -> None:
+    def __init__(self, path: str, file_name: str, logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None) -> None:
         """
         Initializes the DataGenerator with path, file name, logger, and output interface.
 
@@ -42,9 +42,9 @@ class DataGenerator(Base):
         Base.__init__(self, logger, output_interface)  # Initialize Base class
         self.__file_name: str = file_name
         self.__path: Path = Path(path) if path else Path('.')
-       
 
     # --- Properties (file_name, path) remain the same ---
+
     @property
     def file_name(self) -> str:
         return self.__file_name

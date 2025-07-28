@@ -2,7 +2,6 @@
 from PySide6.QtWidgets import QStackedWidget, QWidget, QVBoxLayout
 
 
-
 class BaseUi(QWidget):
     """Common base class for all custom Qt widgets.
 

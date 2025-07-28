@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 
-
 from pathlib import Path
 import time
 from typing import List, Optional, Sequence, Tuple
@@ -32,7 +31,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
     # ------------------------------------------------------------------
     def __init__(
         self,
-        fleat_market_data ,  # type: ignore[valid-type]
+        fleat_market_data,  # type: ignore[valid-type]
         *,
         output_path: str | Path = "output",
         seller_file_name: str = "kundendaten",
@@ -48,7 +47,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         progress_tracker: Optional[_TrackerBase] = None,
         progress_bar: Optional[_BarBase] = None,
     ) -> None:
-        
+
         # Housekeeping -------------------------------------------------
         Base.__init__(self, logger, output_interface)
         self._fm = fleat_market_data
@@ -195,7 +194,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
 
     def create_pdf_data(self, settings: Optional[dict] = None) -> None:
         """Generate only the PDF based on ``settings``."""
-        #self._apply_pdf_settings(settings)
+        # self._apply_pdf_settings(settings)
         tasks = [self._build_tasks()[-1]]  # only PDF task
         self._run_tasks(tasks, "Starte PDF‑Generierung …")
 

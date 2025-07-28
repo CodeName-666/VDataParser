@@ -10,11 +10,8 @@ from .persistent_base_ui import PersistentBaseUi
 from .generated import MarketSettingUi
 
 
-
-
 class MarketSetting(PersistentBaseUi):
     """Widget providing access to market configuration values."""
-
 
     def __init__(self, parent=None):
         """Create widgets and connect signals.
@@ -61,7 +58,7 @@ class MarketSetting(PersistentBaseUi):
     def load_settings(self) -> None:
         """Load settings from the market widget and update the UI."""
         data_manager = self.market_widget().get_data_manager()
-      
+
         self._apply_state_dataclass(data_manager.settings.data[0])
         self.set_config(data_manager)
         self._config_changed()
@@ -92,7 +89,7 @@ class MarketSetting(PersistentBaseUi):
     def set_radio_button_status(self, status: str):
         if status == "ja":
             self.ui.radioActiveFlohmarkt.setChecked(True)
-        else: 
+        else:
             self.ui.radioDisbaledFlohmarkt.setChecked(True)
 
     def set_login_aktiv_status(self, status: str):
@@ -118,14 +115,16 @@ class MarketSetting(PersistentBaseUi):
             verkaufer_liste=self.ui.lineEditTabelleVerkaeufer.text(),
             max_user_ids=str(self.ui.spinMaxIdPerUser.value()),
             datum_flohmarkt=self.ui.dateTimeEditFlohmarkt.date().toString("yyyy-MM-dd"),
-            flohmarkt_aktiv= str(self.get_radio_button_status()),
-            login_aktiv= str(self.get_login_aktiv_status())
+            flohmarkt_aktiv=str(self.get_radio_button_status()),
+            login_aktiv=str(self.get_login_aktiv_status())
         )
 
     def _apply_state_dataclass(self, state: SettingsContentDataClass) -> None:
-        self.ui.spinMaxStammnummer.setValue(int(str(state.max_stammnummern)) if str(state.max_stammnummern).isdigit() else 0)
+        self.ui.spinMaxStammnummer.setValue(int(str(state.max_stammnummern))
+                                            if str(state.max_stammnummern).isdigit() else 0)
         self.ui.spinMaxArtikel.setValue(int(str(state.max_artikel)) if str(state.max_artikel).isdigit() else 0)
-        self.ui.dateTimeEditFlohmarktCountDown.setDateTime(QDateTime.fromString(state.datum_counter, "yyyy-MM-dd HH:mm:ss")        )
+        self.ui.dateTimeEditFlohmarktCountDown.setDateTime(
+            QDateTime.fromString(state.datum_counter, "yyyy-MM-dd HH:mm:ss"))
         self.ui.spinFlohmarktNummer.setValue(int(str(state.flohmarkt_nr)) if str(state.flohmarkt_nr).isdigit() else 0)
         self.ui.spinMaxIdPerUser.setValue(int(str(state.max_user_ids)) if str(state.max_user_ids).isdigit() else 0)
         self.ui.spinPwLength.setValue(int(str(state.psw_laenge)) if str(state.psw_laenge).isdigit() else 0)
@@ -134,10 +133,10 @@ class MarketSetting(PersistentBaseUi):
         self.ui.dateTimeEditFlohmarkt.setDate(QDate.fromString(state.datum_flohmarkt, "yyyy-MM-dd"))
         self.set_login_aktiv_status(str(state.login_aktiv))
         self.set_radio_button_status(str(state.flohmarkt_aktiv))
-    
+
     @Slot()
     def _config_changed(self) -> bool:
-        
+
         if self._config is not None and self._config.get_data() is not None:
             ret = (self._state_to_dataclass() != self._config.settings.data[0])
             self.data_changed.emit(ret)
@@ -167,7 +166,6 @@ class MarketSetting(PersistentBaseUi):
         """Return the associated market widget."""
         return self.market
 
-    
     def update_config_from_state(self, state: Any) -> None:
         if isinstance(state, SettingsContentDataClass):
             config = self.get_config()

@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QWidget
 from .generated import MainMenuUi
 from .base_ui import BaseUi
 
+
 class MainMenu(BaseUi):
     """Front page menu of the application."""
 
@@ -33,7 +34,3 @@ class MainMenu(BaseUi):
         self.on_exit_button_clicked = self.ui.exitButton.clicked
         self.on_open_export_button_clicked = self.ui.exportButton.clicked
         self.on_open_market_button_clicked = self.ui.loadButton.clicked
-        
-
-
-
