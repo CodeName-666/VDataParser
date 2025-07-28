@@ -164,6 +164,7 @@ class MarketObserver(QObject):
                 self.status_info.emit("ERROR", "Export konnte nicht geladen werden")
 
             self.market_config_handler.set_full_market_path(json_path)
+            self._project_exists = True
 
             # self.file_generator = FileGenerator(self.data_manager)
         return ret
@@ -186,7 +187,6 @@ class MarketObserver(QObject):
 
     def _ask_for_default_pdf_config(self) -> bool:
         """Prompt the user whether default PDF layout data should be loaded."""
-        from PySide6.QtWidgets import QMessageBox
 
         msg_box = QMessageBox()
         msg_box.setIcon(QMessageBox.Question)
@@ -371,32 +371,54 @@ class MarketObserver(QObject):
         )
         return not tracker.has_error
 
-   #def save_project(self, dir_path: str) -> bool:
-   #    """Save the current project to ``dir_path``."""
-   #    import shutil
+    def save_project(self, dir_path: str) -> bool:
+        """Save the current project to ``dir_path``.
 
-   #    try:
-   #        market_file = self.market_config_handler.get_market_name()
-   #        target_dir = Path(dir_path)
-   #        target_dir.mkdir(parents=True, exist_ok=True)
-   #        self.data_manager.save(str(target_dir / market_file))
-   #        self.pdf_display_config_loader.save(
-   #            str(target_dir / "pdf_display_config.json")
-   #        )
-   #        self.market_config_handler.save_to(str(target_dir / "project.project"))
-   #        pdf_path = self.pdf_display_config_loader.get_full_pdf_path()
-   #        if pdf_path and Path(pdf_path).is_file():
-   #            shutil.copy(pdf_path, target_dir / Path(pdf_path).name)
+        The method writes the market data, PDF layout configuration and
+        project configuration JSON into the specified directory. The
+        project directory path and existence state are updated when the
+        operation succeeds.
+        """
 
-   #        # remember location and mark project as existing
-   #        self.set_project_dir(dir_path)
-   #        self.set_project_exists(True)
+        try:
+            target_dir = Path(dir_path)
+            target_dir.mkdir(parents=True, exist_ok=True)
 
-   #        self.status_info.emit("INFO", f"Projekt gespeichert: {dir_path}")
-   #        return True
-   #    except Exception as err:  # pragma: no cover - runtime errors handled
-   #        self.status_info.emit("ERROR", str(err))
-   #        return False
+            market_file = target_dir / (
+                self.market_config_handler.get_market_name() or "market.json"
+            )
+            pdf_file = target_dir / (
+                self.market_config_handler.get_pdf_coordinates_config_name()
+                or "pdf_display_config.json"
+            )
+            project_file = target_dir / (
+                self.market_config_handler.get_storage_file_name()
+                or "project.project"
+            )
+
+            self.data_manager.json_data = self.data_manager.export_to_json()
+            self.data_manager.save(str(market_file))
+
+            self.pdf_display_config_loader.save(str(pdf_file))
+
+            self.market_config_handler.set_full_market_path(str(market_file))
+            self.market_config_handler.set_full_pdf_coordinates_config_path(
+                str(pdf_file)
+            )
+            self.market_config_handler.save_to(str(project_file))
+
+            pdf_path = self.pdf_display_config_loader.get_full_pdf_path()
+            if pdf_path and Path(pdf_path).is_file():
+                shutil.copy(pdf_path, target_dir / Path(pdf_path).name)
+
+            self.set_project_dir(dir_path)
+            self.set_project_exists(True)
+
+            self.status_info.emit("INFO", f"Projekt gespeichert: {project_file}")
+            return True
+        except Exception as err:  # pragma: no cover - runtime errors handled
+            self.status_info.emit("ERROR", f"Fehler beim Speichern: {err}")
+            return False
 
 
 class MarketFacade(QObject, metaclass=SingletonMeta):
@@ -705,56 +727,19 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
     @Slot(object, str)
     def save_project(self, market, dir_path: str) -> bool:
-        """Save the current market project to ``dir_path``.
+        """Delegate project saving to the corresponding observer."""
 
-        This writes the market data, PDF layout configuration and the project
-        configuration JSON into the given directory.
-        """
         observer = self.get_observer(market)
         if not observer:
             self.status_info.emit("ERROR", "Kein Observer gefunden")
             return False
 
-        try:
-            target_dir = Path(dir_path)
-            target_dir.mkdir(parents=True, exist_ok=True)
-
-            market_file = target_dir / (
-                observer.market_config_handler.get_market_name() or "market.json"
-            )
-            pdf_file = target_dir / (
-                observer.market_config_handler.get_pdf_coordinates_config_name()
-                or "pdf_display_config.json"
-            )
-            project_file = target_dir / (
-                observer.market_config_handler.get_storage_file_name()
-                or "project.project"
-            )
-
-            observer.data_manager.json_data = observer.data_manager.export_to_json()
-            observer.data_manager.save(str(market_file))
-
-            observer.pdf_display_config_loader.save(str(pdf_file))
-
-            observer.market_config_handler.set_full_market_path(str(market_file))
-            observer.market_config_handler.set_full_pdf_coordinates_config_path(
-                str(pdf_file)
-            )
-            observer.market_config_handler.save_to(str(project_file))
-
-            pdf_path = observer.pdf_display_config_loader.get_full_pdf_path()
-            if pdf_path and Path(pdf_path).is_file():
-                shutil.copy(pdf_path, target_dir / Path(pdf_path).name)
-
-            # remember location and mark project as existing
-            observer.set_project_dir(dir_path)
-            observer.set_project_exists(True)
-
-            self.status_info.emit("INFO", f"Projekt gespeichert: {project_file}")
-            return True
-        except Exception as err:  # pragma: no cover - runtime errors handled
-            self.status_info.emit("ERROR", f"Fehler beim Speichern: {err}")
-            return False
+        ok = observer.save_project(dir_path)
+        if ok:
+            self.status_info.emit("INFO", "Projekt gespeichert")
+        else:
+            self.status_info.emit("ERROR", "Fehler beim Speichern")
+        return ok
 
     def _ask_for_project_creation(self) -> bool:
         """Prompt the user whether a project should be created."""

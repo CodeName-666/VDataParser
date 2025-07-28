@@ -6,7 +6,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 pytest.importorskip("PySide6")
 
-from PySide6.QtWidgets import QMainWindow  # noqa: E402
+try:
+    from PySide6.QtWidgets import QMainWindow  # noqa: E402
+except Exception:  # pragma: no cover - environment without QtWidgets
+    pytest.skip("QtWidgets not available", allow_module_level=True)
+
 from ui.main_window import MainWindow  # noqa: E402
 
 
