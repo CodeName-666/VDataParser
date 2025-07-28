@@ -9,6 +9,7 @@ Follow the rules below when modifying files.
 - Provide docstrings for all public functions and classes.
 - Prefer `from x import y` over importing the entire module when only few members are required.
 - Implement functions and methods with a **single return statement** when possible to reduce complexity.
+- Avoid try/except around imports that generate stub classes. Handle missing dependencies without creating stubs.
 - Add comprehensive docstrings to every function and method:
   - Include a detailed description of the behavior.
   - Document all parameters with their data types and purpose.
