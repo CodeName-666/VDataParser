@@ -57,3 +57,13 @@ def test_facade_save_project(tmp_path):
     assert (tmp_path / pdf.name).is_file()
     assert facade.is_project(market)
     assert facade.get_project_dir(market) == str(tmp_path)
+
+
+def test_save_project_same_pdf_path(tmp_path):
+    obs = _prepare_observer()
+    pdf_file = tmp_path / 'Abholung_Template.pdf'
+    pdf_file.write_text('dummy')
+    obs.pdf_display_config_loader.set_full_pdf_path(str(pdf_file))
+
+    assert obs.save_project(str(tmp_path))
+    assert pdf_file.is_file()
