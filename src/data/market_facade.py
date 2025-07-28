@@ -409,7 +409,10 @@ class MarketObserver(QObject):
 
             pdf_path = self.pdf_display_config_loader.get_full_pdf_path()
             if pdf_path and Path(pdf_path).is_file():
-                shutil.copy(pdf_path, target_dir / Path(pdf_path).name)
+                destination = target_dir / Path(pdf_path).name
+                if Path(pdf_path).resolve() != destination.resolve():
+                    shutil.copy(pdf_path, destination)
+                self.pdf_display_config_loader.set_full_pdf_path(str(destination))
 
             self.set_project_dir(dir_path)
             self.set_project_exists(True)
