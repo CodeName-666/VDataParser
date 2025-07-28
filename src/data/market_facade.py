@@ -1,57 +1,8 @@
 """High level facade combining various market related components."""
 
-try:
-    from PySide6.QtCore import QObject, Slot, Signal
-    from PySide6.QtWidgets import QMessageBox, QFileDialog
-except Exception:  # pragma: no cover - optional PySide6
-    class QObject:  # type: ignore
-        pass
 
-    def Slot(*_args, **_kwargs):  # type: ignore
-        def decorator(func):
-            return func
-
-        return decorator
-
-    class Signal:  # type: ignore
-        def __init__(self, *args, **kwargs) -> None:
-            pass
-
-        def emit(self, *args, **kwargs) -> None:
-            pass
-
-        def connect(self, *_a, **_k) -> None:
-            pass
-
-    class QMessageBox:  # type: ignore
-        Question = Yes = No = 0
-
-        def setIcon(self, *_a, **_k) -> None:
-            pass
-
-        def setWindowTitle(self, *_a, **_k) -> None:
-            pass
-
-        def setText(self, *_a, **_k) -> None:
-            pass
-
-        def setStandardButtons(self, *_a, **_k) -> None:
-            pass
-
-        def setDefaultButton(self, *_a, **_k) -> None:
-            pass
-
-        def exec(self) -> int:
-            return 0
-
-    class QFileDialog:  # type: ignore
-        @staticmethod
-        def getExistingDirectory(*_a, **_k) -> str:
-            return ""
-
-        @staticmethod
-        def getSaveFileName(*_a, **_k) -> tuple[str, str]:
-            return "", ""
+from PySide6.QtCore import QObject, Slot, Signal
+from PySide6.QtWidgets import QMessageBox, QFileDialog
 from .data_manager import DataManager
 from .market_config_handler import MarketConfigHandler
 from .singleton_meta import SingletonMeta
@@ -420,32 +371,32 @@ class MarketObserver(QObject):
         )
         return not tracker.has_error
 
-    def save_project(self, dir_path: str) -> bool:
-        """Save the current project to ``dir_path``."""
-        import shutil
+   #def save_project(self, dir_path: str) -> bool:
+   #    """Save the current project to ``dir_path``."""
+   #    import shutil
 
-        try:
-            market_file = self.market_config_handler.get_market_name()
-            target_dir = Path(dir_path)
-            target_dir.mkdir(parents=True, exist_ok=True)
-            self.data_manager.save(str(target_dir / market_file))
-            self.pdf_display_config_loader.save(
-                str(target_dir / "pdf_display_config.json")
-            )
-            self.market_config_handler.save_to(str(target_dir / "project.project"))
-            pdf_path = self.pdf_display_config_loader.get_full_pdf_path()
-            if pdf_path and Path(pdf_path).is_file():
-                shutil.copy(pdf_path, target_dir / Path(pdf_path).name)
+   #    try:
+   #        market_file = self.market_config_handler.get_market_name()
+   #        target_dir = Path(dir_path)
+   #        target_dir.mkdir(parents=True, exist_ok=True)
+   #        self.data_manager.save(str(target_dir / market_file))
+   #        self.pdf_display_config_loader.save(
+   #            str(target_dir / "pdf_display_config.json")
+   #        )
+   #        self.market_config_handler.save_to(str(target_dir / "project.project"))
+   #        pdf_path = self.pdf_display_config_loader.get_full_pdf_path()
+   #        if pdf_path and Path(pdf_path).is_file():
+   #            shutil.copy(pdf_path, target_dir / Path(pdf_path).name)
 
-            # remember location and mark project as existing
-            self.set_project_dir(dir_path)
-            self.set_project_exists(True)
+   #        # remember location and mark project as existing
+   #        self.set_project_dir(dir_path)
+   #        self.set_project_exists(True)
 
-            self.status_info.emit("INFO", f"Projekt gespeichert: {dir_path}")
-            return True
-        except Exception as err:  # pragma: no cover - runtime errors handled
-            self.status_info.emit("ERROR", str(err))
-            return False
+   #        self.status_info.emit("INFO", f"Projekt gespeichert: {dir_path}")
+   #        return True
+   #    except Exception as err:  # pragma: no cover - runtime errors handled
+   #        self.status_info.emit("ERROR", str(err))
+   #        return False
 
 
 class MarketFacade(QObject, metaclass=SingletonMeta):

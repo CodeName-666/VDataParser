@@ -4,21 +4,7 @@ from __future__ import annotations
 
 import copy
 import os
-try:
-    from PySide6.QtCore import QObject, Signal
-except Exception:  # pragma: no cover - optional PySide6
-    class QObject:  # type: ignore
-        pass
-
-    class Signal:  # type: ignore
-        def __init__(self, *args, **kwargs) -> None:
-            pass
-
-        def emit(self, *args, **kwargs) -> None:
-            pass
-
-        def connect(self, *_a, **_k) -> None:
-            pass
+from PySide6.QtCore import QObject, Signal
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union

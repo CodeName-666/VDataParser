@@ -5,21 +5,8 @@ from copy import deepcopy
 import uuid
 from dataclasses import asdict, dataclass, fields
 from datetime import datetime
-try:
-    from PySide6.QtCore import QObject, Signal
-except Exception:  # pragma: no cover - optional PySide6
-    class QObject:  # type: ignore
-        pass
+from PySide6.QtCore import QObject, Signal
 
-    class Signal:  # type: ignore
-        def __init__(self, *args, **kwargs) -> None:
-            pass
-
-        def emit(self, *args, **kwargs) -> None:
-            pass
-
-        def connect(self, *_a, **_k) -> None:
-            pass
 
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
 from .base_data import BaseData

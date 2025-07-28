@@ -1,9 +1,6 @@
 
-try:
-    from PySide6.QtCore import QObject
-except Exception:  # pragma: no cover - optional PySide6
-    class QObject:  # type: ignore
-        pass
+from PySide6.QtCore import QObject
+
 
 
 class SingletonMeta(type(QObject)):
