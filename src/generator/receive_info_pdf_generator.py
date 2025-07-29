@@ -29,6 +29,10 @@ try:
 except Exception:  # pragma: no cover - optional dependency
     pdfmetrics = None  # type: ignore
     TTFont = None  # type: ignore
+try:
+    from fontTools.ttLib import TTFont as TTFontParser
+except Exception:  # pragma: no cover - optional dependency
+    TTFontParser = None  # type: ignore
 import subprocess
 
 from reportlab.lib.units import mm
@@ -66,7 +70,8 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
 
         The method first tries ``fc-match`` on Unix-like systems. If that fails
         or the platform is Windows, it searches for the font file inside the
-        Windows fonts directory.
+        Windows fonts directory.  When scanning the directory each font file is
+        inspected for a matching title in its metadata.
         """
         if pdfmetrics is None or TTFont is None:
             return
@@ -91,7 +96,20 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
                 for ext in (".ttf", ".ttc", ".otf"):
                     for file in font_dir.glob(f"*{ext}"):
                         stem = file.stem.lower().replace(" ", "")
-                        if sanitized in stem:
+                        title_match = False
+                        if TTFontParser is not None:
+                            try:
+                                f = TTFontParser(str(file))
+                                for rec in f["name"].names:
+                                    if rec.nameID in (1, 4):
+                                        val = rec.toStr().lower().replace(" ", "")
+                                        if sanitized in val:
+                                            title_match = True
+                                            break
+                                f.close()
+                            except Exception:
+                                pass
+                        if sanitized in stem or title_match:
                             path = str(file)
                             break
                     if path:
