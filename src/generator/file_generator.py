@@ -36,7 +36,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         output_path: str | Path = "output",
         seller_file_name: str = "kundendaten",
         price_list_file_name: str = "preisliste",
-        statistic_file_name: str = "versand",
+        statistic_file_name: str = "statistik",
         pdf_template_path_input: str | Path = "template/template.pdf",
         pdf_output_file_name: str | Path = "Abholbestaetigungen.pdf",
         pdf_coordinates: Optional[List[CoordinatesConfig]] = None,

@@ -24,7 +24,7 @@ class StatisticDataGenerator(DataGenerator):
 
     FILE_SUFFIX = 'dat'
 
-    def __init__(self, fleat_market_data: FleatMarket, path: str = '', file_name: str = 'versand',
+    def __init__(self, fleat_market_data: FleatMarket, path: str = '', file_name: str = 'statistic_data',
                  logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None):
         
         """ Initializes the StatisticDataGenerator with data, path, name, logger, and output interface. """
