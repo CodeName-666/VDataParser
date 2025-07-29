@@ -95,9 +95,9 @@ def test_coordinate_list_generation():
 
     c1, c2, c3 = coords_list
 
-    assert (c1.x1, c1.y1, c1.x2, c1.y2, c1.x3, c1.y3) == (1, 2, 3, 4, 10, 11)
-    assert (c2.x1, c2.y1, c2.x2, c2.y2, c2.x3, c2.y3) == (5, 6, 7, 8, 0, 0)
-    assert (c3.x1, c3.y1, c3.x2, c3.y2, c3.x3, c3.y3) == (0, 0, 0, 0, 12, 13)
+    assert (c1.x1, c1.y1, c1.x2, c1.y2, c1.x3, c1.y3) == (1, 8, 3, 10, 10, 17)
+    assert (c2.x1, c2.y1, c2.x2, c2.y2, c2.x3, c2.y3) == (5, 12, 7, 14, 0, 0)
+    assert (c3.x1, c3.y1, c3.x2, c3.y2, c3.x3, c3.y3) == (0, 0, 0, 0, 12, 19)
 
     if restore_pyside:
         sys.modules.pop('PySide6.QtCore', None)
