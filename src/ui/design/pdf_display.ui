@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1096</width>
-    <height>967</height>
+    <height>968</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -199,8 +199,8 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="pdf_display_layout">
+     <widget class="QWidget" name="configWidget" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
@@ -245,156 +245,6 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
         </widget>
        </item>
        <item>
-       <widget class="QGroupBox" name="groupBoxDisplayDpi">
-        <property name="title">
-         <string>PDF DPI</string>
-        </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_display_dpi">
-          <item>
-           <widget class="QSpinBox" name="spinBoxDisplayDpi">
-            <property name="minimum">
-             <number>72</number>
-            </property>
-            <property name="maximum">
-             <number>600</number>
-            </property>
-            <property name="value">
-             <number>150</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBoxPickupDate">
-        <property name="title">
-         <string>Abholdatum</string>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_pickup_date">
-         <item>
-          <widget class="QDateEdit" name="dateEditPickup">
-           <property name="calendarPopup">
-            <bool>true</bool>
-           </property>
-           <property name="displayFormat">
-            <string>dd.MM.yyyy</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QTimeEdit" name="timeEditPickup">
-           <property name="displayFormat">
-            <string>HH:mm</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox_2">
-         <property name="title">
-          <string>Name und Stammnummer</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <property name="topMargin">
-           <number>20</number>
-          </property>
-          <item>
-           <widget class="QListWidget" name="listBoxPairs">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBoxProperties">
-         <property name="title">
-          <string>Box Eigenschaften</string>
-         </property>
-         <layout class="QFormLayout" name="formLayoutProperties">
-          <property name="topMargin">
-           <number>20</number>
-          </property>
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelX">
-            <property name="text">
-             <string>X:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEditX">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelY">
-            <property name="text">
-             <string>Y:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEditY">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="labelWidth">
-            <property name="text">
-             <string>Breite:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineEditWidth">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="labelHeight">
-            <property name="text">
-             <string>Höhe:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="lineEditHeight">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
           <string>PDF Speicherort:</string>
@@ -421,6 +271,189 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="title">
+          <string>Einstellungen</string>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="topMargin">
+           <number>20</number>
+          </property>
+          <property name="rightMargin">
+           <number>9</number>
+          </property>
+          <item>
+           <widget class="QGroupBox" name="groupBoxPickupDate">
+            <property name="title">
+             <string>Abholdatum</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_pickup_date">
+             <property name="topMargin">
+              <number>20</number>
+             </property>
+             <item>
+              <widget class="QDateEdit" name="dateEditPickup">
+               <property name="displayFormat">
+                <string>dd.MM.yyyy</string>
+               </property>
+               <property name="calendarPopup">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QTimeEdit" name="timeEditPickup">
+               <property name="displayFormat">
+                <string>HH:mm</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBoxDisplayDpi">
+            <property name="title">
+             <string>PDF DPI</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_display_dpi">
+             <property name="topMargin">
+              <number>20</number>
+             </property>
+             <item>
+              <widget class="QSpinBox" name="spinBoxDisplayDpi">
+               <property name="minimum">
+                <number>72</number>
+               </property>
+               <property name="maximum">
+                <number>600</number>
+               </property>
+               <property name="value">
+                <number>150</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Name und Stammnummer</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="topMargin">
+           <number>20</number>
+          </property>
+          <item>
+           <widget class="QListWidget" name="listBoxPairs">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBoxProperties">
+            <property name="title">
+             <string>Box Eigenschaften</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <layout class="QFormLayout" name="formLayoutProperties">
+             <property name="topMargin">
+              <number>20</number>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="labelX">
+               <property name="text">
+                <string>X:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="lineEditX">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="labelY">
+               <property name="text">
+                <string>Y:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="lineEditY">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="labelWidth">
+               <property name="text">
+                <string>Breite:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="lineEditWidth">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="labelHeight">
+               <property name="text">
+                <string>Höhe:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QLineEdit" name="lineEditHeight">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Orientation::Vertical</enum>
@@ -431,7 +464,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>17</height>
+           <height>191</height>
           </size>
          </property>
         </spacer>
