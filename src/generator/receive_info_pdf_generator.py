@@ -21,6 +21,10 @@ except Exception:  # pragma: no cover - optional dependency
 
 from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
+try:
+    from reportlab.pdfbase import pdfmetrics
+except Exception:  # pragma: no cover - optional dependency
+    pdfmetrics = None  # type: ignore
 
 from reportlab.lib.units import mm
 from reportlab.lib import colors
