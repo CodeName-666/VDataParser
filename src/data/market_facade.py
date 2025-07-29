@@ -1,8 +1,44 @@
 """High level facade combining various market related components."""
 
 
-from PySide6.QtCore import QObject, Slot, Signal
-from PySide6.QtWidgets import QMessageBox, QFileDialog
+try:
+    from PySide6.QtCore import QObject, Slot, Signal
+    from PySide6.QtWidgets import QMessageBox, QFileDialog
+except Exception:  # pragma: no cover - optional dependency
+    class QObject:
+        """Fallback QObject when PySide6 is unavailable."""
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+    def Slot(*args, **kwargs):
+        def decorator(func):
+            return func
+
+        return decorator
+
+    class Signal:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def emit(self, *args, **kwargs):
+            pass
+
+        def connect(self, *args, **kwargs):  # noqa: D401 - dummy
+            return None
+
+    class QMessageBox:
+        Yes = 0x00004000
+        No = 0x00010000
+
+        @staticmethod
+        def question(*args, **kwargs):
+            return QMessageBox.No
+
+    class QFileDialog:
+        @staticmethod
+        def getOpenFileName(*args, **kwargs):
+            return ("", "")
 from .data_manager import DataManager
 from .market_config_handler import MarketConfigHandler
 from .singleton_meta import SingletonMeta

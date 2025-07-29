@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
     QGraphicsTextItem,
     QGraphicsRectItem,  # Other items might be here
 )
-from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor
+from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor, QFont
 from PySide6.QtCore import (
     Qt,
     QRectF,
@@ -43,6 +43,9 @@ SINGLE_BOX_COLOR = QColor("green")
 DEFAULT_BOX_WIDTH = 100
 DEFAULT_BOX_HEIGHT = 50
 DEFAULT_DISPLAY_DPI = 150
+PLACEHOLDER_FONT_FAMILY = "Helvetica"
+PLACEHOLDER_FONT_SIZE = 12
+PLACEHOLDER_FONT = QFont(PLACEHOLDER_FONT_FAMILY, PLACEHOLDER_FONT_SIZE, QFont.Bold)
 BOX_PAIR_LABEL_1_PREFIX = "USR"
 BOX_PAIR_LABEL_2_PREFIX = "NR"
 SINGLE_BOX_LABEL_PREFIX = "DATE"
@@ -113,6 +116,7 @@ class DraggableBox(QGraphicsRectItem, QObject):
         self._placeholderText = QGraphicsTextItem(self)
         self._placeholderText.setDefaultTextColor(QColor("black"))
         self._placeholderText.setPlainText(self._placeholder)
+        self._placeholderText.setFont(PLACEHOLDER_FONT)
         self._update_placeholder_pos()
 
         # Resizing state
@@ -142,6 +146,11 @@ class DraggableBox(QGraphicsRectItem, QObject):
         """Set the text displayed inside the box."""
         self._placeholder = text
         self._placeholderText.setPlainText(text)
+        self._update_placeholder_pos()
+
+    def setPlaceholderFont(self, font: QFont) -> None:
+        """Set the font used for the placeholder text."""
+        self._placeholderText.setFont(font)
         self._update_placeholder_pos()
 
     def setRect(self, *args, **kwargs):
@@ -328,6 +337,7 @@ class BoxPair(QObject):
             label=f"{BOX_PAIR_LABEL_1_PREFIX}{self.id}",
             placeholder="Max Mustermann",
         )
+        self.box1.setPlaceholderFont(PLACEHOLDER_FONT)
         self.box1.setPos(startPos)
         self.box1.setPen(QPen(BOX_PAIR_COLOR_1, 2))
 
@@ -339,6 +349,7 @@ class BoxPair(QObject):
             label=f"{BOX_PAIR_LABEL_2_PREFIX}{self.id}",
             placeholder="999",
         )
+        self.box2.setPlaceholderFont(PLACEHOLDER_FONT)
         self.box2.setPos(startPos + offset)
         self.box2.setPen(QPen(BOX_PAIR_COLOR_2, 2))
         self.label = f"{BOX_PAIR_LABEL_PREFIX}{self.id}"
@@ -369,6 +380,7 @@ class SingleBox(DraggableBox):
         self.id = SingleBox.manager.get_new_id()
         label = f"{SINGLE_BOX_LABEL_PREFIX}{self.id}"
         super().__init__(rect, label, parent, placeholder=placeholder)
+        self.setPlaceholderFont(PLACEHOLDER_FONT)
         self.setPen(QPen(SINGLE_BOX_COLOR, 2))
 
     def remove_from_scene(self):
@@ -1108,6 +1120,7 @@ class PdfDisplay(PersistentBaseUi):
         box.setLabel(d["label"])
         box.setPos(QPointF(d["x"], d["y"]))
         box.setRect(QRectF(0, 0, d["width"], d["height"]))
+        box.setPlaceholderFont(PLACEHOLDER_FONT)
         self._connect_box_signals(box)
 
     def _load_pdf_from_path(self, path: str):

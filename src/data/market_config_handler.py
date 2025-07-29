@@ -1,7 +1,26 @@
 import copy
 import os
 
-from PySide6.QtCore import QObject, Signal
+try:
+    from PySide6.QtCore import QObject, Signal
+except Exception:  # pragma: no cover - optional dependency
+    class QObject:
+        """Fallback QObject when PySide6 is unavailable."""
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+    class Signal:
+        """Fallback Signal that does nothing."""
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def emit(self, *args, **kwargs):
+            pass
+
+        def connect(self, *args, **kwargs):  # noqa: D401 - dummy
+            return None
 from pathlib import Path
 from typing import Any, Dict, Union
 from util.path_utils import ensure_trailing_sep
