@@ -20,15 +20,7 @@ except Exception:  # pragma: no cover - optional dependency
     ProgressBarAbstraction = None  # type: ignore
 
 from pypdf import PdfReader, PdfWriter
-try:
-    from reportlab.pdfgen import canvas
-except Exception:  # pragma: no cover - optional dependency
-    canvas = None  # type: ignore
-
-try:
-    from reportlab.pdfbase import pdfmetrics
-except Exception:  # pragma: no cover - optional dependency
-    pdfmetrics = None  # type: ignore
+from reportlab.pdfgen import canvas
 
 from reportlab.lib.units import mm
 from reportlab.lib import colors

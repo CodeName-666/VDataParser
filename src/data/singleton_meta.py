@@ -1,12 +1,5 @@
 
-try:
-    from PySide6.QtCore import QObject
-except Exception:  # pragma: no cover - optional dependency
-    class QObject:
-        """Fallback QObject when PySide6 is unavailable."""
-
-        def __init__(self, *args, **kwargs):
-            pass
+from PySide6.QtCore import QObject
 
 
 

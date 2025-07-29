@@ -5,26 +5,7 @@ from copy import deepcopy
 import uuid
 from dataclasses import asdict, dataclass, fields
 from datetime import datetime
-try:
-    from PySide6.QtCore import QObject, Signal
-except Exception:  # pragma: no cover - optional dependency
-    class QObject:
-        """Minimal fallback QObject when PySide6 is unavailable."""
-
-        def __init__(self, *args, **kwargs):
-            pass
-
-    class Signal:
-        """Fallback Signal that does nothing."""
-
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def emit(self, *args, **kwargs):
-            pass
-
-        def connect(self, *args, **kwargs):  # noqa: D401 - dummy
-            return None
+from PySide6.QtCore import QObject, Signal
 
 
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
