@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
     QGraphicsTextItem,
     QGraphicsRectItem,  # Other items might be here
 )
-from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor
+from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor, QFont
 from PySide6.QtCore import (
     Qt,
     QRectF,
@@ -43,6 +43,11 @@ SINGLE_BOX_COLOR = QColor("green")
 DEFAULT_BOX_WIDTH = 100
 DEFAULT_BOX_HEIGHT = 50
 DEFAULT_DISPLAY_DPI = 150
+PLACEHOLDER_FONT_FAMILY = "Helvetica"
+PLACEHOLDER_FONT_SIZE = 12
+PLACEHOLDER_FONT = QFont(PLACEHOLDER_FONT_FAMILY, PLACEHOLDER_FONT_SIZE, QFont.Bold)
+PLACEHLODER_NAME = "Max Mustermann*innen"
+
 BOX_PAIR_LABEL_1_PREFIX = "USR"
 BOX_PAIR_LABEL_2_PREFIX = "NR"
 SINGLE_BOX_LABEL_PREFIX = "DATE"
@@ -82,11 +87,14 @@ class ItemIdManager(QObject):
 
 # --- Graphics Items ---
 class DraggableBox(QGraphicsRectItem, QObject):
-    """A draggable and resizable rectangle item for the graphics scene."""
+    """A draggable and resizable rectangle item for the graphics scene.
+
+    The box can show a placeholder text inside its boundaries so users can
+    preview where actual data will later be inserted in the exported PDF."""
 
     geometryChangedByUser: Signal = Signal()
 
-    def __init__(self, rect: QRectF, label="", parent=None):
+    def __init__(self, rect: QRectF, label: str = "", parent=None, placeholder: str = ""):
         QGraphicsRectItem.__init__(self, rect, parent)
         QObject.__init__(self)
 
@@ -106,6 +114,13 @@ class DraggableBox(QGraphicsRectItem, QObject):
         self.posText = QGraphicsTextItem(self)
         self.updatePosText()  # Initial text setup
 
+        self._placeholder = placeholder
+        self._placeholderText = QGraphicsTextItem(self)
+        self._placeholderText.setDefaultTextColor(QColor("black"))
+        self._placeholderText.setPlainText(self._placeholder)
+        self._placeholderText.setFont(PLACEHOLDER_FONT)
+        self._update_placeholder_pos()
+
         # Resizing state
         self._resizeMargins = RESIZE_MARGIN
         self._resizeEdges = {
@@ -118,6 +133,31 @@ class DraggableBox(QGraphicsRectItem, QObject):
         self._dragStartPos = None
         self._initialRect = self.rect()
         self._initialScenePos = self.pos()
+
+    def _update_placeholder_pos(self) -> None:
+        """Center the placeholder text inside the box."""
+        if not self._placeholderText.toPlainText():
+            return
+        rect = self.rect()
+        br = self._placeholderText.boundingRect()
+        x = (rect.width() - br.width()) / 2
+        y = (rect.height() - br.height()) / 2
+        self._placeholderText.setPos(x, y)
+
+    def setPlaceholderText(self, text: str) -> None:
+        """Set the text displayed inside the box."""
+        self._placeholder = text
+        self._placeholderText.setPlainText(text)
+        self._update_placeholder_pos()
+
+    def setPlaceholderFont(self, font: QFont) -> None:
+        """Set the font used for the placeholder text."""
+        self._placeholderText.setFont(font)
+        self._update_placeholder_pos()
+
+    def setRect(self, *args, **kwargs):
+        super().setRect(*args, **kwargs)
+        self._update_placeholder_pos()
 
     def setLabel(self, text: str):
         """Updates the box label and the displayed text."""
@@ -294,14 +334,24 @@ class BoxPair(QObject):
 
         rect = QRectF(0, 0, DEFAULT_BOX_WIDTH, DEFAULT_BOX_HEIGHT)
 
-        self.box1 = DraggableBox(rect, label=f"{BOX_PAIR_LABEL_1_PREFIX}{self.id}")
+        self.box1 = DraggableBox(
+            rect,
+            label=f"{BOX_PAIR_LABEL_1_PREFIX}{self.id}",
+            placeholder= PLACEHLODER_NAME,
+        )
+        self.box1.setPlaceholderFont(PLACEHOLDER_FONT)
         self.box1.setPos(startPos)
         self.box1.setPen(QPen(BOX_PAIR_COLOR_1, 2))
 
         offset = QPointF(
             DEFAULT_BOX_WIDTH + 20, 0
         )  # Place second box right of the first
-        self.box2 = DraggableBox(rect, label=f"{BOX_PAIR_LABEL_2_PREFIX}{self.id}")
+        self.box2 = DraggableBox(
+            rect,
+            label=f"{BOX_PAIR_LABEL_2_PREFIX}{self.id}",
+            placeholder="999",
+        )
+        self.box2.setPlaceholderFont(PLACEHOLDER_FONT)
         self.box2.setPos(startPos + offset)
         self.box2.setPen(QPen(BOX_PAIR_COLOR_2, 2))
         self.label = f"{BOX_PAIR_LABEL_PREFIX}{self.id}"
@@ -328,10 +378,11 @@ class SingleBox(DraggableBox):
 
     manager = ItemIdManager()  # Class-level ID manager
 
-    def __init__(self, rect: QRectF, parent=None):
+    def __init__(self, rect: QRectF, parent=None, placeholder: str = ""):
         self.id = SingleBox.manager.get_new_id()
         label = f"{SINGLE_BOX_LABEL_PREFIX}{self.id}"
-        super().__init__(rect, label, parent)
+        super().__init__(rect, label, parent, placeholder=placeholder)
+        self.setPlaceholderFont(PLACEHOLDER_FONT)
         self.setPen(QPen(SINGLE_BOX_COLOR, 2))
 
     def remove_from_scene(self):
@@ -389,7 +440,7 @@ class PdfDisplay(PersistentBaseUi):
         self.ui.graphicsView.setDragMode(QGraphicsView.ScrollHandDrag)  # Allow panning
 
         # Start with the configuration panel visible and hide the PDF view
-        self.ui.layoutWidget1.hide()
+        self.ui.configWidget.hide()
         self.ui.splitter.setSizes([1, 0])
 
         # --- Connect Signals ---
@@ -592,7 +643,11 @@ class PdfDisplay(PersistentBaseUi):
         )
 
         rect = QRectF(0, 0, DEFAULT_BOX_WIDTH, DEFAULT_BOX_HEIGHT)
-        newSingle = SingleBox(rect)  # Parent is None initially
+        placeholder = (
+            f"{self.ui.dateEditPickup.date().toString('dd.MM.yyyy')} "
+            f"{self.ui.timeEditPickup.time().toString('HH:mm')}"
+        ).strip()
+        newSingle = SingleBox(rect, placeholder=placeholder)
         newSingle.setPos(startPos)
         self.scene.addItem(newSingle)  # Add to scene first
         self.singleBoxes.append(newSingle)
@@ -724,12 +779,18 @@ class PdfDisplay(PersistentBaseUi):
     @Slot()
     def on_pickup_changed(self) -> None:
         """Handle changes of the pickup date or time."""
+        placeholder = (
+            f"{self.ui.dateEditPickup.date().toString('dd.MM.yyyy')} "
+            f"{self.ui.timeEditPickup.time().toString('HH:mm')}"
+        ).strip()
+        for box in self.singleBoxes:
+            box.setPlaceholderText(placeholder)
         self._config_changed()
 
     @Slot()
     def toggle_pdf_view(self) -> None:
         """Show or hide the PDF view panel."""
-        widget = self.ui.layoutWidget1
+        widget = self.ui.configWidget
         if widget.isVisible():
             widget.hide()
             self.ui.splitter.setSizes([1, 0])
@@ -1050,7 +1111,11 @@ class PdfDisplay(PersistentBaseUi):
             max_single_id = 0
             for s in self._config.get_single_boxes():
                 rect = QRectF(0, 0, s.width, s.height)
-                single = SingleBox(rect)
+                placeholder = (
+                    f"{self.ui.dateEditPickup.date().toString('dd.MM.yyyy')} "
+                    f"{self.ui.timeEditPickup.time().toString('HH:mm')}"
+                ).strip()
+                single = SingleBox(rect, placeholder=placeholder)
                 single.id = s.id
                 self._restore_box(single, s.to_dict())
                 self.scene.addItem(single)
@@ -1066,6 +1131,7 @@ class PdfDisplay(PersistentBaseUi):
         box.setLabel(d["label"])
         box.setPos(QPointF(d["x"], d["y"]))
         box.setRect(QRectF(0, 0, d["width"], d["height"]))
+        box.setPlaceholderFont(PLACEHOLDER_FONT)
         self._connect_box_signals(box)
 
     def _load_pdf_from_path(self, path: str):

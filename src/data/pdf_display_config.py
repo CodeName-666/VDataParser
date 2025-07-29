@@ -239,8 +239,11 @@ class PdfDisplayConfig(QObject, JsonHandler):
     def convert_json_to_coordinates(self, box_id: int) -> CoordinatesConfig:
         """Return ``CoordinatesConfig`` for the given ``box_id``.
 
-        The ``y`` positions are converted to the bottom edge of each box so that
-        text drawn at these coordinates appears inside the boxes.
+        The coordinates represent the centre points of the boxes. When
+        drawing text with the configured ``font_size`` of ``12`` points the
+        baseline will be vertically centred within the box.  Horizontal
+        centring must be performed by the caller, typically by subtracting
+        half of the string width from the ``x`` values returned here.
 
         If either a ``BoxPair`` or ``SingleBox`` is missing for ``box_id`` the
         corresponding coordinates will be ``0``.
@@ -254,13 +257,15 @@ class PdfDisplayConfig(QObject, JsonHandler):
         pair = pairboxes.get(box_id)
         single = singleboxes.get(box_id)
 
-        x1 = pair.box1.x if pair else 0.0
-        y1 = (pair.box1.y + pair.box1.height) if pair else 0.0
-        x2 = pair.box2.x if pair else 0.0
-        y2 = (pair.box2.y + pair.box2.height) if pair else 0.0
+        font_size = 12
 
-        x3 = single.x if single else 0.0
-        y3 = (single.y + single.height) if single else 0.0
+        x1 = (pair.box1.x + pair.box1.width / 2) if pair else 0.0
+        y1 = (pair.box1.y + pair.box1.height / 2 + font_size / 2) if pair else 0.0
+        x2 = (pair.box2.x + pair.box2.width / 2) if pair else 0.0
+        y2 = (pair.box2.y + pair.box2.height / 2 + font_size / 2) if pair else 0.0
+
+        x3 = (single.x + single.width / 2) if single else 0.0
+        y3 = (single.y + single.height / 2 + font_size / 2) if single else 0.0
 
         return CoordinatesConfig(
             x1=x1,
@@ -269,9 +274,9 @@ class PdfDisplayConfig(QObject, JsonHandler):
             y2=y2,
             x3=x3,
             y3=y3,
-            font_size=12,
+            font_size=font_size,
         )
-
+    
     def convert_json_to_coordinate_list(self) -> List[CoordinatesConfig]:
         """Return list of ``CoordinatesConfig`` objects derived from the config.
 

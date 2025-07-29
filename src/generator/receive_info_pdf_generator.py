@@ -50,6 +50,19 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
 
     DEFAULT_DISPLAY_DPI = 150  # DPI used in PdfDisplay when coordinates were captured
 
+    FONT_NAME = "Helvetica-Bold"
+
+    @staticmethod
+    def _draw_centered(can, x: float, y: float, text: str, font_name: str, font_size: int) -> None:
+        """Draw ``text`` centred at ``(x, y)`` using ``font_name`` and ``font_size``."""
+        width = 0
+        if pdfmetrics is not None:
+            try:
+                width = pdfmetrics.stringWidth(text, font_name, font_size)
+            except Exception:
+                width = 0
+        can.drawString(x - width / 2, y, text)
+
     # ------------------------------------------------------------------
     @staticmethod
     def _from_display_coords(
@@ -217,10 +230,10 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         for idx, (f1, f2, f3) in enumerate(rows):
             raw_cfg = self._coords[idx]
             cfg = self._from_display_coords(raw_cfg, page_h, dpi=self._display_dpi)
-            can.setFont("Helvetica-Bold", cfg.font_size)
-            can.drawString(cfg.x1, cfg.y1, f1)
-            can.drawString(cfg.x2, cfg.y2, f2)
-            can.drawString(cfg.x3, cfg.y3, f3)
+            can.setFont(self.FONT_NAME, cfg.font_size)
+            self._draw_centered(can, cfg.x1, cfg.y1, f1, self.FONT_NAME, cfg.font_size)
+            self._draw_centered(can, cfg.x2, cfg.y2, f2, self.FONT_NAME, cfg.font_size)
+            self._draw_centered(can, cfg.x3, cfg.y3, f3, self.FONT_NAME, cfg.font_size)
 
         can.save()
         packet.seek(0)
