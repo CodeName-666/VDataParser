@@ -641,7 +641,10 @@ class PdfDisplay(PersistentBaseUi):
         )
 
         rect = QRectF(0, 0, DEFAULT_BOX_WIDTH, DEFAULT_BOX_HEIGHT)
-        placeholder = self.ui.dateEditPickup.date().toString("dd.MM.yyyy")
+        placeholder = (
+            f"{self.ui.dateEditPickup.date().toString('dd.MM.yyyy')} "
+            f"{self.ui.timeEditPickup.time().toString('HH:mm')}"
+        ).strip()
         newSingle = SingleBox(rect, placeholder=placeholder)
         newSingle.setPos(startPos)
         self.scene.addItem(newSingle)  # Add to scene first
@@ -774,7 +777,10 @@ class PdfDisplay(PersistentBaseUi):
     @Slot()
     def on_pickup_changed(self) -> None:
         """Handle changes of the pickup date or time."""
-        placeholder = self.ui.dateEditPickup.date().toString("dd.MM.yyyy")
+        placeholder = (
+            f"{self.ui.dateEditPickup.date().toString('dd.MM.yyyy')} "
+            f"{self.ui.timeEditPickup.time().toString('HH:mm')}"
+        ).strip()
         for box in self.singleBoxes:
             box.setPlaceholderText(placeholder)
         self._config_changed()
@@ -1103,7 +1109,10 @@ class PdfDisplay(PersistentBaseUi):
             max_single_id = 0
             for s in self._config.get_single_boxes():
                 rect = QRectF(0, 0, s.width, s.height)
-                placeholder = self.ui.dateEditPickup.date().toString("dd.MM.yyyy")
+                placeholder = (
+                    f"{self.ui.dateEditPickup.date().toString('dd.MM.yyyy')} "
+                    f"{self.ui.timeEditPickup.time().toString('HH:mm')}"
+                ).strip()
                 single = SingleBox(rect, placeholder=placeholder)
                 single.id = s.id
                 self._restore_box(single, s.to_dict())
