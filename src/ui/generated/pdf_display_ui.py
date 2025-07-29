@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'pdf_display.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.1
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -50,14 +50,14 @@ class Ui_PdfDisplayView(object):
 
         self.horizontalLayout_toolbar.addWidget(self.btnGeneratePDF)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_toolbar.addItem(self.horizontalSpacer)
 
         self.btnMenuOpenClose = QPushButton(self.layoutWidget)
         self.btnMenuOpenClose.setObjectName(u"btnMenuOpenClose")
         icon = QIcon()
-        icon.addFile(u":/icons/icons/white/menu.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/icons/icons/white/menu.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.btnMenuOpenClose.setIcon(icon)
         self.btnMenuOpenClose.setIconSize(QSize(24, 24))
 
@@ -70,7 +70,7 @@ class Ui_PdfDisplayView(object):
         self.verticalLayout_pdf.setObjectName(u"verticalLayout_pdf")
         self.graphicsView = QGraphicsView(self.layoutWidget)
         self.graphicsView.setObjectName(u"graphicsView")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(2)
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.graphicsView.sizePolicy().hasHeightForWidth())
@@ -81,7 +81,7 @@ class Ui_PdfDisplayView(object):
         self.horizontalLayout_zoom = QHBoxLayout()
         self.horizontalLayout_zoom.setSpacing(6)
         self.horizontalLayout_zoom.setObjectName(u"horizontalLayout_zoom")
-        self.zoomLeftSpacer = QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Minimum)
+        self.zoomLeftSpacer = QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_zoom.addItem(self.zoomLeftSpacer)
 
@@ -95,7 +95,7 @@ class Ui_PdfDisplayView(object):
 
         self.horizontalLayout_zoom.addWidget(self.btnZoomOut)
 
-        self.zoomRightSpacer = QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Minimum)
+        self.zoomRightSpacer = QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_zoom.addItem(self.zoomRightSpacer)
 
@@ -122,7 +122,7 @@ class Ui_PdfDisplayView(object):
 
         self.horizontalLayout_3.addWidget(self.btnRemoveBoxPair)
 
-        self.actionSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Minimum)
+        self.actionSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_3.addItem(self.actionSpacer)
 
@@ -268,7 +268,7 @@ class Ui_PdfDisplayView(object):
         self.verticalLayout.setContentsMargins(-1, 20, -1, -1)
         self.listBoxPairs = QListWidget(self.groupBox_2)
         self.listBoxPairs.setObjectName(u"listBoxPairs")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.listBoxPairs.sizePolicy().hasHeightForWidth())
@@ -289,7 +289,7 @@ class Ui_PdfDisplayView(object):
 
         self.lineEditX = QLineEdit(self.groupBoxProperties)
         self.lineEditX.setObjectName(u"lineEditX")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.lineEditX.sizePolicy().hasHeightForWidth())
@@ -339,7 +339,7 @@ class Ui_PdfDisplayView(object):
 
         self.verticalLayout_4.addWidget(self.groupBox_2)
 
-        self.verticalSpacer = QSpacerItem(20, 191, QSizePolicy.Policy.Expanding, QSizePolicy.Minimum)
+        self.verticalSpacer = QSpacerItem(20, 191, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout_4.addItem(self.verticalSpacer)
 

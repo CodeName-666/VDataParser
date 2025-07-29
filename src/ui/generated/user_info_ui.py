@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'user_info.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.1
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -15,16 +15,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QFormLayout, QGroupBox,
-    QHBoxLayout, QHeaderView, QLabel, QListWidget,
-    QListWidgetItem, QSizePolicy, QTableWidget, QTableWidgetItem,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QFormLayout,
+    QGroupBox, QHBoxLayout, QHeaderView, QLabel,
+    QListWidget, QListWidgetItem, QSizePolicy, QTableWidget,
+    QTableWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_MainWindowWidget(object):
     def setupUi(self, MainWindowWidget):
         if not MainWindowWidget.objectName():
             MainWindowWidget.setObjectName(u"MainWindowWidget")
-        MainWindowWidget.resize(381, 238)
+        MainWindowWidget.resize(886, 324)
         self.horizontalLayout = QHBoxLayout(MainWindowWidget)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.verticalLayoutLeft = QVBoxLayout()
@@ -37,7 +37,7 @@ class Ui_MainWindowWidget(object):
 
         self.listWidgetUsers = QListWidget(MainWindowWidget)
         self.listWidgetUsers.setObjectName(u"listWidgetUsers")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.listWidgetUsers.sizePolicy().hasHeightForWidth())
@@ -50,7 +50,7 @@ class Ui_MainWindowWidget(object):
 
         self.groupBoxDetails = QGroupBox(MainWindowWidget)
         self.groupBoxDetails.setObjectName(u"groupBoxDetails")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.groupBoxDetails.sizePolicy().hasHeightForWidth())
@@ -126,8 +126,8 @@ class Ui_MainWindowWidget(object):
         if (self.tableIDs.columnCount() < 5):
             self.tableIDs.setColumnCount(5)
         self.tableIDs.setObjectName(u"tableIDs")
+        self.tableIDs.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.tableIDs.setColumnCount(5)
-        self.tableIDs.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         self.formLayoutDetails.setWidget(6, QFormLayout.FieldRole, self.tableIDs)
 
@@ -152,25 +152,25 @@ class Ui_MainWindowWidget(object):
         self.checkboxUnique.setText(QCoreApplication.translate("MainWindowWidget", u"Eindeutige Benutzer anzeigen", None))
         self.groupBoxDetails.setTitle(QCoreApplication.translate("MainWindowWidget", u"Benutzerdetails", None))
         self.labelVorname.setText(QCoreApplication.translate("MainWindowWidget", u"Vorname:", None))
-        self.valueVorname.setText("")
         self.valueVorname.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
+        self.valueVorname.setText("")
         self.labelNachname.setText(QCoreApplication.translate("MainWindowWidget", u"Nachname:", None))
-        self.valueNachname.setText("")
         self.valueNachname.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
+        self.valueNachname.setText("")
         self.labelTelefon.setText(QCoreApplication.translate("MainWindowWidget", u"Telefon:", None))
-        self.valueTelefon.setText("")
         self.valueTelefon.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
+        self.valueTelefon.setText("")
         self.labelEmail.setText(QCoreApplication.translate("MainWindowWidget", u"E-Mail:", None))
-        self.valueEmail.setText("")
         self.valueEmail.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
+        self.valueEmail.setText("")
         self.labelCreatedAt.setText(QCoreApplication.translate("MainWindowWidget", u"Created At:", None))
-        self.valueCreatedAt.setText("")
         self.valueCreatedAt.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
+        self.valueCreatedAt.setText("")
         self.labelUpdatedAt.setText(QCoreApplication.translate("MainWindowWidget", u"Updated At:", None))
-        self.valueUpdatedAt.setText("")
         self.valueUpdatedAt.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
+        self.valueUpdatedAt.setText("")
         self.labelIDs.setText(QCoreApplication.translate("MainWindowWidget", u"IDs:", None))
-        self.tableIDs.setProperty("horizontalHeaderLabels", [
+        self.tableIDs.setProperty(u"horizontalHeaderLabels", [
             QCoreApplication.translate("MainWindowWidget", u"ID", None),
             QCoreApplication.translate("MainWindowWidget", u"Vollst\u00e4ndig", None),
             QCoreApplication.translate("MainWindowWidget", u"Teilweise", None),

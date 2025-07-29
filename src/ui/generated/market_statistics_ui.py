@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'market_statistics.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.1
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -81,7 +81,7 @@ class Ui_MarketStatistics(object):
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.chartMainNumbers = QChartView(self.groupBoxMainNumbers)
         self.chartMainNumbers.setObjectName(u"chartMainNumbers")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.chartMainNumbers.sizePolicy().hasHeightForWidth())

@@ -16,6 +16,7 @@ except Exception:  # pragma: no cover - optional dependency
 
 # Sub‑generators -----------------------------------------------------------
 from data import Base
+from .data_generator import DataGenerator
 from .price_list_generator import PriceListGenerator
 from .seller_data_generator import SellerDataGenerator
 from .statistic_data_generator import StatisticDataGenerator
@@ -121,7 +122,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         except Exception:  # pragma: no cover
             pass
 
-    def _run_tasks(self, tasks: List[Tuple[str, object]], headline: str) -> None:
+    def _run_tasks(self, tasks: List[Tuple[str, DataGenerator]], headline: str) -> None:
         """Execute the given tasks with progress tracking."""
         self._ensure_output_folder()
         if self._tracker and hasattr(self._tracker, "reset"):
@@ -131,7 +132,7 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         start = time.time()
         success = True
 
-        for name, task in tasks:
+        for name, task in tasks: 
             self._output("INFO", f"→ {name} …")
             step_ok = True
             try:
