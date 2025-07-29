@@ -50,7 +50,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
 
     DEFAULT_DISPLAY_DPI = 150  # DPI used in PdfDisplay when coordinates were captured
 
-    FONT_NAME = "Helvetica-Bold"
+    DEFAULT_FONT_NAME = "Helvetica-Bold"
 
     @staticmethod
     def _draw_centered(can, x: float, y: float, text: str, font_name: str, font_size: int) -> None:
@@ -95,6 +95,8 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         coordinates: Optional[List[CoordinatesConfig]] = None,
         display_dpi: int = DEFAULT_DISPLAY_DPI,
         pickup_date: str = "",
+        font_name: str = DEFAULT_FONT_NAME,
+        font_size: int = 12,
         logger: Optional[CustomLogger] = None,
         output_interface: Optional[OutputInterfaceAbstraction] = None,
     ):
@@ -108,6 +110,8 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self._coords: List[CoordinatesConfig] = coordinates or self.DEFAULT_COORDS
         self._display_dpi = display_dpi
         self._pickup_date = pickup_date
+        self._font_name = font_name
+        self._font_size = font_size
         if not self._coords:
             raise ValueError(
                 "Es wurden keine Koordinaten definiert und ReportLab ist nicht verfügbar."
@@ -176,6 +180,24 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     def pickup_date(self, value: str) -> None:
         self._pickup_date = value
 
+    @property
+    def font_name(self) -> str:
+        """Font name used for text rendering."""
+        return self._font_name
+
+    @font_name.setter
+    def font_name(self, value: str) -> None:
+        self._font_name = value
+
+    @property
+    def font_size(self) -> int:
+        """Font size used for text rendering."""
+        return self._font_size
+
+    @font_size.setter
+    def font_size(self, value: int) -> None:
+        self._font_size = value
+
     # ------------------------------------------------------------------
     # Data collection helpers
     # ------------------------------------------------------------------
@@ -230,10 +252,10 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         for idx, (f1, f2, f3) in enumerate(rows):
             raw_cfg = self._coords[idx]
             cfg = self._from_display_coords(raw_cfg, page_h, dpi=self._display_dpi)
-            can.setFont(self.FONT_NAME, cfg.font_size)
-            self._draw_centered(can, cfg.x1, cfg.y1, f1, self.FONT_NAME, cfg.font_size)
-            self._draw_centered(can, cfg.x2, cfg.y2, f2, self.FONT_NAME, cfg.font_size)
-            self._draw_centered(can, cfg.x3, cfg.y3, f3, self.FONT_NAME, cfg.font_size)
+            can.setFont(self._font_name, cfg.font_size)
+            self._draw_centered(can, cfg.x1, cfg.y1, f1, self._font_name, cfg.font_size)
+            self._draw_centered(can, cfg.x2, cfg.y2, f2, self._font_name, cfg.font_size)
+            self._draw_centered(can, cfg.x3, cfg.y3, f3, self._font_name, cfg.font_size)
 
         can.save()
         packet.seek(0)

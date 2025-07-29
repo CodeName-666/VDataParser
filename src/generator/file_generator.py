@@ -42,6 +42,8 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         pdf_coordinates: Optional[List[CoordinatesConfig]] = None,
         pdf_display_dpi: int = ReceiveInfoPdfGenerator.DEFAULT_DISPLAY_DPI,
         pickup_date: str = "",
+        placeholder_font_family: str = "Helvetica",
+        placeholder_font_size: int = 12,
         logger: Optional[CustomLogger] = None,
         output_interface: Optional[OutputInterfaceAbstraction] = None,
         progress_tracker: Optional[_TrackerBase] = None,
@@ -64,6 +66,8 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         self._pdf_coordinates = pdf_coordinates
         self._pdf_display_dpi = pdf_display_dpi
         self._pickup_date = pickup_date
+        self._placeholder_font_family = placeholder_font_family
+        self._placeholder_font_size = placeholder_font_size
 
         self._tasks: List[Tuple[str, object]] = []
 
@@ -88,6 +92,8 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
                     coordinates=self._pdf_coordinates,
                     display_dpi=self._pdf_display_dpi,
                     pickup_date=self._pickup_date,
+                    font_name=self._placeholder_font_family,
+                    font_size=self._placeholder_font_size,
                 ),
             ),
         ]
@@ -191,6 +197,12 @@ class FileGenerator(Base):  # noqa: D101 – detailed docs above
         pickup = settings.get("pickup_date")
         if pickup is not None:
             self._pickup_date = pickup
+        font_family = settings.get("font_name") or settings.get("placeholder_font_family")
+        if font_family:
+            self._placeholder_font_family = font_family
+        font_size = settings.get("font_size") or settings.get("placeholder_font_size")
+        if font_size:
+            self._placeholder_font_size = font_size
 
     def create_pdf_data(self, settings: Optional[dict] = None) -> None:
         """Generate only the PDF based on ``settings``."""

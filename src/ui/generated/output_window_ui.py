@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'output_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.9.1
+## Created by: Qt User Interface Compiler version 6.6.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -27,6 +27,7 @@ class Ui_OutputWindow(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.logOutputList = QListWidget(OutputWindow)
         self.logOutputList.setObjectName(u"logOutputList")
+        self.logOutputList.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         self.verticalLayout.addWidget(self.logOutputList)
 

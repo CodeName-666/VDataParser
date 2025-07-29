@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'data_view.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.9.1
+## Created by: Qt User Interface Compiler version 6.6.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -42,7 +42,7 @@ class Ui_DataView(object):
 
         self.horizontalLayout.addWidget(self.btnToggleView)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer)
 
@@ -89,9 +89,9 @@ class Ui_DataView(object):
 "QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }\n"
 "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }", None))
         self.btnToggleView.setText(QCoreApplication.translate("DataView", u"Ansicht umschalten", None))
-        self.treeUsers.setProperty(u"headerLabels", [
+        self.treeUsers.setProperty("headerLabels", [
             QCoreApplication.translate("DataView", u"Benutzer", None)])
-        self.tableEntries.setProperty(u"horizontalHeaderLabels", [
+        self.tableEntries.setProperty("horizontalHeaderLabels", [
             QCoreApplication.translate("DataView", u"Artikelnummer", None),
             QCoreApplication.translate("DataView", u"Beschreibung", None),
             QCoreApplication.translate("DataView", u"Gr\u00f6\u00dfe", None),

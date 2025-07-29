@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'user_info.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.9.1
+## Created by: Qt User Interface Compiler version 6.6.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -37,7 +37,7 @@ class Ui_MainWindowWidget(object):
 
         self.listWidgetUsers = QListWidget(MainWindowWidget)
         self.listWidgetUsers.setObjectName(u"listWidgetUsers")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.listWidgetUsers.sizePolicy().hasHeightForWidth())
@@ -50,7 +50,7 @@ class Ui_MainWindowWidget(object):
 
         self.groupBoxDetails = QGroupBox(MainWindowWidget)
         self.groupBoxDetails.setObjectName(u"groupBoxDetails")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.groupBoxDetails.sizePolicy().hasHeightForWidth())
@@ -60,75 +60,76 @@ class Ui_MainWindowWidget(object):
         self.labelVorname = QLabel(self.groupBoxDetails)
         self.labelVorname.setObjectName(u"labelVorname")
 
-        self.formLayoutDetails.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelVorname)
+        self.formLayoutDetails.setWidget(0, QFormLayout.LabelRole, self.labelVorname)
 
         self.valueVorname = QLabel(self.groupBoxDetails)
         self.valueVorname.setObjectName(u"valueVorname")
 
-        self.formLayoutDetails.setWidget(0, QFormLayout.ItemRole.FieldRole, self.valueVorname)
+        self.formLayoutDetails.setWidget(0, QFormLayout.FieldRole, self.valueVorname)
 
         self.labelNachname = QLabel(self.groupBoxDetails)
         self.labelNachname.setObjectName(u"labelNachname")
 
-        self.formLayoutDetails.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelNachname)
+        self.formLayoutDetails.setWidget(1, QFormLayout.LabelRole, self.labelNachname)
 
         self.valueNachname = QLabel(self.groupBoxDetails)
         self.valueNachname.setObjectName(u"valueNachname")
 
-        self.formLayoutDetails.setWidget(1, QFormLayout.ItemRole.FieldRole, self.valueNachname)
+        self.formLayoutDetails.setWidget(1, QFormLayout.FieldRole, self.valueNachname)
 
         self.labelTelefon = QLabel(self.groupBoxDetails)
         self.labelTelefon.setObjectName(u"labelTelefon")
 
-        self.formLayoutDetails.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labelTelefon)
+        self.formLayoutDetails.setWidget(2, QFormLayout.LabelRole, self.labelTelefon)
 
         self.valueTelefon = QLabel(self.groupBoxDetails)
         self.valueTelefon.setObjectName(u"valueTelefon")
 
-        self.formLayoutDetails.setWidget(2, QFormLayout.ItemRole.FieldRole, self.valueTelefon)
+        self.formLayoutDetails.setWidget(2, QFormLayout.FieldRole, self.valueTelefon)
 
         self.labelEmail = QLabel(self.groupBoxDetails)
         self.labelEmail.setObjectName(u"labelEmail")
 
-        self.formLayoutDetails.setWidget(3, QFormLayout.ItemRole.LabelRole, self.labelEmail)
+        self.formLayoutDetails.setWidget(3, QFormLayout.LabelRole, self.labelEmail)
 
         self.valueEmail = QLabel(self.groupBoxDetails)
         self.valueEmail.setObjectName(u"valueEmail")
 
-        self.formLayoutDetails.setWidget(3, QFormLayout.ItemRole.FieldRole, self.valueEmail)
+        self.formLayoutDetails.setWidget(3, QFormLayout.FieldRole, self.valueEmail)
 
         self.labelCreatedAt = QLabel(self.groupBoxDetails)
         self.labelCreatedAt.setObjectName(u"labelCreatedAt")
 
-        self.formLayoutDetails.setWidget(4, QFormLayout.ItemRole.LabelRole, self.labelCreatedAt)
+        self.formLayoutDetails.setWidget(4, QFormLayout.LabelRole, self.labelCreatedAt)
 
         self.valueCreatedAt = QLabel(self.groupBoxDetails)
         self.valueCreatedAt.setObjectName(u"valueCreatedAt")
 
-        self.formLayoutDetails.setWidget(4, QFormLayout.ItemRole.FieldRole, self.valueCreatedAt)
+        self.formLayoutDetails.setWidget(4, QFormLayout.FieldRole, self.valueCreatedAt)
 
         self.labelUpdatedAt = QLabel(self.groupBoxDetails)
         self.labelUpdatedAt.setObjectName(u"labelUpdatedAt")
 
-        self.formLayoutDetails.setWidget(5, QFormLayout.ItemRole.LabelRole, self.labelUpdatedAt)
+        self.formLayoutDetails.setWidget(5, QFormLayout.LabelRole, self.labelUpdatedAt)
 
         self.valueUpdatedAt = QLabel(self.groupBoxDetails)
         self.valueUpdatedAt.setObjectName(u"valueUpdatedAt")
 
-        self.formLayoutDetails.setWidget(5, QFormLayout.ItemRole.FieldRole, self.valueUpdatedAt)
+        self.formLayoutDetails.setWidget(5, QFormLayout.FieldRole, self.valueUpdatedAt)
 
         self.labelIDs = QLabel(self.groupBoxDetails)
         self.labelIDs.setObjectName(u"labelIDs")
 
-        self.formLayoutDetails.setWidget(6, QFormLayout.ItemRole.LabelRole, self.labelIDs)
+        self.formLayoutDetails.setWidget(6, QFormLayout.LabelRole, self.labelIDs)
 
         self.tableIDs = QTableWidget(self.groupBoxDetails)
         if (self.tableIDs.columnCount() < 5):
             self.tableIDs.setColumnCount(5)
         self.tableIDs.setObjectName(u"tableIDs")
         self.tableIDs.setColumnCount(5)
+        self.tableIDs.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
-        self.formLayoutDetails.setWidget(6, QFormLayout.ItemRole.FieldRole, self.tableIDs)
+        self.formLayoutDetails.setWidget(6, QFormLayout.FieldRole, self.tableIDs)
 
 
         self.horizontalLayout.addWidget(self.groupBoxDetails)
@@ -169,7 +170,7 @@ class Ui_MainWindowWidget(object):
         self.valueUpdatedAt.setText("")
         self.valueUpdatedAt.setStyleSheet(QCoreApplication.translate("MainWindowWidget", u"font-weight: bold;", None))
         self.labelIDs.setText(QCoreApplication.translate("MainWindowWidget", u"IDs:", None))
-        self.tableIDs.setProperty(u"horizontalHeaderLabels", [
+        self.tableIDs.setProperty("horizontalHeaderLabels", [
             QCoreApplication.translate("MainWindowWidget", u"ID", None),
             QCoreApplication.translate("MainWindowWidget", u"Vollst\u00e4ndig", None),
             QCoreApplication.translate("MainWindowWidget", u"Teilweise", None),

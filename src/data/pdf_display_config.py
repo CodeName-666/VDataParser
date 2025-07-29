@@ -69,6 +69,8 @@ class PdfDisplayConfig(QObject, JsonHandler):
         "output_path": "",
         "output_name": "",
         "dpi": 150,
+        "placeholder_font_family": "Helvetica",
+        "placeholder_font_size": 12,
         "pickup_date": "",
         "pickup_time": "",
         "boxPairs": [],
@@ -150,6 +152,23 @@ class PdfDisplayConfig(QObject, JsonHandler):
 
     def set_dpi(self, value: int) -> None:
         self.set_key_value(["dpi"], int(value))
+
+    # ------------------------------------------------------------------
+    # Placeholder font handling
+    # ------------------------------------------------------------------
+    def get_placeholder_font_family(self) -> str:
+        """Return the font family used for placeholders and PDF text."""
+        return str(self.get_key_value(["placeholder_font_family"]) or "Helvetica")
+
+    def set_placeholder_font_family(self, value: str) -> None:
+        self.set_key_value(["placeholder_font_family"], str(value))
+
+    def get_placeholder_font_size(self) -> int:
+        """Return the font size for placeholders and PDF text."""
+        return int(self.get_key_value(["placeholder_font_size"]) or 12)
+
+    def set_placeholder_font_size(self, value: int) -> None:
+        self.set_key_value(["placeholder_font_size"], int(value))
 
     # ------------------------------------------------------------------
     # Pickup date handling
@@ -257,7 +276,7 @@ class PdfDisplayConfig(QObject, JsonHandler):
         pair = pairboxes.get(box_id)
         single = singleboxes.get(box_id)
 
-        font_size = 12
+        font_size = self.get_placeholder_font_size()
 
         x1 = (pair.box1.x + pair.box1.width / 2) if pair else 0.0
         y1 = (pair.box1.y + pair.box1.height / 2 + font_size / 2) if pair else 0.0

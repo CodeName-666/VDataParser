@@ -43,9 +43,9 @@ SINGLE_BOX_COLOR = QColor("green")
 DEFAULT_BOX_WIDTH = 100
 DEFAULT_BOX_HEIGHT = 50
 DEFAULT_DISPLAY_DPI = 150
-PLACEHOLDER_FONT_FAMILY = "Helvetica"
-PLACEHOLDER_FONT_SIZE = 12
-PLACEHOLDER_FONT = QFont(PLACEHOLDER_FONT_FAMILY, PLACEHOLDER_FONT_SIZE, QFont.Bold)
+DEFAULT_PLACEHOLDER_FONT_FAMILY = "Helvetica"
+DEFAULT_PLACEHOLDER_FONT_SIZE = 12
+PLACEHOLDER_FONT = QFont(DEFAULT_PLACEHOLDER_FONT_FAMILY, DEFAULT_PLACEHOLDER_FONT_SIZE, QFont.Bold)
 PLACEHLODER_NAME = "Max Mustermann*innen"
 
 BOX_PAIR_LABEL_1_PREFIX = "USR"
@@ -327,19 +327,20 @@ class BoxPair(QObject):
 
     manager = ItemIdManager()  # Class-level ID manager
 
-    def __init__(self, scene: QGraphicsScene, startPos=QPointF(50, 50)):
+    def __init__(self, scene: QGraphicsScene, startPos=QPointF(50, 50), *, font: QFont | None = None):
         super().__init__()
         self.id = BoxPair.manager.get_new_id()
         self.scene = scene
 
         rect = QRectF(0, 0, DEFAULT_BOX_WIDTH, DEFAULT_BOX_HEIGHT)
 
+        font = font or PLACEHOLDER_FONT
         self.box1 = DraggableBox(
             rect,
             label=f"{BOX_PAIR_LABEL_1_PREFIX}{self.id}",
-            placeholder= PLACEHLODER_NAME,
+            placeholder=PLACEHLODER_NAME,
         )
-        self.box1.setPlaceholderFont(PLACEHOLDER_FONT)
+        self.box1.setPlaceholderFont(font)
         self.box1.setPos(startPos)
         self.box1.setPen(QPen(BOX_PAIR_COLOR_1, 2))
 
@@ -351,7 +352,7 @@ class BoxPair(QObject):
             label=f"{BOX_PAIR_LABEL_2_PREFIX}{self.id}",
             placeholder="999",
         )
-        self.box2.setPlaceholderFont(PLACEHOLDER_FONT)
+        self.box2.setPlaceholderFont(font)
         self.box2.setPos(startPos + offset)
         self.box2.setPen(QPen(BOX_PAIR_COLOR_2, 2))
         self.label = f"{BOX_PAIR_LABEL_PREFIX}{self.id}"
@@ -378,11 +379,12 @@ class SingleBox(DraggableBox):
 
     manager = ItemIdManager()  # Class-level ID manager
 
-    def __init__(self, rect: QRectF, parent=None, placeholder: str = ""):
+    def __init__(self, rect: QRectF, parent=None, placeholder: str = "", *, font: QFont | None = None):
         self.id = SingleBox.manager.get_new_id()
         label = f"{SINGLE_BOX_LABEL_PREFIX}{self.id}"
         super().__init__(rect, label, parent, placeholder=placeholder)
-        self.setPlaceholderFont(PLACEHOLDER_FONT)
+        font = font or PLACEHOLDER_FONT
+        self.setPlaceholderFont(font)
         self.setPen(QPen(SINGLE_BOX_COLOR, 2))
 
     def remove_from_scene(self):
@@ -425,6 +427,17 @@ class PdfDisplay(PersistentBaseUi):
         self._config: PdfDisplayConfig = None
         self._display_dpi = DEFAULT_DISPLAY_DPI
         self.ui.spinBoxDisplayDpi.setValue(self._display_dpi)
+        self._placeholder_font_family = DEFAULT_PLACEHOLDER_FONT_FAMILY
+        self._placeholder_font_size = DEFAULT_PLACEHOLDER_FONT_SIZE
+        self._placeholder_font = QFont(
+            self._placeholder_font_family, self._placeholder_font_size, QFont.Bold
+        )
+        if hasattr(self.ui, "fontComboBoxPlaceholderFamily"):
+            idx = self.ui.fontComboBoxPlaceholderFamily.findText(self._placeholder_font_family)
+            if idx >= 0:
+                self.ui.fontComboBoxPlaceholderFamily.setCurrentIndex(idx)
+        if hasattr(self.ui, "spinBoxPlaceholderFontSize"):
+            self.ui.spinBoxPlaceholderFontSize.setValue(self._placeholder_font_size)
         self.ui.dateEditPickup.setDate(QDate.currentDate())
         self.ui.timeEditPickup.setTime(QTime.currentTime())
         # --- UI Element Access (using self.ui) ---
@@ -483,6 +496,14 @@ class PdfDisplay(PersistentBaseUi):
         self.ui.spinBoxDisplayDpi.valueChanged.connect(self.on_dpi_changed)
         self.ui.dateEditPickup.dateChanged.connect(self.on_pickup_changed)
         self.ui.timeEditPickup.timeChanged.connect(self.on_pickup_changed)
+        if hasattr(self.ui, "fontComboBoxPlaceholderFamily"):
+            self.ui.fontComboBoxPlaceholderFamily.currentFontChanged.connect(
+                self.on_placeholder_font_changed
+            )
+        if hasattr(self.ui, "spinBoxPlaceholderFontSize"):
+            self.ui.spinBoxPlaceholderFontSize.valueChanged.connect(
+                self.on_placeholder_font_changed
+            )
 
         self.scene.selectionChanged.connect(self.on_scene_selection_changed)
         self.ui.listBoxPairs.itemSelectionChanged.connect(
@@ -617,7 +638,7 @@ class PdfDisplay(PersistentBaseUi):
             DEFAULT_BOX_WIDTH / 2, DEFAULT_BOX_HEIGHT / 2
         )  # Adjust for box size
 
-        newPair = BoxPair(self.scene, startPos)
+        newPair = BoxPair(self.scene, startPos, font=self._placeholder_font)
         self.boxPairs.append(newPair)
         list_item = self._add_list_item(str(newPair), newPair)
         self.ui.listBoxPairs.setCurrentItem(list_item)  # Select the new item
@@ -647,7 +668,7 @@ class PdfDisplay(PersistentBaseUi):
             f"{self.ui.dateEditPickup.date().toString('dd.MM.yyyy')} "
             f"{self.ui.timeEditPickup.time().toString('HH:mm')}"
         ).strip()
-        newSingle = SingleBox(rect, placeholder=placeholder)
+        newSingle = SingleBox(rect, placeholder=placeholder, font=self._placeholder_font)
         newSingle.setPos(startPos)
         self.scene.addItem(newSingle)  # Add to scene first
         self.singleBoxes.append(newSingle)
@@ -785,6 +806,21 @@ class PdfDisplay(PersistentBaseUi):
         ).strip()
         for box in self.singleBoxes:
             box.setPlaceholderText(placeholder)
+        self._config_changed()
+
+    @Slot()
+    def on_placeholder_font_changed(self) -> None:
+        """Update placeholder font in all boxes when UI values change."""
+        family = self.ui.fontComboBoxPlaceholderFamily.currentFont().family()
+        size = int(self.ui.spinBoxPlaceholderFontSize.value())
+        self._placeholder_font_family = family
+        self._placeholder_font_size = size
+        self._placeholder_font = QFont(family, size, QFont.Bold)
+        for pair in self.boxPairs:
+            pair.box1.setPlaceholderFont(self._placeholder_font)
+            pair.box2.setPlaceholderFont(self._placeholder_font)
+        for box in self.singleBoxes:
+            box.setPlaceholderFont(self._placeholder_font)
         self._config_changed()
 
     @Slot()
@@ -1034,6 +1070,8 @@ class PdfDisplay(PersistentBaseUi):
         config.set_full_pdf_path(self.pdfPath)
         config.set_full_output_path(self.ui.lineEditOutputPath.text())
         config.set_dpi(self._display_dpi)
+        config.set_placeholder_font_family(self._placeholder_font_family)
+        config.set_placeholder_font_size(self._placeholder_font_size)
         config.set_pickup_date(self.ui.dateEditPickup.date().toString("dd.MM.yyyy"))
         config.set_pickup_time(self.ui.timeEditPickup.time().toString("HH:mm"))
 
@@ -1069,6 +1107,18 @@ class PdfDisplay(PersistentBaseUi):
             self._display_dpi = self._config.get_dpi()
             self.ui.spinBoxDisplayDpi.setValue(self._display_dpi)
 
+            self._placeholder_font_family = self._config.get_placeholder_font_family()
+            self._placeholder_font_size = self._config.get_placeholder_font_size()
+            self._placeholder_font = QFont(
+                self._placeholder_font_family, self._placeholder_font_size, QFont.Bold
+            )
+            if hasattr(self.ui, "fontComboBoxPlaceholderFamily"):
+                idx = self.ui.fontComboBoxPlaceholderFamily.findText(self._placeholder_font_family)
+                if idx >= 0:
+                    self.ui.fontComboBoxPlaceholderFamily.setCurrentIndex(idx)
+            if hasattr(self.ui, "spinBoxPlaceholderFontSize"):
+                self.ui.spinBoxPlaceholderFontSize.setValue(self._placeholder_font_size)
+
             pickup = self._config.get_pickup_date()
             if pickup:
                 date = QDate.fromString(pickup, "dd.MM.yyyy")
@@ -1098,7 +1148,7 @@ class PdfDisplay(PersistentBaseUi):
             # ---------- Box-Paare ----------
             max_pair_id = 0
             for p in self._config.get_box_pairs():
-                pair = BoxPair(self.scene, QPointF(0, 0))
+                pair = BoxPair(self.scene, QPointF(0, 0), font=self._placeholder_font)
                 pair.id = p.id
                 # Wiederherstellung der beiden Boxes aus den Dataclass-Dictionaries
                 self._restore_box(pair.box1, p.box1.to_dict())
@@ -1115,7 +1165,7 @@ class PdfDisplay(PersistentBaseUi):
                     f"{self.ui.dateEditPickup.date().toString('dd.MM.yyyy')} "
                     f"{self.ui.timeEditPickup.time().toString('HH:mm')}"
                 ).strip()
-                single = SingleBox(rect, placeholder=placeholder)
+                single = SingleBox(rect, placeholder=placeholder, font=self._placeholder_font)
                 single.id = s.id
                 self._restore_box(single, s.to_dict())
                 self.scene.addItem(single)
@@ -1131,7 +1181,7 @@ class PdfDisplay(PersistentBaseUi):
         box.setLabel(d["label"])
         box.setPos(QPointF(d["x"], d["y"]))
         box.setRect(QRectF(0, 0, d["width"], d["height"]))
-        box.setPlaceholderFont(PLACEHOLDER_FONT)
+        box.setPlaceholderFont(self._placeholder_font)
         self._connect_box_signals(box)
 
     def _load_pdf_from_path(self, path: str):

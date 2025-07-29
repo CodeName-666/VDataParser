@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'market_statistics.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.9.1
+## Created by: Qt User Interface Compiler version 6.6.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -81,7 +81,7 @@ class Ui_MarketStatistics(object):
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.chartMainNumbers = QChartView(self.groupBoxMainNumbers)
         self.chartMainNumbers.setObjectName(u"chartMainNumbers")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.chartMainNumbers.sizePolicy().hasHeightForWidth())
@@ -95,52 +95,52 @@ class Ui_MarketStatistics(object):
         self.labelCompleteNums = QLabel(self.groupBoxMainNumbers)
         self.labelCompleteNums.setObjectName(u"labelCompleteNums")
 
-        self.formLayoutMainNumbers.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelCompleteNums)
+        self.formLayoutMainNumbers.setWidget(0, QFormLayout.LabelRole, self.labelCompleteNums)
 
         self.valueCompleteNums = QLabel(self.groupBoxMainNumbers)
         self.valueCompleteNums.setObjectName(u"valueCompleteNums")
 
-        self.formLayoutMainNumbers.setWidget(0, QFormLayout.ItemRole.FieldRole, self.valueCompleteNums)
+        self.formLayoutMainNumbers.setWidget(0, QFormLayout.FieldRole, self.valueCompleteNums)
 
         self.labelAlmostNums = QLabel(self.groupBoxMainNumbers)
         self.labelAlmostNums.setObjectName(u"labelAlmostNums")
 
-        self.formLayoutMainNumbers.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelAlmostNums)
+        self.formLayoutMainNumbers.setWidget(1, QFormLayout.LabelRole, self.labelAlmostNums)
 
         self.valueAlmostNums = QLabel(self.groupBoxMainNumbers)
         self.valueAlmostNums.setObjectName(u"valueAlmostNums")
 
-        self.formLayoutMainNumbers.setWidget(1, QFormLayout.ItemRole.FieldRole, self.valueAlmostNums)
+        self.formLayoutMainNumbers.setWidget(1, QFormLayout.FieldRole, self.valueAlmostNums)
 
         self.labelHalfNums = QLabel(self.groupBoxMainNumbers)
         self.labelHalfNums.setObjectName(u"labelHalfNums")
 
-        self.formLayoutMainNumbers.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labelHalfNums)
+        self.formLayoutMainNumbers.setWidget(2, QFormLayout.LabelRole, self.labelHalfNums)
 
         self.valueHalfNums = QLabel(self.groupBoxMainNumbers)
         self.valueHalfNums.setObjectName(u"valueHalfNums")
 
-        self.formLayoutMainNumbers.setWidget(2, QFormLayout.ItemRole.FieldRole, self.valueHalfNums)
+        self.formLayoutMainNumbers.setWidget(2, QFormLayout.FieldRole, self.valueHalfNums)
 
         self.labelInProgressNums = QLabel(self.groupBoxMainNumbers)
         self.labelInProgressNums.setObjectName(u"labelInProgressNums")
 
-        self.formLayoutMainNumbers.setWidget(3, QFormLayout.ItemRole.LabelRole, self.labelInProgressNums)
+        self.formLayoutMainNumbers.setWidget(3, QFormLayout.LabelRole, self.labelInProgressNums)
 
         self.valueInProgressNums = QLabel(self.groupBoxMainNumbers)
         self.valueInProgressNums.setObjectName(u"valueInProgressNums")
 
-        self.formLayoutMainNumbers.setWidget(3, QFormLayout.ItemRole.FieldRole, self.valueInProgressNums)
+        self.formLayoutMainNumbers.setWidget(3, QFormLayout.FieldRole, self.valueInProgressNums)
 
         self.labelStartedNums = QLabel(self.groupBoxMainNumbers)
         self.labelStartedNums.setObjectName(u"labelStartedNums")
 
-        self.formLayoutMainNumbers.setWidget(4, QFormLayout.ItemRole.LabelRole, self.labelStartedNums)
+        self.formLayoutMainNumbers.setWidget(4, QFormLayout.LabelRole, self.labelStartedNums)
 
         self.valueStartedNums = QLabel(self.groupBoxMainNumbers)
         self.valueStartedNums.setObjectName(u"valueStartedNums")
 
-        self.formLayoutMainNumbers.setWidget(4, QFormLayout.ItemRole.FieldRole, self.valueStartedNums)
+        self.formLayoutMainNumbers.setWidget(4, QFormLayout.FieldRole, self.valueStartedNums)
 
 
         self.horizontalLayout_2.addLayout(self.formLayoutMainNumbers)
@@ -165,42 +165,42 @@ class Ui_MarketStatistics(object):
         self.labelTotal = QLabel(self.groupBoxArticles)
         self.labelTotal.setObjectName(u"labelTotal")
 
-        self.formLayoutArticles.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelTotal)
+        self.formLayoutArticles.setWidget(0, QFormLayout.LabelRole, self.labelTotal)
 
         self.valueTotal = QLabel(self.groupBoxArticles)
         self.valueTotal.setObjectName(u"valueTotal")
 
-        self.formLayoutArticles.setWidget(0, QFormLayout.ItemRole.FieldRole, self.valueTotal)
+        self.formLayoutArticles.setWidget(0, QFormLayout.FieldRole, self.valueTotal)
 
         self.labelComplete = QLabel(self.groupBoxArticles)
         self.labelComplete.setObjectName(u"labelComplete")
 
-        self.formLayoutArticles.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelComplete)
+        self.formLayoutArticles.setWidget(1, QFormLayout.LabelRole, self.labelComplete)
 
         self.valueComplete = QLabel(self.groupBoxArticles)
         self.valueComplete.setObjectName(u"valueComplete")
 
-        self.formLayoutArticles.setWidget(1, QFormLayout.ItemRole.FieldRole, self.valueComplete)
+        self.formLayoutArticles.setWidget(1, QFormLayout.FieldRole, self.valueComplete)
 
         self.labelPartial = QLabel(self.groupBoxArticles)
         self.labelPartial.setObjectName(u"labelPartial")
 
-        self.formLayoutArticles.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labelPartial)
+        self.formLayoutArticles.setWidget(2, QFormLayout.LabelRole, self.labelPartial)
 
         self.valuePartial = QLabel(self.groupBoxArticles)
         self.valuePartial.setObjectName(u"valuePartial")
 
-        self.formLayoutArticles.setWidget(2, QFormLayout.ItemRole.FieldRole, self.valuePartial)
+        self.formLayoutArticles.setWidget(2, QFormLayout.FieldRole, self.valuePartial)
 
         self.labelOpen = QLabel(self.groupBoxArticles)
         self.labelOpen.setObjectName(u"labelOpen")
 
-        self.formLayoutArticles.setWidget(3, QFormLayout.ItemRole.LabelRole, self.labelOpen)
+        self.formLayoutArticles.setWidget(3, QFormLayout.LabelRole, self.labelOpen)
 
         self.valueOpen = QLabel(self.groupBoxArticles)
         self.valueOpen.setObjectName(u"valueOpen")
 
-        self.formLayoutArticles.setWidget(3, QFormLayout.ItemRole.FieldRole, self.valueOpen)
+        self.formLayoutArticles.setWidget(3, QFormLayout.FieldRole, self.valueOpen)
 
 
         self.horizontalLayout_3.addLayout(self.formLayoutArticles)
