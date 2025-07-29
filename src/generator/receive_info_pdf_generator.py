@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List, Optional, Sequence, Tuple
 import io
+import os
+import platform
 
 from log import CustomLogger
 
@@ -60,20 +62,46 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     DEFAULT_FONT_NAME = "Helvetica-Bold"
 
     def _register_font(self, name: str) -> None:
-        """Register ``name`` with ReportLab if possible."""
+        """Register ``name`` with ReportLab if possible.
+
+        The method first tries ``fc-match`` on Unix-like systems. If that fails
+        or the platform is Windows, it searches for the font file inside the
+        Windows fonts directory.
+        """
         if pdfmetrics is None or TTFont is None:
             return
         if name in pdfmetrics.getRegisteredFontNames():
             return
-        try:
-            path = subprocess.check_output(
-                ["fc-match", "-f", "%{file}", name],
-                text=True,
-            ).strip()
-            if path:
+
+        path = ""
+        if platform.system() != "Windows":
+            try:
+                path = subprocess.check_output(
+                    ["fc-match", "-f", "%{file}", name],
+                    text=True,
+                    stderr=subprocess.DEVNULL,
+                ).strip()
+            except Exception:
+                path = ""
+
+        if not path and platform.system() == "Windows":
+            font_dir = Path(os.environ.get("WINDIR", "C:\\Windows")) / "Fonts"
+            if font_dir.is_dir():
+                sanitized = name.lower().replace(" ", "")
+                for ext in (".ttf", ".ttc", ".otf"):
+                    for file in font_dir.glob(f"*{ext}"):
+                        stem = file.stem.lower().replace(" ", "")
+                        if sanitized in stem:
+                            path = str(file)
+                            break
+                    if path:
+                        break
+
+        if path:
+            try:
                 pdfmetrics.registerFont(TTFont(name, path))
-        except Exception:
-            pass
+            except Exception:
+                pass
 
     @staticmethod
     def _draw_centered(can, x: float, y: float, text: str, font_name: str, font_size: int) -> None:
