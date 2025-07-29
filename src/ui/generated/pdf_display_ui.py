@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'pdf_display.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.9.1
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -26,7 +26,7 @@ class Ui_PdfDisplayView(object):
     def setupUi(self, PdfDisplayView):
         if not PdfDisplayView.objectName():
             PdfDisplayView.setObjectName(u"PdfDisplayView")
-        PdfDisplayView.resize(1096, 967)
+        PdfDisplayView.resize(1096, 968)
         self.verticalLayout_5 = QVBoxLayout(PdfDisplayView)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.splitter = QSplitter(PdfDisplayView)
@@ -135,12 +135,11 @@ class Ui_PdfDisplayView(object):
         self.user_interface_layout.addLayout(self.horizontalLayout_3)
 
         self.splitter.addWidget(self.layoutWidget)
-        self.layoutWidget1 = QWidget(self.splitter)
-        self.layoutWidget1.setObjectName(u"layoutWidget1")
-        self.pdf_display_layout = QVBoxLayout(self.layoutWidget1)
-        self.pdf_display_layout.setObjectName(u"pdf_display_layout")
-        self.pdf_display_layout.setContentsMargins(0, 0, 0, 0)
-        self.groupBox_3 = QGroupBox(self.layoutWidget1)
+        self.configWidget = QWidget(self.splitter)
+        self.configWidget.setObjectName(u"configWidget")
+        self.verticalLayout_4 = QVBoxLayout(self.configWidget)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.groupBox_3 = QGroupBox(self.configWidget)
         self.groupBox_3.setObjectName(u"groupBox_3")
         self.verticalLayout_3 = QVBoxLayout(self.groupBox_3)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
@@ -170,119 +169,9 @@ class Ui_PdfDisplayView(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout)
 
 
-        self.pdf_display_layout.addWidget(self.groupBox_3)
+        self.verticalLayout_4.addWidget(self.groupBox_3)
 
-        self.groupBoxDisplayDpi = QGroupBox(self.layoutWidget1)
-        self.groupBoxDisplayDpi.setObjectName(u"groupBoxDisplayDpi")
-        self.horizontalLayout_display_dpi = QHBoxLayout(self.groupBoxDisplayDpi)
-        self.horizontalLayout_display_dpi.setObjectName(u"horizontalLayout_display_dpi")
-        self.spinBoxDisplayDpi = QSpinBox(self.groupBoxDisplayDpi)
-        self.spinBoxDisplayDpi.setObjectName(u"spinBoxDisplayDpi")
-        self.spinBoxDisplayDpi.setMinimum(72)
-        self.spinBoxDisplayDpi.setMaximum(600)
-        self.spinBoxDisplayDpi.setValue(150)
-
-        self.horizontalLayout_display_dpi.addWidget(self.spinBoxDisplayDpi)
-
-
-        self.pdf_display_layout.addWidget(self.groupBoxDisplayDpi)
-
-        self.groupBoxPickupDate = QGroupBox(self.layoutWidget1)
-        self.groupBoxPickupDate.setObjectName(u"groupBoxPickupDate")
-        self.horizontalLayout_pickup_date = QHBoxLayout(self.groupBoxPickupDate)
-        self.horizontalLayout_pickup_date.setObjectName(u"horizontalLayout_pickup_date")
-        self.dateEditPickup = QDateEdit(self.groupBoxPickupDate)
-        self.dateEditPickup.setObjectName(u"dateEditPickup")
-        self.dateEditPickup.setCalendarPopup(True)
-
-        self.horizontalLayout_pickup_date.addWidget(self.dateEditPickup)
-
-        self.timeEditPickup = QTimeEdit(self.groupBoxPickupDate)
-        self.timeEditPickup.setObjectName(u"timeEditPickup")
-
-        self.horizontalLayout_pickup_date.addWidget(self.timeEditPickup)
-
-
-        self.pdf_display_layout.addWidget(self.groupBoxPickupDate)
-
-        self.groupBox_2 = QGroupBox(self.layoutWidget1)
-        self.groupBox_2.setObjectName(u"groupBox_2")
-        self.verticalLayout_2 = QVBoxLayout(self.groupBox_2)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(-1, 20, -1, -1)
-        self.listBoxPairs = QListWidget(self.groupBox_2)
-        self.listBoxPairs.setObjectName(u"listBoxPairs")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.listBoxPairs.sizePolicy().hasHeightForWidth())
-        self.listBoxPairs.setSizePolicy(sizePolicy1)
-
-        self.verticalLayout_2.addWidget(self.listBoxPairs)
-
-
-        self.pdf_display_layout.addWidget(self.groupBox_2)
-
-        self.groupBoxProperties = QGroupBox(self.layoutWidget1)
-        self.groupBoxProperties.setObjectName(u"groupBoxProperties")
-        self.formLayoutProperties = QFormLayout(self.groupBoxProperties)
-        self.formLayoutProperties.setObjectName(u"formLayoutProperties")
-        self.formLayoutProperties.setContentsMargins(-1, 20, -1, -1)
-        self.labelX = QLabel(self.groupBoxProperties)
-        self.labelX.setObjectName(u"labelX")
-
-        self.formLayoutProperties.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelX)
-
-        self.lineEditX = QLineEdit(self.groupBoxProperties)
-        self.lineEditX.setObjectName(u"lineEditX")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.lineEditX.sizePolicy().hasHeightForWidth())
-        self.lineEditX.setSizePolicy(sizePolicy2)
-
-        self.formLayoutProperties.setWidget(0, QFormLayout.ItemRole.FieldRole, self.lineEditX)
-
-        self.labelY = QLabel(self.groupBoxProperties)
-        self.labelY.setObjectName(u"labelY")
-
-        self.formLayoutProperties.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelY)
-
-        self.lineEditY = QLineEdit(self.groupBoxProperties)
-        self.lineEditY.setObjectName(u"lineEditY")
-        sizePolicy2.setHeightForWidth(self.lineEditY.sizePolicy().hasHeightForWidth())
-        self.lineEditY.setSizePolicy(sizePolicy2)
-
-        self.formLayoutProperties.setWidget(1, QFormLayout.ItemRole.FieldRole, self.lineEditY)
-
-        self.labelWidth = QLabel(self.groupBoxProperties)
-        self.labelWidth.setObjectName(u"labelWidth")
-
-        self.formLayoutProperties.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labelWidth)
-
-        self.lineEditWidth = QLineEdit(self.groupBoxProperties)
-        self.lineEditWidth.setObjectName(u"lineEditWidth")
-        sizePolicy2.setHeightForWidth(self.lineEditWidth.sizePolicy().hasHeightForWidth())
-        self.lineEditWidth.setSizePolicy(sizePolicy2)
-
-        self.formLayoutProperties.setWidget(2, QFormLayout.ItemRole.FieldRole, self.lineEditWidth)
-
-        self.labelHeight = QLabel(self.groupBoxProperties)
-        self.labelHeight.setObjectName(u"labelHeight")
-
-        self.formLayoutProperties.setWidget(3, QFormLayout.ItemRole.LabelRole, self.labelHeight)
-
-        self.lineEditHeight = QLineEdit(self.groupBoxProperties)
-        self.lineEditHeight.setObjectName(u"lineEditHeight")
-        sizePolicy2.setHeightForWidth(self.lineEditHeight.sizePolicy().hasHeightForWidth())
-        self.lineEditHeight.setSizePolicy(sizePolicy2)
-
-        self.formLayoutProperties.setWidget(3, QFormLayout.ItemRole.FieldRole, self.lineEditHeight)
-
-
-        self.pdf_display_layout.addWidget(self.groupBoxProperties)
-
-        self.groupBox = QGroupBox(self.layoutWidget1)
+        self.groupBox = QGroupBox(self.configWidget)
         self.groupBox.setObjectName(u"groupBox")
         self.horizontalLayout_2 = QHBoxLayout(self.groupBox)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
@@ -303,13 +192,137 @@ class Ui_PdfDisplayView(object):
         self.horizontalLayout_2.addLayout(self.layoutOutput)
 
 
-        self.pdf_display_layout.addWidget(self.groupBox)
+        self.verticalLayout_4.addWidget(self.groupBox)
 
-        self.verticalSpacer = QSpacerItem(20, 17, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.groupBox_4 = QGroupBox(self.configWidget)
+        self.groupBox_4.setObjectName(u"groupBox_4")
+        self.groupBox_4.setAutoFillBackground(False)
+        self.groupBox_4.setFlat(False)
+        self.groupBox_4.setCheckable(True)
+        self.verticalLayout_2 = QVBoxLayout(self.groupBox_4)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_2.setContentsMargins(-1, 20, 9, -1)
+        self.groupBoxPickupDate = QGroupBox(self.groupBox_4)
+        self.groupBoxPickupDate.setObjectName(u"groupBoxPickupDate")
+        self.horizontalLayout_pickup_date = QHBoxLayout(self.groupBoxPickupDate)
+        self.horizontalLayout_pickup_date.setObjectName(u"horizontalLayout_pickup_date")
+        self.horizontalLayout_pickup_date.setContentsMargins(-1, 20, -1, -1)
+        self.dateEditPickup = QDateEdit(self.groupBoxPickupDate)
+        self.dateEditPickup.setObjectName(u"dateEditPickup")
+        self.dateEditPickup.setCalendarPopup(True)
 
-        self.pdf_display_layout.addItem(self.verticalSpacer)
+        self.horizontalLayout_pickup_date.addWidget(self.dateEditPickup)
 
-        self.splitter.addWidget(self.layoutWidget1)
+        self.timeEditPickup = QTimeEdit(self.groupBoxPickupDate)
+        self.timeEditPickup.setObjectName(u"timeEditPickup")
+
+        self.horizontalLayout_pickup_date.addWidget(self.timeEditPickup)
+
+
+        self.verticalLayout_2.addWidget(self.groupBoxPickupDate)
+
+        self.groupBoxDisplayDpi = QGroupBox(self.groupBox_4)
+        self.groupBoxDisplayDpi.setObjectName(u"groupBoxDisplayDpi")
+        self.horizontalLayout_display_dpi = QHBoxLayout(self.groupBoxDisplayDpi)
+        self.horizontalLayout_display_dpi.setObjectName(u"horizontalLayout_display_dpi")
+        self.horizontalLayout_display_dpi.setContentsMargins(-1, 20, -1, -1)
+        self.spinBoxDisplayDpi = QSpinBox(self.groupBoxDisplayDpi)
+        self.spinBoxDisplayDpi.setObjectName(u"spinBoxDisplayDpi")
+        self.spinBoxDisplayDpi.setMinimum(72)
+        self.spinBoxDisplayDpi.setMaximum(600)
+        self.spinBoxDisplayDpi.setValue(150)
+
+        self.horizontalLayout_display_dpi.addWidget(self.spinBoxDisplayDpi)
+
+
+        self.verticalLayout_2.addWidget(self.groupBoxDisplayDpi)
+
+
+        self.verticalLayout_4.addWidget(self.groupBox_4)
+
+        self.groupBox_2 = QGroupBox(self.configWidget)
+        self.groupBox_2.setObjectName(u"groupBox_2")
+        self.verticalLayout = QVBoxLayout(self.groupBox_2)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(-1, 20, -1, -1)
+        self.listBoxPairs = QListWidget(self.groupBox_2)
+        self.listBoxPairs.setObjectName(u"listBoxPairs")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.listBoxPairs.sizePolicy().hasHeightForWidth())
+        self.listBoxPairs.setSizePolicy(sizePolicy1)
+
+        self.verticalLayout.addWidget(self.listBoxPairs)
+
+        self.groupBoxProperties = QGroupBox(self.groupBox_2)
+        self.groupBoxProperties.setObjectName(u"groupBoxProperties")
+        self.groupBoxProperties.setCheckable(True)
+        self.formLayoutProperties = QFormLayout(self.groupBoxProperties)
+        self.formLayoutProperties.setObjectName(u"formLayoutProperties")
+        self.formLayoutProperties.setContentsMargins(-1, 20, -1, -1)
+        self.labelX = QLabel(self.groupBoxProperties)
+        self.labelX.setObjectName(u"labelX")
+
+        self.formLayoutProperties.setWidget(0, QFormLayout.LabelRole, self.labelX)
+
+        self.lineEditX = QLineEdit(self.groupBoxProperties)
+        self.lineEditX.setObjectName(u"lineEditX")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.lineEditX.sizePolicy().hasHeightForWidth())
+        self.lineEditX.setSizePolicy(sizePolicy2)
+
+        self.formLayoutProperties.setWidget(0, QFormLayout.FieldRole, self.lineEditX)
+
+        self.labelY = QLabel(self.groupBoxProperties)
+        self.labelY.setObjectName(u"labelY")
+
+        self.formLayoutProperties.setWidget(1, QFormLayout.LabelRole, self.labelY)
+
+        self.lineEditY = QLineEdit(self.groupBoxProperties)
+        self.lineEditY.setObjectName(u"lineEditY")
+        sizePolicy2.setHeightForWidth(self.lineEditY.sizePolicy().hasHeightForWidth())
+        self.lineEditY.setSizePolicy(sizePolicy2)
+
+        self.formLayoutProperties.setWidget(1, QFormLayout.FieldRole, self.lineEditY)
+
+        self.labelWidth = QLabel(self.groupBoxProperties)
+        self.labelWidth.setObjectName(u"labelWidth")
+
+        self.formLayoutProperties.setWidget(2, QFormLayout.LabelRole, self.labelWidth)
+
+        self.lineEditWidth = QLineEdit(self.groupBoxProperties)
+        self.lineEditWidth.setObjectName(u"lineEditWidth")
+        sizePolicy2.setHeightForWidth(self.lineEditWidth.sizePolicy().hasHeightForWidth())
+        self.lineEditWidth.setSizePolicy(sizePolicy2)
+
+        self.formLayoutProperties.setWidget(2, QFormLayout.FieldRole, self.lineEditWidth)
+
+        self.labelHeight = QLabel(self.groupBoxProperties)
+        self.labelHeight.setObjectName(u"labelHeight")
+
+        self.formLayoutProperties.setWidget(3, QFormLayout.LabelRole, self.labelHeight)
+
+        self.lineEditHeight = QLineEdit(self.groupBoxProperties)
+        self.lineEditHeight.setObjectName(u"lineEditHeight")
+        sizePolicy2.setHeightForWidth(self.lineEditHeight.sizePolicy().hasHeightForWidth())
+        self.lineEditHeight.setSizePolicy(sizePolicy2)
+
+        self.formLayoutProperties.setWidget(3, QFormLayout.FieldRole, self.lineEditHeight)
+
+
+        self.verticalLayout.addWidget(self.groupBoxProperties)
+
+
+        self.verticalLayout_4.addWidget(self.groupBox_2)
+
+        self.verticalSpacer = QSpacerItem(20, 191, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.verticalLayout_4.addItem(self.verticalSpacer)
+
+        self.splitter.addWidget(self.configWidget)
 
         self.verticalLayout_5.addWidget(self.splitter)
 
@@ -339,17 +352,18 @@ class Ui_PdfDisplayView(object):
         self.btnLoadConfig.setText(QCoreApplication.translate("PdfDisplayView", u"Laden", None))
         self.btnSaveConfig.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern", None))
         self.btnSaveAsConfig.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern unter", None))
-        self.groupBoxDisplayDpi.setTitle(QCoreApplication.translate("PdfDisplayView", u"PDF DPI", None))
+        self.groupBox.setTitle(QCoreApplication.translate("PdfDisplayView", u"PDF Speicherort:", None))
+        self.btnSaveOutputPath.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern", None))
+        self.groupBox_4.setTitle(QCoreApplication.translate("PdfDisplayView", u"Einstellungen", None))
         self.groupBoxPickupDate.setTitle(QCoreApplication.translate("PdfDisplayView", u"Abholdatum", None))
         self.dateEditPickup.setDisplayFormat(QCoreApplication.translate("PdfDisplayView", u"dd.MM.yyyy", None))
         self.timeEditPickup.setDisplayFormat(QCoreApplication.translate("PdfDisplayView", u"HH:mm", None))
+        self.groupBoxDisplayDpi.setTitle(QCoreApplication.translate("PdfDisplayView", u"PDF DPI", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("PdfDisplayView", u"Name und Stammnummer", None))
         self.groupBoxProperties.setTitle(QCoreApplication.translate("PdfDisplayView", u"Box Eigenschaften", None))
         self.labelX.setText(QCoreApplication.translate("PdfDisplayView", u"X:", None))
         self.labelY.setText(QCoreApplication.translate("PdfDisplayView", u"Y:", None))
         self.labelWidth.setText(QCoreApplication.translate("PdfDisplayView", u"Breite:", None))
         self.labelHeight.setText(QCoreApplication.translate("PdfDisplayView", u"H\u00f6he:", None))
-        self.groupBox.setTitle(QCoreApplication.translate("PdfDisplayView", u"PDF Speicherort:", None))
-        self.btnSaveOutputPath.setText(QCoreApplication.translate("PdfDisplayView", u"Speichern", None))
     # retranslateUi
 

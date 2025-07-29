@@ -46,6 +46,8 @@ DEFAULT_DISPLAY_DPI = 150
 PLACEHOLDER_FONT_FAMILY = "Helvetica"
 PLACEHOLDER_FONT_SIZE = 12
 PLACEHOLDER_FONT = QFont(PLACEHOLDER_FONT_FAMILY, PLACEHOLDER_FONT_SIZE, QFont.Bold)
+PLACEHLODER_NAME = "Max Mustermann*innen"
+
 BOX_PAIR_LABEL_1_PREFIX = "USR"
 BOX_PAIR_LABEL_2_PREFIX = "NR"
 SINGLE_BOX_LABEL_PREFIX = "DATE"
@@ -335,7 +337,7 @@ class BoxPair(QObject):
         self.box1 = DraggableBox(
             rect,
             label=f"{BOX_PAIR_LABEL_1_PREFIX}{self.id}",
-            placeholder="Max Mustermann",
+            placeholder= PLACEHLODER_NAME,
         )
         self.box1.setPlaceholderFont(PLACEHOLDER_FONT)
         self.box1.setPos(startPos)
@@ -438,7 +440,7 @@ class PdfDisplay(PersistentBaseUi):
         self.ui.graphicsView.setDragMode(QGraphicsView.ScrollHandDrag)  # Allow panning
 
         # Start with the configuration panel visible and hide the PDF view
-        self.ui.layoutWidget1.hide()
+        self.ui.configWidget.hide()
         self.ui.splitter.setSizes([1, 0])
 
         # --- Connect Signals ---
@@ -788,7 +790,7 @@ class PdfDisplay(PersistentBaseUi):
     @Slot()
     def toggle_pdf_view(self) -> None:
         """Show or hide the PDF view panel."""
-        widget = self.ui.layoutWidget1
+        widget = self.ui.configWidget
         if widget.isVisible():
             widget.hide()
             self.ui.splitter.setSizes([1, 0])
