@@ -23,8 +23,11 @@ from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 try:
     from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
 except Exception:  # pragma: no cover - optional dependency
     pdfmetrics = None  # type: ignore
+    TTFont = None  # type: ignore
+import subprocess
 
 from reportlab.lib.units import mm
 from reportlab.lib import colors
@@ -55,6 +58,22 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     DEFAULT_DISPLAY_DPI = 150  # DPI used in PdfDisplay when coordinates were captured
 
     DEFAULT_FONT_NAME = "Helvetica-Bold"
+
+    def _register_font(self, name: str) -> None:
+        """Register ``name`` with ReportLab if possible."""
+        if pdfmetrics is None or TTFont is None:
+            return
+        if name in pdfmetrics.getRegisteredFontNames():
+            return
+        try:
+            path = subprocess.check_output(
+                ["fc-match", "-f", "%{file}", name],
+                text=True,
+            ).strip()
+            if path:
+                pdfmetrics.registerFont(TTFont(name, path))
+        except Exception:
+            pass
 
     @staticmethod
     def _draw_centered(can, x: float, y: float, text: str, font_name: str, font_size: int) -> None:
@@ -116,6 +135,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self._pickup_date = pickup_date
         self._font_name = font_name
         self._font_size = font_size
+        self._register_font(self._font_name)
         if not self._coords:
             raise ValueError(
                 "Es wurden keine Koordinaten definiert und ReportLab ist nicht verfügbar."
@@ -192,6 +212,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     @font_name.setter
     def font_name(self, value: str) -> None:
         self._font_name = value
+        self._register_font(value)
 
     @property
     def font_size(self) -> int:
@@ -250,6 +271,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
 
         packet = io.BytesIO()
         can = canvas.Canvas(packet, pagesize=(page_w, page_h))
+        self._register_font(self._font_name)
 
         # can.rotate(90)
         can.setFillColor(colors.black)  # type: ignore[arg-type]
