@@ -14,7 +14,7 @@
    <string>Print Ausgabe</string>
   </property>
   <property name="styleSheet">
-   <string>QWidget { font-family: "Segoe UI", sans-serif; font-size: 10pt; background-color: #f0f0f0; }
+   <string>QWidget { font-family: &quot;Segoe UI&quot;, sans-serif; font-size: 10pt; background-color: #f0f0f0; }
 QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }
 QPushButton:hover { background-color: #005a9e; }
 QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }
@@ -22,22 +22,22 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-   <widget class="QListWidget" name="logOutputList">
-    <property name="editTriggers">
-     <set>QAbstractItemView.NoEditTriggers</set>
-    </property>
-    <property name="toolTip">
-     <string>Zeigt die Ausgaben an</string>
-    </property>
-   </widget>
+    <widget class="QListWidget" name="logOutputList">
+     <property name="toolTip">
+      <string>Zeigt die Ausgaben an</string>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+     </property>
+     <property name="showDropIndicator" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
-    <item>
-     <widget class="QProgressBar" name="progressBar">
+   <item>
+    <widget class="QProgressBar" name="progressBar">
      <property name="toolTip">
       <string>Zeigt den Fortschritt der Ausgabe an</string>
-     </property>
-     <property name="value">
-      <number>0</number>
      </property>
      <property name="minimum">
       <number>0</number>
@@ -45,38 +45,41 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      <property name="maximum">
       <number>100</number>
      </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
      <property name="textVisible">
       <bool>true</bool>
      </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar_2">
+     <property name="toolTip">
+      <string>Zeigt den Fortschritt der Ausgabe an (zweite Leiste)</string>
+     </property>
+     <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <number>100</number>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
      <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+     <property name="textVisible">
+      <bool>true</bool>
      </property>
     </widget>
-    </item>
-    <item>
-     <widget class="QProgressBar" name="progressBar_2">
-      <property name="toolTip">
-       <string>Zeigt den Fortschritt der Ausgabe an (zweite Leiste)</string>
-      </property>
-      <property name="value">
-       <number>0</number>
-      </property>
-      <property name="minimum">
-       <number>0</number>
-      </property>
-      <property name="maximum">
-       <number>100</number>
-      </property>
-      <property name="textVisible">
-       <bool>true</bool>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <resources/>
-  <connections/>
- </ui>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

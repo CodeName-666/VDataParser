@@ -4,6 +4,8 @@
     "output_path": "",
     "output_name": "Abholbestätigung.pdf",
     "dpi": 150,
+    "placeholder_font_family": "Helvetica",
+    "placeholder_font_size": 12,
     "pickup_date": "",
     "pickup_time": "",
     "boxPairs": [

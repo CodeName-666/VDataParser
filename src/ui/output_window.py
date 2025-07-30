@@ -37,7 +37,7 @@ class OutputWindow(QDialog, OutputInterfaceAbstraction, metaclass=_DialogABCMeta
 
         # Output interface implementation for the log list widget
         self._output = QtOutput(self.ui.logOutputList)
-        self.ui.logOutputList.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.ui.logOutputList.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
         # References to progress bars from the UI
         self.primary_bar = self.ui.progressBar

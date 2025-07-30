@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>381</width>
-    <height>238</height>
+    <width>886</width>
+    <height>324</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Benutzerübersicht</string>
   </property>
   <property name="styleSheet">
-   <string>QWidget { font-family: "Segoe UI", sans-serif; font-size: 11pt; background-color: #fafafa; color: #333; }
+   <string>QWidget { font-family: &quot;Segoe UI&quot;, sans-serif; font-size: 11pt; background-color: #fafafa; color: #333; }
 QPushButton { border: none; padding: 8px 16px; border-radius: 6px; background-color: #2d89ef; color: white; }
 QPushButton:hover { background-color: #1b68c7; }
 QGroupBox { border: 1px solid #d1d1d1; border-radius: 8px; margin-top: 8px; padding: 4px; }
@@ -67,12 +67,12 @@ QTableWidget { background: white; gridline-color: #d1d1d1; }</string>
        </widget>
       </item>
       <item row="0" column="1">
-      <widget class="QLabel" name="valueVorname">
-        <property name="text">
-         <string/>
-        </property>
+       <widget class="QLabel" name="valueVorname">
         <property name="styleSheet">
          <string>font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -84,12 +84,12 @@ QTableWidget { background: white; gridline-color: #d1d1d1; }</string>
        </widget>
       </item>
       <item row="1" column="1">
-      <widget class="QLabel" name="valueNachname">
-        <property name="text">
-         <string/>
-        </property>
+       <widget class="QLabel" name="valueNachname">
         <property name="styleSheet">
          <string>font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -101,12 +101,12 @@ QTableWidget { background: white; gridline-color: #d1d1d1; }</string>
        </widget>
       </item>
       <item row="2" column="1">
-      <widget class="QLabel" name="valueTelefon">
-        <property name="text">
-         <string/>
-        </property>
+       <widget class="QLabel" name="valueTelefon">
         <property name="styleSheet">
          <string>font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -118,12 +118,12 @@ QTableWidget { background: white; gridline-color: #d1d1d1; }</string>
        </widget>
       </item>
       <item row="3" column="1">
-      <widget class="QLabel" name="valueEmail">
-        <property name="text">
-         <string/>
-        </property>
+       <widget class="QLabel" name="valueEmail">
         <property name="styleSheet">
          <string>font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -135,12 +135,12 @@ QTableWidget { background: white; gridline-color: #d1d1d1; }</string>
        </widget>
       </item>
       <item row="4" column="1">
-      <widget class="QLabel" name="valueCreatedAt">
-        <property name="text">
-         <string/>
-        </property>
+       <widget class="QLabel" name="valueCreatedAt">
         <property name="styleSheet">
          <string>font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -152,12 +152,12 @@ QTableWidget { background: white; gridline-color: #d1d1d1; }</string>
        </widget>
       </item>
       <item row="5" column="1">
-      <widget class="QLabel" name="valueUpdatedAt">
-        <property name="text">
-         <string/>
-        </property>
+       <widget class="QLabel" name="valueUpdatedAt">
         <property name="styleSheet">
          <string>font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -170,11 +170,11 @@ QTableWidget { background: white; gridline-color: #d1d1d1; }</string>
       </item>
       <item row="6" column="1">
        <widget class="QTableWidget" name="tableIDs">
+        <property name="editTriggers">
+         <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+        </property>
         <property name="columnCount">
          <number>5</number>
-        </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView.NoEditTriggers</set>
         </property>
         <property name="horizontalHeaderLabels" stdset="0">
          <stringlist>

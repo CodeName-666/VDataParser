@@ -15,11 +15,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QButtonGroup, QDateEdit, QFormLayout,
-    QGraphicsView, QGroupBox, QHBoxLayout, QLabel,
-    QLineEdit, QListWidget, QListWidgetItem, QPushButton,
-    QSizePolicy, QSpacerItem, QSpinBox, QSplitter,
-    QTimeEdit, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QButtonGroup, QDateEdit, QFontComboBox,
+    QFormLayout, QGraphicsView, QGroupBox, QHBoxLayout,
+    QLabel, QLineEdit, QListWidget, QListWidgetItem,
+    QPushButton, QSizePolicy, QSpacerItem, QSpinBox,
+    QSplitter, QTimeEdit, QVBoxLayout, QWidget)
 import resources_rc
 
 class Ui_PdfDisplayView(object):
@@ -237,6 +237,27 @@ class Ui_PdfDisplayView(object):
 
         self.verticalLayout_2.addWidget(self.groupBoxDisplayDpi)
 
+        self.groupBoxPlaceholderFont = QGroupBox(self.groupBox_4)
+        self.groupBoxPlaceholderFont.setObjectName(u"groupBoxPlaceholderFont")
+        self.horizontalLayout_placeholder_font = QHBoxLayout(self.groupBoxPlaceholderFont)
+        self.horizontalLayout_placeholder_font.setObjectName(u"horizontalLayout_placeholder_font")
+        self.horizontalLayout_placeholder_font.setContentsMargins(-1, 20, -1, -1)
+        self.fontComboBoxPlaceholderFamily = QFontComboBox(self.groupBoxPlaceholderFont)
+        self.fontComboBoxPlaceholderFamily.setObjectName(u"fontComboBoxPlaceholderFamily")
+
+        self.horizontalLayout_placeholder_font.addWidget(self.fontComboBoxPlaceholderFamily)
+
+        self.spinBoxPlaceholderFontSize = QSpinBox(self.groupBoxPlaceholderFont)
+        self.spinBoxPlaceholderFontSize.setObjectName(u"spinBoxPlaceholderFontSize")
+        self.spinBoxPlaceholderFontSize.setMinimum(6)
+        self.spinBoxPlaceholderFontSize.setMaximum(72)
+        self.spinBoxPlaceholderFontSize.setValue(12)
+
+        self.horizontalLayout_placeholder_font.addWidget(self.spinBoxPlaceholderFontSize)
+
+
+        self.verticalLayout_2.addWidget(self.groupBoxPlaceholderFont)
+
 
         self.verticalLayout_4.addWidget(self.groupBox_4)
 
@@ -359,6 +380,7 @@ class Ui_PdfDisplayView(object):
         self.dateEditPickup.setDisplayFormat(QCoreApplication.translate("PdfDisplayView", u"dd.MM.yyyy", None))
         self.timeEditPickup.setDisplayFormat(QCoreApplication.translate("PdfDisplayView", u"HH:mm", None))
         self.groupBoxDisplayDpi.setTitle(QCoreApplication.translate("PdfDisplayView", u"PDF DPI", None))
+        self.groupBoxPlaceholderFont.setTitle(QCoreApplication.translate("PdfDisplayView", u"Platzhalter Schrift", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("PdfDisplayView", u"Name und Stammnummer", None))
         self.groupBoxProperties.setTitle(QCoreApplication.translate("PdfDisplayView", u"Box Eigenschaften", None))
         self.labelX.setText(QCoreApplication.translate("PdfDisplayView", u"X:", None))

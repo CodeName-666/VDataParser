@@ -256,6 +256,8 @@ class MarketObserver(QObject):
         pickup_date = self.pdf_display_config_loader.get_pickup_date()
         pickup_time = self.pdf_display_config_loader.get_pickup_time()
         pickup = f"{pickup_date} {pickup_time}".strip()
+        font_family = self.pdf_display_config_loader.get_placeholder_font_family()
+        font_size = self.pdf_display_config_loader.get_placeholder_font_size()
 
         self.file_generator = FileGenerator(
             self.fm,
@@ -267,6 +269,8 @@ class MarketObserver(QObject):
             pdf_coordinates=coordinates,
             pdf_display_dpi=dpi,
             pickup_date=pickup,
+            placeholder_font_family=font_family,
+            placeholder_font_size=font_size,
         )
         return self.file_generator, tracker
 
@@ -314,6 +318,8 @@ class MarketObserver(QObject):
         pickup_time = self.pdf_display_config_loader.get_pickup_time()
         pickup = f"{pickup_date} {pickup_time}".strip()
         dpi = self.pdf_display_config_loader.get_dpi()
+        font_family = self.pdf_display_config_loader.get_placeholder_font_family()
+        font_size = self.pdf_display_config_loader.get_placeholder_font_size()
 
         self.file_generator = FileGenerator(
             self.fm,
@@ -325,6 +331,8 @@ class MarketObserver(QObject):
             pdf_coordinates=coordinates,
             pdf_display_dpi=dpi,
             pickup_date=pickup,
+            placeholder_font_family=font_family,
+            placeholder_font_size=font_size,
         )
         return self.file_generator, tracker
 
