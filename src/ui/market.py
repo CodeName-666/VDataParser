@@ -62,6 +62,11 @@ class Market(BaseUi):
         self.market_setting.data_changed.connect(self.data_changed)
         self.data_view.data_changed.connect(self.data_changed)
 
+        if hasattr(self.market_setting.ui, "spinMaxStammnummer"):
+            self.market_setting.ui.spinMaxStammnummer.valueChanged.connect(
+                self.market_stats.update_statistics
+            )
+
 
         
 
