@@ -5,8 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List, Optional, Sequence, Tuple
 import io
-import os
-import platform
 
 from log import CustomLogger
 
@@ -25,15 +23,9 @@ from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 try:
     from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
 except Exception:  # pragma: no cover - optional dependency
     pdfmetrics = None  # type: ignore
-    TTFont = None  # type: ignore
-try:
-    from fontTools.ttLib import TTFont as TTFontParser
-except Exception:  # pragma: no cover - optional dependency
-    TTFontParser = None  # type: ignore
-import subprocess
+from util.font_utils import register_font
 
 from reportlab.lib.units import mm
 from reportlab.lib import colors
@@ -64,62 +56,6 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     DEFAULT_DISPLAY_DPI = 150  # DPI used in PdfDisplay when coordinates were captured
 
     DEFAULT_FONT_NAME = "Helvetica-Bold"
-
-    def _register_font(self, name: str) -> None:
-        """Register ``name`` with ReportLab if possible.
-
-        The method first tries ``fc-match`` on Unix-like systems. If that fails
-        or the platform is Windows, it searches for the font file inside the
-        Windows fonts directory.  When scanning the directory each font file is
-        inspected for a matching title in its metadata.
-        """
-        if pdfmetrics is None or TTFont is None:
-            return
-        if name in pdfmetrics.getRegisteredFontNames():
-            return
-
-        path = ""
-        if platform.system() != "Windows":
-            try:
-                path = subprocess.check_output(
-                    ["fc-match", "-f", "%{file}", name],
-                    text=True,
-                    stderr=subprocess.DEVNULL,
-                ).strip()
-            except Exception:
-                path = ""
-
-        if not path and platform.system() == "Windows":
-            font_dir = Path(os.environ.get("WINDIR", "C:\\Windows")) / "Fonts"
-            if font_dir.is_dir():
-                sanitized = name.lower().replace(" ", "")
-                for ext in (".ttf", ".ttc", ".otf"):
-                    for file in font_dir.glob(f"*{ext}"):
-                        stem = file.stem.lower().replace(" ", "")
-                        title_match = False
-                        if TTFontParser is not None:
-                            try:
-                                f = TTFontParser(str(file))
-                                for rec in f["name"].names:
-                                    if rec.nameID in (1, 4):
-                                        val = rec.toStr().lower().replace(" ", "")
-                                        if sanitized in val:
-                                            title_match = True
-                                            break
-                                f.close()
-                            except Exception:
-                                pass
-                        if sanitized in stem or title_match:
-                            path = str(file)
-                            break
-                    if path:
-                        break
-
-        if path:
-            try:
-                pdfmetrics.registerFont(TTFont(name, path))
-            except Exception:
-                pass
 
     @staticmethod
     def _draw_centered(can, x: float, y: float, text: str, font_name: str, font_size: int) -> None:
@@ -181,7 +117,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
         self._pickup_date = pickup_date
         self._font_name = font_name
         self._font_size = font_size
-        self._register_font(self._font_name)
+        register_font(self._font_name)
         if not self._coords:
             raise ValueError(
                 "Es wurden keine Koordinaten definiert und ReportLab ist nicht verfügbar."
@@ -258,7 +194,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
     @font_name.setter
     def font_name(self, value: str) -> None:
         self._font_name = value
-        self._register_font(value)
+        register_font(value)
 
     @property
     def font_size(self) -> int:
@@ -317,7 +253,7 @@ class ReceiveInfoPdfGenerator(DataGenerator):  # noqa: D101 – see module docst
 
         packet = io.BytesIO()
         can = canvas.Canvas(packet, pagesize=(page_w, page_h))
-        self._register_font(self._font_name)
+        register_font(self._font_name)
 
         # can.rotate(90)
         can.setFillColor(colors.black)  # type: ignore[arg-type]
