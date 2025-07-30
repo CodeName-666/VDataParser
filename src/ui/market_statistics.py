@@ -34,7 +34,14 @@ class MarketStatistics(BaseUi):
         tables = dm.get_main_number_tables()
         settings = dm.get_settings()
         max_num = 0
-        if settings and getattr(settings, "data", None):
+        if self.market_widget() and hasattr(self.market_widget(), "market_setting"):
+            try:
+                max_num = int(
+                    str(self.market_widget().market_setting.ui.spinMaxStammnummer.value())
+                )
+            except (TypeError, ValueError):
+                max_num = 0
+        elif settings and getattr(settings, "data", None):
             raw = settings.data[0].max_stammnummern
             try:
                 max_num = int(str(raw))
