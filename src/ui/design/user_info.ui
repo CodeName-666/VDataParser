@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindowWidget</class>
+ <widget class="QWidget" name="MainWindowWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>886</width>
+    <height>324</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Benutzerübersicht</string>
+  </property>
+  <property name="styleSheet">
+   <string>QWidget { font-family: &quot;Segoe UI&quot;, sans-serif; font-size: 11pt; background-color: #fafafa; color: #333; }
+QPushButton { border: none; padding: 8px 16px; border-radius: 6px; background-color: #2d89ef; color: white; }
+QPushButton:hover { background-color: #1b68c7; }
+QGroupBox { border: 1px solid #d1d1d1; border-radius: 8px; margin-top: 8px; padding: 4px; }
+QGroupBox::title { subcontrol-origin: margin; left: 8px; padding: 0 6px; font-weight: bold; }
+QListWidget { background: white; border: 1px solid #d1d1d1; }
+QTableWidget { background: white; gridline-color: #d1d1d1; }</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayoutLeft">
+     <item>
+      <widget class="QCheckBox" name="checkboxUnique">
+       <property name="text">
+        <string>Eindeutige Benutzer anzeigen</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QListWidget" name="listWidgetUsers">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBoxDetails">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Benutzerdetails</string>
+     </property>
+     <layout class="QFormLayout" name="formLayoutDetails">
+      <item row="0" column="0">
+       <widget class="QLabel" name="labelVorname">
+        <property name="text">
+         <string>Vorname:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="valueVorname">
+        <property name="styleSheet">
+         <string>font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="labelNachname">
+        <property name="text">
+         <string>Nachname:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="valueNachname">
+        <property name="styleSheet">
+         <string>font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="labelTelefon">
+        <property name="text">
+         <string>Telefon:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="valueTelefon">
+        <property name="styleSheet">
+         <string>font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="labelEmail">
+        <property name="text">
+         <string>E-Mail:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="valueEmail">
+        <property name="styleSheet">
+         <string>font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="labelCreatedAt">
+        <property name="text">
+         <string>Created At:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLabel" name="valueCreatedAt">
+        <property name="styleSheet">
+         <string>font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="labelUpdatedAt">
+        <property name="text">
+         <string>Updated At:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLabel" name="valueUpdatedAt">
+        <property name="styleSheet">
+         <string>font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="labelIDs">
+        <property name="text">
+         <string>IDs:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QTableWidget" name="tableIDs">
+        <property name="editTriggers">
+         <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+        </property>
+        <property name="columnCount">
+         <number>5</number>
+        </property>
+        <property name="horizontalHeaderLabels" stdset="0">
+         <stringlist>
+          <string>ID</string>
+          <string>Vollständig</string>
+          <string>Teilweise</string>
+          <string>Offen</string>
+          <string>Summe</string>
+         </stringlist>
+        </property>
+        <column/>
+        <column/>
+        <column/>
+        <column/>
+        <column/>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

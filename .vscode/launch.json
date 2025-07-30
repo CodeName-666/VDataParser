@@ -5,17 +5,84 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Aktuelle Datei",
+            "name": "Python: MAIN CLI ",
+            "type": "python",
+            "request": "launch",
+            "program": "src/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--file", "c:\\Users\\NoName\\Downloads\\F25.json",
+                "--path", "src\\output",
+                "--log-level", "DEBUG",
+                //"--verbose"
+            ]
+        },
+
+        {
+            "name": "Python: MAIN UI ",
+            "type": "python",
+            "request": "launch",
+            "program": "src/main.py",
+            "console": "integratedTerminal",
+            "args": []
+        },
+
+        {
+            "name": "Connect Database",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "--file", "G:\\Meine Ablage\\Developement\\Python\\VDataParser\\data\\Unterlagen\\Export_Datenbank\\d03ee067.json",
-                "--path", "src\\output",
-                "--log-level", "INFO",
-                //"--verbose"
+                "connect",
+                "--host", "localhost",
+                "--user", "Christof",
+                "--password", "exec1234",
+                "--database", "verkauf",
+               
             ]
-        }
+        },
+
+        {
+            "name": "Export Database",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "export",
+                "--host", "localhost",
+                "--user", "Christof",
+                "--password", "exec1234",
+                "--database", "verkauf",
+                "--output", "test_db.json",
+
+                
+            ]
+        },
+        
+        {
+            "name": "Debug File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                
+            ]
+        },
+
+         {
+            "name": " Generator",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--rc", 
+                "--qrc-file", ".\\src\\resource\\ressources.qrc"
+               
+            ]
+        },
     ]
 }

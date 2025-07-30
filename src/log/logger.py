@@ -1,435 +1,173 @@
+from __future__ import annotations
+
+"""A compact yet powerful replacement for *CustomLogger*.
+
+Key features
+~~~~~~~~~~~~
+* Thread‑safe *one‑line* aggregation with full nesting support.
+* Fine‑grained *skip* control per log level.
+* Regular convenience methods (`debug`, `info`, `warning`, `error`, `critical`).
+* Fully self‑contained: does **not** tamper with the global `logging` config.
+"""
+
 import logging
-import inspect
-from typing import List
+import threading
+from typing import Dict, List, Final, Optional, Tuple
 
-LOG_DISABLED = 0
-LOG_VERBOSE = 1
-LOG_LOGGING = 2
+# ---------------------------------------------------------------------------
+# Shared constants & aliases
+# ---------------------------------------------------------------------------
+LEVELS: Final[Tuple[str, ...]] = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
+LogType = str
 
-_levelToInterface = {
-    logging.INFO: logging.info,
-    logging.WARNING: logging.warning,
-    logging.DEBUG: logging.debug,
-    logging.ERROR: logging.error
-}
+# ---------------------------------------------------------------------------
+# One‑line helper (stack based / thread safe)
+# ---------------------------------------------------------------------------
+class _OneLineSession:  # noqa: D101 – tiny helper class
+    __slots__ = ("_parts",)
 
-__verbose__ = False
-__indendation_value__ = '..'  # Indentation value for log messages
-
-class OneLineData:
-    """
-    A class to store one-line log data.
-    
-    Attributes:
-    -----------
-    __enabled : bool
-        Indicates if one-line logging is enabled.
-    __data : str
-        The log data.
-    """
-    
-    def __init__(self, enabled: bool = False, data: str = "") -> None:
-        """
-        Initializes the OneLineData with enabled status and data.
-        
-        Parameters:
-        -----------
-        enabled : bool, optional
-            Indicates if one-line logging is enabled (default is False).
-        data : str, optional
-            The log data (default is "").
-        """
-        self.__enabled: bool = enabled        
-        self.__data: str = data
-
-    @property
-    def enabled(self):
-        """
-        Gets the enabled status.
-        
-        Returns:
-        --------
-        bool
-            The enabled status.
-        """
-        return self.__enabled
-    
-    @enabled.setter
-    def enabled(self, status: bool):
-        """
-        Sets the enabled status.
-        
-        Parameters:
-        -----------
-        status : bool
-            The enabled status.
-        """
-        self.__enabled = status
-
-    @property
-    def data(self):
-        """
-        Gets the log data.
-        
-        Returns:
-        --------
-        str
-            The log data.
-        """
-        return self.__data
-    
-    @data.setter
-    def data(self, data: str):
-        """
-        Sets the log data.
-        
-        Parameters:
-        -----------
-        data : str
-            The log data.
-        """
-        self.__data = data
-
-
-class LogHelper:
-    """
-    A helper class for managing log data.
-    
-    Attributes:
-    -----------
-    __one_line_info : List[OneLineData]
-        List of one-line info log data.
-    __one_line_warn : List[OneLineData]
-        List of one-line warning log data.
-    __one_line_debug : List[OneLineData]
-        List of one-line debug log data.
-    __one_line_error : List[OneLineData]
-        List of one-line error log data.
-    __one_line_data : dict
-        Dictionary mapping log types to their respective one-line data lists.
-    __skip_logging : dict
-        Dictionary indicating whether logging is skipped for each log type.
-    """
-    
     def __init__(self) -> None:
-        """
-        Initializes the LogHelper with empty one-line data lists and skip logging flags.
-        """
-        self.__one_line_info: List[OneLineData] = []
-        self.__one_line_warn: List[OneLineData] = []
-        self.__one_line_debug: List[OneLineData] = []
-        self.__one_line_error: List[OneLineData] = []
+        self._parts: List[str] = []
 
-        self.__one_line_data = {
-            "INFO": self.__one_line_info, 
-            "WARNING": self.__one_line_warn,
-            "DEBUG": self.__one_line_debug,
-            "ERROR": self.__one_line_error
-        }
+    def append(self, msg: str) -> None:  # noqa: D401
+        self._parts.append(msg)
 
-        self.__skip_logging = {
-            "INFO": False,
-            "WARNING": False,
-            "DEBUG": False,
-            "ERROR": False
-        }
-   
-    def __get_one_line_data_list(self, type: str) -> List[OneLineData]:
-        """
-        Gets the one-line data list for the specified log type.
-        
-        Parameters:
-        -----------
-        type : str
-            The log type.
-        
-        Returns:
-        --------
-        List[OneLineData]
-            The one-line data list for the specified log type.
-        """
-        return self.__one_line_data[type]
+    def flush(self) -> str:  # noqa: D401 – returns and clears
+        out = "".join(self._parts)
+        self._parts.clear()
+        return out
 
-    def log_new_one_line(self, type: str):
-        """
-        Starts a new one-line log for the specified log type.
-        
-        Parameters:
-        -----------
-        type : str
-            The log type.
-        """
-        data = self.__get_one_line_data_list(type)
-        new_data = OneLineData(enabled=True)
-        data.append(new_data)
 
-    def log(self, type: str, data: str):
-        """
-        Logs data to the current one-line log of the specified log type.
-        
-        Parameters:
-        -----------
-        type : str
-            The log type.
-        data : str
-            The log data.
-        """
-        if not self.logging_skiped(type):
-            log_data: List[OneLineData] = self.__get_one_line_data_list(type)
-            log_data[-1].data += data
+class _OneLineManager:  # noqa: D101 – encapsulates state per logger
+    def __init__(self) -> None:
+        self._stacks: Dict[LogType, List[_OneLineSession]] = {lvl: [] for lvl in LEVELS}
+        self._skip: Dict[LogType, bool] = {lvl: False for lvl in LEVELS}
+        self._lock = threading.Lock()
 
-    def log_enabled(self, type: str) -> bool:
-        """
-        Checks if one-line logging is enabled for the specified log type.
-        
-        Parameters:
-        -----------
-        type : str
-            The log type.
-        
-        Returns:
-        --------
-        bool
-            True if one-line logging is enabled, False otherwise.
-        """
-        log_list: List[OneLineData] = self.__get_one_line_data_list(type)
-        if len(log_list) > 0:
-            log_data: OneLineData = log_list[-1]
-            return log_data.enabled
-        return False
+    # Validation -------------------------------------------------------
+    @staticmethod
+    def _check_level(level: LogType) -> None:  # noqa: D401
+        if level not in LEVELS:
+            raise ValueError(f"Ungültiges Log‑Level: {level}. Erlaubt: {LEVELS}")
 
-    def stop_line_log(self, type: str) -> str:
-        """
-        Stops the current one-line log for the specified log type and returns the log data.
-        
-        Parameters:
-        -----------
-        type : str
-            The log type.
-        
-        Returns:
-        --------
-        str
-            The log data.
-        """
-        log_data = ''
-        data_list = self.__get_one_line_data_list(type)
-        if len(data_list) > 0:
-            one_line_data: OneLineData = data_list[-1]
-            log_data = one_line_data.data
-            one_line_data.enabled = False
+    # Public API -------------------------------------------------------
+    def begin(self, level: LogType):
+        self._check_level(level)
+        with self._lock:
+            self._stacks[level].append(_OneLineSession())
 
-        return log_data
-    
-    def delete_line_log(self, type: str):
-        """
-        Deletes the current one-line log for the specified log type.
-        
-        Parameters:
-        -----------
-        type : str
-            The log type.
-        """
-        data_list = self.__get_one_line_data_list(type)
-        if len(data_list) > 0:
-            data_list.pop()
-    
-    def skip_logging(self, type: str, status: bool):
-        """
-        Sets the skip logging status for the specified log type.
-        
-        Parameters:
-        -----------
-        type : str
-            The log type.
-        status : bool
-            The skip logging status.
-        """
-        self.__skip_logging[type] = status
-        
-    def logging_skiped(self, type: str) -> bool:
-        """
-        Checks if logging is skipped for the specified log type.
-        
-        Parameters:
-        -----------
-        type : str
-            The log type.
-        
-        Returns:
-        --------
-        bool
-            True if logging is skipped, False otherwise.
-        """
-        return self.__skip_logging[type]
+    def append(self, level: LogType, msg: str):
+        self._check_level(level)
+        with self._lock:
+            if not self._skip[level] and self._stacks[level]:
+                self._stacks[level][-1].append(msg)
 
-__log_helper = LogHelper()
+    def end(self, level: LogType) -> str:
+        self._check_level(level)
+        with self._lock:
+            return self._stacks[level].pop().flush() if self._stacks[level] else ""
 
-def __get(type: str):
-    """
-    Gets the logging interface for the specified log type.
-    
-    Parameters:
-    -----------
-    type : str
-        The log type.
-    
-    Returns:
-    --------
-    function
-        The logging interface function.
-    """
-    lvl = logging._nameToLevel[type]
-    return _levelToInterface[lvl]
+    # Skip control -----------------------------------------------------
+    def set_skip(self, level: LogType, state: bool):
+        self._check_level(level)
+        with self._lock:
+            self._skip[level] = state
 
-def setup(log_level = "INFO", verbose_enabled = False) -> None:
-    """
-    Sets up the logging configuration.
-    
-    Parameters:
-    -----------
-    log_level : str, optional
-        The log level (default is "INFO").
-    verbose_enabled : bool, optional
-        Indicates if verbose logging is enabled (default is False).
-    """
-    global __verbose__ 
-    logging.basicConfig(level=log_level, format='%(levelname)s: %(message)s')
-    __verbose__ = verbose_enabled
+    def is_skipped(self, level: LogType) -> bool:
+        self._check_level(level)
+        with self._lock:
+            return self._skip[level]
 
-def indentation_depth() -> str:
-    """
-    Calculates the indentation depth based on the call stack.
-    
-    Returns:
-    --------
-    str
-        The indentation string.
-    """
-    depth = len(inspect.stack()) - 12
-    indentation = ''
-    for i in range(depth):
-        indentation += __indendation_value__  # Four spaces per indentation level
-    return indentation
 
-def skip_logging(type: str, status: bool):
-    """
-    Sets the skip logging status for the specified log type.
-    
-    Parameters:
-    -----------
-    type : str
-        The log type.
-    status : bool
-        The skip logging status.
-    """
-    global __log_helper
-    __log_helper.skip_logging(type, status)
+# ---------------------------------------------------------------------------
+# CustomLogger
+# ---------------------------------------------------------------------------
+class CustomLogger:  # noqa: D101 – see module docstring
+    _LEVEL_MAP = {
+        "DEBUG": logging.DEBUG,
+        "INFO": logging.INFO,
+        "WARNING": logging.WARNING,
+        "ERROR": logging.ERROR,
+        "CRITICAL": logging.CRITICAL,
+    }
 
-def log(type: str, msg: str, on_verbose = False):
-    """
-    Logs a message of the specified log type.
-    
-    Parameters:
-    -----------
-    type : str
-        The log type.
-    msg : str
-        The log message.
-    on_verbose : bool, optional
-        Indicates if the message should be logged only in verbose mode (default is False).
-    """
-    global __log_helper
-    if on_verbose and not verbose():
-        return
+    # ------------------------------------------------------------------
+    def __init__(self, name: str = __name__,*, level: str = "INFO", verbose: bool = False,
+                fmt: str = "%(asctime)s %(levelname)s %(message)s",
+                datefmt: str = "%Y-%m-%d %H:%M:%S", handler: Optional[logging.Handler] = None):
+       
+        self._verbose = verbose
+        self._ol = _OneLineManager()
 
-    if not __log_helper.log_enabled(type):
-        if msg != '' and not __log_helper.logging_skiped(type):
-            interface = __get(type)
-            interface(msg)
-        __log_helper.delete_line_log(type)
-    else:
-        __log_helper.log(type, msg)
-        
-def log_one_line(type: str, enabled: bool = True):
-    """
-    Starts or stops one-line logging for the specified log type.
-    
-    Parameters:
-    -----------
-    type : str
-        The log type.
-    enabled : bool, optional
-        Indicates if one-line logging should be enabled (default is True).
-    """
-    global __log_helper
+        self._lg = logging.getLogger(name)
+        self._lg.propagate = False
+        self._lg.setLevel(self._LEVEL_MAP.get(level.upper(), logging.INFO))
 
-    if enabled:
-        __log_helper.log_new_one_line(type)
-    else: 
-        log_data = __log_helper.stop_line_log(type)
-        log(type, log_data)
-      
-def verbose() -> bool:
-    """
-    Checks if verbose logging is enabled.
-    
-    Returns:
-    --------
-    bool
-        True if verbose logging is enabled, False otherwise.
-    """
-    global __verbose__
-    return __verbose__
+        if handler is None:
+            handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter(fmt, datefmt=datefmt))
+        if not self._lg.handlers:
+            self._lg.addHandler(handler)
 
-def debug(msg: str, on_verbose = False):
-    """
-    Logs a debug message.
-    
-    Parameters:
-    -----------
-    msg : str
-        The debug message.
-    on_verbose : bool, optional
-        Indicates if the message should be logged only in verbose mode (default is False).
-    """
-    log("DEBUG", msg, on_verbose)
-    
-def info(msg: str, on_verbose = False):
-    """
-    Logs an info message.
-    
-    Parameters:
-    -----------
-    msg : str
-        The info message.
-    on_verbose : bool, optional
-        Indicates if the message should be logged only in verbose mode (default is False).
-    """
-    log("INFO", msg, on_verbose)
+    # ------------------------------------------------------------------
+    # Public helpers
+    # ------------------------------------------------------------------
+    def set_level(self, level: str):  # noqa: D401
+        self._lg.setLevel(self._LEVEL_MAP.get(level.upper(), logging.INFO))
 
-def warning(msg: str, on_verbose = False):
-    """
-    Logs a warning message.
-    
-    Parameters:
-    -----------
-    msg : str
-        The warning message.
-    on_verbose : bool, optional
-        Indicates if the message should be logged only in verbose mode (default is False).
-    """
-    log("WARNING", msg, on_verbose)
+    def skip_logging(self, level: LogType, state: bool):  # noqa: D401
+        try:
+            self._ol.set_skip(level, state)
+        except ValueError as err:
+            self.error(f"Skip‑Fehler: {err}")
 
-def error(msg: str, on_verbose = False):
-    """
-    Logs an error message.
-    
-    Parameters:
-    -----------
-    msg : str
-        The error message.
-    on_verbose : bool, optional
-        Indicates if the message should be logged only in verbose mode (default is False).
-    """
-    log("ERROR", msg, on_verbose)
+    # One‑line interface ----------------------------------------------
+    def one_line_log(self, level: LogType, start: bool):  # noqa: D401
+        try:
+            if start:
+                self._ol.begin(level)
+            else:
+                msg = self._ol.end(level)
+                if msg and not self._ol.is_skipped(level):
+                    self._lg.log(self._LEVEL_MAP[level], msg)
+        except ValueError as err:
+            self.error(f"One‑line‑Fehler: {err}")
+
+    # ------------------------------------------------------------------
+    # Core log dispatcher
+    # ------------------------------------------------------------------
+    def _dispatch(self, level: LogType, msg: str, *, verbose: bool):  # noqa: D401
+        if verbose and not self._verbose:
+            return
+        if self._ol.is_skipped(level):
+            return
+        if self._ol._stacks[level]:  # active one‑line
+            self._ol.append(level, msg)
+        else:
+            self._lg.log(self._LEVEL_MAP[level], msg)
+
+    # ------------------------------------------------------------------
+    # Convenience wrappers
+    # ------------------------------------------------------------------
+    def debug(self, msg: str, *, verbose: bool = False):
+        self._dispatch("DEBUG", msg, verbose=verbose)
+
+    def info(self, msg: str, *, verbose: bool = False):
+        self._dispatch("INFO", msg, verbose=verbose)
+
+    def warning(self, msg: str, *, verbose: bool = False):
+        self._dispatch("WARNING", msg, verbose=verbose)
+
+    def error(self, msg: str, *, verbose: bool = False):
+        self._dispatch("ERROR", msg, verbose=verbose)
+
+    def critical(self, msg: str, *, verbose: bool = False):
+        """Logs a *critical* message (new convenience wrapper)."""
+        self._dispatch("CRITICAL", msg, verbose=verbose)
+
+    # ------------------------------------------------------------------
+    # Properties
+    # ------------------------------------------------------------------
+    @property
+    def verbose(self) -> bool:  # noqa: D401
+        return self._verbose

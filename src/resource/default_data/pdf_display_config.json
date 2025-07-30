@@ -1,0 +1,115 @@
+{
+    "pdf_path": "D:\\Projekte\\Python\\FlohmarktManager",
+    "pdf_name": "Abholung_Template.pdf",
+    "output_path": "",
+    "output_name": "Abholbestätigung.pdf",
+    "dpi": 150,
+    "placeholder_font_family": "Helvetica",
+    "placeholder_font_size": 12,
+    "pickup_date": "",
+    "pickup_time": "",
+    "boxPairs": [
+        {
+            "id": 1,
+            "box1": {
+                "label": "USR1",
+                "x": 204.5,
+                "y": 177.5,
+                "width": 274.0,
+                "height": 50.0
+            },
+            "box2": {
+                "label": "NR1",
+                "x": 631.5,
+                "y": 175.5,
+                "width": 100.0,
+                "height": 50.0
+            }
+        },
+        {
+            "id": 2,
+            "box1": {
+                "label": "USR2",
+                "x": 1053.5,
+                "y": 178.5,
+                "width": 269.0,
+                "height": 50.0
+            },
+            "box2": {
+                "label": "NR2",
+                "x": 1478.5,
+                "y": 182.5,
+                "width": 100.0,
+                "height": 44.0
+            }
+        },
+        {
+            "id": 3,
+            "box1": {
+                "label": "USR3",
+                "x": 205.5,
+                "y": 709.5,
+                "width": 272.0,
+                "height": 50.0
+            },
+            "box2": {
+                "label": "NR3",
+                "x": 630.5,
+                "y": 707.5,
+                "width": 100.0,
+                "height": 50.0
+            }
+        },
+        {
+            "id": 4,
+            "box1": {
+                "label": "USR4",
+                "x": 1050.0,
+                "y": 705.5,
+                "width": 280.0,
+                "height": 50.0
+            },
+            "box2": {
+                "label": "NR4",
+                "x": 1481.0,
+                "y": 706.5,
+                "width": 107.0,
+                "height": 50.0
+            }
+        }
+    ],
+    "singleBoxes": [
+        {
+            "label": "DATE1",
+            "x": 172.5,
+            "y": 319.5,
+            "width": 527.0,
+            "height": 50.0,
+            "id": 1
+        },
+        {
+            "label": "DATE2",
+            "x": 175.0,
+            "y": 860.0,
+            "width": 518.0,
+            "height": 37.0,
+            "id": 2
+        },
+        {
+            "label": "DATE3",
+            "x": 992.0,
+            "y": 860.0,
+            "width": 518.0,
+            "height": 37.0,
+            "id": 3
+        },
+        {
+            "label": "DATE4",
+            "x": 992.0,
+            "y": 325.0,
+            "width": 473.0,
+            "height": 53.0,
+            "id": 4
+        }
+    ]
+}

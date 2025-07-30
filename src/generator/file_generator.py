@@ -1,81 +1,223 @@
+from __future__ import annotations
+
+
 from pathlib import Path
-from objects import FleatMarket
+import time
+from typing import List, Optional, Sequence, Tuple
+from log import CustomLogger  # type: ignore
+from display import (
+    OutputInterfaceAbstraction,                      # type: ignore
+    ProgressTrackerAbstraction as _TrackerBase,      # type: ignore
+)
+try:
+    from display import ProgressBarAbstraction as _BarBase
+except Exception:  # pragma: no cover - optional dependency
+    _BarBase = None  # type: ignore
+
+# Sub‑generators -----------------------------------------------------------
+from data import Base
+from .data_generator import DataGenerator
 from .price_list_generator import PriceListGenerator
 from .seller_data_generator import SellerDataGenerator
 from .statistic_data_generator import StatisticDataGenerator
 from .receive_info_pdf_generator import ReceiveInfoPdfGenerator
-from log import logger
+from objects import CoordinatesConfig
 
-class FileGenerator:
-    """
-    A class to generate various files for a flea market.
-    
-    Attributes:
-    -----------
-    __seller_generator : SellerDataGenerator
-        The generator for seller data.
-    __price_list_generator : PriceListGenerator
-        The generator for price lists.
-    __statistic_generator : StatisticDataGenerator
-        The generator for statistics.
-    __receive_info_pdf_generator : ReceiveInfoPdfGenerator
-        The generator for receive info PDFs.
-    """
+__all__ = ["FileGenerator"]
 
-    def __init__(self, fleat_market_data: FleatMarket, output_path: str = '', seller_file_name: str = "", price_list_file_name: str = "", pdf_template_path_input: str = '', pdf_template_path_output: str = '') -> None:
-        """
-        Initializes the FileGenerator with flea market data and various file paths and names.
-        
-        Parameters:
-        -----------
-        fleat_market_data : FleatMarket
-            The flea market data to generate the files from.
-        output_path : str, optional
-            The path to save the generated files (default is '').
-        seller_file_name : str, optional
-            The name of the generated seller file (default is '').
-        price_list_file_name : str, optional
-            The name of the generated price list file (default is '').
-        pdf_template_path_input : str, optional
-            The input path for the PDF template (default is '').
-        pdf_template_path_output : str, optional
-            The output path for the generated PDF (default is '').
-        """
-        self.__seller_generator = SellerDataGenerator(fleat_market_data, output_path, seller_file_name)
-        self.__price_list_generator = PriceListGenerator(fleat_market_data, output_path, price_list_file_name)
-        self.__statistic_generator = StatisticDataGenerator(fleat_market_data, output_path)
-        self.__receive_info_pdf_generator = ReceiveInfoPdfGenerator(fleat_market_data, output_path, pdf_template_path_input, pdf_template_path_output)
-        self.verify_output_path(Path(output_path))
 
-    def generate(self):
-        """
-        Generates all the necessary files for the flea market.
-        """
-        self.__seller_generator.generate()
-        self.__price_list_generator.generate()
-        self.__statistic_generator.generate()
-        logger.info(">> Daten wurden erfolgreich erstellt: <<\n\n")
-        self.__receive_info_pdf_generator.generate()
+class FileGenerator(Base):  # noqa: D101 – detailed docs above
+    # ------------------------------------------------------------------
+    # Construction helpers
+    # ------------------------------------------------------------------
+    def __init__(
+        self,
+        fleat_market_data,  # type: ignore[valid-type]
+        *,
+        output_path: str | Path = "output",
+        seller_file_name: str = "kundendaten",
+        price_list_file_name: str = "preisliste",
+        statistic_file_name: str = "statistik",
+        pdf_template_path_input: str | Path = "template/template.pdf",
+        pdf_output_file_name: str | Path = "Abholbestaetigungen.pdf",
+        pdf_coordinates: Optional[List[CoordinatesConfig]] = None,
+        pdf_display_dpi: int = ReceiveInfoPdfGenerator.DEFAULT_DISPLAY_DPI,
+        pickup_date: str = "",
+        placeholder_font_family: str = "Helvetica",
+        placeholder_font_size: int = 12,
+        logger: Optional[CustomLogger] = None,
+        output_interface: Optional[OutputInterfaceAbstraction] = None,
+        progress_tracker: Optional[_TrackerBase] = None,
+        progress_bar: Optional[_BarBase] = None,
+    ) -> None:
 
-    def verify_output_path(self, path: Path):
-        """
-        Verifies and creates the output path if it does not exist.
-        
-        Parameters:
-        -----------
-        path : Path
-            The path to verify and create.
-        """
-        path.mkdir(parents=True, exist_ok=True)
+        # Housekeeping -------------------------------------------------
+        Base.__init__(self, logger, output_interface)
+        self._fm = fleat_market_data
+        self._path = Path(output_path)
+        self._tracker = progress_tracker
+        self._bar = progress_bar
 
-    def set_seller_file_name(self): 
-        """
-        Sets the seller file name.
-        """
-        pass
+        # Parameter für spätere Initialisierung merken
+        self._seller_file_name = seller_file_name
+        self._price_list_file_name = price_list_file_name
+        self._statistic_file_name = statistic_file_name
+        self._pdf_template_path_input = pdf_template_path_input
+        self._pdf_output_file_name = pdf_output_file_name
+        self._pdf_coordinates = pdf_coordinates
+        self._pdf_display_dpi = pdf_display_dpi
+        self._pickup_date = pickup_date
+        self._placeholder_font_family = placeholder_font_family
+        self._placeholder_font_size = placeholder_font_size
 
-    def set_price_list_file_name(self):
-        """
-        Sets the price list file name.
-        """
-        pass
+        self._tasks: List[Tuple[str, object]] = []
+
+    def _ensure_output_folder(self) -> None:
+        """Erstellt den Output-Ordner falls nötig und loggt den Pfad."""
+        self._path.mkdir(parents=True, exist_ok=True)
+        self._log("debug", f"Output path: {self._path.resolve()}")
+
+    def _build_tasks(self) -> List[Tuple[str, object]]:
+        """Erzeuge die Liste aller Sub‑Generatoren."""
+        common = dict(fleat_market_data=self._fm, path=str(self._path))
+        return [
+            ("Verkäuferdaten", SellerDataGenerator(**common, file_name=self._seller_file_name)),
+            ("Preisliste", PriceListGenerator(**common, file_name=self._price_list_file_name)),
+            ("Statistik", StatisticDataGenerator(**common, file_name=self._statistic_file_name)),
+            (
+                "Abholbestätigung",
+                ReceiveInfoPdfGenerator(
+                    **common,
+                    pdf_template=self._pdf_template_path_input,
+                    output_name=self._pdf_output_file_name,
+                    coordinates=self._pdf_coordinates,
+                    display_dpi=self._pdf_display_dpi,
+                    pickup_date=self._pickup_date,
+                    font_name=self._placeholder_font_family,
+                    font_size=self._placeholder_font_size,
+                ),
+            ),
+        ]
+
+    def _init_tasks(self) -> None:
+        """Initialisiert die Sub-Generatoren-Tasks."""
+        self._tasks = self._build_tasks()
+        if self._tracker and hasattr(self._tracker, "reset"):
+            self._tracker.reset(total=len(self._tasks)*2)  # type: ignore[misc]
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+    # Logging + UI ------------------------------------------------------
+
+    # Progress bar helper ----------------------------------------------
+    def _update_bar(self):  # noqa: D401
+        if not (self._tracker and self._bar):
+            return
+        try:
+            st = self._tracker.get_state()  # type: ignore[attr-defined]
+            self._bar.update(
+                st.get("percentage", 0), st.get("current"), st.get("total"), st.get("error")
+            )
+        except Exception:  # pragma: no cover
+            pass
+
+    def _run_tasks(self, tasks: List[Tuple[str, DataGenerator]], headline: str) -> None:
+        """Execute the given tasks with progress tracking."""
+        self._ensure_output_folder()
+        if self._tracker and hasattr(self._tracker, "reset"):
+            self._tracker.reset(total=len(tasks) * 2)  # type: ignore[misc]
+
+        self._output("INFO", headline)
+        start = time.time()
+        success = True
+
+        for name, task in tasks: 
+            self._output("INFO", f"→ {name} …")
+            step_ok = True
+            try:
+                task.generate(overall_tracker=self._tracker)
+            except Exception as err:  # pragma: no cover
+                self._output("ERROR", f"Fehler in Schritt '{name}': {err}")
+                step_ok = success = False
+                if self._tracker and hasattr(self._tracker, "set_error"):
+                    self._tracker.set_error(err)  # type: ignore[misc]
+            finally:
+                if self._tracker and hasattr(self._tracker, "increment"):
+                    self._tracker.increment()  # type: ignore[misc]
+                self._update_bar()
+            self._output("INFO" if step_ok else "ERROR", f"← {name} {'ok' if step_ok else 'fehlgeschlagen'}")
+
+        duration = time.time() - start
+        if success:
+            self._output("INFO", f"Alle Aufgaben abgeschlossen in {duration:.2f}s.")
+            if self._bar:
+                self._bar.complete(success=True)  # type: ignore[misc]
+        else:
+            self._output("ERROR", f"Generierung mit Fehlern beendet ({duration:.2f}s).")
+            if self._bar:
+                self._bar.complete(success=False)  # type: ignore[misc]
+
+    # ------------------------------------------------------------------
+    # Public entry point
+    # ------------------------------------------------------------------
+    def generate(self) -> None:  # noqa: D401
+        self._init_tasks()
+        self._run_tasks(self._tasks, "Starte Dateigenerierung …")
+
+    def set_output_folder_path(self, path: str | Path) -> None:
+        """Setzt den Pfad zum Output-Ordner."""
+        self._path = Path(path)
+
+    def get_output_folder_path(self) -> Path:
+        """Gibt den Pfad zum Output-Ordner zurück."""
+        return self._path
+
+    # ------------------------------------------------------------------
+    # Public helpers for partial generation
+    # ------------------------------------------------------------------
+    def _apply_pdf_settings(self, settings: Optional[dict]) -> None:
+        """Update internal paths based on ``settings`` dictionary."""
+        if not settings:
+            return
+        out = settings.get("output_path") or settings.get("pdf_path")
+        if out:
+            self._path = Path(out)
+        template = settings.get("pdf_template") or settings.get("pdf_template_path_input")
+        if template:
+            self._pdf_template_path_input = template
+        output = settings.get("pdf_output") or settings.get("pdf_output_file_name") or settings.get("pdf_name")
+        if output:
+            self._pdf_output_file_name = output
+        coords = settings.get("coordinates") or settings.get("pdf_coordinates")
+        if coords:
+            self._pdf_coordinates = coords
+        dpi = settings.get("display_dpi") or settings.get("dpi")
+        if dpi:
+            self._pdf_display_dpi = dpi
+        pickup = settings.get("pickup_date")
+        if pickup is not None:
+            self._pickup_date = pickup
+        font_family = settings.get("font_name") or settings.get("placeholder_font_family")
+        if font_family:
+            self._placeholder_font_family = font_family
+        font_size = settings.get("font_size") or settings.get("placeholder_font_size")
+        if font_size:
+            self._placeholder_font_size = font_size
+
+    def create_pdf_data(self, settings: Optional[dict] = None) -> None:
+        """Generate only the PDF based on ``settings``."""
+        self._apply_pdf_settings(settings)
+        tasks = [self._build_tasks()[-1]]  # only PDF task
+        self._run_tasks(tasks, "Starte PDF‑Generierung …")
+
+    def create_seller_data(self) -> None:
+        """Generate seller related data files (DAT)."""
+        tasks = self._build_tasks()[:-1]
+        self._run_tasks(tasks, "Starte Dateigenerierung …")
+
+    def create_all(self, settings: Optional[dict] = None) -> None:
+        """Generate all data and PDF files."""
+        self._apply_pdf_settings(settings)
+        tasks = self._build_tasks()
+        self._run_tasks(tasks, "Starte Dateigenerierung …")

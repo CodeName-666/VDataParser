@@ -1,85 +1,132 @@
-from objects import FleatMarket
+from __future__ import annotations
+
+from pathlib import Path
+from typing import List, Optional, Sequence
+from log import CustomLogger  # type: ignore
+from display import (
+    ProgressTrackerAbstraction as _TrackerBase,  # type: ignore
+    OutputInterfaceAbstraction,  # type: ignore
+)
+try:
+    from display import ProgressBarAbstraction as _BarBase
+except Exception:  # pragma: no cover - optional dependency
+    _BarBase = None  # type: ignore
+try:
+    from display import ConsoleProgressBar as _ConsoleBar
+except Exception:  # pragma: no cover - optional dependency
+    _ConsoleBar = None  # type: ignore
+from display import BasicProgressTracker as ProgressTracker
+
 from .data_generator import DataGenerator
-from objects import Article
-from typing import List
+from objects import FleatMarket  # type: ignore
+from objects import MainNumber  # type: ignore
 
-class PriceListGenerator(DataGenerator):
-    """
-    A class to generate price lists for a flea market.
-    
-    Attributes:
-    -----------
-    FILE_SUFFIX : str
-        The suffix for the output file.
-    __fleat_market_data : FleatMarket
-        The flea market data to generate the price list from.
-    __output_data : List[str]
-        The list to store the generated price list entries.
-    """
 
-    FILE_SUFFIX = 'dat'
 
-    def __init__(self, fleat_market_data: FleatMarket, path: str = '', file_name: str = '') -> None:
-        """
-        Initializes the PriceListGenerator with flea market data, path, and file name.
-        
-        Parameters:
-        -----------
-        fleat_market_data : FleatMarket
-            The flea market data to generate the price list from.
-        path : str, optional
-            The path to save the generated file (default is '').
-        file_name : str, optional
-            The name of the generated file (default is '').
-        """
-        DataGenerator.__init__(self, path, file_name)
-        self.__fleat_market_data = fleat_market_data
-        self.__output_data: List[str] = []
+class PriceListGenerator(DataGenerator):  # noqa: D101 – detailed docs above
+    FILE_SUFFIX = "dat"
 
-    def __create_entry(self, main_number: str, article_number: str, price: str) -> str:
-        """
-        Creates a formatted entry for the price list.
-        
-        Parameters:
-        -----------
-        main_number : str
-            The main number of the article.
-        article_number : str
-            The article number.
-        price : str
-            The price of the article.
-        
-        Returns:
-        --------
-        str
-            The formatted entry for the price list.
-        """
-        if int(article_number) < 10: 
-            article_number = f'0{article_number}'
+    # ------------------------------------------------------------------
+    def __init__(self, fleat_market_data: FleatMarket, *,path: str | Path = "", file_name: str = "preisliste",
+                 logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None) -> None:
 
-        return f'{main_number}{article_number},{price}\n'
-    
-    def __write(self):
-        """
-        Writes the generated price list to a file.
-        """
-        if self.__output_data:
-            with open(self.path / f'{self.file_name}.{self.FILE_SUFFIX}', 'w') as file:
-                file.writelines(self.__output_data)
+        super().__init__(path, file_name, logger, output_interface)
+        self._fleat_market = fleat_market_data
 
-    def generate(self):
-        """
-        Generates the price list from the flea market data.
-        """
-        for main_number in self.__fleat_market_data.get_main_number_data_list():
-            if main_number.is_valid():
-                for article in main_number.article_list:
-                    if article.is_valid():
-                        m_n = main_number.get_main_number()
-                        a_n = article.number()
-                        a_p = article.price()
-                        entry = self.__create_entry(m_n, a_n, a_p)
-                        self.__output_data.append(entry)
-        
-        self.__write()
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _format_entry(main_number: str, article_number: str, price: str) -> str:  # noqa: D401
+        try:
+            num = int(article_number)
+            article_format = f"{num:02d}" if 0 <= num < 100 else "XX"
+        except ValueError:
+            article_format = "XX"
+        price_fmt = price.strip().replace(",", ".")
+        return f"{main_number.strip()}{article_format},{price_fmt}\n"
 
+    def _collect_lines(self, tracker: Optional[_TrackerBase] = None) -> List[str]:
+        """Collect formatted price list lines."""
+        lines: list[str] = []
+        skipped = 0
+        for main_number in self._fleat_market.main_numbers():
+            if not (getattr(main_number, "is_valid", lambda: False)() and hasattr(main_number, "valid_articles")):
+                skipped += 1
+                continue
+            main_number_int = str(main_number.number())
+            #for art in getattr(mn, "valid_articles", []):
+            for article in main_number.valid_articles():
+                if not getattr(article, "is_valid", lambda: False)():
+                    skipped += 1
+                    continue
+                try:
+                    line = self._format_entry(main_number_int, str(article.number()), str(article.price()))
+                    lines.append(line)
+                except Exception:  # pragma: no cover – lenient parsing
+                    skipped += 1
+            if tracker is not None:
+                tracker.increment()
+        self._log("debug", f"PriceList lines collected: {len(lines)}, skipped: {skipped}.")
+        return lines
+
+    def _write(self, lines: Sequence[str]) -> bool:  # noqa: D401
+        if not lines:
+            self._output_and_log("INFO", "Keine gültigen Einträge – Datei wird nicht erstellt.")
+            return False
+        path = self.get_full_path()
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("".join(lines), encoding="utf-8")
+            self._output_and_log("INFO", f"Preisliste geschrieben: {path.relative_to(Path.cwd())}")
+            return True
+        except Exception as err:  # pragma: no cover
+            self._output_and_log("ERROR", f"Fehler beim Schreiben der Preisliste: {err}")
+            return False
+
+    # ------------------------------------------------------------------
+    # Public entry point
+    # ------------------------------------------------------------------
+    def generate(
+        self,
+        overall_tracker: Optional[_TrackerBase] = None,
+        *,
+        bar: Optional[_BarBase] = None,
+    ) -> None:  # noqa: D401
+        """Generate the price list file."""
+
+        self._output_and_log("INFO", "Starte Preislisten‑Generierung …")
+        total = len(self._fleat_market.main_numbers()) + 1
+        tracker = ProgressTracker()
+        if hasattr(tracker, "reset"):
+            tracker.reset(total=total)  # type: ignore[misc]
+
+        if hasattr(self.output_interface, "set_secondary_tracker"):
+            try:
+                self.output_interface.set_secondary_tracker(tracker)  # type: ignore[attr-defined]
+            except Exception:
+                pass
+
+        use_bar = bar or (_ConsoleBar(length=50, description="Preisliste") if _ConsoleBar else None)
+
+        def _task() -> None:
+            lines = self._collect_lines(tracker)
+            ok = self._write(lines)
+            if not ok:
+                tracker.set_error(RuntimeError("write failed"))
+            tracker.increment()
+
+        if use_bar:
+            use_bar.run_with_progress(target=_task, tracker=tracker)  # type: ignore[arg-type]
+        else:
+            _task()
+
+        if tracker.has_error:
+            self._output_and_log("ERROR", "Preislistenerstellung fehlgeschlagen – siehe Log.")
+            if overall_tracker:
+                overall_tracker.set_error(RuntimeError("price list error"))  # type: ignore[attr-defined]
+        else:
+            self._output_and_log("INFO", "Preislistenerstellung abgeschlossen.")
+
+        if overall_tracker:
+            overall_tracker.increment()  # type: ignore[attr-defined]

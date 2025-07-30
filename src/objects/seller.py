@@ -1,4 +1,4 @@
-from data import SellerDataClass
+from .data_class_definition import SellerDataClass
 
 
 class Seller(SellerDataClass): 

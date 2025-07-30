@@ -1,31 +1,69 @@
-from data import SellerDataClass
-from data import MainNumberDataClass
-
+from __future__ import annotations
+from typing import List, Optional, Sequence
+from log import CustomLogger  # type: ignore
+from display import OutputInterfaceAbstraction  # type: ignore
+from data import Base
+from .data_class_definition import SellerDataClass, MainNumberDataClass
 from .seller import Seller
 from .main_number import MainNumber
-from typing import List
 
 
 
-class FleatMarket:
-    def __init__(self) -> None:
-        self.__seller_list: List[Seller] = []
-        self.__main_number_list: List[MainNumber] = []
+class FleatMarket(Base):  # noqa: D101 – Docstring below
+    """Container object managing :class:`Seller` and :class:`MainNumber` sets."""
 
-    def set_seller_data(self, seller_data_list: SellerDataClass):
-        self.__seller_list = [Seller(seller_data) for seller_data in seller_data_list]
+    # ------------------------------------------------------------------
+    # Construction helpers
+    # ------------------------------------------------------------------
+    def __init__(self, *,logger: Optional[CustomLogger] = None, output_interface: Optional[OutputInterfaceAbstraction] = None,):
+        
+        Base.__init__(logger, output_interface)
 
-    def set_main_number_data(self,main_number_data_list: List[MainNumberDataClass]):       
-        self.__main_number_list = [MainNumber(main_number) for main_number in main_number_data_list]
-               
-    def get_seller_list(self):
-        return self.__seller_list
+        self._sellers: List[Seller] = []
+        self._main_numbers: List[MainNumber] = []
 
-    def get_main_number_data_list(self):
-        return self.__main_number_list
+        self._log("info", "FleatMarket initialised.")
+   
+    def load_sellers(self, data: Sequence[SellerDataClass]) -> None:  # noqa: D401
+        """Replace internal seller list with *data*."""
+        self._log("debug", f"Loading {len(data)} seller entries …")
+        try:
+            self._sellers = [ Seller(s) for s in data ]
 
-    def get_seller_data(self, main_number: int):
-        if main_number <= len(self.__seller_list) :
-            return self.__seller_list[main_number]
-        else: 
+            self._log("info", f"{len(self._sellers)} sellers loaded.")
+        except Exception as err:  # pragma: no cover – defensive
+            self._log("error", "Failed to load sellers", exc=err)
+            self._echo("USER_ERROR:", "Fehler beim Laden der Verkäuferdaten – siehe Log.")
+
+    def load_main_numbers(self, data: Sequence[MainNumberDataClass]) -> None:  # noqa: D401
+        """Replace internal main‑number list with *data*."""
+        self._log("debug", f"Loading {len(data)} main‑number entries …")
+        try:
+            self._main_numbers = [ MainNumber(m) for m in data]
+            self._log("info", f"{len(self._main_numbers)} main numbers loaded.")
+        except Exception as err:  # pragma: no cover
+            self._log("error", "Failed to load main numbers", exc=err)
+            self._echo("USER_ERROR:", "Fehler beim Laden der Hauptnummern – siehe Log.")
+
+    def sellers(self) ->  List[Seller]:
+        """Immutable view of loaded sellers."""
+        return self._sellers
+
+    def main_numbers(self) -> List[MainNumber]:
+        """Immutable view of loaded main numbers."""
+        return self._main_numbers
+
+    # Convenience helpers -------------------------------------------------
+    def seller_count(self) -> int:  # noqa: D401
+        return len(self._sellers)
+
+    def main_number_count(self) -> int:  # noqa: D401
+        return len(self._main_numbers)
+
+    def seller_at(self, index: int) -> Optional[Seller]:  # noqa: D401
+        """Return seller *index* or ``None`` if out of range."""
+        try:
+            return self._sellers[index]
+        except IndexError:
+            self._log("warning",f"Seller index {index} out of range (max {len(self._sellers) - 1}).")
             return None

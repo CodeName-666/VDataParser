@@ -1,0 +1,15 @@
+[
+  {"type": "header", "version": "1", "comment": ""},
+  {"type": "database", "name": "test"},
+  {"type": "table", "name": "stnr1", "database": "test", "data": [
+    {"artikelnummer": "1", "beschreibung": "Item 1", "groesse": "", "preis": "10"}
+  ]},
+  {"type": "table", "name": "stnr2", "database": "test", "data": [
+    {"artikelnummer": "1", "beschreibung": "Item 2", "groesse": "", "preis": "20"}
+  ]},
+  {"type": "table", "name": "verkaeufer", "database": "test", "data": [
+    {"id": "1", "vorname": "A", "nachname": "B", "telefon": "", "email": "a@b.c", "passwort": "", "created_at": "", "updated_at": ""},
+    {"id": "2", "vorname": "", "nachname": "", "telefon": "", "email": "", "passwort": "", "created_at": "", "updated_at": ""}
+  ]},
+  {"type": "table", "name": "einstellungen", "database": "test", "data": []}
+]

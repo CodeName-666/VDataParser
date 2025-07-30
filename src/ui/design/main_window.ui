@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>770</width>
+    <height>450</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Benutzerübersicht</string>
+  </property>
+  <property name="styleSheet">
+   <string>QWidget { font-family: &quot;Segoe UI&quot;, sans-serif; font-size: 10pt; background-color: #f0f0f0; }
+QPushButton { border: none; padding: 6px 12px; border-radius: 4px; background-color: #0078d7; color: white; }
+QPushButton:hover { background-color: #005a9e; }
+QGroupBox { border: 1px solid #cccccc; border-radius: 4px; margin-top: 6px; }
+QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout"/>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>770</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_file">
+   <property name="title">
+    <string>File</string>
+   </property>
+   <addaction name="action_save_project"/>
+   <addaction name="action_save_project_as"/>
+   <addaction name="separator"/>
+  </widget>
+   <widget class="QMenu" name="menu_help">
+    <property name="title">
+     <string>Help</string>
+    </property>
+   </widget>
+   <addaction name="menu_file"/>
+   <addaction name="menu_help"/>
+  </widget>
+  <widget class="QToolBar" name="tool_export">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="floatable">
+    <bool>true</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>LeftToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_create_pdf"/>
+   <addaction name="action_generate_data"/>
+   <addaction name="action_generate_add"/>
+  </widget>
+  <widget class="QToolBar" name="tool_project">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>LeftToolBarArea</enum>
+   </attribute>
+  <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_save_project"/>
+   <addaction name="action_save_project_as"/>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>LeftToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="tool_seller">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>LeftToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_delete_dataset"/>
+   <addaction name="action_save_seller"/>
+   <addaction name="action_restore_seller"/>
+  </widget>
+  <action name="action_create_pdf">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/file-type-pdf.svg</normaloff>:/icons/icons/black/file-type-pdf.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Create PDF</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_generate_data">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/radioactive.svg</normaloff>:/icons/icons/black/radioactive.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Daten Generieren</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_generate_add">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/radioactive_filled.svg</normaloff>:/icons/icons/black/radioactive_filled.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Alles generieren</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_save_project">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/file-database.svg</normaloff>:/icons/icons/black/file-database.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Projekt speichern</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_save_project_as">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/database-export.svg</normaloff>:/icons/icons/black/database-export.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Projekt speichern unter</string>
+  </property>
+  <property name="menuRole">
+   <enum>QAction::NoRole</enum>
+  </property>
+ </action>
+  <action name="action_delete_dataset">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/database-x.svg</normaloff>:/icons/icons/black/database-x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Stammnummer löschen</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_save_seller">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/file-database.svg</normaloff>:/icons/icons/black/file-database.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Speichern</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_restore_seller">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/database-import.svg</normaloff>:/icons/icons/black/database-import.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Wiederherstellen</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+</widget>
+ <resources>
+  <include location="../../resource/resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
