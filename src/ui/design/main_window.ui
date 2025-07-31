@@ -29,17 +29,17 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
      <x>0</x>
      <y>0</y>
      <width>770</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_file">
-   <property name="title">
-    <string>File</string>
-   </property>
-   <addaction name="action_save_project"/>
-   <addaction name="action_save_project_as"/>
-   <addaction name="separator"/>
-  </widget>
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="action_save_project"/>
+    <addaction name="action_save_project_as"/>
+    <addaction name="separator"/>
+   </widget>
    <widget class="QMenu" name="menu_help">
     <property name="title">
      <string>Help</string>
@@ -72,7 +72,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    <attribute name="toolBarArea">
     <enum>LeftToolBarArea</enum>
    </attribute>
-  <attribute name="toolBarBreak">
+   <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
    <addaction name="action_save_project"/>
@@ -112,7 +112,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
     <string>&amp;Create PDF</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
   <action name="action_generate_data">
@@ -124,7 +124,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
     <string>&amp;Daten Generieren</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
   <action name="action_generate_add">
@@ -136,7 +136,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
     <string>&amp;Alles generieren</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
   <action name="action_save_project">
@@ -148,7 +148,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
     <string>&amp;Projekt speichern</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
   <action name="action_save_project_as">
@@ -158,11 +158,11 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    </property>
    <property name="text">
     <string>&amp;Projekt speichern unter</string>
-  </property>
-  <property name="menuRole">
-   <enum>QAction::NoRole</enum>
-  </property>
- </action>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
   <action name="action_delete_dataset">
    <property name="icon">
     <iconset resource="../../resource/resources.qrc">
@@ -172,7 +172,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
     <string>Stammnummer löschen</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
   <action name="action_save_seller">
@@ -184,7 +184,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
     <string>Speichern</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
   <action name="action_restore_seller">
@@ -196,10 +196,10 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
     <string>Wiederherstellen</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
-</widget>
+ </widget>
  <resources>
   <include location="../../resource/resources.qrc"/>
  </resources>

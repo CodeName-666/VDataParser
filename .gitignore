@@ -161,3 +161,4 @@ cython_debug/
 cli_logging
 examples/markt/
 examples/data/
+output/

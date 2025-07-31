@@ -15,6 +15,11 @@
     <file>Signs/ChatGPT Image 21. Juni 2025, 22_36_35.png</file>
     <file>Signs/ChatGPT Image 21. Juni 2025, 22_39_44.png</file>
   </qresource>
+  <qresource prefix="data">
+    <file>default_data/Abholung_Template.pdf</file>
+    <file>default_data/pdf_display_config.json</file>
+    <file>default_data/Zettel fuer Abholung (70x).doc</file>
+  </qresource>
   <qresource prefix="icons">
     <file>icons/white/menu.svg</file>
     <file>icons/black/database.svg</file>
