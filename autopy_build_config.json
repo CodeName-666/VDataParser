@@ -7,7 +7,7 @@
   },
   {
    "optionDest": "filenames",
-   "value": "../src/main.py"
+   "value": "src/main.py"
   },
   {
    "optionDest": "onefile",
@@ -19,7 +19,7 @@
   },
   {
    "optionDest": "icon_file",
-   "value": "../src/resource/icon_4.ico"
+   "value": "src/resource/icon_4.ico"
   },
   {
    "optionDest": "clean_build",

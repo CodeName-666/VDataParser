@@ -115,9 +115,8 @@ konvertiert und gleichzeitig die Ressourcendatei `resources_rc.py` erstellt.
 Weitere Optionen können über `-h` angezeigt werden.
 
 Für den späteren Bau einer ausführbaren Datei mit *auto-py-to-exe* existiert die
-Konfigurationsdatei `autopy_build_config.json` (im Repository noch unter dem
-Tippfehlernamen `auotpi_build_config.json`). Sie speichert die PyInstaller-
-Einstellungen, die von dem Tool eingelesen werden können.
+Konfigurationsdatei `autopy_build_config.json`. Sie speichert die
+PyInstaller-Einstellungen, die von dem Tool eingelesen werden können.
 
 ## Wichtige Programmtechniken und Muster
 
