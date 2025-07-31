@@ -5,7 +5,11 @@ import sys
 import logging
 from typing import List, Tuple, Optional, Any
 
-from args import Arguments
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from args import Arguments
+else:  # pragma: no cover - packaged execution
+    from .args import Arguments
 from version import get_version
 
 from data import Base
