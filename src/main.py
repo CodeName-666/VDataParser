@@ -7,27 +7,26 @@ from typing import List, Tuple, Optional, Any
 
 if not __package__:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from args import Arguments
-else:  # pragma: no cover - packaged execution
-    from .args import Arguments
-from version import get_version
 
-from data import Base
-from data import BaseData
-from data import MarketFacade
-from objects import SellerDataClass
-from objects import MainNumberDataClass
-from objects import FleatMarket
+from src.args import Arguments
+from src.version import get_version
+
+from src.data import Base
+from src.data import BaseData
+from src.data import MarketFacade
+from src.objects import SellerDataClass
+from src.objects import MainNumberDataClass
+from src.objects import FleatMarket
 
 
-from generator.file_generator import FileGenerator
-from display import BasicProgressTracker as ProgressTracker
-from display import ConsoleProgressBar as ConsoleBar
-from display import ConsoleOutput as OutputIface
+from src.generator.file_generator import FileGenerator
+from src.display import BasicProgressTracker as ProgressTracker
+from src.display import ConsoleProgressBar as ConsoleBar
+from src.display import ConsoleOutput as OutputIface
 
-from ui import MainWindow
+from src.ui import MainWindow
 from PySide6.QtWidgets import QApplication
-from log import CustomLogger
+from src.log import CustomLogger
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

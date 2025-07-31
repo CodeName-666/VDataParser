@@ -4,7 +4,7 @@ import types
 import dataclasses
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 # minimal stubs for heavy dependencies
 sys.modules.setdefault(
@@ -56,7 +56,7 @@ requests_stub.exceptions = types.SimpleNamespace(
 sys.modules.setdefault('requests', requests_stub)
 
 # build minimal generator package for relative imports
-GEN_DIR = Path(__file__).resolve().parents[1] / 'src' / 'generator'
+GEN_DIR = Path(__file__).resolve().parents[1] / 'generator'
 gen_pkg = types.ModuleType('generator')
 gen_pkg.__path__ = [str(GEN_DIR)]
 sys.modules['generator'] = gen_pkg

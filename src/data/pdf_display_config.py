@@ -8,9 +8,9 @@ from PySide6.QtCore import QObject, Signal
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
-from objects import CoordinatesConfig  # Typ für Koordinaten
+from src.objects import CoordinatesConfig  # Typ für Koordinaten
 
-from util.path_utils import ensure_trailing_sep
+from src.util.path_utils import ensure_trailing_sep
 
 from .json_handler import JsonHandler  # Basisklasse mit get_key_value / set_key_value
 

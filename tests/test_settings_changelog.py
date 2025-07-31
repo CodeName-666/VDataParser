@@ -2,13 +2,13 @@ import json
 from pathlib import Path
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
 pytest.importorskip('PySide6')
 
-from data.data_manager import DataManager
-from objects import SettingsContentDataClass
+from src.data.data_manager import DataManager
+from src.objects import SettingsContentDataClass
 
 DATASET = Path(__file__).parent / 'test_dataset.json'
 

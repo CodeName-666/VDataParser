@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import Optional
-from log import CustomLogger
-from display import ProgressTrackerAbstraction
-from display import OutputInterfaceAbstraction
-from data import Base
+from src.log import CustomLogger
+from src.display import ProgressTrackerAbstraction
+from src.display import OutputInterfaceAbstraction
+from src.data import Base
 
 
 class DataGenerator(Base):

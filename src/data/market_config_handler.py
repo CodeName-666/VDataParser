@@ -4,12 +4,12 @@ import os
 from PySide6.QtCore import QObject, Signal
 from pathlib import Path
 from typing import Any, Dict, Union
-from util.path_utils import ensure_trailing_sep
+from src.util.path_utils import ensure_trailing_sep
 
 from .json_handler import JsonHandler
 from .data_manager import DataManager
-from log import CustomLogger  # noqa: F401
-from objects import SettingsContentDataClass
+from src.log import CustomLogger  # noqa: F401
+from src.objects import SettingsContentDataClass
 
 class MarketConfigHandler(QObject, JsonHandler):
     """Manage one project‑configuration JSON and expose convenience helpers."""

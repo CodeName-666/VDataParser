@@ -4,8 +4,8 @@ from typing import Any
 from dataclasses import asdict
 from PySide6.QtCore import QDate, QDateTime, Slot
 from PySide6.QtWidgets import QFileDialog, QMessageBox
-from objects import SettingsContentDataClass
-from data import DataManager
+from src.objects import SettingsContentDataClass
+from src.data import DataManager
 from .persistent_base_ui import PersistentBaseUi
 from .generated import MarketSettingUi
 

@@ -4,7 +4,7 @@ import types
 import dataclasses
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.modules.pop('objects', None)
 sys.modules.pop('PySide6', None)
 sys.modules.pop('PySide6.QtCore', None)
@@ -97,7 +97,7 @@ def test_overlay_page_uses_template_dimensions(tmp_path):
     _store('objects', objects_mod)
 
     # build minimal generator package for relative imports
-    GEN_DIR = Path(__file__).resolve().parents[1] / 'src' / 'generator'
+    GEN_DIR = Path(__file__).resolve().parents[1] / 'generator'
     gen_pkg = types.ModuleType('generator')
     gen_pkg.__path__ = [str(GEN_DIR)]
     _store('generator', gen_pkg)

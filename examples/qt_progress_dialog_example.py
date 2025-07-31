@@ -6,10 +6,10 @@ from PySide6.QtWidgets import QApplication
 
 # Allow imports from repository root and src directory
 sys.path.insert(0, Path(__file__).parent.parent.__str__())
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from display import BasicProgressTracker
-from display.progress_bar.qt_progress_bar import _ProgressDialog
+from src.display import BasicProgressTracker
+from src.display.progress_bar.qt_progress_bar import _ProgressDialog
 
 
 def example_task(dialog: _ProgressDialog, tracker: BasicProgressTracker, steps: int = 20, delay: float = 0.1) -> None:

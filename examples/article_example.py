@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 sys.path.insert(0, Path(__file__).parent.parent.__str__())
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.objects import Article
 from src.data import ArticleDataClass
 from src.log.logger import CustomLogger

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from PySide6.QtCore import QThread
-from generator.file_generator import FileGenerator
+from src.generator.file_generator import FileGenerator
 
 
 class GeneratorWorker(QThread):

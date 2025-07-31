@@ -7,11 +7,11 @@ ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
 
-from data.data_manager import DataManager
-from objects import FleatMarket
-from generator.file_generator import FileGenerator
-from display import BasicProgressTracker
-from ui.output_window import OutputWindow
+from src.data.data_manager import DataManager
+from src.objects import FleatMarket
+from src.generator.file_generator import FileGenerator
+from src.display import BasicProgressTracker
+from src.ui.output_window import OutputWindow
 from PySide6.QtWidgets import QApplication
 
 

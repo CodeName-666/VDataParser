@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, Path(__file__).parent.parent.__str__())
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 from PySide6.QtWidgets import QApplication, QDialog, QFileDialog
 
 from src.ui import MarketLoaderDialog

@@ -10,7 +10,7 @@ from PySide6.QtCore import QObject, Signal
 
 sys.path.insert(0, Path(__file__).parent.parent.parent.parent.__str__())  # NOQA: E402 pylint: disable=[C0413]
 from .base_data import BaseData
-from objects import (
+from src.objects import (
     MainNumberDataClass,
     SellerDataClass,
     ArticleDataClass,

@@ -11,7 +11,7 @@ try:
 except Exception:  # pragma: no cover - environment without QtWidgets
     pytest.skip("QtWidgets not available", allow_module_level=True)
 
-from ui.main_window import MainWindow  # noqa: E402
+from src.ui.main_window import MainWindow  # noqa: E402
 
 
 def test_main_window_inheritance():

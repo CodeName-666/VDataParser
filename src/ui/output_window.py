@@ -1,7 +1,7 @@
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QDialog, QAbstractItemView, QPushButton
 
-from display import (
+from src.display import (
     OutputInterfaceAbstraction,
     BasicProgressTracker,
     QtOutput,

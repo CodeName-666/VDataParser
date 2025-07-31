@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 pytest.importorskip("PySide6")
 
-from data.market_facade import MarketFacade
+from src.data.market_facade import MarketFacade
 
 class DummySignal:
     def connect(self, *args, **kwargs):
@@ -48,7 +48,7 @@ def test_load_export_creates_project(tmp_path):
     sys.modules['PySide6.QtWidgets'] = qtwidgets
 
     import data.market_facade as mf
-    from data.market_facade import MarketFacade, MarketObserver
+    from src.data.market_facade import MarketFacade, MarketObserver
     original_get_dir = mf.QFileDialog.getExistingDirectory
     mf.QFileDialog.getExistingDirectory = staticmethod(lambda *a, **k: str(tmp_path))
     original_get_dir = mf.QFileDialog.getExistingDirectory

@@ -5,7 +5,7 @@ import dataclasses
 from pathlib import Path
 
 def test_dpi_getter_setter():
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
     pyside6 = types.ModuleType('PySide6')
     qtcore = types.ModuleType('PySide6.QtCore')
@@ -47,7 +47,7 @@ def test_dpi_getter_setter():
     sys.modules.setdefault('objects', objects_mod)
 
     # build minimal data package for relative imports
-    DATA_DIR = Path(__file__).resolve().parents[1] / 'src' / 'data'
+    DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
     data_pkg = types.ModuleType('data')
     data_pkg.__path__ = [str(DATA_DIR)]
     sys.modules['data'] = data_pkg
@@ -58,7 +58,7 @@ def test_dpi_getter_setter():
     sys.modules['data.json_handler'] = json_mod
     json_spec.loader.exec_module(json_mod)  # type: ignore[arg-type]
 
-    spec = importlib.util.spec_from_file_location('data.pdf_display_config', Path(__file__).resolve().parents[1] / 'src' / 'data' / 'pdf_display_config.py')
+    spec = importlib.util.spec_from_file_location('data.pdf_display_config', Path(__file__).resolve().parents[1] / 'data' / 'pdf_display_config.py')
     module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
     sys.modules['data.pdf_display_config'] = module

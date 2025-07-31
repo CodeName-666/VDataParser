@@ -11,7 +11,7 @@ except ImportError:
 
 # Conditional import of CustomLogger
 try:
-    from log import CustomLogger
+    from src.log import CustomLogger
 except ImportError:
     CustomLogger = None
 

@@ -8,7 +8,7 @@ from .data_view import DataView
 from .user_info import UserInfo
 from .pdf_display import PdfDisplay
 from .market_statistics import MarketStatistics
-from data import DataManager, PdfDisplayConfig
+from src.data import DataManager, PdfDisplayConfig
 
 
 class Market(BaseUi):

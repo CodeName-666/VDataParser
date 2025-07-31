@@ -9,7 +9,7 @@ from pathlib import Path
 import os
 import shutil
 
-from log import CustomLogger, LogType  # Import LogType if used
+from src.log import CustomLogger, LogType  # Import LogType if used
 import requests
 from urllib.parse import urlparse, urlunparse
 

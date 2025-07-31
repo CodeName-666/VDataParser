@@ -7,7 +7,7 @@ from PySide6.QtCore import QTimer
 
 
 # Local imports
-from data import DataManager
+from src.data import DataManager
 from .stack_widget import StackWidget
 from .generated import MainWindowUi
 from .generated import AboutUi
@@ -19,7 +19,7 @@ from .pdf_display import PdfDisplay
 from .market_loader_dialog import MarketLoaderDialog
 from .output_window import OutputWindow
 from .generator_worker import GeneratorWorker
-from data import MarketFacade
+from src.data import MarketFacade
 from .status_bar import StatusBar
 
 

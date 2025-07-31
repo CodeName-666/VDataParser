@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from typing import Optional
 import dataclasses
-from data import Base
-from log import CustomLogger  # type: ignore
-from display import OutputInterfaceAbstraction  # type: ignore
+from src.data import Base
+from src.log import CustomLogger  # type: ignore
+from src.display import OutputInterfaceAbstraction  # type: ignore
 from .data_class_definition import ArticleDataClass
 
 __all__ = ["Article"]

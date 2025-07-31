@@ -2,9 +2,9 @@ import sys
 from pathlib import Path
 import shutil
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from data.market_facade import MarketFacade
+from src.data.market_facade import MarketFacade
 
 class DummySignal:
     def connect(self, *args, **kwargs):

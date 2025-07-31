@@ -7,15 +7,15 @@ from .data_manager import DataManager
 from .market_config_handler import MarketConfigHandler
 from .singleton_meta import SingletonMeta
 from .pdf_display_config import PdfDisplayConfig
-from generator.file_generator import FileGenerator
-from objects import FleatMarket, SettingsContentDataClass
-from display import BasicProgressTracker
+from src.generator.file_generator import FileGenerator
+from src.objects import FleatMarket, SettingsContentDataClass
+from src.display import BasicProgressTracker
 from typing import List, Dict, Any, Union
 from pathlib import Path
 import tempfile
 import shutil
-from backend import MySQLInterface
-from backend.advance_db_connector import AdvancedDBManager
+from src.backend import MySQLInterface
+from src.backend.advance_db_connector import AdvancedDBManager
 
 
 class MarketObserver(QObject):

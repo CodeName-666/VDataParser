@@ -4,24 +4,24 @@ from __future__ import annotations
 from pathlib import Path
 import time
 from typing import List, Optional, Sequence, Tuple
-from log import CustomLogger  # type: ignore
-from display import (
+from src.log import CustomLogger  # type: ignore
+from src.display import (
     OutputInterfaceAbstraction,                      # type: ignore
     ProgressTrackerAbstraction as _TrackerBase,      # type: ignore
 )
 try:
-    from display import ProgressBarAbstraction as _BarBase
+    from src.display import ProgressBarAbstraction as _BarBase
 except Exception:  # pragma: no cover - optional dependency
     _BarBase = None  # type: ignore
 
 # Sub‑generators -----------------------------------------------------------
-from data import Base
+from src.data import Base
 from .data_generator import DataGenerator
 from .price_list_generator import PriceListGenerator
 from .seller_data_generator import SellerDataGenerator
 from .statistic_data_generator import StatisticDataGenerator
 from .receive_info_pdf_generator import ReceiveInfoPdfGenerator
-from objects import CoordinatesConfig
+from src.objects import CoordinatesConfig
 
 __all__ = ["FileGenerator"]
 

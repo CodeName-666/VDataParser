@@ -2,24 +2,24 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import List, Optional, Sequence
-from log import CustomLogger  # type: ignore
-from display import (
+from src.log import CustomLogger  # type: ignore
+from src.display import (
     ProgressTrackerAbstraction as _TrackerBase,  # type: ignore
     OutputInterfaceAbstraction,  # type: ignore
 )
 try:
-    from display import ProgressBarAbstraction as _BarBase
+    from src.display import ProgressBarAbstraction as _BarBase
 except Exception:  # pragma: no cover - optional dependency
     _BarBase = None  # type: ignore
 try:
-    from display import ConsoleProgressBar as _ConsoleBar
+    from src.display import ConsoleProgressBar as _ConsoleBar
 except Exception:  # pragma: no cover - optional dependency
     _ConsoleBar = None  # type: ignore
-from display import BasicProgressTracker as ProgressTracker
+from src.display import BasicProgressTracker as ProgressTracker
 
 from .data_generator import DataGenerator
-from objects import FleatMarket  # type: ignore
-from objects import MainNumber  # type: ignore
+from src.objects import FleatMarket  # type: ignore
+from src.objects import MainNumber  # type: ignore
 
 
 

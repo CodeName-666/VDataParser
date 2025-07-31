@@ -4,11 +4,11 @@ import sys
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 pytest.importorskip('PySide6')
 
-from data.data_manager import DataManager
+from src.data.data_manager import DataManager
 
 DATASET = Path(__file__).parent / 'test_dataset_empty.json'
 

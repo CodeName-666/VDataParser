@@ -1,22 +1,22 @@
 from pathlib import Path
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
 pytest.importorskip('PySide6')
 
-from data.market_facade import MarketFacade
-from data.market_facade import MarketObserver
-from data.market_config_handler import MarketConfigHandler
-from data.data_manager import DataManager
-from data.pdf_display_config import PdfDisplayConfig
+from src.data.market_facade import MarketFacade
+from src.data.market_facade import MarketObserver
+from src.data.market_config_handler import MarketConfigHandler
+from src.data.data_manager import DataManager
+from src.data.pdf_display_config import PdfDisplayConfig
 
 
 def _prepare_observer():
     dataset = Path(__file__).parent / 'test_dataset.json'
     dm = DataManager(str(dataset))
-    pdf = Path(__file__).resolve().parents[1] / 'src' / 'resource' / 'default_data' / 'Abholung_Template.pdf'
+    pdf = Path(__file__).resolve().parents[1] / 'resource' / 'default_data' / 'Abholung_Template.pdf'
     pdf_cfg = PdfDisplayConfig({'pdf_path': str(pdf.parent), 'pdf_name': pdf.name})
     mch = MarketConfigHandler()
     mch.set_market('', 'market.json')
@@ -34,7 +34,7 @@ def test_save_project(tmp_path):
     assert (tmp_path / 'market.json').is_file()
     assert (tmp_path / 'pdf_display_config.json').is_file()
     assert (tmp_path / 'project.project').is_file()
-    pdf = Path(__file__).resolve().parents[1] / 'src' / 'resource' / 'default_data' / 'Abholung_Template.pdf'
+    pdf = Path(__file__).resolve().parents[1] / 'resource' / 'default_data' / 'Abholung_Template.pdf'
     assert (tmp_path / pdf.name).is_file()
     assert obs.project_exists()
     assert obs.get_project_dir() == str(tmp_path)
@@ -53,7 +53,7 @@ def test_facade_save_project(tmp_path):
     assert (tmp_path / 'market.json').is_file()
     assert (tmp_path / 'pdf_display_config.json').is_file()
     assert (tmp_path / 'project.project').is_file()
-    pdf = Path(__file__).resolve().parents[1] / 'src' / 'resource' / 'default_data' / 'Abholung_Template.pdf'
+    pdf = Path(__file__).resolve().parents[1] / 'resource' / 'default_data' / 'Abholung_Template.pdf'
     assert (tmp_path / pdf.name).is_file()
     assert facade.is_project(market)
     assert facade.get_project_dir(market) == str(tmp_path)

@@ -6,16 +6,16 @@ from pathlib import Path
 from typing import List, Optional, Sequence, Tuple
 import io
 
-from log import CustomLogger
+from src.log import CustomLogger
 
-from display import (
+from src.display import (
     ProgressTrackerAbstraction,
     OutputInterfaceAbstraction,
     ConsoleProgressBar,
 )
 
 try:
-    from display import ProgressBarAbstraction
+    from src.display import ProgressBarAbstraction
 except Exception:  # pragma: no cover - optional dependency
     ProgressBarAbstraction = None  # type: ignore
 
@@ -25,13 +25,13 @@ try:
     from reportlab.pdfbase import pdfmetrics
 except Exception:  # pragma: no cover - optional dependency
     pdfmetrics = None  # type: ignore
-from util.font_utils import register_font
+from src.util.font_utils import register_font
 
 from reportlab.lib.units import mm
 from reportlab.lib import colors
 from .data_generator import DataGenerator
-from objects import CoordinatesConfig
-from display import BasicProgressTracker as ProgressTracker
+from src.objects import CoordinatesConfig
+from src.display import BasicProgressTracker as ProgressTracker
 
 
 # ---------------------------------------------------------------------------

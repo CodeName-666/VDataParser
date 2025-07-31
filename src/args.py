@@ -1,5 +1,5 @@
 import argparse
-from version import get_version
+from src.version import get_version
 
 
 

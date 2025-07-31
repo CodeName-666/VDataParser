@@ -5,9 +5,9 @@ import threading
 from typing import Optional, Callable, Dict, Any, Tuple
 
 
-from display import ProgressBarAbstraction
-from display import ProgressTrackerAbstraction
-from log import CustomLogger
+from src.display import ProgressBarAbstraction
+from src.display import ProgressTrackerAbstraction
+from src.log import CustomLogger
 
 
 # Inherit from the Abstraction

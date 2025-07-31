@@ -1,8 +1,8 @@
 """Base class providing logging and output helpers."""
 
 from typing import overload, Optional, Any
-from log import CustomLogger
-from display import OutputInterfaceAbstraction
+from src.log import CustomLogger
+from src.display import OutputInterfaceAbstraction
 
 
 class Base:

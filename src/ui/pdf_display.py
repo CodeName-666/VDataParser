@@ -29,7 +29,7 @@ from pathlib import Path
 
 from .generated import PdfDisplayUi
 from .persistent_base_ui import PersistentBaseUi
-from data import PdfDisplayConfig
+from src.data import PdfDisplayConfig
 
 # --- Konstanten ---
 BOX_BORDER_PEN = QPen(QColor("black"), 2)

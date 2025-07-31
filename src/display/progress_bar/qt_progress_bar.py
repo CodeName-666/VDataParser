@@ -12,7 +12,7 @@ from PySide6.QtCore import QThread
 
 from .progress_bar_abstraction import ProgressBarAbstraction
 from ..tracker.progress_tracker_abstraction import ProgressTrackerAbstraction
-from log import CustomLogger
+from src.log import CustomLogger
 
 
 # --- Qt Progress Dialog Widget ---

@@ -9,7 +9,7 @@ import shutil
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QFileDialog, QMessageBox
 
-from data.json_handler import JsonHandler
+from src.data.json_handler import JsonHandler
 
 from .base_ui import BaseUi
 

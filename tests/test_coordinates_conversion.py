@@ -7,7 +7,7 @@ import dataclasses
 
 def test_coordinate_list_generation():
     # Inject src directory
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
     pyside6 = types.ModuleType('PySide6')
     qtcore = types.ModuleType('PySide6.QtCore')
@@ -47,7 +47,7 @@ def test_coordinate_list_generation():
     sys.modules.setdefault('requests', requests_stub)
 
     # build minimal data package for relative imports
-    DATA_DIR = Path(__file__).resolve().parents[1] / 'src' / 'data'
+    DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
     data_pkg = types.ModuleType('data')
     data_pkg.__path__ = [str(DATA_DIR)]
     sys.modules['data'] = data_pkg
