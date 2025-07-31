@@ -7,19 +7,19 @@
   },
   {
    "optionDest": "filenames",
-   "value": "../src/main.py"
+   "value": "D:/Projekte/Python/FlohmarktManager/src/main.py"
   },
   {
    "optionDest": "onefile",
-   "value": true
+   "value": false
   },
   {
    "optionDest": "console",
-   "value": true
+   "value": false
   },
   {
    "optionDest": "icon_file",
-   "value": "../src/resource/icon_4.ico"
+   "value": "D:/Projekte/Python/FlohmarktManager/src/resource/icon_4.ico"
   },
   {
    "optionDest": "clean_build",
@@ -52,6 +52,18 @@
   {
    "optionDest": "bootloader_ignore_signals",
    "value": false
+  },
+  {
+   "optionDest": "datas",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/resource/default_data;default_data/"
+  },
+  {
+   "optionDest": "datas",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/resource/icons;icons/"
+  },
+  {
+   "optionDest": "datas",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/resource/Signs;Signs/"
   }
  ],
  "nonPyinstallerOptions": {
