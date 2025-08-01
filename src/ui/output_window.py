@@ -1,4 +1,4 @@
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, QThread, QMetaObject, Qt
 from PySide6.QtWidgets import QDialog, QAbstractItemView, QPushButton
 
 from display import (
@@ -57,7 +57,14 @@ class OutputWindow(QDialog, OutputInterfaceAbstraction, metaclass=_DialogABCMeta
 
     # ------------------------------------------------------------------
     def _ensure_timer(self) -> None:
-        """Create and start the update timer if necessary."""
+        """Create and start the update timer in the GUI thread if needed."""
+        if QThread.currentThread() != self.thread():
+            QMetaObject.invokeMethod(
+                self,
+                "_ensure_timer",
+                Qt.ConnectionType.QueuedConnection,
+            )
+            return
         if self._timer is None:
             self._timer = QTimer(self)
             self._timer.setInterval(100)
