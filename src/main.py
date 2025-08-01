@@ -5,13 +5,10 @@ import sys
 import logging
 from typing import List, Tuple, Optional, Any
 
-if not __package__:
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from args import Arguments
-else:  # pragma: no cover - packaged execution
-    from .args import Arguments
-from version import get_version
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from args import Arguments
+from version import get_version
 from data import Base
 from data import BaseData
 from data import MarketFacade

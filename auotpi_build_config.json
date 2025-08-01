@@ -64,6 +64,54 @@
   {
    "optionDest": "datas",
    "value": "D:/Projekte/Python/FlohmarktManager/src/resource/Signs;Signs/"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/Projekte/Python/FlohmarktManager"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/Projekte/Python/FlohmarktManager/src"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/backend/interface"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/data"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/display/output"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/display/progress_bar"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/display/tracker"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/generator"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/log"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/objects"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/ui/generated"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/Projekte/Python/FlohmarktManager/src/util"
   }
  ],
  "nonPyinstallerOptions": {
