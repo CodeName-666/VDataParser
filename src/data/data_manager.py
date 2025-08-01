@@ -324,6 +324,10 @@ class DataManager(QObject, BaseData):
                         "preis": old_values[2],
                     },
                 )
+                self.status_info.emit(
+                    "INFO",
+                    f"Artikel {artikelnummer} in stnr{stnr_id} aktualisiert",
+                )
                 return article
         raise ValueError(
             f"Artikelnummer {artikelnummer} nicht gefunden in stnr{stnr_id}.")
@@ -339,7 +343,12 @@ class DataManager(QObject, BaseData):
         Returns:
             Optional[ArticleDataClass]: The article after deletion.
         """
-        return self.update_article(stnr_id, artikelnummer, "", "0", "0.00")
+        article = self.update_article(stnr_id, artikelnummer, "", "0", "0.00")
+        self.status_info.emit(
+            "INFO",
+            f"Artikel {artikelnummer} in stnr{stnr_id} gelöscht",
+        )
+        return article
 
     def delete_seller(self, seller_id: str):
         """
@@ -368,6 +377,10 @@ class DataManager(QObject, BaseData):
                     target=f"verkaeufer:{seller_id}",
                     description=f"Verkäuferdaten gelöscht: {old_data}",
                     old_value=asdict(old_data)
+                )
+                self.status_info.emit(
+                    "INFO",
+                    f"Verkäufer {seller_id} gelöscht",
                 )
                 return seller
         raise ValueError(f"Verkäufer mit ID {seller_id} nicht gefunden.")
@@ -400,6 +413,10 @@ class DataManager(QObject, BaseData):
             description="Alle Artikelinhalte gelöscht.",
             old_value={"articles": old_articles}
         )
+        self.status_info.emit(
+            "INFO",
+            f"Alle Artikel in stnr{stnr_id} gelöscht",
+        )
         return table
 
     def delete_dataset(self, seller_id: str):
@@ -425,6 +442,10 @@ class DataManager(QObject, BaseData):
                 "seller": asdict(old_seller) if old_seller else None,
                 "articles": old_articles,
             }
+        )
+        self.status_info.emit(
+            "INFO",
+            f"Datensatz {seller_id} gelöscht",
         )
 
     def validate_structure(self) -> bool:
@@ -484,6 +505,11 @@ class DataManager(QObject, BaseData):
         ret = super().load(path_or_url)
         if ret:
             self.data_loaded.emit(self)
+            self.status_info.emit("INFO", f"Daten geladen: {path_or_url}")
+        else:
+            self.status_info.emit(
+                "ERROR", f"Daten konnten nicht geladen werden: {path_or_url}"
+            )
         return ret
 
     def reset_change(self, change_id: str) -> bool:
@@ -547,6 +573,10 @@ class DataManager(QObject, BaseData):
                 description=f"Setting '{key}' geändert von {old_value} zu {new_value}",
                 old_value={key: old_value}
             )
+            self.status_info.emit(
+                "INFO",
+                f"Setting '{key}' auf {new_value} gesetzt",
+            )
             return True
         return False
 
@@ -557,6 +587,7 @@ class DataManager(QObject, BaseData):
         """
         Setzt die Default-Werte für die Settings (überschreibt alle Felder).
         """
+        initial_empty = not self.settings.data
         # Wenn noch keine Settings vorhanden sind, neu anlegen und Änderungen protokollieren
         if not self.settings.data:
             self.settings.data.append(new_settings)
@@ -583,6 +614,7 @@ class DataManager(QObject, BaseData):
                     )
 
         self.synchornize_data_class_change_to_json()
+        self.status_info.emit("INFO", "Standardeinstellungen geladen" if initial_empty else "Einstellungen aktualisiert")
 
     def reset_all_changes(self) -> int:
         """Reset all logged changes and return the number of reverted entries."""
@@ -593,6 +625,10 @@ class DataManager(QObject, BaseData):
                 successful_resets += 1
         self._change_log.clear()
         self._unsaved_changes = True  # weil Änderungen am Zustand erfolgt sind
+        self.status_info.emit(
+            "INFO",
+            f"{successful_resets} Änderungen zurückgesetzt",
+        )
         return successful_resets
 
     def synchornize_data_class_change_to_json(self):
