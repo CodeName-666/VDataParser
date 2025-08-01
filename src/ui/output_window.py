@@ -1,4 +1,4 @@
-from PySide6.QtCore import QTimer, QThread, QMetaObject, Qt
+from PySide6.QtCore import QTimer, QThread, QMetaObject, Qt, Slot
 from PySide6.QtWidgets import QDialog, QAbstractItemView, QPushButton
 
 from display import (
@@ -56,8 +56,15 @@ class OutputWindow(QDialog, OutputInterfaceAbstraction, metaclass=_DialogABCMeta
         self._output.write_message(message)
 
     # ------------------------------------------------------------------
+    @Slot()
     def _ensure_timer(self) -> None:
-        """Create and start the update timer in the GUI thread if needed."""
+        """Create and start the update timer in the GUI thread if needed.
+
+        The method checks whether it is running on the GUI thread. If not, it
+        schedules itself to be executed on the correct thread. Once running in
+        the GUI thread, it creates and starts a :class:`QTimer` that regularly
+        updates the progress bars.
+        """
         if QThread.currentThread() != self.thread():
             QMetaObject.invokeMethod(
                 self,
