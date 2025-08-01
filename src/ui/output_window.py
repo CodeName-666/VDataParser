@@ -1,4 +1,4 @@
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, QThread, QMetaObject, Qt, Slot
 from PySide6.QtWidgets import QDialog, QAbstractItemView, QPushButton
 
 from display import (
@@ -13,6 +13,7 @@ from abc import ABCMeta
 
 class _DialogABCMeta(type(QDialog), ABCMeta):
     """Combine Qt's dialog metaclass with :class:`ABCMeta`."""
+
     pass
 
 
@@ -37,7 +38,9 @@ class OutputWindow(QDialog, OutputInterfaceAbstraction, metaclass=_DialogABCMeta
 
         # Output interface implementation for the log list widget
         self._output = QtOutput(self.ui.logOutputList)
-        self.ui.logOutputList.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.ui.logOutputList.setEditTriggers(
+            QAbstractItemView.EditTrigger.NoEditTriggers
+        )
 
         # References to progress bars from the UI
         self.primary_bar = self.ui.progressBar
@@ -56,12 +59,21 @@ class OutputWindow(QDialog, OutputInterfaceAbstraction, metaclass=_DialogABCMeta
         self._output.write_message(message)
 
     # ------------------------------------------------------------------
+    @Slot()
     def _ensure_timer(self) -> None:
-        """Create and start the update timer if necessary."""
+        """Create and start the update timer in the GUI thread if needed."""
+        if QThread.currentThread() != self.thread():
+            QMetaObject.invokeMethod(
+                self,
+                "_ensure_timer",
+                Qt.ConnectionType.QueuedConnection,
+            )
+            return
         if self._timer is None:
             self._timer = QTimer(self)
             self._timer.setInterval(100)
             self._timer.timeout.connect(self._update_bars)
+        if not self._timer.isActive():
             self._timer.start()
 
     def _update_bars(self) -> None:
@@ -72,7 +84,10 @@ class OutputWindow(QDialog, OutputInterfaceAbstraction, metaclass=_DialogABCMeta
             self.secondary_bar.setValue(self._secondary_tracker.percentage)
         if (
             (self._primary_tracker is None or self._primary_tracker.percentage >= 100)
-            and (self._secondary_tracker is None or self._secondary_tracker.percentage >= 100)
+            and (
+                self._secondary_tracker is None
+                or self._secondary_tracker.percentage >= 100
+            )
             and self._timer is not None
         ):
             self._timer.stop()
@@ -87,4 +102,3 @@ class OutputWindow(QDialog, OutputInterfaceAbstraction, metaclass=_DialogABCMeta
         """Assign ``tracker`` to the second progress bar."""
         self._secondary_tracker = tracker
         self._ensure_timer()
-
