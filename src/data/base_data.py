@@ -6,7 +6,7 @@ import time
 from pathlib import Path  # Import Path from pathlib
 
 from .json_handler import JsonHandler
-from log import CustomLogger, LogType
+from log import CustomLogger
 from objects.data_class_definition import *
 
 
