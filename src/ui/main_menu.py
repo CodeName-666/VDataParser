@@ -11,6 +11,7 @@ class MainMenu(BaseUi):
     on_exit_button_clicked: Signal = None
     on_open_export_button_clicked: Signal = None
     on_open_market_button_clicked: Signal = None
+    on_new_market_button_clicked: Signal = None
 
     def __init__(self, parent: QWidget | None = None) -> None:
         """Instantiate and set up the UI.
@@ -34,3 +35,6 @@ class MainMenu(BaseUi):
         self.on_exit_button_clicked = self.ui.exitButton.clicked
         self.on_open_export_button_clicked = self.ui.exportButton.clicked
         self.on_open_market_button_clicked = self.ui.loadButton.clicked
+        # New market button
+        if hasattr(self.ui, "newButton"):
+            self.on_new_market_button_clicked = self.ui.newButton.clicked

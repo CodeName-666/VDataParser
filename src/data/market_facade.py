@@ -115,12 +115,7 @@ class MarketObserver(QObject):
                 # Initialize the DataManager with the market JSON path
                 ret = self.data_manager.load(market_json_path)
                 if ret:
-                    self.apply_settings()
-                    # Setup the FleatMarket with the loaded data
-                    self.data_manager_loaded.emit(self.data_manager)
-                    self.setup_data_generation()
-
-                    self.status_info.emit("INFO", f"Projekt geladen: {json_path}")
+                    self._on_loaded_success(f"Projekt geladen: {json_path}")
                 else:
                     self.status_info.emit("ERROR", "Daten konnten nicht geladen werden")
                 # Load the PDF display configuration
@@ -152,14 +147,9 @@ class MarketObserver(QObject):
         if json_path:
             ret = self.data_manager.load(json_path)
             if ret:
-                # Setup the FleatMarket with the loaded data
-                self.apply_settings()
-                self.data_manager_loaded.emit(self.data_manager)
-                self.pdf_display_config_loaded.emit(
-                    self.pdf_display_config_loader
-                )  # Send empty config
-                self.setup_data_generation()
-                self.status_info.emit("INFO", f"Export geladen: {json_path}")
+                # send empty config, then finalise
+                self.pdf_display_config_loaded.emit(self.pdf_display_config_loader)
+                self._on_loaded_success(f"Export geladen: {json_path}")
             else:
                 self.status_info.emit("ERROR", "Export konnte nicht geladen werden")
 
@@ -177,6 +167,13 @@ class MarketObserver(QObject):
         self.fm.load_sellers(self.data_manager.get_seller_as_list())
         self.fm.load_main_numbers(self.data_manager.get_main_number_as_list())
         self.file_generator = FileGenerator(self.fm)
+
+    # Small helper to consolidate repeated success handling
+    def _on_loaded_success(self, info_text: str) -> None:
+        self.apply_settings()
+        self.data_manager_loaded.emit(self.data_manager)
+        self.setup_data_generation()
+        self.status_info.emit("INFO", info_text)
 
     @Slot(str)
     def storage_path_changed(self, path: str):
@@ -241,23 +238,18 @@ class MarketObserver(QObject):
         if not self._data_ready:
             return None, None
 
-        tracker = BasicProgressTracker()
-        try:
-            window.set_primary_tracker(tracker)
-        except AttributeError:
-            pass
+        tracker = self._make_tracker(window)
 
-        template_path = self.pdf_display_config_loader.get_full_pdf_path()
-
-        outputpath = self.pdf_display_config_loader.get_output_path()
-        outputname = self.pdf_display_config_loader.get_output_name()
-        coordinates = self.pdf_display_config_loader.convert_json_to_coordinate_list()
-        dpi = self.pdf_display_config_loader.get_dpi()
-        pickup_date = self.pdf_display_config_loader.get_pickup_date()
-        pickup_time = self.pdf_display_config_loader.get_pickup_time()
-        pickup = f"{pickup_date} {pickup_time}".strip()
-        font_family = self.pdf_display_config_loader.get_placeholder_font_family()
-        font_size = self.pdf_display_config_loader.get_placeholder_font_size()
+        (
+            template_path,
+            outputpath,
+            outputname,
+            coordinates,
+            dpi,
+            pickup,
+            font_family,
+            font_size,
+        ) = self._pdf_params()
 
         self.file_generator = FileGenerator(
             self.fm,
@@ -281,11 +273,7 @@ class MarketObserver(QObject):
         if not self._data_ready:
             return None, None
 
-        tracker = BasicProgressTracker()
-        try:
-            window.set_primary_tracker(tracker)
-        except AttributeError:
-            pass
+        tracker = self._make_tracker(window)
 
         output_path = self.pdf_display_config_loader.get_output_path()
 
@@ -304,22 +292,18 @@ class MarketObserver(QObject):
         if not self._data_ready:
             return None, None
 
-        tracker = BasicProgressTracker()
-        try:
-            window.set_primary_tracker(tracker)
-        except AttributeError:
-            pass
+        tracker = self._make_tracker(window)
 
-        template_path = self.pdf_display_config_loader.get_full_pdf_path()
-        output_path = self.pdf_display_config_loader.get_output_path()
-        output_name = self.pdf_display_config_loader.get_output_name()
-        coordinates = self.pdf_display_config_loader.convert_json_to_coordinate_list()
-        pickup_date = self.pdf_display_config_loader.get_pickup_date()
-        pickup_time = self.pdf_display_config_loader.get_pickup_time()
-        pickup = f"{pickup_date} {pickup_time}".strip()
-        dpi = self.pdf_display_config_loader.get_dpi()
-        font_family = self.pdf_display_config_loader.get_placeholder_font_family()
-        font_size = self.pdf_display_config_loader.get_placeholder_font_size()
+        (
+            template_path,
+            output_path,
+            output_name,
+            coordinates,
+            dpi,
+            pickup,
+            font_family,
+            font_size,
+        ) = self._pdf_params()
 
         self.file_generator = FileGenerator(
             self.fm,
@@ -335,6 +319,37 @@ class MarketObserver(QObject):
             placeholder_font_size=font_size,
         )
         return self.file_generator, tracker
+
+    # -------------------------- helpers --------------------------- #
+    def _make_tracker(self, window) -> BasicProgressTracker:
+        tracker = BasicProgressTracker()
+        try:
+            window.set_primary_tracker(tracker)
+        except AttributeError:
+            pass
+        return tracker
+
+    def _pdf_params(self):
+        template_path = self.pdf_display_config_loader.get_full_pdf_path()
+        output_path = self.pdf_display_config_loader.get_output_path()
+        output_name = self.pdf_display_config_loader.get_output_name()
+        coordinates = self.pdf_display_config_loader.convert_json_to_coordinate_list()
+        dpi = self.pdf_display_config_loader.get_dpi()
+        pickup_date = self.pdf_display_config_loader.get_pickup_date()
+        pickup_time = self.pdf_display_config_loader.get_pickup_time()
+        pickup = f"{pickup_date} {pickup_time}".strip()
+        font_family = self.pdf_display_config_loader.get_placeholder_font_family()
+        font_size = self.pdf_display_config_loader.get_placeholder_font_size()
+        return (
+            template_path,
+            output_path,
+            output_name,
+            coordinates,
+            dpi,
+            pickup,
+            font_family,
+            font_size,
+        )
 
     def generate_pdf_data(self, window) -> bool:
         """Generate PDF data using ``window`` for output and progress."""
@@ -567,7 +582,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
     def create_project_from_export(
         self, market, export_path: str, target_dir: str
-    ) -> bool:
+    ) -> tuple[bool, Path | None]:
         """Create a project configuration from a loaded export."""
 
         observer: MarketObserver = self.get_observer(market)
@@ -751,6 +766,79 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         else:
             self.status_info.emit("ERROR", "Fehler beim Speichern")
         return ok
+
+    # ------------------------------------------------------------------
+    # Project creation from scratch (no existing export)
+    # ------------------------------------------------------------------
+    def create_new_project(
+        self,
+        market,
+        target_dir: str,
+        market_filename: str,
+        settings: SettingsContentDataClass | None = None,
+        server_info: dict | None = None,
+    ) -> bool:
+        """Create a new local project with the provided settings and server info.
+
+        This will:
+        - Ensure an observer exists for ``market``
+        - Apply ``settings`` to the data manager (so they're exported to market JSON)
+        - Set market path/name and database fields
+        - Persist the project (market JSON, pdf display config, project file)
+        - Copy default PDF configuration and template into the project directory
+
+        Returns True on success, False otherwise.
+        """
+        observer = self.get_observer(market) or self.create_observer(market)
+        try:
+            # 1) Configure market path + name
+            target = Path(target_dir)
+            target.mkdir(parents=True, exist_ok=True)
+            observer.market_config_handler.set_market(
+                str(target) + ("/" if not str(target).endswith(("/", "\\")) else ""),
+                market_filename,
+            )
+
+            # 2) Apply settings to be exported in the JSON
+            if settings is not None:
+                try:
+                    observer.data_manager.set_new_settings(settings)
+                except Exception:
+                    pass
+
+            # 3) Store server connection info in project config
+            if server_info:
+                try:
+                    mch = observer.market_config_handler
+                    mch.set_database(server_info.get("host", ""), str(server_info.get("port", "")))
+                    mch.set_key_value(["database", "name"], server_info.get("database", ""))
+                    mch.set_key_value(["database", "user"], server_info.get("user", ""))
+                    mch.set_key_value(["database", "password"], server_info.get("password", ""))
+                except Exception:
+                    pass
+
+            # 4) Persist project (writes market.json, pdf config, project.project)
+            if not observer.save_project(str(target)):
+                return False
+
+            # 5) Ensure default PDF config/template exist and project references them
+            try:
+                project_file = str(target / "project.project")
+                observer._load_default_pdf_config(project_file)
+            except Exception:
+                pass
+
+            # 6) Prepare in-memory data for UI/generators
+            try:
+                observer.setup_data_generation()
+            except Exception:
+                pass
+
+            self.status_info.emit("INFO", f"Neues Projekt erstellt: {target}")
+            return True
+        except Exception as err:  # pragma: no cover - runtime errors handled
+            self.status_info.emit("ERROR", f"Projektanlage fehlgeschlagen: {err}")
+            return False
 
     def _ask_for_project_creation(self) -> bool:
         """Prompt the user whether a project should be created."""

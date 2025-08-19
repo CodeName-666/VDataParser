@@ -8,9 +8,11 @@ edited manually.
 from .main_menu import MainMenu
 from .main_window import MainWindow
 from .market_loader_dialog import MarketLoaderDialog
+from .new_market_dialog import NewMarketDialog
 
 __all__ = [
     "MainMenu",
     "MainWindow",
     "MarketLoaderDialog",
+    "NewMarketDialog",
 ]
