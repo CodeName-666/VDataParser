@@ -1,3 +1,9 @@
+"""Domain model: Seller.
+
+Thin convenience wrapper around the `SellerDataClass` to simplify
+initialisation and future extensions.
+"""
+
 from .data_class_definition import SellerDataClass
 
 
