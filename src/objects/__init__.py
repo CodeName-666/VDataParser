@@ -1,4 +1,10 @@
-from .data_class_definition import *
+"""Domain objects and dataclass definitions.
+
+Exports dataclasses and provides lazy accessors for richer wrapper types
+(`Article`, `Seller`, `MainNumber`, `FleatMarket`).
+"""
+
+from .data_class_definition import *  # re-export generated dataclasses
 
 
 def __getattr__(name: str):

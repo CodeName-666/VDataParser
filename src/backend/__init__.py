@@ -1,16 +1,23 @@
+"""Database backends and connector interfaces.
 
-"""Re‑export convenient database connectors and helper types."""
+Exports common exceptions, the abstract DB API, availability flags, and
+concrete SQLite/MySQL connectors.
+"""
 
 from .interface import (
     DatabaseConnectionError,
     DatabaseQueryError,
     DatabaseOperations,
-    MYSQL_AVAILABLE
+    MYSQL_AVAILABLE,
 )
-    
 
-from .interface import SQLiteInterface
-from .interface import MySQLInterface
+from .interface import SQLiteInterface, MySQLInterface
 
-
-
+__all__ = [
+    "DatabaseConnectionError",
+    "DatabaseQueryError",
+    "DatabaseOperations",
+    "MYSQL_AVAILABLE",
+    "SQLiteInterface",
+    "MySQLInterface",
+]

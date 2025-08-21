@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (
     QMainWindow, QMessageBox, QFileDialog, QDialog, QLabel, QLineEdit
 )
 from PySide6.QtCore import QTimer
+from pathlib import Path
 
 
 # Local imports
@@ -21,6 +22,7 @@ from .output_window import OutputWindow
 from .generator_worker import GeneratorWorker
 from data import MarketFacade
 from .status_bar import StatusBar
+from .new_market_dialog import NewMarketDialog
 
 
 class MainWindow(QMainWindow):
@@ -78,6 +80,8 @@ class MainWindow(QMainWindow):
         self.main_menu.on_exit_button_clicked.connect(self.close)
         self.main_menu.on_open_export_button_clicked.connect(self.open_local_market_export)
         self.main_menu.on_open_market_button_clicked.connect(self.open_market_view)
+        if getattr(self.main_menu, 'on_new_market_button_clicked', None):
+            self.main_menu.on_new_market_button_clicked.connect(self.create_new_market)
 
         self.ui.action_create_pdf.triggered.connect(self.start_pdf_generation)
         self.ui.action_generate_data.triggered.connect(self.start_data_generation)
@@ -159,6 +163,72 @@ class MainWindow(QMainWindow):
                 self.open_view("Market")
         else:
             QMessageBox.warning(self, "Warning", "No market data loaded. Please try again.")
+
+    @Slot()
+    def create_new_market(self):
+        """Create a new market project: name + initial settings, then save."""
+        dlg = NewMarketDialog(self)
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+
+        name = dlg.market_name()
+        settings = dlg.settings()
+        server = dlg.server_info()
+        if not name:
+            return
+
+        # Ask whether to also create a local project now
+        reply = QMessageBox.question(
+            self,
+            "Projekt anlegen",
+            "Möchten Sie zusätzlich sofort ein lokales Projekt erstellen?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes,
+        )
+
+        if reply == QMessageBox.Yes:
+            # Choose target directory
+            chosen_dir = QFileDialog.getExistingDirectory(self, "Projektordner wählen")
+            if not chosen_dir:
+                return
+
+            # Ensure filename has .json
+            market_filename = name if name.lower().endswith('.json') else f"{name}.json"
+
+            # Check for existing files and confirm overwrite
+            target_dir = Path(chosen_dir)
+            candidates = [
+                target_dir / market_filename,
+                target_dir / "pdf_display_config.json",
+                target_dir / "project.project",
+                target_dir / "Abholung_Template.pdf",
+            ]
+            existing = [str(p.name) for p in candidates if p.exists()]
+            if existing:
+                msg = (
+                    "Im Zielordner existieren bereits folgende Dateien:\n\n" +
+                    "\n".join(f"- {n}" for n in existing) +
+                    "\n\nÜberschreiben?"
+                )
+                confirm = QMessageBox.warning(
+                    self,
+                    "Dateien überschreiben?",
+                    msg,
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No,
+                )
+                if confirm != QMessageBox.Yes:
+                    return
+
+            ok = self.market_facade.create_new_project(
+                self.market_view,
+                chosen_dir,
+                market_filename,
+                settings=settings,
+                server_info=server,
+            )
+            if ok:
+                self.open_view("Market")
 
     @Slot()
     def switch_to_last_view(self):

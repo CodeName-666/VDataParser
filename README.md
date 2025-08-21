@@ -18,7 +18,13 @@ Dieses Projekt dient zur Erzeugung von Datendateien und PDF-Dokumenten für Floh
 pip install -r src/requirements.txt
 ```
 
-Die Abhängigkeiten umfassen unter anderem `PySide6` für die GUI, `pypdf` und `reportlab` für die PDF-Erzeugung sowie `mysql-connector-python` für optionale Datenbankanbindung.
+Für Entwicklung/Tests zusätzlich die Dev-Abhängigkeiten installieren:
+
+```bash
+pip install -r requirements-test.txt
+```
+
+Die Abhängigkeiten umfassen unter anderem `PySide6` für die GUI, `pypdf` und `reportlab` für die PDF-Erzeugung sowie `mysql-connector-python` für optionale Datenbankanbindung. Fehlt `PySide6`, werden Qt-bezogene Tests automatisch übersprungen.
 
 ## Verwendung
 
@@ -48,6 +54,26 @@ python src/main.py -h  # zeigt alle Optionen an
 ### Grafische Oberfläche
 
 Wird das Programm ohne die oben genannten Parameter gestartet, öffnet sich eine Qt-basierte GUI. Über diese können Projekte geladen, Daten eingesehen und die Dateigenerierung gestartet werden.
+
+## Tests
+
+Zum Ausführen der Tests wird `pytest` verwendet:
+
+```bash
+pytest -q
+```
+
+Einzelne Tests lassen sich gezielt starten, z. B.:
+
+```bash
+pytest tests/test_version.py -q
+```
+
+Hinweis: Qt-bezogene Tests werden automatisch übersprungen, wenn `PySide6` nicht installiert ist.
+
+## Beitragen
+
+Richtlinien zu Entwicklungsumgebung, Stil, Tests und Pull Requests finden sich in `CONTRIBUTING.md`.
 
 ## Projektverwaltung
 

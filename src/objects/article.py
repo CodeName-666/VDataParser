@@ -1,3 +1,9 @@
+"""Domain model: Article.
+
+Wrapper around the dataclass definition with validation and convenience
+helpers used throughout the application and generators.
+"""
+
 from __future__ import annotations
 
 
