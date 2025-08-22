@@ -45,7 +45,7 @@ class NewMarketDialog(QDialog):
 
         # Prepopulate with defaults from MarketConfigHandler
         try:
-            defaults = MarketConfigHandler().get_default_settings()
+            defaults = MarketConfigHandler().get_market_settings()
         except Exception:
             defaults = SettingsContentDataClass()
         self._settings_widget.import_state(defaults)

@@ -1,8 +1,10 @@
 from pathlib import Path
+from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
+import json
 import pytest
 pytest.importorskip('PySide6')
 
@@ -39,6 +41,11 @@ def test_save_project(tmp_path):
     assert obs.project_exists()
     assert obs.get_project_dir() == str(tmp_path)
 
+    data = json.loads((tmp_path / 'market.json').read_text())
+    assert all(item.get('name') != 'einstellungen' for item in data if isinstance(item, dict))
+    project = json.loads((tmp_path / 'project.project').read_text())
+    assert 'market_settings' in project
+
 
 def test_facade_save_project(tmp_path):
     facade = MarketFacade()
@@ -57,6 +64,11 @@ def test_facade_save_project(tmp_path):
     assert (tmp_path / pdf.name).is_file()
     assert facade.is_project(market)
     assert facade.get_project_dir(market) == str(tmp_path)
+
+    data = json.loads((tmp_path / 'market.json').read_text())
+    assert all(item.get('name') != 'einstellungen' for item in data if isinstance(item, dict))
+    project = json.loads((tmp_path / 'project.project').read_text())
+    assert 'market_settings' in project
 
 
 def test_save_project_same_pdf_path(tmp_path):

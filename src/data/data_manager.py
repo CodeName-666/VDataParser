@@ -488,7 +488,6 @@ class DataManager(QObject, BaseData):
         json_data = [
             asdict(self.export_header),
             asdict(self.base_info),
-            asdict(self.settings)
         ]
         for table in self.main_numbers_list:
             json_data.append(asdict(table))
