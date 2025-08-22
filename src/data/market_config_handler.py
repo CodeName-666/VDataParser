@@ -1,36 +1,32 @@
 import copy
 import os
 
+from dataclasses import asdict
 from PySide6.QtCore import QObject, Signal
 from pathlib import Path
 from typing import Any, Dict, Union
 from util.path_utils import ensure_trailing_sep
 
 from .json_handler import JsonHandler
-from .data_manager import DataManager
+from .market_settings import market_settings
 from log import CustomLogger  # noqa: F401
 from objects import SettingsContentDataClass
 
 class MarketConfigHandler(QObject, JsonHandler):
     """Manage one project‑configuration JSON and expose convenience helpers."""
 
+    SETTINGS_DB_SUFFIX = "_settings"
+
     # --------------------------- defaults --------------------------- #
     _DEFAULT_STRUCTURE: Dict[str, Any] = {
-                "database": {"url": "","port": ""},
-                "market": {"market_path": "", "market_name": ""},
-                "pfd_coordiantes_config": {"coordinates_config_path": "", "coordinates_config_name": ""},
-                "dafault_settings": {
-                    "max_stammnummern": "250",
-                    "max_artikel": "40",
-                    "datum_counter": "2025-09-15 12:00:00",
-                    "flohmarkt_nr": "6",
-                    "psw_laenge": "10",
-                    "tabellen_prefix": "str",
-                    "verkaufer_liste": "verkeaufer",
-                    "max_user_ids": "8",
-                    "datum_flohmarkt": "2025-09-15"
-                }
-            }
+        "database": {"url": "", "port": "", "settings_name": ""},
+        "market": {"market_path": "", "market_name": ""},
+        "pfd_coordiantes_config": {
+            "coordinates_config_path": "",
+            "coordinates_config_name": "",
+        },
+        "market_settings": copy.deepcopy(market_settings),
+    }
 
 
     # ------------------------ construction ------------------------- #
@@ -79,6 +75,14 @@ class MarketConfigHandler(QObject, JsonHandler):
         """Set both ``database.url`` and ``database.port``."""
         self.set_key_value(["database", "url"], url)
         self.set_key_value(["database", "port"], port)
+
+    def set_settings_database(self, name: str) -> None:
+        """Set the name of the global settings database."""
+        self.set_key_value(["database", "settings_name"], name)
+
+    def get_settings_database(self) -> str:
+        """Return the configured settings database name."""
+        return self.get_key_value(["database", "settings_name"]) or ""
 
     # --------------------- market accessors ----------------------- #
     def get_market(self) -> Dict[str, str]:
@@ -168,10 +172,18 @@ class MarketConfigHandler(QObject, JsonHandler):
         config_name = os.path.basename(full_path)
         self.set_pdf_coordinates_config(config_path, config_name)
 
-    def get_default_settings(self) -> SettingsContentDataClass:
-        """Return the *default_pdf_generation_data* section as a shallow dict."""
-        dict_settings = self.get_key_value(["dafault_settings"]) or {}
-        return SettingsContentDataClass(**dict_settings) if dict_settings else SettingsContentDataClass()
+    def get_market_settings(self) -> SettingsContentDataClass:
+        """Return market settings stored in the project file."""
+        dict_settings = self.get_key_value(["market_settings"]) or {}
+        return (
+            SettingsContentDataClass(**dict_settings)
+            if dict_settings
+            else SettingsContentDataClass()
+        )
+
+    def set_market_settings(self, settings: SettingsContentDataClass) -> None:
+        """Persist ``settings`` into the project configuration."""
+        self.set_key_value(["market_settings"], asdict(settings))
 
     # ------------------------- persistence ------------------------ #
     def save_to(self, destination: Union[str, Path]) -> None:

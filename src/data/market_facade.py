@@ -42,13 +42,13 @@ class MarketObserver(QObject):
         self._project_dir = ""
 
     def apply_settings(self) -> None:
-        """Set ``default_settings`` and inform the user."""
+        """Set ``market_settings`` and inform the user."""
         if not self.data_manager.settings_available():
-            default_settings = self.market_config_handler.get_default_settings()
-            self.data_manager.set_new_settings(default_settings)
+            market_settings = self.market_config_handler.get_market_settings()
+            self.data_manager.set_new_settings(market_settings)
             self.status_info.emit(
                 "WARNING",
-                "Keine Settings gefunden. Default Einstellungen wurden geladen.",
+                "Keine Settings gefunden. Markt Einstellungen wurden geladen.",
             )
 
     def set_data_ready_satus(self, status: bool) -> None:
@@ -428,6 +428,10 @@ class MarketObserver(QObject):
             self.market_config_handler.set_full_pdf_coordinates_config_path(
                 str(pdf_file)
             )
+            if self.data_manager.settings.data:
+                self.market_config_handler.set_market_settings(
+                    self.data_manager.settings.data[0]
+                )
             self.market_config_handler.save_to(str(project_file))
 
             pdf_path = self.pdf_display_config_loader.get_full_pdf_path()
@@ -611,6 +615,10 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             return False, None
 
         observer.init_project(str(new_export))
+        if observer.data_manager.settings.data:
+            observer.market_config_handler.set_market_settings(
+                observer.data_manager.settings.data[0]
+            )
         project_name = Path(new_export).stem + ".project"
         project_file = target / project_name
         try:
@@ -814,6 +822,11 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                     mch.set_key_value(["database", "name"], server_info.get("database", ""))
                     mch.set_key_value(["database", "user"], server_info.get("user", ""))
                     mch.set_key_value(["database", "password"], server_info.get("password", ""))
+                    db_name = server_info.get("database", "")
+                    if db_name:
+                        mch.set_settings_database(
+                            db_name + MarketConfigHandler.SETTINGS_DB_SUFFIX
+                        )
                 except Exception:
                     pass
 

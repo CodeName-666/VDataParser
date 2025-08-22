@@ -6,6 +6,7 @@ from PySide6.QtCore import QDate, QDateTime, Slot
 from PySide6.QtWidgets import QFileDialog, QMessageBox
 from objects import SettingsContentDataClass
 from data import DataManager
+from data.market_facade import MarketFacade
 from .persistent_base_ui import PersistentBaseUi
 from .generated import MarketSettingUi
 
@@ -151,8 +152,16 @@ class MarketSetting(PersistentBaseUi):
 
     @Slot()
     def save_state(self) -> None:
-        """Save settings using the current storage path."""
+        """Save settings and persist them to the project file."""
         super().save_state()
+        facade = MarketFacade()
+        observer = facade.get_observer(self.market_widget())
+        if observer:
+            settings = self.export_state()
+            observer.market_config_handler.set_market_settings(settings)
+            project_path = observer.market_config_handler.get_storage_full_path()
+            if project_path:
+                observer.market_config_handler.save_to(project_path)
 
     @Slot()
     def restore_state(self) -> None:
