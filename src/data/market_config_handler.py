@@ -8,6 +8,7 @@ from typing import Any, Dict, Union
 from util.path_utils import ensure_trailing_sep
 
 from .json_handler import JsonHandler
+from .market_settings import market_settings
 from log import CustomLogger  # noqa: F401
 from objects import SettingsContentDataClass
 
@@ -24,19 +25,7 @@ class MarketConfigHandler(QObject, JsonHandler):
             "coordinates_config_path": "",
             "coordinates_config_name": "",
         },
-        "market_settings": {
-            "max_stammnummern": "250",
-            "max_artikel": "40",
-            "datum_counter": "2025-09-15 12:00:00",
-            "flohmarkt_nr": "6",
-            "psw_laenge": "10",
-            "tabellen_prefix": "str",
-            "verkaufer_liste": "verkeaufer",
-            "max_user_ids": "8",
-            "datum_flohmarkt": "2025-09-15",
-            "flohmarkt_aktiv": "nein",
-            "login_aktiv": "nein",
-        },
+        "market_settings": copy.deepcopy(market_settings),
     }
 
 
@@ -195,10 +184,6 @@ class MarketConfigHandler(QObject, JsonHandler):
     def set_market_settings(self, settings: SettingsContentDataClass) -> None:
         """Persist ``settings`` into the project configuration."""
         self.set_key_value(["market_settings"], asdict(settings))
-
-    # Backwards compatibility -------------------------------------------------
-    def get_default_settings(self) -> SettingsContentDataClass:  # pragma: no cover - deprecated
-        return self.get_market_settings()
 
     # ------------------------- persistence ------------------------ #
     def save_to(self, destination: Union[str, Path]) -> None:

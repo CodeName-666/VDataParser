@@ -42,13 +42,13 @@ class MarketObserver(QObject):
         self._project_dir = ""
 
     def apply_settings(self) -> None:
-        """Set ``default_settings`` and inform the user."""
+        """Set ``market_settings`` and inform the user."""
         if not self.data_manager.settings_available():
-            default_settings = self.market_config_handler.get_market_settings()
-            self.data_manager.set_new_settings(default_settings)
+            market_settings = self.market_config_handler.get_market_settings()
+            self.data_manager.set_new_settings(market_settings)
             self.status_info.emit(
                 "WARNING",
-                "Keine Settings gefunden. Default Einstellungen wurden geladen.",
+                "Keine Settings gefunden. Markt Einstellungen wurden geladen.",
             )
 
     def set_data_ready_satus(self, status: bool) -> None:
