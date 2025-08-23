@@ -96,6 +96,11 @@ class MainWindow(QMainWindow):
         self.ui.action_restore_seller.triggered.connect(
             self.market_view.data_view.restore_changes)
 
+        self.ui.action_connect_db.triggered.connect(self.connect_to_db)
+        self.ui.action_disconnect_db.triggered.connect(self.disconnect_from_db)
+        self.ui.action_upload_data.triggered.connect(self.upload_data)
+        self.ui.action_export_data.triggered.connect(self.export_data)
+
         self.market_facade.status_info.connect(self.status_bar.handle_status)
         self.market_view.status_info.connect(self.status_bar.handle_status)
 
@@ -248,6 +253,7 @@ class MainWindow(QMainWindow):
         self.ui.tool_project.setVisible(False)
         self.ui.toolBar.setVisible(False)
         self.ui.tool_seller.setVisible(False)
+        self.ui.tool_db.setVisible(False)
 
     def show_toolbars(self, view_name: str):
         """
@@ -270,6 +276,8 @@ class MainWindow(QMainWindow):
                 self.ui.tool_export.setVisible(True)
                 self.ui.tool_project.setVisible(True)
                 self.ui.toolBar.setVisible(True)
+                if self.market_facade.is_project(self.market_view):
+                    self.ui.tool_db.setVisible(True)
                 if self.market_view.ui.tabWidget.currentWidget() == self.market_view.ui.tab_2:
                     self.ui.tool_seller.setVisible(True)
 
@@ -310,6 +318,38 @@ class MainWindow(QMainWindow):
         chosen_dir = QFileDialog.getExistingDirectory(self, "Projekt speichern unter")
         if chosen_dir:
             self.market_facade.save_project(self.market_view, chosen_dir)
+
+    @Slot()
+    def connect_to_db(self):
+        """Connect to the configured database.
+
+        This method currently only shows a placeholder message.
+        """
+        QMessageBox.information(self, "Info", "Connect to DB clicked.")
+
+    @Slot()
+    def disconnect_from_db(self):
+        """Disconnect from the database.
+
+        This method currently only shows a placeholder message.
+        """
+        QMessageBox.information(self, "Info", "Disconnect from DB clicked.")
+
+    @Slot()
+    def upload_data(self):
+        """Upload data to the database.
+
+        This method currently only shows a placeholder message.
+        """
+        QMessageBox.information(self, "Info", "Upload Data clicked.")
+
+    @Slot()
+    def export_data(self):
+        """Export data from the database.
+
+        This method currently only shows a placeholder message.
+        """
+        QMessageBox.information(self, "Info", "Export Data clicked.")
 
     def open_about_ui(self):
         """

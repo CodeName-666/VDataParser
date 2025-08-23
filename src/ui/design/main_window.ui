@@ -103,6 +103,21 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    <addaction name="action_save_seller"/>
    <addaction name="action_restore_seller"/>
   </widget>
+  <widget class="QToolBar" name="tool_db">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>LeftToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_connect_db"/>
+   <addaction name="action_disconnect_db"/>
+   <addaction name="action_upload_data"/>
+   <addaction name="action_export_data"/>
+  </widget>
   <action name="action_create_pdf">
    <property name="icon">
     <iconset resource="../../resource/resources.qrc">
@@ -199,8 +214,56 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
     <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
- </widget>
- <resources>
+  <action name="action_connect_db">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/database.svg</normaloff>:/icons/icons/black/database.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Connect to DB</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_disconnect_db">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/database-off.svg</normaloff>:/icons/icons/black/database-off.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Disconnect from DB</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_upload_data">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/database-import.svg</normaloff>:/icons/icons/black/database-import.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Upload Data</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_export_data">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/database-export.svg</normaloff>:/icons/icons/black/database-export.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Export Data</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+</widget>
+<resources>
   <include location="../../resource/resources.qrc"/>
  </resources>
  <connections/>
