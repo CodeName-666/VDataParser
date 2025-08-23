@@ -42,8 +42,7 @@ class SettingsContentDataClass:
     tabellen_prefix: str = ""
     verkaufer_liste: str = ""
     max_user_ids: str = ""
-    datum_flohmarkt: str = ""   
-    flohmarkt_aktiv:str = ""
+    datum_flohmarkt: str = ""
     login_aktiv:str = ""
 
 @dataclass
