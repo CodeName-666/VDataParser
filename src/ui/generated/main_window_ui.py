@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.2
+## Created by: Qt User Interface Compiler version 6.9.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -71,6 +71,26 @@ class Ui_MainWindow(object):
         icon6.addFile(u":/icons/icons/black/database-import.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.action_restore_seller.setIcon(icon6)
         self.action_restore_seller.setMenuRole(QAction.MenuRole.NoRole)
+        self.action_connect_db = QAction(MainWindow)
+        self.action_connect_db.setObjectName(u"action_connect_db")
+        icon7 = QIcon()
+        icon7.addFile(u":/icons/icons/black/database.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.action_connect_db.setIcon(icon7)
+        self.action_connect_db.setMenuRole(QAction.MenuRole.NoRole)
+        self.action_disconnect_db = QAction(MainWindow)
+        self.action_disconnect_db.setObjectName(u"action_disconnect_db")
+        icon8 = QIcon()
+        icon8.addFile(u":/icons/icons/black/database-off.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.action_disconnect_db.setIcon(icon8)
+        self.action_disconnect_db.setMenuRole(QAction.MenuRole.NoRole)
+        self.action_upload_data = QAction(MainWindow)
+        self.action_upload_data.setObjectName(u"action_upload_data")
+        self.action_upload_data.setIcon(icon6)
+        self.action_upload_data.setMenuRole(QAction.MenuRole.NoRole)
+        self.action_export_data = QAction(MainWindow)
+        self.action_export_data.setObjectName(u"action_export_data")
+        self.action_export_data.setIcon(icon4)
+        self.action_export_data.setMenuRole(QAction.MenuRole.NoRole)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.horizontalLayout = QHBoxLayout(self.centralwidget)
@@ -97,6 +117,9 @@ class Ui_MainWindow(object):
         self.tool_seller = QToolBar(MainWindow)
         self.tool_seller.setObjectName(u"tool_seller")
         MainWindow.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tool_seller)
+        self.tool_db = QToolBar(MainWindow)
+        self.tool_db.setObjectName(u"tool_db")
+        MainWindow.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tool_db)
 
         self.menubar.addAction(self.menu_file.menuAction())
         self.menubar.addAction(self.menu_help.menuAction())
@@ -111,6 +134,10 @@ class Ui_MainWindow(object):
         self.tool_seller.addAction(self.action_delete_dataset)
         self.tool_seller.addAction(self.action_save_seller)
         self.tool_seller.addAction(self.action_restore_seller)
+        self.tool_db.addAction(self.action_connect_db)
+        self.tool_db.addAction(self.action_disconnect_db)
+        self.tool_db.addAction(self.action_upload_data)
+        self.tool_db.addAction(self.action_export_data)
 
         self.retranslateUi(MainWindow)
 
@@ -132,11 +159,16 @@ class Ui_MainWindow(object):
         self.action_delete_dataset.setText(QCoreApplication.translate("MainWindow", u"Stammnummer l\u00f6schen", None))
         self.action_save_seller.setText(QCoreApplication.translate("MainWindow", u"Speichern", None))
         self.action_restore_seller.setText(QCoreApplication.translate("MainWindow", u"Wiederherstellen", None))
+        self.action_connect_db.setText(QCoreApplication.translate("MainWindow", u"Connect to DB", None))
+        self.action_disconnect_db.setText(QCoreApplication.translate("MainWindow", u"Disconnect from DB", None))
+        self.action_upload_data.setText(QCoreApplication.translate("MainWindow", u"Upload Data", None))
+        self.action_export_data.setText(QCoreApplication.translate("MainWindow", u"Export Data", None))
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menu_help.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
         self.tool_export.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
         self.tool_project.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
         self.toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
         self.tool_seller.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
+        self.tool_db.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
     # retranslateUi
 
