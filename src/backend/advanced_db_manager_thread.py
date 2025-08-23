@@ -11,6 +11,7 @@ can react without blocking the main thread.
 from PySide6.QtCore import QThread, Signal
 import queue
 import threading
+from time import monotonic
 from typing import Any, Callable, Tuple
 
 from .advance_db_connector import AdvancedDBManager
@@ -24,6 +25,15 @@ class AdvancedDBManagerThread(QThread):
 
     task_error = Signal(Exception)
     """Emitted when a task raised an exception."""
+
+    connected = Signal()
+    """Forwarded when the underlying manager connected."""
+
+    disconnected = Signal()
+    """Forwarded when the manager disconnected or the thread stops."""
+
+    connecting = Signal()
+    """Forwarded when a connection attempt starts."""
 
     def __init__(self, db_interface: Any, parent: QThread | None = None) -> None:
         """Initialise the thread with a database interface.
@@ -43,18 +53,29 @@ class AdvancedDBManagerThread(QThread):
     def run(self) -> None:  # pragma: no cover - thread loop
         """Process queued tasks until :meth:`stop` is called."""
         manager = AdvancedDBManager(self._db_interface)
+
+        # Forward connection state signals to the outside
+        manager.connected.connect(self.connected)
+        manager.disconnected.connect(self.disconnected)
+        manager.connecting.connect(self.connecting)
+
         manager.connect()
+        last_check = monotonic()
         try:
             while not self._stop_event.is_set():
                 try:
                     func, args, kwargs = self._tasks.get(timeout=0.1)
                 except queue.Empty:
-                    continue
-                try:
-                    result = func(manager, *args, **kwargs)
-                    self.task_finished.emit(result)
-                except Exception as exc:  # pragma: no cover - error path
-                    self.task_error.emit(exc)
+                    func = None
+                if func is not None:
+                    try:
+                        result = func(manager, *args, **kwargs)
+                        self.task_finished.emit(result)
+                    except Exception as exc:  # pragma: no cover - error path
+                        self.task_error.emit(exc)
+                if monotonic() - last_check >= 10:
+                    manager._check_connection()
+                    last_check = monotonic()
         finally:
             manager.disconnect()
 

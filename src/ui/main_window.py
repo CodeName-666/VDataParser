@@ -3,7 +3,6 @@ from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (
     QMainWindow, QMessageBox, QFileDialog, QDialog, QLabel, QLineEdit
 )
-from PySide6.QtCore import QTimer
 from pathlib import Path
 
 
@@ -24,7 +23,7 @@ from data import MarketFacade
 from .status_bar import StatusBar
 from .new_market_dialog import NewMarketDialog
 from backend import SQLiteInterface
-from backend.advance_db_connector import AdvancedDBManager
+from backend.advanced_db_manager_thread import AdvancedDBManagerThread
 
 
 class MainWindow(QMainWindow):
@@ -49,11 +48,8 @@ class MainWindow(QMainWindow):
         self.status_bar = StatusBar(self)
         self._workers: list[GeneratorWorker] = []
 
-        # Set up database manager and forward its signals to the status bar
-        self.db_manager = AdvancedDBManager(SQLiteInterface(database=":memory:"))
-        self.db_manager.connected.connect(self.status_bar.set_connected)
-        self.db_manager.disconnected.connect(self.status_bar.set_disconnected)
-        self.db_manager.connecting.connect(self.status_bar.set_connecting)
+        # Database connection thread (initially not started)
+        self.db_thread: AdvancedDBManagerThread | None = None
 
     def setup_ui(self):
         """
@@ -329,13 +325,22 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def connect_to_db(self):
-        """Connect to the configured database."""
-        self.db_manager.connect()
+        """Connect to the configured database using a background thread."""
+        if self.db_thread is not None:
+            return
+        self.db_thread = AdvancedDBManagerThread(SQLiteInterface(database=":memory:"))
+        self.db_thread.connected.connect(self.status_bar.set_connected)
+        self.db_thread.disconnected.connect(self.status_bar.set_disconnected)
+        self.db_thread.connecting.connect(self.status_bar.set_connecting)
+        self.db_thread.start()
 
     @Slot()
     def disconnect_from_db(self):
-        """Disconnect from the database."""
-        self.db_manager.disconnect()
+        """Disconnect from the database and stop the thread."""
+        if self.db_thread is None:
+            return
+        self.db_thread.stop()
+        self.db_thread = None
 
     @Slot()
     def upload_data(self):
