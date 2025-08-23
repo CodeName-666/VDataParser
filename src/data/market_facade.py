@@ -15,7 +15,7 @@ from pathlib import Path
 import tempfile
 import shutil
 from backend import MySQLInterface
-from backend.advance_db_connector import AdvancedDBManager
+from backend.advanced_db_manager_thread import AdvancedDBManagerThread
 
 
 class MarketObserver(QObject):
@@ -459,6 +459,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         QObject.__init__(self)
 
         self._market_list: List = []
+        self._db_thread: AdvancedDBManagerThread | None = None
 
     def load_online_market(self, market, info: dict) -> bool:
         """Load market data from a MySQL database.
@@ -479,36 +480,58 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         password = info.get("password")
 
         tmp_path = None
-        ret = False
         try:
             mysql_if = MySQLInterface(
                 host=host, user=user, password=password, database=database, port=port
             )
-            with AdvancedDBManager(mysql_if) as db:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
-                    tmp_path = tmp.name
-                db.export_to_custom_json(tmp_path)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
+                tmp_path = tmp.name
 
-            new_observer = self.create_observer(market)
-            new_observer.connect_signals(market)
-            ret = new_observer.load_local_market_export(tmp_path)
+            db_thread = AdvancedDBManagerThread(mysql_if)
+            self._db_thread = db_thread
 
-            if ret:
-                self.status_info.emit(
-                    "INFO", f"Online-Datenbank geladen: {database}@{host}:{port}"
-                )
-            else:
-                self.status_info.emit("ERROR", "Daten konnten nicht geladen werden")
-        except Exception as e:
-            self.status_info.emit("ERROR", f"Fehler beim Laden der Datenbank: {e}")
-            ret = False
-        finally:
+            def _handle_finished(_result: object) -> None:  # pragma: no cover - Qt slot
+                new_observer = self.create_observer(market)
+                new_observer.connect_signals(market)
+                ret_local = new_observer.load_local_market_export(tmp_path)
+                if ret_local:
+                    self.status_info.emit(
+                        "INFO", f"Online-Datenbank geladen: {database}@{host}:{port}"
+                    )
+                else:
+                    self.status_info.emit(
+                        "ERROR", "Daten konnten nicht geladen werden"
+                    )
+                db_thread.stop()
+                if Path(tmp_path).exists():
+                    try:
+                        Path(tmp_path).unlink()
+                    except OSError:
+                        pass
+
+            def _handle_error(exc: Exception) -> None:  # pragma: no cover - Qt slot
+                self.status_info.emit("ERROR", f"Fehler beim Laden der Datenbank: {exc}")
+                db_thread.stop()
+                if Path(tmp_path).exists():
+                    try:
+                        Path(tmp_path).unlink()
+                    except OSError:
+                        pass
+
+            db_thread.task_finished.connect(_handle_finished)
+            db_thread.task_error.connect(_handle_error)
+            db_thread.start()
+            db_thread.add_task(lambda m: m.export_to_custom_json(tmp_path))
+
+            return True
+        except Exception as e:  # pragma: no cover - error path
             if tmp_path and Path(tmp_path).exists():
                 try:
                     Path(tmp_path).unlink()
                 except OSError:
                     pass
-        return ret
+            self.status_info.emit("ERROR", f"Fehler beim Starten des DB-Threads: {e}")
+            return False
 
     def load_local_market_porject(self, market, json_path: str) -> bool:
         """
