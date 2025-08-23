@@ -16,9 +16,17 @@ class MarketConfigHandler(QObject, JsonHandler):
 
     # --------------------------- defaults --------------------------- #
     _DEFAULT_STRUCTURE: Dict[str, Any] = {
-                "database": {"url": "","port": ""},
+                "database": {
+                    "url": "",
+                    "port": "",
+                    "name": "",
+                    "user": "",
+                },
                 "market": {"market_path": "", "market_name": ""},
-                "pfd_coordiantes_config": {"coordinates_config_path": "", "coordinates_config_name": ""},
+                "pfd_coordiantes_config": {
+                    "coordinates_config_path": "",
+                    "coordinates_config_name": "",
+                },
                 "dafault_settings": {
                     "max_stammnummern": "250",
                     "max_artikel": "40",
@@ -28,8 +36,8 @@ class MarketConfigHandler(QObject, JsonHandler):
                     "tabellen_prefix": "str",
                     "verkaufer_liste": "verkeaufer",
                     "max_user_ids": "8",
-                    "datum_flohmarkt": "2025-09-15"
-                }
+                    "datum_flohmarkt": "2025-09-15",
+                },
             }
 
 
@@ -79,6 +87,19 @@ class MarketConfigHandler(QObject, JsonHandler):
         """Set both ``database.url`` and ``database.port``."""
         self.set_key_value(["database", "url"], url)
         self.set_key_value(["database", "port"], port)
+
+    def get_db_credentials(self) -> Dict[str, str]:
+        """Return the stored database name and user."""
+        db = self.get_database()
+        return {
+            "name": db.get("name", ""),
+            "user": db.get("user", ""),
+        }
+
+    def set_db_credentials(self, name: str, user: str) -> None:
+        """Set ``database`` name and user fields."""
+        self.set_key_value(["database", "name"], name)
+        self.set_key_value(["database", "user"], user)
 
     # --------------------- market accessors ----------------------- #
     def get_market(self) -> Dict[str, str]:

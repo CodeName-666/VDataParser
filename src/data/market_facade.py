@@ -425,10 +425,14 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             if server_info:
                 try:
                     mch = observer.market_config_handler
-                    mch.set_database(server_info.get("host", ""), str(server_info.get("port", "")))
-                    mch.set_key_value(["database", "name"], server_info.get("database", ""))
-                    mch.set_key_value(["database", "user"], server_info.get("user", ""))
-                    mch.set_key_value(["database", "password"], server_info.get("password", ""))
+                    mch.set_database(
+                        server_info.get("host", ""),
+                        str(server_info.get("port", "")),
+                    )
+                    mch.set_db_credentials(
+                        server_info.get("database", ""),
+                        server_info.get("user", ""),
+                    )
                 except Exception:
                     pass
 
