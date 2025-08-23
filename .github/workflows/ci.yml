@@ -1,4 +1,4 @@
-name: Lint and Start
+name: Lint and Test
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  lint-and-start:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,16 +20,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
+          pip install -r requirements-test.txt
           pip install flake8
 
       - name: Lint with flake8
         continue-on-error: true
         run: flake8 src
 
-      - name: Run application
+      - name: Run tests
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb libegl1 libgl1 libxcb-cursor0 libxkbcommon-x11-0
-          xvfb-run -a timeout 5 python src/main.py
+          xvfb-run -a python utils/run_pytests.py
