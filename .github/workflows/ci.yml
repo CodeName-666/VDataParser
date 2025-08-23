@@ -27,7 +27,9 @@ jobs:
         run: flake8 src
 
       - name: Run application
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb libegl1 libgl1
+          sudo apt-get install -y xvfb libegl1 libgl1 libxcb-cursor0 libxkbcommon-x11-0
           xvfb-run -a timeout 5 python src/main.py
