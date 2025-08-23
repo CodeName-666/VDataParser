@@ -40,8 +40,6 @@ class MarketSetting(PersistentBaseUi):
         self.ui.lineEditTabelleVerkaeufer.textChanged.connect(self._config_changed)
         self.ui.spinMaxIdPerUser.valueChanged.connect(self._config_changed)
         self.ui.dateTimeEditFlohmarkt.dateChanged.connect(self._config_changed)
-        self.ui.radioDisbaledFlohmarkt.clicked.connect(self._config_changed)
-        self.ui.radioActiveFlohmarkt.clicked.connect(self._config_changed)
         self.ui.checkBoxLoginDisable.clicked.connect(self._config_changed)
 
     def setup_views(self, market_widget):
@@ -78,20 +76,6 @@ class MarketSetting(PersistentBaseUi):
             config.settings.data[0] = state
             self._config_changed()
 
-    def get_radio_button_status(self) -> str:
-        if self.ui.radioActiveFlohmarkt.isChecked():
-            return "ja"
-        elif self.ui.radioDisbaledFlohmarkt.isChecked():
-            return "nein"
-        else:
-            return "nein"
-
-    def set_radio_button_status(self, status: str):
-        if status == "ja":
-            self.ui.radioActiveFlohmarkt.setChecked(True)
-        else:
-            self.ui.radioDisbaledFlohmarkt.setChecked(True)
-
     def set_login_aktiv_status(self, status: str):
         if status == "ja":
             self.ui.checkBoxLoginDisable.setChecked(True)
@@ -115,7 +99,6 @@ class MarketSetting(PersistentBaseUi):
             verkaufer_liste=self.ui.lineEditTabelleVerkaeufer.text(),
             max_user_ids=str(self.ui.spinMaxIdPerUser.value()),
             datum_flohmarkt=self.ui.dateTimeEditFlohmarkt.date().toString("yyyy-MM-dd"),
-            flohmarkt_aktiv=str(self.get_radio_button_status()),
             login_aktiv=str(self.get_login_aktiv_status())
         )
 
@@ -132,7 +115,6 @@ class MarketSetting(PersistentBaseUi):
         self.ui.lineEditTabelleVerkaeufer.setText(state.verkaufer_liste)
         self.ui.dateTimeEditFlohmarkt.setDate(QDate.fromString(state.datum_flohmarkt, "yyyy-MM-dd"))
         self.set_login_aktiv_status(str(state.login_aktiv))
-        self.set_radio_button_status(str(state.flohmarkt_aktiv))
 
     @Slot()
     def _config_changed(self) -> bool:
