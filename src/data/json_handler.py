@@ -393,15 +393,31 @@ class JsonHandler():
             self._log_error("save_to_url", f"Unexpected error saving to URL: {json_url}", e)
 
     def save_to_local(self, json_file_path: str) -> None:
-        """ Saves JSON data to a local file. """
+        """
+        Save JSON data to a local file.
+
+        Creates a numbered backup of the existing file only if the content
+        differs from ``json_data``. If no changes are detected, the method
+        returns without writing a file or creating a backup.
+        """
         if self.json_data is None:
             return  # Already logged by save()
 
         try:
             p = Path(json_file_path)
-            # create a backup if the file already exists
             if p.is_file():
+                try:
+                    with open(p, 'r', encoding='utf-8') as existing_file:
+                        existing = json.load(existing_file)
+                except Exception:
+                    existing = None
+
+                if existing == self.json_data:
+                    self._log("INFO", f"No changes detected for {p}. Skipping save and backup.")
+                    return
+
                 self._create_backup(p)
+
             # Ensure the parent directory exists
             p.parent.mkdir(parents=True, exist_ok=True)
             with open(p, 'w', encoding='utf-8') as json_file:
