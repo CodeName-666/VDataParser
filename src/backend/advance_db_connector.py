@@ -1,12 +1,111 @@
 
-"""Utility helpers for exporting and updating databases using JSON."""
+"""Utility helpers for exporting and updating databases using JSON.
+
+This module now also provides :class:`AdvancedDBManager` which extends
+``BasicDBConnector`` with Qt signals to report the state of the database
+connection.  The manager emits a ``connecting`` signal before attempting to
+open the connection, ``connected`` once the connection has been established and
+``disconnected`` if the connection is lost or explicitly closed.  While the
+connection is active a timer checks every ten seconds whether the connection is
+still alive and automatically retries to reconnect if necessary.
+"""
+
+from PySide6.QtCore import QObject, QTimer, Signal
 
 from .basic_db_connector import BasicDBConnector
 import json
 
 
-class AdvancedDBManager(BasicDBConnector):
-    """Extension of :class:`BasicDBConnector` with JSON export features."""
+class AdvancedDBManager(QObject, BasicDBConnector):
+    """Extended database manager with JSON helpers and connection signals."""
+
+    connected = Signal()
+    """Emitted when the database connection has been established."""
+
+    disconnected = Signal()
+    """Emitted when the connection has been closed or lost."""
+
+    connecting = Signal()
+    """Emitted when a connection attempt starts."""
+
+    def __init__(self, db_operator):
+        """Initialise the manager with a concrete ``DatabaseOperations`` object.
+
+        Parameters
+        ----------
+        db_operator:
+            Implementation of :class:`~backend.interface.DatabaseOperations`
+            providing the low level database access.
+        """
+        QObject.__init__(self)
+        BasicDBConnector.__init__(self, db_operator)
+
+        # Expose ``params`` and a simplified ``db_type`` attribute for the
+        # legacy export helpers below which expect these names to be present.
+        self.params = getattr(db_operator, "params", {})
+        self.db_type = "mysql" if "mysql" in self.db_type_name.lower() else "sqlite"
+
+        self._connection_timer = QTimer(self)
+        self._connection_timer.setInterval(10000)
+        self._connection_timer.timeout.connect(self._check_connection)
+
+    # ------------------------------------------------------------------
+    # Connection handling
+    # ------------------------------------------------------------------
+    def connect(self, database_override: str = None):  # type: ignore[override]
+        """Connect to the database and start the health check timer.
+
+        The ``connecting`` signal is emitted before attempting to establish the
+        connection.  On success ``connected`` is emitted and a periodic check is
+        started to ensure that the connection stays alive.  If the connection
+        attempt fails the ``disconnected`` signal is emitted.
+        """
+
+        self.connecting.emit()
+        try:
+            super().connect(database_override)
+        except Exception:
+            self.disconnected.emit()
+            return False
+        self._connection_timer.start()
+        self.connected.emit()
+        return True
+
+    def disconnect(self):  # type: ignore[override]
+        """Disconnect from the database and stop the health check timer."""
+
+        self._connection_timer.stop()
+        super().disconnect()
+        self.disconnected.emit()
+
+    # ------------------------------------------------------------------
+    # Connection monitoring
+    # ------------------------------------------------------------------
+    def _check_connection(self) -> None:
+        """Verify that the connection is still alive and reconnect if needed."""
+
+        if self._is_connection_alive():
+            return
+        self._connection_timer.stop()
+        # ``connect`` emits the appropriate signals
+        self.connect()
+
+    def _is_connection_alive(self) -> bool:
+        """Return ``True`` if the database connection appears to be valid."""
+
+        if not self.conn:
+            return False
+        try:
+            # MySQL connections expose ``is_connected``
+            if hasattr(self.conn, "is_connected"):
+                return bool(self.conn.is_connected())
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+            cursor.close()
+            return True
+        except Exception:
+            return False
     
     def export_to_custom_json(self, output_file: str):
         """Export the entire database into a phpMyAdmin compatible JSON file."""

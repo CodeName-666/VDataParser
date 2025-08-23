@@ -22,6 +22,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
     """
 
     status_info = Signal(str, str)
+    db_connected = Signal()
+    db_disconnected = Signal()
+    db_connecting = Signal()
 
     def __init__(self):
 
@@ -72,6 +75,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                         "ERROR", "Daten konnten nicht geladen werden"
                     )
                 db_thread.stop()
+                self._db_thread = None
                 if Path(tmp_path).exists():
                     try:
                         Path(tmp_path).unlink()
@@ -81,6 +85,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             def _handle_error(exc: Exception) -> None:  # pragma: no cover - Qt slot
                 self.status_info.emit("ERROR", f"Fehler beim Laden der Datenbank: {exc}")
                 db_thread.stop()
+                self._db_thread = None
                 if Path(tmp_path).exists():
                     try:
                         Path(tmp_path).unlink()
@@ -101,6 +106,24 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                     pass
             self.status_info.emit("ERROR", f"Fehler beim Starten des DB-Threads: {e}")
             return False
+
+    def connect_to_db(self, db_interface) -> None:
+        """Start a background thread managing ``db_interface``."""
+        if self._db_thread is not None:
+            return
+        db_thread = AdvancedDBManagerThread(db_interface)
+        self._db_thread = db_thread
+        db_thread.connected.connect(self.db_connected)
+        db_thread.disconnected.connect(self.db_disconnected)
+        db_thread.connecting.connect(self.db_connecting)
+        db_thread.start()
+
+    def disconnect_from_db(self) -> None:
+        """Stop the background database thread if running."""
+        if self._db_thread is None:
+            return
+        self._db_thread.stop()
+        self._db_thread = None
 
     def load_local_market_porject(self, market, json_path: str) -> bool:
         """

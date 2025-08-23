@@ -3,7 +3,6 @@ from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (
     QMainWindow, QMessageBox, QFileDialog, QDialog, QLabel, QLineEdit
 )
-from PySide6.QtCore import QTimer
 from pathlib import Path
 
 
@@ -23,6 +22,7 @@ from .generator_worker import GeneratorWorker
 from data import MarketFacade
 from .status_bar import StatusBar
 from .new_market_dialog import NewMarketDialog
+from backend import SQLiteInterface
 
 
 class MainWindow(QMainWindow):
@@ -103,6 +103,10 @@ class MainWindow(QMainWindow):
 
         self.market_facade.status_info.connect(self.status_bar.handle_status)
         self.market_view.status_info.connect(self.status_bar.handle_status)
+
+        self.market_facade.db_connected.connect(self.status_bar.set_connected)
+        self.market_facade.db_disconnected.connect(self.status_bar.set_disconnected)
+        self.market_facade.db_connecting.connect(self.status_bar.set_connecting)
 
         # self.ui.action_tool.triggered.connect(self.open_about_ui)
 
@@ -321,19 +325,13 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def connect_to_db(self):
-        """Connect to the configured database.
-
-        This method currently only shows a placeholder message.
-        """
-        QMessageBox.information(self, "Info", "Connect to DB clicked.")
+        """Connect to the configured database via the facade."""
+        self.market_facade.connect_to_db(SQLiteInterface(database=":memory:"))
 
     @Slot()
     def disconnect_from_db(self):
-        """Disconnect from the database.
-
-        This method currently only shows a placeholder message.
-        """
-        QMessageBox.information(self, "Info", "Disconnect from DB clicked.")
+        """Disconnect from the database via the facade."""
+        self.market_facade.disconnect_from_db()
 
     @Slot()
     def upload_data(self):

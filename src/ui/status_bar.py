@@ -43,7 +43,7 @@ class StatusBar(QStatusBar):
 
         # Connection Label und LED
         self.connection_label = QLabel()
-        self.connection_label.setText("Disconnected")
+        self.connection_label.setText("Nicht Verbunden")
 
         self.status_led = QLabel()
         self.status_led.setFixedSize(12, 12)
@@ -55,9 +55,6 @@ class StatusBar(QStatusBar):
         self.addWidget(self.horizontalSpacer)
         self.addPermanentWidget(self.connection_label)
         self.addPermanentWidget(self.status_led)
-
-        # Verantwortlich für Datenbank-Status (nur Beispiel)
-        QTimer.singleShot(3000, self.set_connected)
 
         # Queue und Timer für sequentielle Anzeige von Nachrichten
         self._message_queue: list[tuple[str, str]] = []
@@ -87,12 +84,24 @@ class StatusBar(QStatusBar):
             """
         )
 
+    @Slot()
     def set_connected(self) -> None:
         """Switch the indicator to the connected state."""
-        self.connection_label.setText("Verbindung: Aktiv")
+        self.connection_label.setText("Verbunden")
         self.set_led_color("green")
-        # Inform the user about the new connection
         self.post_message("Datenbank verbunden")
+
+    @Slot()
+    def set_disconnected(self) -> None:
+        """Switch the indicator to the disconnected state."""
+        self.connection_label.setText("Nicht Verbunden")
+        self.set_led_color("red")
+
+    @Slot()
+    def set_connecting(self) -> None:
+        """Switch the indicator to the connecting state."""
+        self.connection_label.setText("Verbindung wird aufgebaut")
+        self.set_led_color("yellow")
 
     def _add_to_history(self, message: str, level: str) -> None:
         """Store ``message`` in the internal history list."""
