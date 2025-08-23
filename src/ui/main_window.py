@@ -23,6 +23,8 @@ from .generator_worker import GeneratorWorker
 from data import MarketFacade
 from .status_bar import StatusBar
 from .new_market_dialog import NewMarketDialog
+from backend import SQLiteInterface
+from backend.advance_db_connector import AdvancedDBManager
 
 
 class MainWindow(QMainWindow):
@@ -46,6 +48,12 @@ class MainWindow(QMainWindow):
         self.market_facade = MarketFacade()
         self.status_bar = StatusBar(self)
         self._workers: list[GeneratorWorker] = []
+
+        # Set up database manager and forward its signals to the status bar
+        self.db_manager = AdvancedDBManager(SQLiteInterface(database=":memory:"))
+        self.db_manager.connected.connect(self.status_bar.set_connected)
+        self.db_manager.disconnected.connect(self.status_bar.set_disconnected)
+        self.db_manager.connecting.connect(self.status_bar.set_connecting)
 
     def setup_ui(self):
         """
@@ -321,19 +329,13 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def connect_to_db(self):
-        """Connect to the configured database.
-
-        This method currently only shows a placeholder message.
-        """
-        QMessageBox.information(self, "Info", "Connect to DB clicked.")
+        """Connect to the configured database."""
+        self.db_manager.connect()
 
     @Slot()
     def disconnect_from_db(self):
-        """Disconnect from the database.
-
-        This method currently only shows a placeholder message.
-        """
-        QMessageBox.information(self, "Info", "Disconnect from DB clicked.")
+        """Disconnect from the database."""
+        self.db_manager.disconnect()
 
     @Slot()
     def upload_data(self):
