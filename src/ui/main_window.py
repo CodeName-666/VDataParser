@@ -23,7 +23,6 @@ from data import MarketFacade
 from .status_bar import StatusBar
 from .new_market_dialog import NewMarketDialog
 from backend import SQLiteInterface
-from backend.advanced_db_manager_thread import AdvancedDBManagerThread
 
 
 class MainWindow(QMainWindow):
@@ -47,9 +46,6 @@ class MainWindow(QMainWindow):
         self.market_facade = MarketFacade()
         self.status_bar = StatusBar(self)
         self._workers: list[GeneratorWorker] = []
-
-        # Database connection thread (initially not started)
-        self.db_thread: AdvancedDBManagerThread | None = None
 
     def setup_ui(self):
         """
@@ -107,6 +103,10 @@ class MainWindow(QMainWindow):
 
         self.market_facade.status_info.connect(self.status_bar.handle_status)
         self.market_view.status_info.connect(self.status_bar.handle_status)
+
+        self.market_facade.db_connected.connect(self.status_bar.set_connected)
+        self.market_facade.db_disconnected.connect(self.status_bar.set_disconnected)
+        self.market_facade.db_connecting.connect(self.status_bar.set_connecting)
 
         # self.ui.action_tool.triggered.connect(self.open_about_ui)
 
@@ -325,22 +325,13 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def connect_to_db(self):
-        """Connect to the configured database using a background thread."""
-        if self.db_thread is not None:
-            return
-        self.db_thread = AdvancedDBManagerThread(SQLiteInterface(database=":memory:"))
-        self.db_thread.connected.connect(self.status_bar.set_connected)
-        self.db_thread.disconnected.connect(self.status_bar.set_disconnected)
-        self.db_thread.connecting.connect(self.status_bar.set_connecting)
-        self.db_thread.start()
+        """Connect to the configured database via the facade."""
+        self.market_facade.connect_to_db(SQLiteInterface(database=":memory:"))
 
     @Slot()
     def disconnect_from_db(self):
-        """Disconnect from the database and stop the thread."""
-        if self.db_thread is None:
-            return
-        self.db_thread.stop()
-        self.db_thread = None
+        """Disconnect from the database via the facade."""
+        self.market_facade.disconnect_from_db()
 
     @Slot()
     def upload_data(self):
