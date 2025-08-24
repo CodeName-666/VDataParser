@@ -62,21 +62,8 @@ class NewMarketDialog(QDialog):
         name_form.addRow(QLabel("Marktname:"), self._name_edit)
         body_layout.addLayout(name_form)
 
-        # Build tabs: Einstellungen (settings) and Server-Login
+        # Build tabs: Server-Login and Einstellungen (settings)
         self._tabs = QTabWidget(self)
-
-        # Einstellungen tab content
-        self._settings_tab = QWidget(self)
-        settings_tab_layout = QVBoxLayout(self._settings_tab)
-        settings_tab_layout.setContentsMargins(0, 0, 0, 0)
-        # Hide the inner title label of the MarketSetting to avoid duplicate headings inside the tab
-        try:
-            if hasattr(self._settings_widget, 'ui') and hasattr(self._settings_widget.ui, 'titleLabel'):
-                self._settings_widget.ui.titleLabel.setVisible(False)
-        except Exception:
-            pass
-        settings_tab_layout.addWidget(self._settings_widget)
-        self._tabs.addTab(self._settings_tab, "Einstellungen")
 
         # Server-Login tab content (wrap generated login UI)
         self._server_tab = QWidget(self)
@@ -106,6 +93,19 @@ class NewMarketDialog(QDialog):
         except Exception:
             pass
         self._server_tab_index = self._tabs.addTab(self._server_tab, "Server-Login")
+
+        # Einstellungen tab content
+        self._settings_tab = QWidget(self)
+        settings_tab_layout = QVBoxLayout(self._settings_tab)
+        settings_tab_layout.setContentsMargins(0, 0, 0, 0)
+        # Hide the inner title label of the MarketSetting to avoid duplicate headings inside the tab
+        try:
+            if hasattr(self._settings_widget, "ui") and hasattr(self._settings_widget.ui, "titleLabel"):
+                self._settings_widget.ui.titleLabel.setVisible(False)
+        except Exception:
+            pass
+        settings_tab_layout.addWidget(self._settings_widget)
+        self._tabs.addTab(self._settings_tab, "Einstellungen")
 
         body_layout.addWidget(self._tabs)
 
