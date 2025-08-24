@@ -4,7 +4,7 @@ import os
 from PySide6.QtCore import QObject, Signal
 from pathlib import Path
 from typing import Any, Dict, Union
-from util.path_utils import ensure_trailing_sep
+from utils.path_utils import ensure_trailing_sep
 
 from .json_handler import JsonHandler
 from .data_manager import DataManager

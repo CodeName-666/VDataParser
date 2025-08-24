@@ -6,7 +6,7 @@ import shutil
 from PySide6.QtCore import QObject, Slot, Signal
 from PySide6.QtWidgets import QMessageBox
 
-from utils.file_checks_utils import check_existing_files
+from src.utils.file_checks_utils import check_existing_files
 
 from display import BasicProgressTracker
 from generator.file_generator import FileGenerator

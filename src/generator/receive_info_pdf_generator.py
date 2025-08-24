@@ -25,7 +25,7 @@ try:
     from reportlab.pdfbase import pdfmetrics
 except Exception:  # pragma: no cover - optional dependency
     pdfmetrics = None  # type: ignore
-from util.font_utils import register_font
+from utils.font_utils import register_font
 
 from reportlab.lib.units import mm
 from reportlab.lib import colors
