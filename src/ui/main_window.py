@@ -242,7 +242,7 @@ class MainWindow(QMainWindow):
     def hide_all_toolbars(self):
         self.ui.tool_export.setVisible(False)
         self.ui.tool_project.setVisible(False)
-        self.ui.toolBar.setVisible(False)
+        
         self.ui.tool_seller.setVisible(False)
         self.ui.tool_db.setVisible(False)
 
@@ -266,7 +266,6 @@ class MainWindow(QMainWindow):
             case "Market":
                 self.ui.tool_export.setVisible(True)
                 self.ui.tool_project.setVisible(True)
-                self.ui.toolBar.setVisible(True)
                 if self.market_facade.is_project(self.market_view):
                     self.ui.tool_db.setVisible(True)
                 if self.market_view.ui.tabWidget.currentWidget() == self.market_view.ui.tab_2:

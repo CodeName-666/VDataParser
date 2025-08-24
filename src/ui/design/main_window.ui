@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>770</width>
-    <height>450</height>
+    <height>706</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -79,17 +79,6 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    <addaction name="action_save_project"/>
    <addaction name="action_save_project_as"/>
    <addaction name="action_db_settings"/>
-  </widget>
-  <widget class="QToolBar" name="toolBar">
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>LeftToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
   </widget>
   <widget class="QToolBar" name="tool_seller">
    <property name="windowTitle">
@@ -172,7 +161,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    <property name="icon">
     <iconset resource="../../resource/resources.qrc">
      <normaloff>:/icons/icons/black/database-export.svg</normaloff>:/icons/icons/black/database-export.svg</iconset>
-    </property>
+   </property>
    <property name="text">
     <string>&amp;Projekt speichern unter</string>
    </property>
@@ -196,7 +185,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    <property name="icon">
     <iconset resource="../../resource/resources.qrc">
      <normaloff>:/icons/icons/black/database-x.svg</normaloff>:/icons/icons/black/database-x.svg</iconset>
-    </property>
+   </property>
    <property name="text">
     <string>Stammnummer löschen</string>
    </property>
@@ -276,8 +265,8 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
     <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
-</widget>
-<resources>
+ </widget>
+ <resources>
   <include location="../../resource/resources.qrc"/>
  </resources>
  <connections/>

@@ -24,7 +24,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(770, 450)
+        MainWindow.resize(770, 706)
         self.action_create_pdf = QAction(MainWindow)
         self.action_create_pdf.setObjectName(u"action_create_pdf")
         icon = QIcon()
@@ -117,9 +117,6 @@ class Ui_MainWindow(object):
         self.tool_project = QToolBar(MainWindow)
         self.tool_project.setObjectName(u"tool_project")
         MainWindow.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tool_project)
-        self.toolBar = QToolBar(MainWindow)
-        self.toolBar.setObjectName(u"toolBar")
-        MainWindow.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.toolBar)
         self.tool_seller = QToolBar(MainWindow)
         self.tool_seller.setObjectName(u"tool_seller")
         MainWindow.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tool_seller)
@@ -176,7 +173,6 @@ class Ui_MainWindow(object):
         self.menu_help.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
         self.tool_export.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
         self.tool_project.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
-        self.toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
         self.tool_seller.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
         self.tool_db.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
     # retranslateUi

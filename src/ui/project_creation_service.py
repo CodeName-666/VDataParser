@@ -8,7 +8,7 @@ from typing import Any, Tuple
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 from data import MarketFacade
-from utils.file_checks_utils import check_existing_files
+from src.utils.file_checks_utils import check_existing_files
 
 
 class ProjectCreationService:

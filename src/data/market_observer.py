@@ -6,8 +6,6 @@ import shutil
 from PySide6.QtCore import QObject, Slot, Signal
 from PySide6.QtWidgets import QMessageBox
 
-from src.utils.file_checks_utils import check_existing_files
-
 from display import BasicProgressTracker
 from generator.file_generator import FileGenerator
 from objects import FleatMarket
@@ -15,7 +13,7 @@ from objects import FleatMarket
 from .data_manager import DataManager
 from .market_config_handler import MarketConfigHandler
 from .pdf_display_config import PdfDisplayConfig
-
+from utils.file_checks_utils import check_existing_files
 
 class MarketObserver(QObject):
 
