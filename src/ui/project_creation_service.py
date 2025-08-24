@@ -8,9 +8,10 @@ from typing import Any, Tuple
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 from data import MarketFacade
+from ui.utils.file_checks import check_existing_files
 
 
-class ProjectService:
+class ProjectCreationService:
     """Service class handling project creation workflows.
 
     This class encapsulates user interactions required for creating new
@@ -38,36 +39,6 @@ class ProjectService:
     def _select_directory(self) -> str | None:
         """Ask the user to select a project directory."""
         return QFileDialog.getExistingDirectory(self._parent, "Projektordner wählen") or None
-
-    def _confirm_overwrite(self, candidates: list[Path]) -> bool:
-        """Confirm overwriting existing files.
-
-        Parameters
-        ----------
-        candidates:
-            List of file paths to check for existence.
-
-        Returns
-        -------
-        bool
-            ``True`` if overwriting is accepted or no file exists, ``False`` otherwise.
-        """
-        existing = [p.name for p in candidates if p.exists()]
-        if not existing:
-            return True
-        msg = (
-            "Im Zielordner existieren bereits folgende Dateien:\n\n"
-            + "\n".join(f"- {name}" for name in existing)
-            + "\n\nÜberschreiben?"
-        )
-        reply = QMessageBox.warning(
-            self._parent,
-            "Dateien überschreiben?",
-            msg,
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
-        )
-        return reply == QMessageBox.Yes
 
     # ------------------------------------------------------------------
     # Public API
@@ -118,13 +89,18 @@ class ProjectService:
 
         market_filename = name if name.lower().endswith(".json") else f"{name}.json"
         target_dir = Path(chosen_dir)
-        candidates = [
-            target_dir / market_filename,
-            target_dir / "pdf_display_config.json",
-            target_dir / "project.project",
-            target_dir / "Abholung_Template.pdf",
-        ]
-        if not self._confirm_overwrite(candidates):
+        _, proceed = check_existing_files(
+            target_dir,
+            [
+                market_filename,
+                "pdf_display_config.json",
+                "project.project",
+                "Abholung_Template.pdf",
+            ],
+            parent=self._parent,
+            confirm=True,
+        )
+        if not proceed:
             return False
 
         return self._facade.create_new_project(
@@ -164,17 +140,14 @@ class ProjectService:
             return False, None
 
         export_file = Path(export_path)
-        target_file = Path(chosen_dir) / export_file.name
-        if target_file.exists():
-            reply = QMessageBox.warning(
-                self._parent,
-                "Datei überschreiben?",
-                f"Die Datei {export_file.name} existiert bereits.\nÜberschreiben?",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No,
-            )
-            if reply != QMessageBox.Yes:
-                return False, None
+        _, proceed = check_existing_files(
+            chosen_dir,
+            [export_file.name],
+            parent=self._parent,
+            confirm=True,
+        )
+        if not proceed:
+            return False, None
 
         ok, target = self._facade.create_project_from_export(
             market, export_path, chosen_dir
