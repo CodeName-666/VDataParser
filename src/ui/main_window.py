@@ -23,7 +23,7 @@ from data import MarketFacade
 from .status_bar import StatusBar
 from .new_market_dialog import NewMarketDialog
 from .database_settings_dialog import DatabaseSettingsDialog
-from .project_service import ProjectService
+from .project_creation_service import ProjectCreationService
 from backend import SQLiteInterface
 
 
@@ -220,7 +220,7 @@ class MainWindow(QMainWindow):
         if not name:
             return
 
-        service = ProjectService(self, self.market_facade)
+        service = ProjectCreationService(self, self.market_facade)
         if service.create_new_project(
             self.market_view, name, settings=settings, server_info=server
         ):

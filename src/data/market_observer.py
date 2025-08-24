@@ -6,6 +6,8 @@ import shutil
 from PySide6.QtCore import QObject, Slot, Signal
 from PySide6.QtWidgets import QMessageBox
 
+from ui.utils.file_checks import check_existing_files
+
 from display import BasicProgressTracker
 from generator.file_generator import FileGenerator
 from objects import FleatMarket
@@ -204,6 +206,14 @@ class MarketObserver(QObject):
 
         cfg_dst = project_dir / "pdf_display_config.json"
         pdf_dst = project_dir / "Abholung_Template.pdf"
+
+        _, proceed = check_existing_files(
+            project_dir,
+            [cfg_dst.name, pdf_dst.name],
+            confirm=True,
+        )
+        if not proceed:
+            return
 
         shutil.copy(cfg_src, cfg_dst)
         shutil.copy(pdf_src, pdf_dst)
