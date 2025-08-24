@@ -152,8 +152,39 @@ class MainWindow(QMainWindow):
         local_json = self.open_file_dialog()
         if local_json is None:
             return
-        self.market_facade.load_local_market_export(self.market_view, local_json)
-        self.open_view("Market")
+
+        export_path = Path(local_json)
+
+        reply = QMessageBox.question(
+            self,
+            "Projekt erstellen",
+            "Soll aus dem Export ein Projekt erstellt werden?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes,
+        )
+
+        if reply == QMessageBox.Yes:
+            chosen_dir = QFileDialog.getExistingDirectory(
+                self, "Projektordner wählen"
+            )
+            if not chosen_dir:
+                return
+            ok, target = self.market_facade.create_project_from_export(
+                self.market_view, local_json, chosen_dir
+            )
+            if not ok:
+                QMessageBox.critical(
+                    self, "Fehler", "Projekt konnte nicht erstellt werden."
+                )
+                return
+            export_path = Path(target) / export_path.name
+            local_json = str(export_path)
+
+        ret = self.market_facade.load_local_market_export(
+            self.market_view, local_json
+        )
+        if ret:
+            self.open_view("Market")
 
     @Slot()
     def open_market_view(self):
