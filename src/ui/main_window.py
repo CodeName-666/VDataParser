@@ -183,8 +183,6 @@ class MainWindow(QMainWindow):
             # self.market_view.set_data(market_data)
             if ret:
                 self.open_view("Market")
-        else:
-            QMessageBox.warning(self, "Warning", "No market data loaded. Please try again.")
 
     @Slot()
     def create_new_market(self):
