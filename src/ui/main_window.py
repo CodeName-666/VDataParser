@@ -1,6 +1,6 @@
 # PySide6 imports
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtGui import QAction
+from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import (
     QMainWindow, QMessageBox, QFileDialog, QDialog, QLabel, QLineEdit
 )
@@ -68,9 +68,13 @@ class MainWindow(QMainWindow):
         # Das QStackedWidget als zentrales Widget setzen
         self.setCentralWidget(self.stack)
 
-        self.db_settings_action = QAction("DB Einstellungen", self)
+        self.db_settings_action = QAction(
+            QIcon(":/icons/icons/black/settings.svg"),
+            "DB Einstellungen",
+            self,
+        )
         self.ui.menu_file.addAction(self.db_settings_action)
-        self.ui.tool_db.addAction(self.db_settings_action)
+        self.ui.tool_project.addAction(self.db_settings_action)
 
         self.hide_all_toolbars()
         self.setup_signals()

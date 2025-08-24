@@ -39,5 +39,6 @@
     <file>icons/black/menu-2.svg</file>
     <file>icons/black/radioactive.svg</file>
     <file>icons/black/radioactive_filled.svg</file>
+    <file>icons/black/settings.svg</file>
   </qresource>
 </RCC>
