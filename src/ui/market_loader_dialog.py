@@ -6,7 +6,7 @@ Vorteil: Keine XML‑Datei muss zur Laufzeit eingelesen werden – alles ist ber
 in Python gegossen.  Du kannst natürlich weiterhin im Designer arbeiten und bei
 Änderungen einfach neu generieren lassen.
 """
-from PySide6.QtWidgets import QApplication, QDialog, QFileDialog
+from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QMessageBox
 
 from .base_ui import BaseUi
 from .generated import MarketLoaderUi
@@ -63,6 +63,24 @@ class MarketLoaderDialog(QDialog):
             w.setEnabled(not json_active)
 
     # ────────────────────────── Öffentliche API ──────────────────────────
+    def accept(self) -> None:
+        """Prüft Pflichtfelder und schließt den Dialog bei Erfolg."""
+        if not self.ui.jsonRadio.isChecked():
+            required = (
+                self.ui.hostEdit,
+                self.ui.portEdit,
+                self.ui.userEdit,
+                self.ui.pwEdit,
+            )
+            if not all(w.text().strip() for w in required):
+                QMessageBox.warning(
+                    self,
+                    "Ungültige Eingabe",
+                    "Bitte Host, Port, Benutzer und Passwort angeben.",
+                )
+                return
+        super().accept()
+
     def get_result(self) -> dict:
         """Liest die aktuell eingegebenen Daten aus und liefert sie strukturiert."""
         if self.ui.jsonRadio.isChecked():
