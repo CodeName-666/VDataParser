@@ -39,6 +39,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
     <addaction name="action_save_project"/>
     <addaction name="action_save_project_as"/>
     <addaction name="separator"/>
+    <addaction name="action_db_settings"/>
    </widget>
    <widget class="QMenu" name="menu_help">
     <property name="title">
@@ -77,6 +78,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    </attribute>
    <addaction name="action_save_project"/>
    <addaction name="action_save_project_as"/>
+   <addaction name="action_db_settings"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
@@ -170,9 +172,21 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    <property name="icon">
     <iconset resource="../../resource/resources.qrc">
      <normaloff>:/icons/icons/black/database-export.svg</normaloff>:/icons/icons/black/database-export.svg</iconset>
-   </property>
+    </property>
    <property name="text">
     <string>&amp;Projekt speichern unter</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_db_settings">
+   <property name="icon">
+    <iconset resource="../../resource/resources.qrc">
+     <normaloff>:/icons/icons/black/settings.svg</normaloff>:/icons/icons/black/settings.svg</iconset>
+   </property>
+   <property name="text">
+    <string>DB Einstellungen</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>
@@ -182,7 +196,7 @@ QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; pad
    <property name="icon">
     <iconset resource="../../resource/resources.qrc">
      <normaloff>:/icons/icons/black/database-x.svg</normaloff>:/icons/icons/black/database-x.svg</iconset>
-   </property>
+    </property>
    <property name="text">
     <string>Stammnummer löschen</string>
    </property>
