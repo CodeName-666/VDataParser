@@ -1,5 +1,6 @@
 # PySide6 imports
 from PySide6.QtCore import Qt, Slot
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QMainWindow, QMessageBox, QFileDialog, QDialog, QLabel, QLineEdit
 )
@@ -7,7 +8,7 @@ from pathlib import Path
 
 
 # Local imports
-from data import DataManager
+from data import DataManager, MarketConfigHandler
 from .stack_widget import StackWidget
 from .generated import MainWindowUi
 from .generated import AboutUi
@@ -22,6 +23,7 @@ from .generator_worker import GeneratorWorker
 from data import MarketFacade
 from .status_bar import StatusBar
 from .new_market_dialog import NewMarketDialog
+from .database_settings_dialog import DatabaseSettingsDialog
 from backend import SQLiteInterface
 
 
@@ -66,6 +68,10 @@ class MainWindow(QMainWindow):
         # Das QStackedWidget als zentrales Widget setzen
         self.setCentralWidget(self.stack)
 
+        self.db_settings_action = QAction("DB Einstellungen", self)
+        self.ui.menu_file.addAction(self.db_settings_action)
+        self.ui.tool_db.addAction(self.db_settings_action)
+
         self.hide_all_toolbars()
         self.setup_signals()
 
@@ -100,6 +106,9 @@ class MainWindow(QMainWindow):
         self.ui.action_disconnect_db.triggered.connect(self.disconnect_from_db)
         self.ui.action_upload_data.triggered.connect(self.upload_data)
         self.ui.action_export_data.triggered.connect(self.export_data)
+        self.db_settings_action.triggered.connect(
+            self.open_database_settings_dialog
+        )
 
         self.market_facade.status_info.connect(self.status_bar.handle_status)
         self.market_view.status_info.connect(self.status_bar.handle_status)
@@ -322,6 +331,17 @@ class MainWindow(QMainWindow):
         chosen_dir = QFileDialog.getExistingDirectory(self, "Projekt speichern unter")
         if chosen_dir:
             self.market_facade.save_project(self.market_view, chosen_dir)
+
+    @Slot()
+    def open_database_settings_dialog(self) -> None:
+        """Open a dialog to edit database connection parameters."""
+        dialog = DatabaseSettingsDialog(self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            host, port, name, user, _password = dialog.get_values()
+            mch = MarketConfigHandler()
+            mch.set_database(host, port)
+            mch.set_db_credentials(name, user)
+            self.save_project()
 
     @Slot()
     def connect_to_db(self):
