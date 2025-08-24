@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import List
 
 from PySide6.QtCore import QObject, Slot, Signal
-from PySide6.QtWidgets import QFileDialog, QMessageBox
 
 from backend import MySQLInterface
 from backend.advanced_db_manager_thread import AdvancedDBManagerThread
@@ -139,25 +138,18 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         return ret
 
     def load_local_market_export(self, market, json_path: str) -> bool:
-        """
-        Load local JSON data.
+        """Load market data from a local JSON export.
 
-        :param json_path: Path to the local JSON file.
+        Parameters
+        ----------
+        market:
+            Target :class:`Market` view.
+        json_path:
+            Path to the local JSON export file.
         """
         new_observer = self.create_observer(market)
         new_observer.connect_signals(market)
-
-        if self._ask_for_project_creation():
-            ret, target = self.create_project_from_export(market, json_path, "")
-            if ret:
-                json_file = Path(json_path)
-                json_path = str(target / json_file.name)
-            else:
-                self.status_info.emit("ERROR", "Projekt konnte nicht erstellt werden")
-
-            ret = new_observer.load_local_market_export(json_path)
-
-        return ret
+        return new_observer.load_local_market_export(json_path)
 
     def market_already_exists(self, market) -> bool:
         market = next(
@@ -198,23 +190,35 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
     def create_project_from_export(
         self, market, export_path: str, target_dir: str
     ) -> tuple[bool, Path | None]:
-        """Create a project configuration from a loaded export."""
+        """Create a project configuration from a previously exported market.
+
+        Parameters
+        ----------
+        market:
+            Target :class:`Market` view.
+        export_path:
+            Path to the existing export file.
+        target_dir:
+            Directory where the new project should be created. The directory must
+            be provided by the caller and will be created if it does not exist.
+
+        Returns
+        -------
+        tuple[bool, Path | None]
+            ``(True, Path)`` on success where ``Path`` points to the project
+            directory. ``(False, None)`` if an error occurred.
+        """
 
         observer: MarketObserver = self.get_observer(market)
         if not observer:
             self.status_info.emit("ERROR", "Kein Observer gefunden")
             return False, None
 
-        chosen_dir = target_dir
-        if not chosen_dir:
-            chosen_dir = QFileDialog.getExistingDirectory(
-                market, "Projektordner wählen"
-            )
-            if not chosen_dir:
-                return False, None
+        if not target_dir:
+            raise ValueError("target_dir must be provided")
 
         try:
-            target = Path(chosen_dir)
+            target = Path(target_dir)
             target.mkdir(parents=True, exist_ok=True)
             export_file = Path(export_path)
             new_export = target / export_file.name
@@ -225,10 +229,10 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             )
             return False, None
 
-        observer.init_project(str(new_export))
-        project_name = Path(new_export).stem + ".project"
-        project_file = target / project_name
         try:
+            observer.init_project(str(new_export))
+            project_name = Path(new_export).stem + ".project"
+            project_file = target / project_name
             observer.market_config_handler.save_to(str(project_file))
         except Exception as err:
             self.status_info.emit(
@@ -458,13 +462,3 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         except Exception as err:  # pragma: no cover - runtime errors handled
             self.status_info.emit("ERROR", f"Projektanlage fehlgeschlagen: {err}")
             return False
-
-    def _ask_for_project_creation(self) -> bool:
-        """Prompt the user whether a project should be created."""
-        msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.Question)
-        msg_box.setWindowTitle("Projekt erstellen")
-        msg_box.setText("Es wurden keine Einstellungen gefunden. Projekt erstellen?")
-        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        msg_box.setDefaultButton(QMessageBox.Yes)
-        return msg_box.exec() == QMessageBox.Yes
