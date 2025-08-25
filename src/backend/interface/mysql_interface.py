@@ -60,7 +60,8 @@ class MySQLInterface(DatabaseOperations):
             "host": self.params.get("host", "localhost"),
             "user": self.params.get("user"),
             "password": self.params.get("password"),
-            "database": db_to_connect # Pass None if not specified
+            "port": self.params.get("port", 3306),
+            "database": db_to_connect  # Pass None if not specified
         }
         print(f"Versuche Verbindung zu MySQL ({connect_args['host']}, DB: {db_to_connect or 'Server'})...")
 
@@ -158,7 +159,8 @@ class MySQLInterface(DatabaseOperations):
             temp_conn = mysql_connector_lib.connect(
                 host=self.params.get("host", "localhost"),
                 user=self.params.get("user"),
-                password=self.params.get("password")
+                password=self.params.get("password"),
+                port=self.params.get("port", 3306)
                 # No 'database' argument here
             )
             cursor = temp_conn.cursor()
@@ -197,7 +199,8 @@ class MySQLInterface(DatabaseOperations):
             temp_conn = mysql_connector_lib.connect(
                 host=self.params.get("host", "localhost"),
                 user=self.params.get("user"),
-                password=self.params.get("password")
+                password=self.params.get("password"),
+                port=self.params.get("port", 3306)
             )
             cursor = temp_conn.cursor()
             # Use backticks for safety
@@ -243,6 +246,7 @@ class MySQLInterface(DatabaseOperations):
                 host=self.params.get("host", "localhost"),
                 user=self.params.get("user"),
                 password=self.params.get("password"),
+                port=self.params.get("port", 3306),
             )
             cursor = temp_conn.cursor()
             if prefix:

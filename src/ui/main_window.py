@@ -24,7 +24,6 @@ from .status_bar import StatusBar
 from .new_market_dialog import NewMarketDialog
 from .database_settings_dialog import DatabaseSettingsDialog
 from .project_creation_service import ProjectCreationService
-from backend import SQLiteInterface, MySQLInterface
 
 
 class MainWindow(QMainWindow):
@@ -98,7 +97,6 @@ class MainWindow(QMainWindow):
         self.ui.action_restore_seller.triggered.connect(
             self.market_view.data_view.restore_changes)
 
-        self.ui.action_connect_db.triggered.connect(self.connect_to_db)
         self.ui.action_disconnect_db.triggered.connect(self.disconnect_from_db)
         self.ui.action_upload_data.triggered.connect(self.upload_data)
         self.ui.action_export_data.triggered.connect(self.export_data)
@@ -201,24 +199,6 @@ class MainWindow(QMainWindow):
                     self.market_view, market_loader_info["path"]
                 )
             elif market_loader_info["mode"] == "mysql":
-                try:
-                    server_if = MySQLInterface(
-                        host=market_loader_info["host"],
-                        port=market_loader_info["port"],
-                        user=market_loader_info["user"],
-                        password=market_loader_info["password"],
-                    )
-                    self.market_facade.connect_to_db(server_if)
-                    self.market_facade.status_info.emit(
-                        "INFO",
-                        f"Server verbunden: {market_loader_info['host']}:{market_loader_info['port']}",
-                    )
-                except Exception as exc:  # pragma: no cover - runtime path
-                    self.market_facade.status_info.emit(
-                        "ERROR", f"Verbindung fehlgeschlagen: {exc}"
-                    )
-                    self.market_facade.db_disconnected.emit()
-                    return
                 ret = self.market_facade.load_online_market(
                     self.market_view, market_loader_info
                 )
@@ -341,11 +321,6 @@ class MainWindow(QMainWindow):
             mch.set_database(host, port)
             mch.set_db_credentials(name, user)
             self.save_project()
-
-    @Slot()
-    def connect_to_db(self):
-        """Connect to the configured database via the facade."""
-        self.market_facade.connect_to_db(SQLiteInterface(database=":memory:"))
 
     @Slot()
     def disconnect_from_db(self):
