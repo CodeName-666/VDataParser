@@ -76,6 +76,38 @@ class BasicDBConnector:
             raise DatabaseConnectionError(f"Unerwarteter Fehler bei Existenzprüfung ({self.db_type_name}): {e}") from e
 
 
+
+    def list_databases(self, prefix: str | None = None) -> list[str]:
+        """Return databases available for this connector.
+
+        Parameters
+        ----------
+        prefix : str | None, optional
+            Filter databases starting with this prefix.
+
+        Returns
+        -------
+        list[str]
+            Names of available databases.
+
+        Raises
+        ------
+        DatabaseConnectionError
+            If the listing fails.
+        """
+        try:
+            info = f" mit Präfix '{prefix}'" if prefix else ""
+            print(f"Liste Datenbanken{info} via {type(self.operator).__name__}...")
+            return self.operator.list_databases(prefix)
+        except (DatabaseConnectionError, ImportError, ValueError) as e:
+            print(f"Fehler beim Auflisten der DBs ({self.db_type_name}): {e}")
+            raise
+        except Exception as e:
+            print(f"Unerwarteter Fehler beim Auflisten der DBs ({self.db_type_name}): {e}")
+            raise DatabaseConnectionError(
+                f"Unerwarteter Fehler beim Auflisten der Datenbanken ({self.db_type_name}): {e}"
+            ) from e
+
     def create_database(self, new_db_name: str):
         """Create a new database via the operator."""
         try:
