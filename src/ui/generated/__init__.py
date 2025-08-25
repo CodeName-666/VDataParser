@@ -9,3 +9,4 @@ from .pdf_display_ui import Ui_PdfDisplayView as PdfDisplayUi
 from .market_loader_dialog_ui import Ui_MarketLoaderDialog as MarketLoaderUi
 from .output_window_ui import Ui_OutputWindow as OutputWindowUi
 from .market_statistics_ui import Ui_MarketStatistics as MarketStatisticsUi
+from .database_selection_dialog_ui import Ui_DatabaseSelectionDialog as DatabaseSelectionDialogUi

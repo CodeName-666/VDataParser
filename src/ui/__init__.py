@@ -10,6 +10,7 @@ __all__ = [
     "MainWindow",
     "MarketLoaderDialog",
     "NewMarketDialog",
+    "DatabaseSelectionDialog",
 ]
 
 
@@ -26,4 +27,7 @@ def __getattr__(name: str):  # pragma: no cover - simple delegation
     if name == "NewMarketDialog":
         from .new_market_dialog import NewMarketDialog
         return NewMarketDialog
+    if name == "DatabaseSelectionDialog":
+        from .database_selection_dialog import DatabaseSelectionDialog
+        return DatabaseSelectionDialog
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
