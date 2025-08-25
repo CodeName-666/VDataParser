@@ -25,7 +25,6 @@ from .status_bar import StatusBar
 from .new_market_dialog import NewMarketDialog
 from .database_settings_dialog import DatabaseSettingsDialog
 from .project_creation_service import ProjectCreationService
-from backend import SQLiteInterface, MySQLInterface
 
 
 class MainWindow(QMainWindow):
@@ -99,7 +98,6 @@ class MainWindow(QMainWindow):
         self.ui.action_restore_seller.triggered.connect(
             self.market_view.data_view.restore_changes)
 
-        self.ui.action_connect_db.triggered.connect(self.connect_to_db)
         self.ui.action_disconnect_db.triggered.connect(self.disconnect_from_db)
         self.ui.action_upload_data.triggered.connect(self.upload_data)
         self.ui.action_export_data.triggered.connect(self.export_data)
@@ -377,11 +375,6 @@ class MainWindow(QMainWindow):
             mch.set_database(host, port)
             mch.set_db_credentials(name, user)
             self.save_project()
-
-    @Slot()
-    def connect_to_db(self):
-        """Connect to the configured database via the facade."""
-        self.market_facade.connect_to_db(SQLiteInterface(database=":memory:"))
 
     @Slot()
     def disconnect_from_db(self):
