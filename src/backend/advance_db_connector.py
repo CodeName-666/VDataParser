@@ -2,12 +2,26 @@
 """Utility helpers for exporting and updating databases using JSON."""
 
 from .basic_db_connector import BasicDBConnector
+from .interface import DatabaseOperations
 import json
 
 
 class AdvancedDBManager(BasicDBConnector):
     """Extension of :class:`BasicDBConnector` with JSON export features."""
-    
+
+    def __init__(self, db_operator: DatabaseOperations):
+        """Initialise the advanced manager with a concrete database interface.
+
+        Parameters
+        ----------
+        db_operator:
+            Implementation of :class:`DatabaseOperations` providing the
+            low-level database access.
+        """
+        super().__init__(db_operator)
+        self.params = db_operator.params
+        self.db_type = type(db_operator).__name__.replace("Interface", "").lower()
+
     def export_to_custom_json(self, output_file: str):
         """Export the entire database into a phpMyAdmin compatible JSON file."""
         export_data = []
