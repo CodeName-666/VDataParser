@@ -24,7 +24,7 @@ from .status_bar import StatusBar
 from .new_market_dialog import NewMarketDialog
 from .database_settings_dialog import DatabaseSettingsDialog
 from .project_creation_service import ProjectCreationService
-from backend import SQLiteInterface
+from backend import SQLiteInterface, MySQLInterface
 
 
 class MainWindow(QMainWindow):
@@ -197,9 +197,31 @@ class MainWindow(QMainWindow):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             market_loader_info = dialog.get_result()
             if market_loader_info["mode"] == "project":
-                ret = self.market_facade.load_local_market_porject(self.market_view, market_loader_info["path"])
+                ret = self.market_facade.load_local_market_porject(
+                    self.market_view, market_loader_info["path"]
+                )
             elif market_loader_info["mode"] == "mysql":
-                ret = self.market_facade.load_online_market(self.market_view, market_loader_info)
+                try:
+                    server_if = MySQLInterface(
+                        host=market_loader_info["host"],
+                        port=market_loader_info["port"],
+                        user=market_loader_info["user"],
+                        password=market_loader_info["password"],
+                    )
+                    self.market_facade.connect_to_db(server_if)
+                    self.market_facade.status_info.emit(
+                        "INFO",
+                        f"Server verbunden: {market_loader_info['host']}:{market_loader_info['port']}",
+                    )
+                except Exception as exc:  # pragma: no cover - runtime path
+                    self.market_facade.status_info.emit(
+                        "ERROR", f"Verbindung fehlgeschlagen: {exc}"
+                    )
+                    self.market_facade.db_disconnected.emit()
+                    return
+                ret = self.market_facade.load_online_market(
+                    self.market_view, market_loader_info
+                )
             else:
                 # QMessageBox.critical(self, "Error", "Invalid market loader mode selected.")
                 return
