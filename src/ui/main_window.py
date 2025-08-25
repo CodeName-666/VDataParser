@@ -17,6 +17,7 @@ from .main_menu import MainMenu
 from .market import Market
 from .pdf_display import PdfDisplay
 from .market_loader_dialog import MarketLoaderDialog
+from .database_selection_dialog import DatabaseSelectionDialog
 from .output_window import OutputWindow
 from .generator_worker import GeneratorWorker
 from data import MarketFacade
@@ -213,12 +214,47 @@ class MainWindow(QMainWindow):
                         "INFO",
                         f"Server verbunden: {market_loader_info['host']}:{market_loader_info['port']}",
                     )
+                    databases = server_if.list_databases()
                 except Exception as exc:  # pragma: no cover - runtime path
                     self.market_facade.status_info.emit(
                         "ERROR", f"Verbindung fehlgeschlagen: {exc}"
                     )
                     self.market_facade.db_disconnected.emit()
                     return
+
+                selected_db = None
+                db_name = market_loader_info.get("database")
+                if db_name:
+                    matches = [db for db in databases if db.startswith(db_name)]
+                    if len(matches) == 1 and matches[0] == db_name:
+                        selected_db = matches[0]
+                    elif matches:
+                        dlg = DatabaseSelectionDialog(matches, self)
+                        if dlg.exec() != QDialog.DialogCode.Accepted:
+                            self.market_facade.db_disconnected.emit()
+                            return
+                        selected_db = dlg.get_selection()
+                        if not selected_db:
+                            self.market_facade.db_disconnected.emit()
+                            return
+                    else:
+                        self.market_facade.status_info.emit(
+                            "ERROR", "Keine passende Datenbank gefunden"
+                        )
+                        self.market_facade.db_disconnected.emit()
+                        return
+                else:
+                    dlg = DatabaseSelectionDialog(databases, self)
+                    if dlg.exec() != QDialog.DialogCode.Accepted:
+                        self.market_facade.db_disconnected.emit()
+                        return
+                    selected_db = dlg.get_selection()
+                    if not selected_db:
+                        self.market_facade.db_disconnected.emit()
+                        return
+
+                market_loader_info["database"] = selected_db
+
                 ret = self.market_facade.load_online_market(
                     self.market_view, market_loader_info
                 )
