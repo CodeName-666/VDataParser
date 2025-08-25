@@ -214,3 +214,66 @@ class MySQLInterface(DatabaseOperations):
             if temp_conn and temp_conn.is_connected():
                 try: temp_conn.close()
                 except Exception as conn_e: print(f"Warnung: Fehler beim Schließen der temp. MySQL-Verbindung: {conn_e}")
+
+    def list_databases(self, prefix: str | None = None) -> list[str]:
+        """Return a list of databases available on the server.
+
+        Parameters
+        ----------
+        prefix : str | None, optional
+            Filter databases starting with this prefix.
+
+        Returns
+        -------
+        list[str]
+            Names of the available databases.
+
+        Raises
+        ------
+        DatabaseConnectionError
+            If listing the databases fails.
+        """
+
+        temp_conn = None
+        cursor = None
+        try:
+            info = f" mit Präfix '{prefix}'" if prefix else ""
+            print(f"Liste MySQL-Datenbanken{info}...")
+            temp_conn = mysql_connector_lib.connect(
+                host=self.params.get("host", "localhost"),
+                user=self.params.get("user"),
+                password=self.params.get("password"),
+            )
+            cursor = temp_conn.cursor()
+            if prefix:
+                query = "SHOW DATABASES LIKE %s"
+                cursor.execute(query, (prefix + '%',))
+            else:
+                cursor.execute("SHOW DATABASES")
+            result = cursor.fetchall()
+            databases = [row[0] for row in result]
+            print(f"Gefundene MySQL-Datenbanken: {databases}")
+            return databases
+        except mysql_connector_lib.Error as e:
+            raise DatabaseConnectionError(
+                f"Fehler beim Abrufen der MySQL-Datenbanken: {e}"
+            ) from e
+        except Exception as e:
+            raise DatabaseConnectionError(
+                f"Unerwarteter Fehler beim Abrufen der MySQL-Datenbanken: {e}"
+            ) from e
+        finally:
+            if cursor:
+                try:
+                    cursor.close()
+                except Exception as cur_e:
+                    print(
+                        f"Warnung: Fehler beim Schließen des MySQL-List-Cursors: {cur_e}"
+                    )
+            if temp_conn and temp_conn.is_connected():
+                try:
+                    temp_conn.close()
+                except Exception as conn_e:
+                    print(
+                        f"Warnung: Fehler beim Schließen der temp. MySQL-Verbindung: {conn_e}"
+                    )

@@ -44,6 +44,11 @@ class DatabaseOperations(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def list_databases(self, prefix: str | None = None) -> list[str]:
+        """Return all databases optionally filtered by ``prefix``."""
+        pass
+
+    @abc.abstractmethod
     def get_placeholder_style(self) -> str:
         """Return the placeholder style used by this DB (``"%s"`` or ``"?"``)."""
         pass

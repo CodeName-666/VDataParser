@@ -83,6 +83,14 @@ class AdvancedDBManagerThread(QThread):
         """Queue a callable to be executed in the thread."""
         self._tasks.put((func, args, kwargs))
 
+    def list_databases(self, prefix: str | None = None) -> None:
+        """Queue a task to list databases via the manager.
+
+        The resulting list or any raised exception is emitted through the
+        ``task_finished`` or ``task_error`` signal respectively.
+        """
+        self.add_task(lambda mgr: mgr.list_databases(prefix))
+
     def stop(self) -> None:
         """Signal the thread to stop and wait for its termination."""
         self._stop_event.set()

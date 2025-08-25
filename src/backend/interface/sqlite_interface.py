@@ -170,4 +170,42 @@ class SQLiteInterface(DatabaseOperations):
                 try:
                     temp_conn.close()
                 except sqlite3.Error as close_e:
-                    print(f"Warnung: Fehler beim Schließen der temporären SQLite Verbindung: {close_e}")
+                    print(
+                        f"Warnung: Fehler beim Schließen der temporären SQLite Verbindung: {close_e}"
+                    )
+
+    def list_databases(self, prefix: str | None = None) -> list[str]:
+        """Return available SQLite database files in the configured directory.
+
+        Parameters
+        ----------
+        prefix : str | None, optional
+            Filter files beginning with this prefix.
+
+        Returns
+        -------
+        list[str]
+            Names of matching database files.
+
+        Raises
+        ------
+        DatabaseConnectionError
+            If accessing the directory fails.
+        """
+
+        directory = os.path.dirname(self._db_path_template) or os.getcwd()
+        try:
+            info = f" mit Präfix '{prefix}'" if prefix else ""
+            print(
+                f"Liste SQLite-Datenbanken im Verzeichnis '{directory}'{info}..."
+            )
+            files = os.listdir(directory)
+            databases = [
+                f for f in files if f.endswith('.db') and (not prefix or f.startswith(prefix))
+            ]
+            print(f"Gefundene SQLite-Datenbanken: {databases}")
+            return databases
+        except OSError as e:
+            raise DatabaseConnectionError(
+                f"Fehler beim Abrufen der SQLite-Datenbanken: {e}"
+            ) from e
