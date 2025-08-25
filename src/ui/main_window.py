@@ -1,5 +1,5 @@
 # PySide6 imports
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtCore import Qt, Slot, QEventLoop
 from PySide6.QtWidgets import (
     QMainWindow, QMessageBox, QFileDialog, QDialog, QLabel, QLineEdit
 )
@@ -8,6 +8,7 @@ from pathlib import Path
 
 # Local imports
 from data import DataManager, MarketConfigHandler
+from backend import MySQLInterface
 from .stack_widget import StackWidget
 from .generated import MainWindowUi
 from .generated import AboutUi
@@ -212,7 +213,36 @@ class MainWindow(QMainWindow):
                         "INFO",
                         f"Server verbunden: {market_loader_info['host']}:{market_loader_info['port']}",
                     )
-                    databases = server_if.list_databases()
+
+                    db_thread = self.market_facade._db_thread
+                    if db_thread is None:
+                        self.market_facade.status_info.emit(
+                            "ERROR", "DB-Thread konnte nicht gestartet werden"
+                        )
+                        return
+
+                    databases: list[str] = []
+                    loop = QEventLoop()
+
+                    def _handle_finished(result: object) -> None:  # pragma: no cover - Qt slot
+                        nonlocal databases
+                        databases = result
+                        loop.quit()
+
+                    def _handle_error(exc: Exception) -> None:  # pragma: no cover - Qt slot
+                        self.market_facade.status_info.emit(
+                            "ERROR", f"Verbindung fehlgeschlagen: {exc}"
+                        )
+                        self.market_facade.db_disconnected.emit()
+                        loop.quit()
+
+                    db_thread.task_finished.connect(_handle_finished)
+                    db_thread.task_error.connect(_handle_error)
+                    db_thread.list_databases()
+                    loop.exec()
+                    db_thread.task_finished.disconnect(_handle_finished)
+                    db_thread.task_error.disconnect(_handle_error)
+
                 except Exception as exc:  # pragma: no cover - runtime path
                     self.market_facade.status_info.emit(
                         "ERROR", f"Verbindung fehlgeschlagen: {exc}"
