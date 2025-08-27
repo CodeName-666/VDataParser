@@ -1,5 +1,5 @@
 # PySide6 imports
-from PySide6.QtCore import Qt, Slot, QEventLoop
+from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (
     QMainWindow, QMessageBox, QFileDialog, QDialog, QLabel, QLineEdit
 )
@@ -7,8 +7,7 @@ from pathlib import Path
 
 
 # Local imports
-from data import DataManager, MarketConfigHandler
-from backend import MySQLInterface
+from data import MarketConfigHandler
 from .stack_widget import StackWidget
 from .generated import MainWindowUi
 from .generated import AboutUi
@@ -194,85 +193,36 @@ class MainWindow(QMainWindow):
         """
         ret = False
         dialog = MarketLoaderDialog(self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            market_loader_info = dialog.get_result()
-            if market_loader_info["mode"] == "project":
-                ret = self.market_facade.load_local_market_porject(
-                    self.market_view, market_loader_info["path"]
-                )
-            elif market_loader_info["mode"] == "mysql":
-                try:
-                    server_if = MySQLInterface(
-                        host=market_loader_info["host"],
-                        port=market_loader_info["port"],
-                        user=market_loader_info["user"],
-                        password=market_loader_info["password"],
-                    )
-                    self.market_facade.connect_to_db(server_if)
-                    self.market_facade.status_info.emit(
-                        "INFO",
-                        f"Server verbunden: {market_loader_info['host']}:{market_loader_info['port']}",
-                    )
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
 
-                    db_thread = self.market_facade._db_thread
-                    if db_thread is None:
-                        self.market_facade.status_info.emit(
-                            "ERROR", "DB-Thread konnte nicht gestartet werden"
-                        )
-                        return
+        market_loader_info = dialog.get_result()
+        if market_loader_info["mode"] == "project":
+            ret = self.market_facade.load_local_market_porject(
+                self.market_view, market_loader_info["path"]
+            )
+        elif market_loader_info["mode"] == "mysql":
+            if not self.market_facade.connect_to_mysql_server(
+                market_loader_info["host"],
+                market_loader_info["port"],
+                market_loader_info["user"],
+                market_loader_info["password"],
+            ):
+                return
 
-                    databases: list[str] = []
-                    loop = QEventLoop()
+            databases = self.market_facade.list_databases()
+            if not databases:
+                self.market_facade.db_disconnected.emit()
+                return
 
-                    def _handle_finished(result: object) -> None:  # pragma: no cover - Qt slot
-                        nonlocal databases
-                        databases = result
-                        loop.quit()
-
-                    def _handle_error(exc: Exception) -> None:  # pragma: no cover - Qt slot
-                        self.market_facade.status_info.emit(
-                            "ERROR", f"Verbindung fehlgeschlagen: {exc}"
-                        )
-                        self.market_facade.db_disconnected.emit()
-                        loop.quit()
-
-                    db_thread.task_finished.connect(_handle_finished)
-                    db_thread.task_error.connect(_handle_error)
-                    db_thread.list_databases()
-                    loop.exec()
-                    db_thread.task_finished.disconnect(_handle_finished)
-                    db_thread.task_error.disconnect(_handle_error)
-
-                except Exception as exc:  # pragma: no cover - runtime path
-                    self.market_facade.status_info.emit(
-                        "ERROR", f"Verbindung fehlgeschlagen: {exc}"
-                    )
-                    self.market_facade.db_disconnected.emit()
-                    return
-
-                selected_db = None
-                db_name = market_loader_info.get("database")
-                if db_name:
-                    matches = [db for db in databases if db.startswith(db_name)]
-                    if len(matches) == 1 and matches[0] == db_name:
-                        selected_db = matches[0]
-                    elif matches:
-                        dlg = DatabaseSelectionDialog(matches, self)
-                        if dlg.exec() != QDialog.DialogCode.Accepted:
-                            self.market_facade.db_disconnected.emit()
-                            return
-                        selected_db = dlg.get_selection()
-                        if not selected_db:
-                            self.market_facade.db_disconnected.emit()
-                            return
-                    else:
-                        self.market_facade.status_info.emit(
-                            "ERROR", "Keine passende Datenbank gefunden"
-                        )
-                        self.market_facade.db_disconnected.emit()
-                        return
-                else:
-                    dlg = DatabaseSelectionDialog(databases, self)
+            selected_db = None
+            db_name = market_loader_info.get("database")
+            if db_name:
+                matches = [db for db in databases if db.startswith(db_name)]
+                if len(matches) == 1 and matches[0] == db_name:
+                    selected_db = matches[0]
+                elif matches:
+                    dlg = DatabaseSelectionDialog(matches, self)
                     if dlg.exec() != QDialog.DialogCode.Accepted:
                         self.market_facade.db_disconnected.emit()
                         return
@@ -280,18 +230,32 @@ class MainWindow(QMainWindow):
                     if not selected_db:
                         self.market_facade.db_disconnected.emit()
                         return
-
-                market_loader_info["database"] = selected_db
-
-                ret = self.market_facade.load_online_market(
-                    self.market_view, market_loader_info
-                )
+                else:
+                    self.market_facade.status_info.emit(
+                        "ERROR", "Keine passende Datenbank gefunden"
+                    )
+                    self.market_facade.db_disconnected.emit()
+                    return
             else:
-                # QMessageBox.critical(self, "Error", "Invalid market loader mode selected.")
-                return
-            # self.market_view.set_data(market_data)
-            if ret:
-                self.open_view("Market")
+                dlg = DatabaseSelectionDialog(databases, self)
+                if dlg.exec() != QDialog.DialogCode.Accepted:
+                    self.market_facade.db_disconnected.emit()
+                    return
+                selected_db = dlg.get_selection()
+                if not selected_db:
+                    self.market_facade.db_disconnected.emit()
+                    return
+
+            market_loader_info["database"] = selected_db
+
+            ret = self.market_facade.load_online_market(
+                self.market_view, market_loader_info
+            )
+        else:
+            return
+
+        if ret:
+            self.open_view("Market")
 
     @Slot()
     def create_new_market(self):
