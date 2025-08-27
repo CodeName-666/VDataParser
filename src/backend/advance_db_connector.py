@@ -28,7 +28,7 @@ class AdvancedDBManager(QObject, BasicDBConnector):
 
     connecting = Signal()
     
-    def __init__(self, db_operator):
+    def __init__(self, db_operator: DatabaseOperations):
         """Initialise the manager with a concrete ``DatabaseOperations`` object.
 
         Parameters

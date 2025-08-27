@@ -46,8 +46,8 @@ class AdvancedDBManagerThread(QThread):
             Optional Qt parent.
         """
         super().__init__(parent)
-        self.manager = AdvancedDBManager(self._db_interface)
         self._db_interface = db_interface
+        self.manager = AdvancedDBManager(self._db_interface)
         self._tasks: "queue.Queue[Tuple[Callable[..., Any], tuple, dict]]" = queue.Queue()
         self._stop_event = threading.Event()
 
