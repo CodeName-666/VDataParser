@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from typing import List
 
-from PySide6.QtCore import QObject, Slot, Signal
+from PySide6.QtCore import QObject, Slot, Signal, QEventLoop
 
 from backend import MySQLInterface
 from backend.advanced_db_manager_thread import AdvancedDBManagerThread
@@ -31,6 +31,91 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
         self._market_list: List = []
         self._db_thread: AdvancedDBManagerThread | None = None
+
+    def connect_to_mysql_server(
+        self, host: str, port: int, user: str, password: str
+    ) -> bool:
+        """Establish a connection to a MySQL server using a background thread.
+
+        Parameters
+        ----------
+        host:
+            Server address of the MySQL instance.
+        port:
+            Port number of the MySQL server.
+        user:
+            Username used for authentication.
+        password:
+            Password for the given user.
+
+        Returns
+        -------
+        bool
+            ``True`` if the connection thread was started successfully,
+            ``False`` otherwise.
+        """
+
+        try:
+            server_if = MySQLInterface(
+                host=host, port=port, user=user, password=password
+            )
+            self.connect_to_db(server_if)
+            self.status_info.emit(
+                "INFO", f"Server verbunden: {host}:{port}"
+            )
+            return self._db_thread is not None
+        except Exception as exc:  # pragma: no cover - runtime path
+            self.status_info.emit(
+                "ERROR", f"Verbindung fehlgeschlagen: {exc}"
+            )
+            self.db_disconnected.emit()
+            return False
+
+    def list_databases(self, prefix: str | None = None) -> list[str]:
+        """Return a list of databases available on the connected server.
+
+        Parameters
+        ----------
+        prefix:
+            Optional prefix to filter database names.
+
+        Returns
+        -------
+        list[str]
+            A list of database names. An empty list is returned if the
+            database thread is not running or an error occurred.
+        """
+
+        if self._db_thread is None:
+            self.status_info.emit(
+                "ERROR", "DB-Thread konnte nicht gestartet werden"
+            )
+            return []
+
+        databases: list[str] = []
+        loop = QEventLoop()
+
+        def _handle_finished(result: object) -> None:  # pragma: no cover - Qt slot
+            nonlocal databases
+            databases = result
+            loop.quit()
+
+        def _handle_error(exc: Exception) -> None:  # pragma: no cover - Qt slot
+            self.status_info.emit(
+                "ERROR", f"Verbindung fehlgeschlagen: {exc}"
+            )
+            self.db_disconnected.emit()
+            loop.quit()
+
+        db_thread = self._db_thread
+        db_thread.task_finished.connect(_handle_finished)
+        db_thread.task_error.connect(_handle_error)
+        db_thread.list_databases(prefix)
+        loop.exec()
+        db_thread.task_finished.disconnect(_handle_finished)
+        db_thread.task_error.disconnect(_handle_error)
+
+        return databases
 
     def load_online_market(self, market, info: dict) -> bool:
         """Load market data from a MySQL database.
