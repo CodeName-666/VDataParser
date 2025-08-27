@@ -27,14 +27,15 @@ class AdvancedDBManager(QObject, BasicDBConnector):
     """Emitted when the connection has been closed or lost."""
 
     connecting = Signal()
-    """Emitted when a connection attempt starts."""
-
+    
+    def __init__(self, db_operator):
+        """Initialise the manager with a concrete ``DatabaseOperations`` object.
 
         Parameters
         ----------
         db_operator:
             Implementation of :class:`~backend.interface.DatabaseOperations`
-            providing the low level database access.
+            providing the low level database access.    
         """
         QObject.__init__(self)
         BasicDBConnector.__init__(self, db_operator)

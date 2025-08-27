@@ -46,20 +46,21 @@ class AdvancedDBManagerThread(QThread):
             Optional Qt parent.
         """
         super().__init__(parent)
+        self.manager = AdvancedDBManager(self._db_interface)
         self._db_interface = db_interface
         self._tasks: "queue.Queue[Tuple[Callable[..., Any], tuple, dict]]" = queue.Queue()
         self._stop_event = threading.Event()
 
     def run(self) -> None:  # pragma: no cover - thread loop
         """Process queued tasks until :meth:`stop` is called."""
-        manager = AdvancedDBManager(self._db_interface)
+        
 
         # Forward connection state signals to the outside
-        manager.connected.connect(self.connected)
-        manager.disconnected.connect(self.disconnected)
-        manager.connecting.connect(self.connecting)
+        self.manager.connected.connect(self.connected)
+        self.manager.disconnected.connect(self.disconnected)
+        self.manager.connecting.connect(self.connecting)
 
-        manager.connect()
+        self.manager.connect()
         last_check = monotonic()
         try:
             while not self._stop_event.is_set():
@@ -69,15 +70,15 @@ class AdvancedDBManagerThread(QThread):
                     func = None
                 if func is not None:
                     try:
-                        result = func(manager, *args, **kwargs)
+                        result = func(self.manager, *args, **kwargs)
                         self.task_finished.emit(result)
                     except Exception as exc:  # pragma: no cover - error path
                         self.task_error.emit(exc)
                 if monotonic() - last_check >= 10:
-                    manager._check_connection()
+                    self.manager._check_connection()
                     last_check = monotonic()
         finally:
-            manager.disconnect()
+            self.manager.disconnect()
 
     def add_task(self, func: Callable[..., Any], *args: Any, **kwargs: Any) -> None:
         """Queue a callable to be executed in the thread."""
