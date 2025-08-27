@@ -13,6 +13,7 @@ still alive and automatically retries to reconnect if necessary.
 from PySide6.QtCore import QObject, QTimer, Signal
 
 from .basic_db_connector import BasicDBConnector
+from .interface import DatabaseOperations
 import json
 
 
@@ -28,8 +29,6 @@ class AdvancedDBManager(QObject, BasicDBConnector):
     connecting = Signal()
     """Emitted when a connection attempt starts."""
 
-    def __init__(self, db_operator):
-        """Initialise the manager with a concrete ``DatabaseOperations`` object.
 
         Parameters
         ----------
