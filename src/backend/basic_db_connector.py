@@ -4,25 +4,54 @@ from .interface import (
     DatabaseOperations
 )
 
+from PySide6.QtCore import QObject, QTimer, Signal
 
 # (Code from the previous response: Imports, Exceptions, DatabaseOperations,
 #  SQLiteConnector, MySQLConnector - assuming they are already defined above)
 
 # --- Main BasicDBConnector (Continued) ---
-class BasicDBConnector:
+class BasicDBConnector(QObject):
     """Generic helper that delegates all operations to a ``DatabaseOperations`` implementation."""
 
-    def __init__(self, db_operator: DatabaseOperations):
-        """Initialise the connector with a concrete ``DatabaseOperations`` instance."""
+    def __init__(self, db_operator: DatabaseOperations | None = None):
+        """Initialise the connector with a concrete ``DatabaseOperations`` instance.
+
+        Parameters
+        ----------
+        db_operator : DatabaseOperations | None
+            Concrete implementation used to perform DB operations. Must be an
+            instance of a class implementing :class:`DatabaseOperations` (e.g.
+            ``SQLiteInterface`` or ``MySQLInterface``).
+
+        Raises
+        ------
+        RuntimeError
+            If ``db_operator`` is omitted or ``None`` to provide a clearer
+            error than a missing-argument ``TypeError``.
+        TypeError
+            If ``db_operator`` is not an instance of ``DatabaseOperations``.
+        """
+
+        QObject.__init__(self) # No super() to avoid MRO issues with multiple inheritance
+        
+        if db_operator is None:
+            raise RuntimeError(
+                "BasicDBConnector wurde ohne 'db_operator' initialisiert. "
+                "Übergeben Sie eine Instanz einer DatabaseOperations-Implementierung, "
+                "z. B. SQLiteInterface(database='pfad/zur.db') oder "
+                "MySQLInterface(host='localhost', user='...', password='...')."
+            )
         if not isinstance(db_operator, DatabaseOperations):
-            raise TypeError("db_operator muss eine Instanz einer DatabaseOperations-Implementierung sein.")
+            raise TypeError(
+                "db_operator muss eine Instanz einer DatabaseOperations-Implementierung sein."
+            )
         self.operator = db_operator
         self.conn = None
         # Store the class name for easier logging/messaging
         self.db_type_name = type(db_operator).__name__.replace("Connector", "")
 
 
-    def connect(self, database_override: str = None):
+    def connect_to_db(self, database_override: str = None):
         """Connect to the database via the provided operator."""
         if self.conn:
             print(f"Bereits verbunden ({self.db_type_name}).")
@@ -40,7 +69,7 @@ class BasicDBConnector:
             raise DatabaseConnectionError(f"Unerwarteter Fehler beim Verbindungsaufbau ({self.db_type_name}): {e}") from e
 
 
-    def disconnect(self):
+    def disconnect_from_db(self):
         """Close the database connection using the operator."""
         if self.conn:
             # Delegate disconnection to the specific operator

@@ -14,10 +14,11 @@ from PySide6.QtCore import QObject, QTimer, Signal
 
 from .basic_db_connector import BasicDBConnector
 from .interface import DatabaseOperations
+from .interface import SQLiteInterface  # only used in the self-test example
 import json
 
 
-class AdvancedDBManager(QObject, BasicDBConnector):
+class AdvancedDBManager(BasicDBConnector):
     """Extended database manager with JSON helpers and connection signals."""
 
     connected = Signal()
@@ -37,7 +38,7 @@ class AdvancedDBManager(QObject, BasicDBConnector):
             Implementation of :class:`~backend.interface.DatabaseOperations`
             providing the low level database access.    
         """
-        QObject.__init__(self)
+        #QObject.__init__(self)
         BasicDBConnector.__init__(self, db_operator)
 
         # Expose ``params`` and a simplified ``db_type`` attribute for the
@@ -52,7 +53,7 @@ class AdvancedDBManager(QObject, BasicDBConnector):
     # ------------------------------------------------------------------
     # Connection handling
     # ------------------------------------------------------------------
-    def connect(self, database_override: str = None):  # type: ignore[override]
+    def connect_to_db(self, database_override: str = None):  # type: ignore[override]
         """Connect to the database and start the health check timer.
 
         The ``connecting`` signal is emitted before attempting to establish the
@@ -63,7 +64,9 @@ class AdvancedDBManager(QObject, BasicDBConnector):
 
         self.connecting.emit()
         try:
-            super().connect(database_override)
+            # Note: QObject must be first in the MRO, so using super() would
+            # resolve to QObject.connect here. Call the connector explicitly.
+            BasicDBConnector.connect_to_db(self, database_override)
         except Exception:
             self.disconnected.emit()
             return False
@@ -71,11 +74,12 @@ class AdvancedDBManager(QObject, BasicDBConnector):
         self.connected.emit()
         return True
 
-    def disconnect(self):  # type: ignore[override]
+    def disconnect_from_db(self):  # type: ignore[override]
         """Disconnect from the database and stop the health check timer."""
 
         self._connection_timer.stop()
-        super().disconnect()
+        # See note in connect(): avoid super() due to QObject in MRO.
+        BasicDBConnector.disconnect_from_db(self)
         self.disconnected.emit()
 
     # ------------------------------------------------------------------
@@ -88,7 +92,7 @@ class AdvancedDBManager(QObject, BasicDBConnector):
             return
         self._connection_timer.stop()
         # ``connect`` emits the appropriate signals
-        self.connect()
+        self.connect_to_db()
 
     def _is_connection_alive(self) -> bool:
         """Return ``True`` if the database connection appears to be valid."""
@@ -207,7 +211,9 @@ class AdvancedDBManager(QObject, BasicDBConnector):
 # Beispielhafte Nutzung der AdvancedDBManager-Klasse
 if __name__ == "__main__":
     # Beispiel: Verwendung mit einer SQLite-Datenbank
-    manager = AdvancedDBManager("sqlite", database="example.db")
+    # AdvancedDBManager erwartet ein Objekt, das DatabaseOperations implementiert
+    # (z. B. SQLiteInterface oder MySQLInterface), nicht String-Parameter.
+    manager = AdvancedDBManager(SQLiteInterface(database="example.db"))
     manager.connect()
     
     # Beispiel: Erstelle (falls noch nicht vorhanden) eine Beispiel-Tabelle

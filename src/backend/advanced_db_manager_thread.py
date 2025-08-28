@@ -51,16 +51,16 @@ class AdvancedDBManagerThread(QThread):
         self._tasks: "queue.Queue[Tuple[Callable[..., Any], tuple, dict]]" = queue.Queue()
         self._stop_event = threading.Event()
 
-    def run(self) -> None:  # pragma: no cover - thread loop
-        """Process queued tasks until :meth:`stop` is called."""
-        
-
-        # Forward connection state signals to the outside
+          # Forward connection state signals to the outside
         self.manager.connected.connect(self.connected)
         self.manager.disconnected.connect(self.disconnected)
         self.manager.connecting.connect(self.connecting)
 
-        self.manager.connect()
+
+    def run(self) -> None:  # pragma: no cover - thread loop
+        """Process queued tasks until :meth:`stop` is called."""
+        
+        self.manager.connect_to_db()
         last_check = monotonic()
         try:
             while not self._stop_event.is_set():
@@ -78,7 +78,7 @@ class AdvancedDBManagerThread(QThread):
                     self.manager._check_connection()
                     last_check = monotonic()
         finally:
-            self.manager.disconnect()
+            self.manager.disconnect_from_db()
 
     def add_task(self, func: Callable[..., Any], *args: Any, **kwargs: Any) -> None:
         """Queue a callable to be executed in the thread."""
