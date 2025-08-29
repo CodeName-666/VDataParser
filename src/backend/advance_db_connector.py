@@ -112,7 +112,11 @@ class AdvancedDBManager(BasicDBConnector):
             return False
     
     def export_to_custom_json(self, output_file: str):
-        """Export the entire database into a phpMyAdmin compatible JSON file."""
+        """Export the entire database into a phpMyAdmin compatible JSON file.
+
+        Date and time values in the result set are converted to strings so the
+        output can be serialized by :mod:`json`.
+        """
         export_data = []
         # Header hinzufügen
         header = {
@@ -164,7 +168,13 @@ class AdvancedDBManager(BasicDBConnector):
         # Speichern in die Output-Datei
         try:
             with open(output_file, 'w', encoding='utf-8') as f:
-                json.dump(export_data, f, ensure_ascii=False, indent=4)
+                json.dump(
+                    export_data,
+                    f,
+                    ensure_ascii=False,
+                    indent=4,
+                    default=str,
+                )
             print(f"Database export erfolgreich nach '{output_file}' geschrieben.")
         except Exception as e:
             print("Fehler beim Speichern des Exports:", e)
@@ -201,7 +211,13 @@ class AdvancedDBManager(BasicDBConnector):
                 data = json.load(f)
             modified_data = modification_func(data)
             with open(json_file, 'w', encoding='utf-8') as f:
-                json.dump(modified_data, f, ensure_ascii=False, indent=4)
+                json.dump(
+                    modified_data,
+                    f,
+                    ensure_ascii=False,
+                    indent=4,
+                    default=str,
+                )
             print("Modifizierter Export wurde erfolgreich gespeichert.")
         except Exception as e:
             print("Fehler beim Modifizieren des JSON Exports:", e)
