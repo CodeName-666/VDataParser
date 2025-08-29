@@ -3,7 +3,7 @@
 import shutil
 import tempfile
 from pathlib import Path
-from typing import List
+from typing import List, Callable
 
 from PySide6.QtCore import QObject, Slot, Signal, QEventLoop
 
@@ -118,17 +118,25 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
         return databases
 
-    def load_online_market(self, market, info: dict) -> bool:
-        """Load market data from a MySQL database.
+    def download_market_export(
+        self, info: dict, output_path: str, on_finished: Callable[[bool], None]
+    ) -> bool:
+        """Export a MySQL database to ``output_path`` asynchronously.
 
         Parameters
         ----------
-        market:
-            Target :class:`Market` view.
         info:
-            Dictionary containing connection parameters (host, port, database,
-            user and password). ``database`` must specify the exact name of the
-            database to load.
+            Connection parameters including ``host``, ``port``, ``user``,
+            ``password`` and ``database``.
+        output_path:
+            Destination file path where the JSON export will be written.
+        on_finished:
+            Callback invoked with ``True`` on success and ``False`` on failure.
+
+        Returns
+        -------
+        bool
+            ``True`` if the export task was started, ``False`` otherwise.
         """
 
         host = info.get("host")
@@ -139,24 +147,62 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
         if not database:
             self.status_info.emit("ERROR", "Keine Datenbank angegeben")
+            on_finished(False)
             return False
 
-        tmp_path = None
         try:
             mysql_if = MySQLInterface(
-                host=host,
-                user=user,
-                password=password,
-                database=database,
-                port=port,
+                host=host, user=user, password=password, database=database, port=port
             )
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
-                tmp_path = tmp.name
-
             db_thread = AdvancedDBManagerThread(mysql_if)
             self._db_thread = db_thread
 
+            def _cleanup() -> None:  # pragma: no cover - Qt slot
+                db_thread.stop()
+                self._db_thread = None
+                db_thread.task_finished.disconnect(_handle_finished)
+                db_thread.task_error.disconnect(_handle_error)
+
             def _handle_finished(_result: object) -> None:  # pragma: no cover - Qt slot
+                _cleanup()
+                on_finished(True)
+
+            def _handle_error(exc: Exception) -> None:  # pragma: no cover - Qt slot
+                self.status_info.emit(
+                    "ERROR", f"Fehler beim Laden der Datenbank: {exc}"
+                )
+                _cleanup()
+                on_finished(False)
+
+            db_thread.task_finished.connect(_handle_finished)
+            db_thread.task_error.connect(_handle_error)
+            db_thread.start()
+            db_thread.add_task(lambda m: m.export_to_custom_json(output_path))
+            return True
+        except Exception as e:  # pragma: no cover - error path
+            self.status_info.emit(
+                "ERROR", f"Fehler beim Starten des DB-Threads: {e}"
+            )
+            on_finished(False)
+            return False
+
+    def load_online_market(self, market, info: dict) -> bool:
+        """Load market data from a MySQL database.
+
+        This helper uses :func:`download_market_export` to export the selected
+        database to a temporary file and then loads it into ``market``. The
+        caller is still responsible for switching views.
+        """
+
+        database = info.get("database")
+        host = info.get("host")
+        port = info.get("port")
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
+            tmp_path = tmp.name
+
+        def _post(success: bool) -> None:  # pragma: no cover - Qt slot
+            if success:
                 new_observer = self.create_observer(market)
                 new_observer.connect_signals(market)
                 ret_local = new_observer.load_local_market_export(tmp_path)
@@ -168,42 +214,17 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                     self.status_info.emit(
                         "ERROR", "Daten konnten nicht geladen werden"
                     )
-                db_thread.stop()
-                self._db_thread = None
-                if Path(tmp_path).exists():
-                    try:
-                        Path(tmp_path).unlink()
-                    except OSError:
-                        pass
-
-            def _handle_error(exc: Exception) -> None:  # pragma: no cover - Qt slot
+            else:
                 self.status_info.emit(
-                    "ERROR", f"Fehler beim Laden der Datenbank: {exc}"
+                    "ERROR", "Daten konnten nicht geladen werden"
                 )
-                db_thread.stop()
-                self._db_thread = None
-                if Path(tmp_path).exists():
-                    try:
-                        Path(tmp_path).unlink()
-                    except OSError:
-                        pass
-
-            db_thread.task_finished.connect(_handle_finished)
-            db_thread.task_error.connect(_handle_error)
-            db_thread.start()
-            db_thread.add_task(lambda m: m.export_to_custom_json(tmp_path))
-
-            return True
-        except Exception as e:  # pragma: no cover - error path
-            if tmp_path and Path(tmp_path).exists():
+            if Path(tmp_path).exists():
                 try:
                     Path(tmp_path).unlink()
                 except OSError:
                     pass
-            self.status_info.emit(
-                "ERROR", f"Fehler beim Starten des DB-Threads: {e}"
-            )
-            return False
+
+        return self.download_market_export(info, tmp_path, _post)
 
     def connect_to_db(self, db_interface) -> None:
         """Start a background thread managing ``db_interface``."""
@@ -309,9 +330,10 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         """
 
         observer: MarketObserver = self.get_observer(market)
+        # Ensure an observer exists for ``market`` so a project can be
+        # initialised even if no data was loaded beforehand.
         if not observer:
-            self.status_info.emit("ERROR", "Kein Observer gefunden")
-            return False, None
+            observer = self.create_observer(market)
 
         if not target_dir:
             raise ValueError("target_dir must be provided")
