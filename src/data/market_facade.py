@@ -6,10 +6,13 @@ from pathlib import Path
 from typing import List
 
 from PySide6.QtCore import QObject, Slot, Signal, QEventLoop
+from PySide6.QtWidgets import QDialog
 
 from backend import MySQLInterface
 from backend.advanced_db_manager_thread import AdvancedDBManagerThread
 from objects import SettingsContentDataClass
+
+from ui.database_selection_dialog import DatabaseSelectionDialog
 
 from .market_observer import MarketObserver
 from .singleton_meta import SingletonMeta
@@ -117,7 +120,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
         return databases
 
-    def load_online_market(self, market, info: dict) -> bool:
+    def load_online_market(
+        self, market, info: dict, parent: QDialog | None = None
+    ) -> bool:
         """Load market data from a MySQL database.
 
         Parameters
@@ -127,18 +132,63 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
         info:
             Dictionary containing connection parameters (host, port, database,
             user and password).
+        parent:
+            Optional parent widget used for modal dialogs during database
+            selection.
         """
 
         host = info.get("host")
         port = info.get("port")
-        database = info.get("database")
         user = info.get("user")
         password = info.get("password")
+        database = info.get("database")
+
+        if not self.connect_to_mysql_server(host, port, user, password):
+            return False
+
+        databases = self.list_databases()
+        if not databases:
+            self.db_disconnected.emit()
+            return False
+
+        selected_db = None
+        if database:
+            matches = [db for db in databases if db.startswith(database)]
+            if len(matches) == 1 and matches[0] == database:
+                selected_db = matches[0]
+            elif matches:
+                dlg = DatabaseSelectionDialog(matches, parent)
+                if dlg.exec() != QDialog.DialogCode.Accepted:
+                    self.db_disconnected.emit()
+                    return False
+                selected_db = dlg.get_selection()
+                if not selected_db:
+                    self.db_disconnected.emit()
+                    return False
+            else:
+                self.status_info.emit("ERROR", "Keine passende Datenbank gefunden")
+                self.db_disconnected.emit()
+                return False
+        else:
+            dlg = DatabaseSelectionDialog(databases, parent)
+            if dlg.exec() != QDialog.DialogCode.Accepted:
+                self.db_disconnected.emit()
+                return False
+            selected_db = dlg.get_selection()
+            if not selected_db:
+                self.db_disconnected.emit()
+                return False
+
+        self.disconnect_from_db()
 
         tmp_path = None
         try:
             mysql_if = MySQLInterface(
-                host=host, user=user, password=password, database=database, port=port
+                host=host,
+                user=user,
+                password=password,
+                database=selected_db,
+                port=port,
             )
             with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
                 tmp_path = tmp.name
@@ -152,7 +202,7 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                 ret_local = new_observer.load_local_market_export(tmp_path)
                 if ret_local:
                     self.status_info.emit(
-                        "INFO", f"Online-Datenbank geladen: {database}@{host}:{port}"
+                        "INFO", f"Online-Datenbank geladen: {selected_db}@{host}:{port}"
                     )
                 else:
                     self.status_info.emit(
@@ -167,7 +217,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                         pass
 
             def _handle_error(exc: Exception) -> None:  # pragma: no cover - Qt slot
-                self.status_info.emit("ERROR", f"Fehler beim Laden der Datenbank: {exc}")
+                self.status_info.emit(
+                    "ERROR", f"Fehler beim Laden der Datenbank: {exc}"
+                )
                 db_thread.stop()
                 self._db_thread = None
                 if Path(tmp_path).exists():
@@ -188,7 +240,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                     Path(tmp_path).unlink()
                 except OSError:
                     pass
-            self.status_info.emit("ERROR", f"Fehler beim Starten des DB-Threads: {e}")
+            self.status_info.emit(
+                "ERROR", f"Fehler beim Starten des DB-Threads: {e}"
+            )
             return False
 
     def connect_to_db(self, db_interface) -> None:
