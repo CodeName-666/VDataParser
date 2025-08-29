@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (
     QMainWindow, QMessageBox, QFileDialog, QDialog
 )
 from pathlib import Path
+import tempfile
 
 
 # Local imports
@@ -190,7 +191,6 @@ class MainWindow(QMainWindow):
         """
         Switches the currently displayed view in the stack to the market view.
         """
-        ret = False
         dialog = MarketLoaderDialog(self)
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
@@ -200,6 +200,9 @@ class MainWindow(QMainWindow):
             ret = self.market_facade.load_local_market_porject(
                 self.market_view, market_loader_info["path"]
             )
+            if ret:
+                self.open_view("Market")
+            return
         elif market_loader_info["mode"] == "mysql":
             info = market_loader_info
             if not self.market_facade.connect_to_mysql_server(
@@ -240,11 +243,86 @@ class MainWindow(QMainWindow):
                 self.market_facade.db_disconnected.emit()
                 return
             info["database"] = selected_db
-            ret = self.market_facade.load_online_market(self.market_view, info)
+
+            reply = QMessageBox.question(
+                self,
+                "Projekt erstellen",
+                "Soll aus dem Export ein Projekt erstellt werden?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes,
+            )
+
+            if reply == QMessageBox.Yes:
+                chosen_dir = QFileDialog.getExistingDirectory(
+                    self, "Projektordner wählen"
+                )
+                if not chosen_dir:
+                    self.market_facade.db_disconnected.emit()
+                    return
+                tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
+                tmp_path = tmp.name
+                tmp.close()
+
+                def _finished(success: bool) -> None:
+                    if not success:
+                        QMessageBox.critical(
+                            self, "Fehler", "Daten konnten nicht exportiert werden."
+                        )
+                        if Path(tmp_path).exists():
+                            Path(tmp_path).unlink()
+                        return
+                    ok, target = self.market_facade.create_project_from_export(
+                        self.market_view, tmp_path, chosen_dir
+                    )
+                    if not ok:
+                        QMessageBox.critical(
+                            self, "Fehler", "Projekt konnte nicht erstellt werden."
+                        )
+                        if Path(tmp_path).exists():
+                            Path(tmp_path).unlink()
+                        return
+                    project_export = Path(target) / Path(tmp_path).name
+                    new_export = Path(target) / f"{selected_db}.json"
+                    try:
+                        project_export.rename(new_export)
+                    except OSError:
+                        pass
+                    if Path(tmp_path).exists():
+                        Path(tmp_path).unlink()
+                    ret_local = self.market_facade.load_local_market_export(
+                        self.market_view, str(new_export)
+                    )
+                    if ret_local:
+                        self.open_view("Market")
+
+                self.market_facade.download_market_export(info, tmp_path, _finished)
+            else:
+                file_path, _ = QFileDialog.getSaveFileName(
+                    self,
+                    "Export speichern",
+                    f"{selected_db}.json",
+                    "JSON Files (*.json)",
+                )
+                if not file_path:
+                    self.market_facade.db_disconnected.emit()
+                    return
+
+                def _finished_save(success: bool) -> None:
+                    if success:
+                        QMessageBox.information(
+                            self, "Info", "Export erfolgreich gespeichert."
+                        )
+                    else:
+                        QMessageBox.critical(
+                            self, "Fehler", "Daten konnten nicht exportiert werden."
+                        )
+
+                self.market_facade.download_market_export(
+                    info, file_path, _finished_save
+                )
+            return
         else:
             return
-        if ret:
-            self.open_view("Market")
 
     @Slot()
     def create_new_market(self):
