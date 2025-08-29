@@ -56,6 +56,12 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             ``False`` otherwise.
         """
 
+        if self._db_thread is not None:
+            self.status_info.emit(
+                "INFO", f"Server bereits verbunden: {host}:{port}"
+            )
+            return True
+
         try:
             server_if = MySQLInterface(
                 host=host, port=port, user=user, password=password
@@ -118,6 +124,27 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
 
         return databases
 
+    def select_database(self, name: str) -> bool:
+        """Select a database on the connected server.
+
+        Parameters
+        ----------
+        name:
+            Name of the database to select.
+
+        Returns
+        -------
+        bool
+            ``True`` if the task was queued successfully, ``False`` otherwise.
+        """
+
+        if self._db_thread is None:
+            self.status_info.emit("ERROR", "Keine Serververbindung")
+            return False
+
+        self._db_thread.add_task(lambda m: m.connect_to_db(name))
+        return True
+
     def download_market_export(
         self, info: dict, output_path: str, on_finished: Callable[[bool], None]
     ) -> bool:
@@ -151,32 +178,37 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             return False
 
         try:
-            mysql_if = MySQLInterface(
-                host=host, user=user, password=password, database=database, port=port
-            )
-            db_thread = AdvancedDBManagerThread(mysql_if)
-            self._db_thread = db_thread
+            if self._db_thread is None:
+                if not self.connect_to_mysql_server(host, port, user, password):
+                    on_finished(False)
+                    return False
 
-            def _cleanup() -> None:  # pragma: no cover - Qt slot
-                db_thread.stop()
-                self._db_thread = None
-                db_thread.task_finished.disconnect(_handle_finished)
-                db_thread.task_error.disconnect(_handle_error)
+            if not self.select_database(database):
+                on_finished(False)
+                return False
+
+            db_thread = self._db_thread
+            pending = True
 
             def _handle_finished(_result: object) -> None:  # pragma: no cover - Qt slot
-                _cleanup()
+                nonlocal pending
+                if pending:
+                    pending = False
+                    return
+                db_thread.task_finished.disconnect(_handle_finished)
+                db_thread.task_error.disconnect(_handle_error)
                 on_finished(True)
 
             def _handle_error(exc: Exception) -> None:  # pragma: no cover - Qt slot
                 self.status_info.emit(
                     "ERROR", f"Fehler beim Laden der Datenbank: {exc}"
                 )
-                _cleanup()
+                db_thread.task_finished.disconnect(_handle_finished)
+                db_thread.task_error.disconnect(_handle_error)
                 on_finished(False)
 
             db_thread.task_finished.connect(_handle_finished)
             db_thread.task_error.connect(_handle_error)
-            db_thread.start()
             db_thread.add_task(lambda m: m.export_to_custom_json(output_path))
             return True
         except Exception as e:  # pragma: no cover - error path
