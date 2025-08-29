@@ -11,6 +11,7 @@ from backend import MySQLInterface
 from backend.advanced_db_manager_thread import AdvancedDBManagerThread
 from objects import SettingsContentDataClass
 
+
 from .market_observer import MarketObserver
 from .singleton_meta import SingletonMeta
 
@@ -126,19 +127,28 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
             Target :class:`Market` view.
         info:
             Dictionary containing connection parameters (host, port, database,
-            user and password).
+            user and password). ``database`` must specify the exact name of the
+            database to load.
         """
 
         host = info.get("host")
         port = info.get("port")
-        database = info.get("database")
         user = info.get("user")
         password = info.get("password")
+        database = info.get("database")
+
+        if not database:
+            self.status_info.emit("ERROR", "Keine Datenbank angegeben")
+            return False
 
         tmp_path = None
         try:
             mysql_if = MySQLInterface(
-                host=host, user=user, password=password, database=database, port=port
+                host=host,
+                user=user,
+                password=password,
+                database=database,
+                port=port,
             )
             with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
                 tmp_path = tmp.name
@@ -167,7 +177,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                         pass
 
             def _handle_error(exc: Exception) -> None:  # pragma: no cover - Qt slot
-                self.status_info.emit("ERROR", f"Fehler beim Laden der Datenbank: {exc}")
+                self.status_info.emit(
+                    "ERROR", f"Fehler beim Laden der Datenbank: {exc}"
+                )
                 db_thread.stop()
                 self._db_thread = None
                 if Path(tmp_path).exists():
@@ -188,7 +200,9 @@ class MarketFacade(QObject, metaclass=SingletonMeta):
                     Path(tmp_path).unlink()
                 except OSError:
                     pass
-            self.status_info.emit("ERROR", f"Fehler beim Starten des DB-Threads: {e}")
+            self.status_info.emit(
+                "ERROR", f"Fehler beim Starten des DB-Threads: {e}"
+            )
             return False
 
     def connect_to_db(self, db_interface) -> None:

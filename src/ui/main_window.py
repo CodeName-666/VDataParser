@@ -1,7 +1,7 @@
 # PySide6 imports
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (
-    QMainWindow, QMessageBox, QFileDialog, QDialog, QLabel, QLineEdit
+    QMainWindow, QMessageBox, QFileDialog, QDialog
 )
 from pathlib import Path
 
@@ -11,13 +11,11 @@ from data import MarketConfigHandler
 from .stack_widget import StackWidget
 from .generated import MainWindowUi
 from .generated import AboutUi
-from .generated import MarketLoaderUi
 
 from .main_menu import MainMenu
 from .market import Market
 from .pdf_display import PdfDisplay
 from .market_loader_dialog import MarketLoaderDialog
-from .database_selection_dialog import DatabaseSelectionDialog
 from .output_window import OutputWindow
 from .generator_worker import GeneratorWorker
 from data import MarketFacade
@@ -25,6 +23,7 @@ from .status_bar import StatusBar
 from .new_market_dialog import NewMarketDialog
 from .database_settings_dialog import DatabaseSettingsDialog
 from .project_creation_service import ProjectCreationService
+from .database_selection_dialog import DatabaseSelectionDialog
 
 
 class MainWindow(QMainWindow):
@@ -202,24 +201,20 @@ class MainWindow(QMainWindow):
                 self.market_view, market_loader_info["path"]
             )
         elif market_loader_info["mode"] == "mysql":
+            info = market_loader_info
             if not self.market_facade.connect_to_mysql_server(
-                market_loader_info["host"],
-                market_loader_info["port"],
-                market_loader_info["user"],
-                market_loader_info["password"],
+                info["host"], info["port"], info["user"], info["password"]
             ):
                 return
-
             databases = self.market_facade.list_databases()
             if not databases:
                 self.market_facade.db_disconnected.emit()
                 return
 
             selected_db = None
-            db_name = market_loader_info.get("database")
-            if db_name:
-                matches = [db for db in databases if db.startswith(db_name)]
-                if len(matches) == 1 and matches[0] == db_name:
+            if info.get("database"):
+                matches = [db for db in databases if db.startswith(info["database"])]
+                if len(matches) == 1 and matches[0] == info["database"]:
                     selected_db = matches[0]
                 elif matches:
                     dlg = DatabaseSelectionDialog(matches, self)
@@ -227,12 +222,9 @@ class MainWindow(QMainWindow):
                         self.market_facade.db_disconnected.emit()
                         return
                     selected_db = dlg.get_selection()
-                    if not selected_db:
-                        self.market_facade.db_disconnected.emit()
-                        return
                 else:
-                    self.market_facade.status_info.emit(
-                        "ERROR", "Keine passende Datenbank gefunden"
+                    QMessageBox.critical(
+                        self, "Fehler", "Keine passende Datenbank gefunden"
                     )
                     self.market_facade.db_disconnected.emit()
                     return
@@ -242,18 +234,15 @@ class MainWindow(QMainWindow):
                     self.market_facade.db_disconnected.emit()
                     return
                 selected_db = dlg.get_selection()
-                if not selected_db:
-                    self.market_facade.db_disconnected.emit()
-                    return
 
-            market_loader_info["database"] = selected_db
-
-            ret = self.market_facade.load_online_market(
-                self.market_view, market_loader_info
-            )
+            self.market_facade.disconnect_from_db()
+            if not selected_db:
+                self.market_facade.db_disconnected.emit()
+                return
+            info["database"] = selected_db
+            ret = self.market_facade.load_online_market(self.market_view, info)
         else:
             return
-
         if ret:
             self.open_view("Market")
 
