@@ -48,6 +48,11 @@ class AdvancedDBManagerThread(QThread):
         super().__init__(parent)
         self._db_interface = db_interface
         self.manager = AdvancedDBManager(self._db_interface)
+        # Ensure the manager and its internal QTimer live in this worker thread.
+        # Otherwise, starting the timer from :meth:`connect_to_db` would trigger
+        # "QObject::startTimer" warnings because the object would still belong
+        # to the main thread.
+        self.manager.moveToThread(self)
         self._tasks: "queue.Queue[Tuple[Callable[..., Any], tuple, dict]]" = queue.Queue()
         self._stop_event = threading.Event()
 
