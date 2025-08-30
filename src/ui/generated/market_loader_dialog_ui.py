@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'market_loader_dialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.2
+## Created by: Qt User Interface Compiler version 6.9.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -62,53 +62,53 @@ class Ui_MarketLoaderDialog(object):
         self.labelHost = QLabel(MarketLoaderDialog)
         self.labelHost.setObjectName(u"labelHost")
 
-        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.labelHost)
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelHost)
 
         self.hostEdit = QLineEdit(MarketLoaderDialog)
         self.hostEdit.setObjectName(u"hostEdit")
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.hostEdit)
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.hostEdit)
 
         self.labelPort = QLabel(MarketLoaderDialog)
         self.labelPort.setObjectName(u"labelPort")
 
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.labelPort)
+        self.formLayout.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelPort)
 
         self.portEdit = QLineEdit(MarketLoaderDialog)
         self.portEdit.setObjectName(u"portEdit")
 
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.portEdit)
-
-        self.labelDatabase = QLabel(MarketLoaderDialog)
-        self.labelDatabase.setObjectName(u"labelDatabase")
-
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.labelDatabase)
-
-        self.dbEdit = QLineEdit(MarketLoaderDialog)
-        self.dbEdit.setObjectName(u"dbEdit")
-
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.dbEdit)
+        self.formLayout.setWidget(1, QFormLayout.ItemRole.FieldRole, self.portEdit)
 
         self.labelUser = QLabel(MarketLoaderDialog)
         self.labelUser.setObjectName(u"labelUser")
 
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.labelUser)
+        self.formLayout.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labelUser)
 
         self.userEdit = QLineEdit(MarketLoaderDialog)
         self.userEdit.setObjectName(u"userEdit")
 
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.userEdit)
+        self.formLayout.setWidget(2, QFormLayout.ItemRole.FieldRole, self.userEdit)
 
         self.labelPassword = QLabel(MarketLoaderDialog)
         self.labelPassword.setObjectName(u"labelPassword")
 
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.labelPassword)
+        self.formLayout.setWidget(3, QFormLayout.ItemRole.LabelRole, self.labelPassword)
 
         self.pwEdit = QLineEdit(MarketLoaderDialog)
         self.pwEdit.setObjectName(u"pwEdit")
         self.pwEdit.setEchoMode(QLineEdit.EchoMode.Password)
 
-        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.pwEdit)
+        self.formLayout.setWidget(3, QFormLayout.ItemRole.FieldRole, self.pwEdit)
+
+        self.labelDatabase = QLabel(MarketLoaderDialog)
+        self.labelDatabase.setObjectName(u"labelDatabase")
+
+        self.formLayout.setWidget(4, QFormLayout.ItemRole.LabelRole, self.labelDatabase)
+
+        self.dbEdit = QLineEdit(MarketLoaderDialog)
+        self.dbEdit.setObjectName(u"dbEdit")
+
+        self.formLayout.setWidget(4, QFormLayout.ItemRole.FieldRole, self.dbEdit)
 
 
         self.verticalLayout.addLayout(self.formLayout)
@@ -156,9 +156,9 @@ class Ui_MarketLoaderDialog(object):
         self.hostEdit.setText(QCoreApplication.translate("MarketLoaderDialog", u"localhost", None))
         self.labelPort.setText(QCoreApplication.translate("MarketLoaderDialog", u"Port:", None))
         self.portEdit.setText(QCoreApplication.translate("MarketLoaderDialog", u"3306", None))
-        self.labelDatabase.setText(QCoreApplication.translate("MarketLoaderDialog", u"Datenbank:", None))
         self.labelUser.setText(QCoreApplication.translate("MarketLoaderDialog", u"Benutzer:", None))
         self.labelPassword.setText(QCoreApplication.translate("MarketLoaderDialog", u"Passwort:", None))
+        self.labelDatabase.setText(QCoreApplication.translate("MarketLoaderDialog", u"Datenbank:", None))
         self.okBtn.setText(QCoreApplication.translate("MarketLoaderDialog", u"OK", None))
         self.cancelBtn.setText(QCoreApplication.translate("MarketLoaderDialog", u"Abbrechen", None))
     # retranslateUi
