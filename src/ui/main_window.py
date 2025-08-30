@@ -238,8 +238,10 @@ class MainWindow(QMainWindow):
                     return
                 selected_db = dlg.get_selection()
 
-            self.market_facade.disconnect_from_db()
             if not selected_db:
+                self.market_facade.db_disconnected.emit()
+                return
+            if not self.market_facade.select_database(selected_db):
                 self.market_facade.db_disconnected.emit()
                 return
             info["database"] = selected_db
